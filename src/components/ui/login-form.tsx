@@ -1,0 +1,88 @@
+'use client';
+
+import { useActionState } from 'react';
+import { authenticate } from '@/app/lib/actions';
+import { FiMail, FiLock, FiArrowRight, FiAlertCircle } from 'react-icons/fi';
+
+export default function LoginForm() {
+  const [errorMessage, dispatch, isPending] = useActionState(authenticate, undefined);
+
+  return (
+    <form action={dispatch} className="space-y-4">
+      <div className="space-y-2">
+        <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider" htmlFor="email">
+          Email
+        </label>
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <FiMail className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+          </div>
+          <input
+            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+            id="email"
+            type="email"
+            name="email"
+            placeholder="name@example.com"
+            required
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider" htmlFor="password">
+          Password
+        </label>
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <FiLock className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+          </div>
+          <input
+            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+            id="password"
+            type="password"
+            name="password"
+            placeholder="••••••••"
+            required
+            minLength={6}
+          />
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <input
+            id="remember-me"
+            name="remember-me"
+            type="checkbox"
+            className="h-4 w-4 rounded border-white/10 bg-white/5 text-emerald-500 focus:ring-emerald-500/50 focus:ring-offset-0"
+          />
+          <label htmlFor="remember-me" className="ml-2 block text-sm text-zinc-400">
+            Remember me
+          </label>
+        </div>
+        <div className="text-sm">
+          <a href="#" className="font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
+            Forgot password?
+          </a>
+        </div>
+      </div>
+      <div
+        className="flex h-8 items-end space-x-1"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {errorMessage && (
+          <>
+            <FiAlertCircle className="h-5 w-5 text-red-500" />
+            <p className="text-sm text-red-500">{errorMessage}</p>
+          </>
+        )}
+      </div>
+      <button
+        className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        aria-disabled={isPending}
+        disabled={isPending}
+      >
+        Sign in <FiArrowRight className="ml-2 h-4 w-4" />
+      </button>
+    </form>
+  );
+}
