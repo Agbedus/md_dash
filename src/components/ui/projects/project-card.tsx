@@ -3,6 +3,8 @@ import { Project, priorityMapping, statusMapping } from '@/types/project';
 import { FiCalendar, FiClock, FiEdit2, FiTrash2, FiDollarSign, FiTag } from 'react-icons/fi';
 import { format } from 'date-fns';
 import UserAvatarGroup from '@/components/ui/user-avatar-group';
+import Link from 'next/link';
+import { FiCheckSquare } from 'react-icons/fi';
 
 interface ProjectCardProps {
   project: Project;
@@ -52,6 +54,13 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
           >
             <FiTrash2 className="w-3.5 h-3.5" />
           </button>
+          <Link
+            href={`/projects/${project.id}/tasks`}
+            className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-zinc-400 hover:text-emerald-400 transition-colors"
+            title="View project tasks"
+          >
+            <FiCheckSquare className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
 

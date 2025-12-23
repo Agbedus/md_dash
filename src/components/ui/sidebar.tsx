@@ -170,7 +170,7 @@ const Sidebar = ({ user }: SidebarProps) => {
               <FiSettings className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-indigo-400`} />
               {!isCollapsed && "Settings"}
             </Link>
-            {(user?.roles?.some(r => ['super_admin', 'manager'].includes(r))) && (
+            {(user?.roles?.some(r => ['super_admin', 'admin'].includes(r))) && (
               <>
                 <Link
                   href="/users"

@@ -7,10 +7,10 @@ import { Client } from '@/types/client';
 import { FiEdit2, FiTrash2, FiClock, FiCheck, FiX, FiDollarSign } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { createProject, updateProject, deleteProject } from '@/app/projects/actions';
-import { updateTask, deleteTask } from '@/app/tasks/actions';
+import { updateTask, deleteTask, createTask } from '@/app/tasks/actions';
 import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import TaskCard from '@/components/ui/tasks/task-card';
-import { FiChevronRight, FiChevronDown } from 'react-icons/fi';
+import { FiChevronRight, FiChevronDown, FiPlus } from 'react-icons/fi';
 
 interface ProjectTableProps {
   projects: Project[];
@@ -18,18 +18,15 @@ interface ProjectTableProps {
   clients: Client[];
 }
 
-import { Combobox } from "@/components/ui/combobox";
-import { FiPlus } from 'react-icons/fi';
-
 export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
+  const [addingTaskId, setAddingTaskId] = useState<number | null>(null);
   
   // Combobox state
-  const [editingManagers, setEditingManagers] = useState<(string | number)[]>([]);
-  const [newManagers, setNewManagers] = useState<(string | number)[]>([]);
 
+  
   const newNameRef = useRef<HTMLInputElement | null>(null);
 
   const toggleExpand = (id: number) => {
@@ -40,12 +37,10 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
 
   const startEditing = (project: Project) => {
     setEditingId(project.id);
-    setEditingManagers(project.managers?.map(m => m.user.id) || []);
   };
 
   const cancelEditing = () => {
     setEditingId(null);
-    setEditingManagers([]);
   };
 
   useEffect(() => {
@@ -59,25 +54,16 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
     const formData = new FormData(event.currentTarget);
     formData.set('id', editingId!.toString());
 
-    // Combobox handles managerIds via hidden input if name="managerIds" is used
-    // But wait, the Combobox puts a JSON string if multiple=true.
-    // The actions expect 'managerIds' as a JSON string.
-    // So we don't need manual handling if we use the Combobox's hidden input.
-
     await updateProject(formData);
     setEditingId(null);
-    setEditingManagers([]);
   };
 
   const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
-    // Combobox handles managerIds via hidden input
-
     await createProject(formData);
     setIsAdding(false);
-    setNewManagers([]);
   };
 
   const handleDelete = async (project: Project) => {
@@ -111,7 +97,6 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
             <th className="px-4 py-3 w-[120px]">Status</th>
             <th className="px-4 py-3 w-[100px]">Priority</th>
             <th className="px-4 py-3 w-[120px]">Owner</th>
-            <th className="px-4 py-3 w-[200px]">Managers</th>
             <th className="px-4 py-3 w-[120px]">Client</th>
             <th className="px-4 py-3 w-[110px]">Start Date</th>
             <th className="px-4 py-3 w-[110px]">End Date</th>
@@ -129,7 +114,7 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
               return (
                 <React.Fragment key={project.id}>
                 <tr className="bg-white/[0.02]">
-                  <td colSpan={11} className="p-0">
+                  <td colSpan={10} className="p-0">
                     <form onSubmit={handleUpdate} className="contents">
                       <table className="w-full">
                         <tbody>
@@ -185,18 +170,6 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
                                   <option key={u.id} value={u.id}>{u.fullName}</option>
                                 ))}
                               </select>
-                            </td>
-                            <td className="px-4 py-2 w-[200px]">
-                              <Combobox
-                                name="managerIds"
-                                options={users.map(u => ({ value: u.id, label: u.fullName || u.email, subLabel: u.email }))}
-                                value={editingManagers}
-                                onChange={(val) => setEditingManagers(val as (string | number)[])}
-                                multiple
-                                placeholder="Select..."
-                                searchPlaceholder="Search..."
-                                className="w-full"
-                              />
                             </td>
                             <td className="px-4 py-2 w-[120px]">
                               <select
@@ -302,11 +275,6 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
                   {owner ? <UserAvatarGroup users={[owner]} size="sm" /> : '-'}
                 </td>
                 <td className="px-4 py-3 text-zinc-400 text-xs">
-                  {project.managers && project.managers.length > 0 ? (
-                    <UserAvatarGroup users={project.managers.map(m => m.user)} size="sm" limit={3} />
-                  ) : '-'}
-                </td>
-                <td className="px-4 py-3 text-zinc-400 text-xs">
                   {client ? client.companyName : '-'}
                 </td>
                 <td className="px-4 py-3 text-zinc-400 text-xs">
@@ -356,12 +324,104 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
               </tr>
               {expandedIds.includes(project.id) && (
                 <tr className="bg-white/[0.02]">
-                  <td colSpan={11} className="p-0">
-                    <div className="p-4 pl-12 bg-zinc-900/30 border-y border-white/5">
-                      <h4 className="mb-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Tasks ({project.tasks?.length || 0})</h4>
+                  <td colSpan={10} className="p-0 border-none">
+                    <div className="sticky left-0 p-4 pl-12 bg-zinc-900/30 border-y border-white/5 w-[calc(100vw-6rem)] md:w-[calc(100vw-22rem)] max-w-7xl overflow-x-auto">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Tasks ({project.tasks?.length || 0})</h4>
+                        <button 
+                          onClick={() => setAddingTaskId(addingTaskId === project.id ? null : project.id)}
+                          className="flex items-center gap-1 text-[10px] font-medium text-zinc-400 hover:text-white transition-all px-2 py-1 rounded bg-white/5 hover:bg-white/10"
+                        >
+                          <FiPlus className="w-3 h-3" />
+                          <span>Add Task</span>
+                        </button>
+                      </div>
+
+                      {addingTaskId === project.id && (
+                        <div className="mb-4 p-4 rounded-xl bg-white/5 border border-indigo-500/20 animate-in fade-in slide-in-from-top-2">
+                           <form onSubmit={async (e) => {
+                             e.preventDefault();
+                             const formData = new FormData(e.currentTarget);
+                             formData.set('projectId', project.id.toString());
+                             
+                             // Handle assignees if I add them below
+                             const assignees = e.currentTarget.dataset.assignees;
+                             if (assignees) formData.set('assigneeIds', assignees);
+                             
+                             if (!formData.get('status')) formData.set('status', 'task');
+                             
+                             await createTask(formData);
+                             setAddingTaskId(null);
+                           }}
+                           className="space-y-4"
+                           >
+                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                               <div className="md:col-span-2">
+                                 <input 
+                                   type="text" 
+                                   name="name" 
+                                   placeholder="Task Name *" 
+                                   required 
+                                   className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                                 />
+                               </div>
+                               <div>
+                                 <select 
+                                   name="priority" 
+                                   defaultValue="medium"
+                                   className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50 appearance-none cursor-pointer"
+                                 >
+                                   <option value="low">Low Priority</option>
+                                   <option value="medium">Medium Priority</option>
+                                   <option value="high">High Priority</option>
+                                 </select>
+                               </div>
+                               <div>
+                                 <input 
+                                   type="date" 
+                                   name="dueDate" 
+                                   className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50 [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert"
+                                 />
+                               </div>
+                             </div>
+                             <div className="flex items-center gap-4">
+                               <div className="flex-1">
+                                 <textarea 
+                                   name="description" 
+                                   placeholder="Add a description..." 
+                                   rows={1}
+                                   className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50 resize-none"
+                                 />
+                               </div>
+                               <div className="flex gap-2">
+                                 <button type="submit" className="px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all font-medium text-sm flex items-center gap-2 border border-emerald-500/20">
+                                   <FiCheck className="w-4 h-4" />
+                                   <span>Create</span>
+                                 </button>
+                                 <button type="button" onClick={() => setAddingTaskId(null)} className="px-3 py-2 rounded-lg bg-white/5 text-zinc-400 hover:text-white transition-all text-sm border border-white/5">
+                                   <FiX className="w-4 h-4" />
+                                 </button>
+                               </div>
+                             </div>
+                           </form>
+                        </div>
+                      )}
+
                       {project.tasks && project.tasks.length > 0 ? (
                         <div className="overflow-x-auto rounded-lg border border-white/5 bg-zinc-900/50">
-                            <table className="w-full text-left text-sm">
+                            <table className="w-full text-left text-sm min-w-[1000px]">
+                                <thead className="bg-white/5 text-zinc-500 font-bold text-[10px] uppercase tracking-wider">
+                                    <tr>
+                                        <th className="px-4 py-2">Name</th>
+                                        <th className="px-4 py-2">Description</th>
+                                        <th className="px-4 py-2">Due Date</th>
+                                        <th className="px-4 py-2">Priority</th>
+                                        <th className="px-4 py-2">Assignee</th>
+                                        {/* Project hidden */}
+                                        <th className="px-4 py-2">Status</th>
+                                        <th className="px-4 py-2 text-right">Actions</th>
+                                    </tr>
+                                </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {project.tasks.map(task => (
                                         <TaskCard 
@@ -371,13 +431,14 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
                                             projects={projects} 
                                             updateTask={updateTask} 
                                             deleteTask={deleteTask} 
+                                            hideProject={true}
                                         />
                                     ))}
                                 </tbody>
                             </table>
                         </div>
                       ) : (
-                        <div className="text-sm text-zinc-500 italic py-2">No tasks found for this project.</div>
+                        !addingTaskId && <div className="text-sm text-zinc-500 italic py-2">No tasks found for this project.</div>
                       )}
                     </div>
                   </td>
@@ -390,7 +451,7 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
           {/* Add New Row */}
           {isAdding && (
             <tr className="bg-white/[0.02]">
-              <td colSpan={11} className="p-0">
+              <td colSpan={10} className="p-0">
                 <form onSubmit={handleCreate} className="contents">
                   <table className="w-full">
                     <tbody>
@@ -447,18 +508,7 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
                             ))}
                           </select>
                         </td>
-                        <td className="px-4 py-2 w-[200px]">
-                          <Combobox
-                            name="managerIds"
-                            options={users.map(u => ({ value: u.id, label: u.fullName || u.email, subLabel: u.email }))}
-                            value={newManagers}
-                            onChange={(val) => setNewManagers(val as (string | number)[])}
-                            multiple
-                            placeholder="Select..."
-                            searchPlaceholder="Search..."
-                            className="w-full"
-                          />
-                        </td>
+
                         <td className="px-4 py-2 w-[120px]">
                           <select
                             name="clientId"
@@ -521,8 +571,8 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
 
           {/* Add Button Row */}
           {!isAdding && (
-            <tr>
-              <td colSpan={11} className="px-4 py-2">
+            <tr className="sticky bottom-0 z-10">
+              <td colSpan={10} className="px-4 py-3 sticky left-0">
                 <button
                   onClick={() => setIsAdding(true)}
                   className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm text-zinc-400 hover:text-white transition-all duration-200 group w-fit"
@@ -538,7 +588,7 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
 
           {projects.length === 0 && !isAdding && (
             <tr>
-              <td colSpan={11} className="px-6 py-12 text-center text-zinc-500">
+              <td colSpan={10} className="px-6 py-12 text-center text-zinc-500">
                 No projects found. Click &quot;Add project&quot; to create one.
               </td>
             </tr>

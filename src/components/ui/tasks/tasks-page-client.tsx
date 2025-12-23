@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useTransition, useRef, useEffect, useCallback } from 'react';
+import { useState, useTransition, useRef, useEffect, useCallback, useOptimistic } from 'react';
 import { FiCheck, FiX, FiPlus, FiGrid, FiList, FiSearch } from 'react-icons/fi';
-import { createTask, updateTask, deleteTask } from '@/app/tasks/actions';
+import { createTask, updateTask, deleteTask, getTasks } from '@/app/tasks/actions';
 import { statusMapping, priorityMapping } from "@/types/task";
 import type { Task } from "@/types/task";
 import TaskCard from './task-card';
@@ -10,23 +10,28 @@ import KanbanBoard from './kanban-board';
 
 type ViewMode = 'table' | 'kanban';
 
-async function fetchTasks(query = '', priority = '', status = ''): Promise<Task[]> {
-    const params = new URLSearchParams({ query, priority, status });
-    const response = await fetch(`/api/tasks?${params.toString()}`);
-    if (!response.ok) {
-        throw new Error('Failed to fetch tasks');
-    }
-    return response.json();
-}
-
-
 import { User } from "@/types/user";
 import { Project } from "@/types/project";
 
 import { Combobox } from "@/components/ui/combobox";
 
-export default function TasksPageClient({ allTasks: initialTasks, users, projects }: { allTasks: Task[], users: User[], projects: Project[] }) {
-    const [allTasks, setAllTasks] = useState<Task[]>(initialTasks);
+export default function TasksPageClient({ allTasks: initialTasks, users, projects, projectId }: { allTasks: Task[], users: User[], projects: Project[], projectId?: number }) {
+    const hydrateTasks = useCallback((tasks: Task[]) => {
+        return tasks.map(task => {
+            if (task.assignees && task.assignees.length > 0) return task;
+            if (!task.assigneeIds || task.assigneeIds.length === 0) return task;
+            
+            return {
+                ...task,
+                assignees: users
+                    .filter(u => task.assigneeIds?.includes(u.id))
+                    .map(user => ({ user }))
+            };
+        });
+    }, [users]);
+
+    const [allTasks, setAllTasks] = useState<Task[]>(hydrateTasks(initialTasks));
+    // ... rest of state
     const [viewMode, setViewMode] = useState<ViewMode>('table');
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [isPending, startTransition] = useTransition();
@@ -36,24 +41,41 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     const [searchQuery, setSearchQuery] = useState('');
     const [filterPriority, setFilterPriority] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
+    
+    // Optimistic UI
+    const [optimisticTasks, addOptimisticTask] = useOptimistic(
+        allTasks,
+        (state: Task[], action: { type: 'add' | 'update' | 'delete', task: Task }) => {
+            switch (action.type) {
+                case 'add':
+                    return [...state, action.task];
+                case 'update':
+                    return state.map(t => t.id === action.task.id ? action.task : t);
+                case 'delete':
+                    return state.filter(t => t.id !== action.task.id);
+                default:
+                    return state;
+            }
+        }
+    );
 
     // New task state
     const [newAssignees, setNewAssignees] = useState<(string | number)[]>([]);
-    const [newProject, setNewProject] = useState<string | number | null>(null);
+    const [newProject, setNewProject] = useState<string | number | null>(projectId || null);
 
     const newNameRef = useRef<HTMLInputElement | null>(null);
 
     const loadTasks = useCallback(() => {
         startTransition(async () => {
             try {
-                const tasks = await fetchTasks(searchQuery, filterPriority, filterStatus);
-                setAllTasks(tasks);
+                const tasks = await getTasks(searchQuery, filterPriority, filterStatus, projectId);
+                setAllTasks(hydrateTasks(tasks));
             } catch (err) {
                 console.error(err);
                 setErrorMsg('Could not load tasks. Please try again.');
             }
         });
-    }, [searchQuery, filterPriority, filterStatus]);
+    }, [searchQuery, filterPriority, filterStatus, hydrateTasks, projectId]);
 
     useEffect(() => {
         loadTasks();
@@ -66,6 +88,34 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     }, [isAddingTask]);
 
     const handleCreate = async (formData: FormData) => {
+        // Optimistic Update
+        const newTask: Task = {
+            id: -1,
+            name: formData.get('name') as string,
+            description: formData.get('description') as string,
+            status: formData.get('status') as Task['status'],
+            priority: formData.get('priority') as Task['priority'],
+            dueDate: formData.get('dueDate') as string,
+            projectId: formData.get('projectId') ? Number(formData.get('projectId')) : null,
+            assignees: (() => {
+                const idsJson = formData.get('assigneeIds') as string;
+                if (!idsJson) return [];
+                try {
+                    const ids = JSON.parse(idsJson);
+                    return users
+                        .filter(u => ids.includes(u.id))
+                        .map(user => ({ user }));
+                } catch { return []; }
+            })(),
+            assigneeIds: (() => {
+                const idsJson = formData.get('assigneeIds') as string;
+                try { return idsJson ? JSON.parse(idsJson) : []; } catch { return []; }
+            })(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        addOptimisticTask({ type: 'add', task: newTask });
+
         setErrorMsg(null);
         setSavingCreate(true);
         try {
@@ -84,6 +134,36 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     };
 
     const handleUpdate = async (formData: FormData) => {
+        // Optimistic Update
+        const id = Number(formData.get('id'));
+        const existingTask = allTasks.find(t => t.id === id);
+        if (existingTask) {
+             const updatedTask: Task = {
+                ...existingTask,
+                name: (formData.get('name') as string) || existingTask.name,
+                description: (formData.get('description') as string) || existingTask.description,
+                status: (formData.get('status') as Task['status']) || existingTask.status,
+                priority: (formData.get('priority') as Task['priority']) || existingTask.priority,
+                dueDate: (formData.get('dueDate') as string) || existingTask.dueDate,
+                projectId: formData.get('projectId') ? Number(formData.get('projectId')) : existingTask.projectId,
+                assignees: (() => {
+                    const idsJson = formData.get('assigneeIds') as string;
+                    if (!idsJson) return existingTask.assignees;
+                    try {
+                        const ids = JSON.parse(idsJson);
+                        return users
+                            .filter(u => ids.includes(u.id))
+                            .map(user => ({ user }));
+                    } catch { return existingTask.assignees; }
+                })(),
+                assigneeIds: (() => {
+                    const idsJson = formData.get('assigneeIds') as string;
+                    try { return idsJson ? JSON.parse(idsJson) : existingTask.assigneeIds; } catch { return existingTask.assigneeIds; }
+                })(),
+             };
+             addOptimisticTask({ type: 'update', task: updatedTask });
+        }
+
         setErrorMsg(null);
         try {
             await updateTask(formData);
@@ -95,6 +175,12 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     };
 
     const handleDelete = async (formData: FormData) => {
+        const id = Number(formData.get('id'));
+        const task = allTasks.find(t => t.id === id);
+        if (task) {
+            addOptimisticTask({ type: 'delete', task });
+        }
+        
         setErrorMsg(null);
         try {
             await deleteTask(formData);
@@ -131,7 +217,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                             className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:bg-white/10 focus:border-white/20 text-zinc-300 cursor-pointer hover:bg-white/10 transition-colors"
                         >
                             <option value="">All Priorities</option>
-                            {Object.keys(priorityMapping).map(p => <option key={p} value={p}>{priorityMapping[p]}</option>)}
+                            {Object.entries(priorityMapping).map(([key, value]) => <option key={key} value={key}>{value}</option>)}
                         </select>
                         <select
                             value={filterStatus}
@@ -139,7 +225,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                             className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:bg-white/10 focus:border-white/20 text-zinc-300 cursor-pointer hover:bg-white/10 transition-colors"
                         >
                             <option value="">All Statuses</option>
-                            {Object.keys(statusMapping).map(s => <option key={s} value={s}>{statusMapping[s]}</option>)}
+                            {Object.entries(statusMapping).map(([key, value]) => <option key={key} value={key}>{value}</option>)}
                         </select>
                     </div>
                     <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10">
@@ -170,7 +256,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
 
             {viewMode === 'kanban' ? (
                 <KanbanBoard
-                    tasks={allTasks}
+                    tasks={optimisticTasks}
                     updateTask={handleUpdate}
                     deleteTask={handleDelete}
                 />
@@ -192,7 +278,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {allTasks.map((task) => (
+                                {optimisticTasks.map((task) => (
                                     <TaskCard
                                         key={task.id}
                                         task={task}

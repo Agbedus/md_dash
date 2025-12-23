@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { User } from '@/types/user';
 import { FiSearch, FiEdit2, FiTrash2, FiX, FiCheck } from 'react-icons/fi';
-import { updateUser, deleteUser } from '@/app/users/actions';
+import { updateUser, deleteUser, getUsers } from '@/app/users/actions';
+import { useOptimistic, useTransition } from 'react';
 
 interface UsersPageClientProps {
   initialUsers: User[];
@@ -18,13 +19,30 @@ interface UsersPageClientProps {
 const AVAILABLE_ROLES = ['staff', 'supervisor', 'project_manager', 'manager', 'super_admin'];
 
 export default function UsersPageClient({ initialUsers, currentUser }: UsersPageClientProps) {
+  const [allUsers, setAllUsers] = useState<User[]>(initialUsers);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [, startTransition] = useTransition();
+
+  // Optimistic UI for Users
+  const [optimisticUsers, addOptimisticUser] = useOptimistic(
+    allUsers,
+    (state: User[], action: { type: 'update' | 'delete', user: User }) => {
+      switch (action.type) {
+        case 'update':
+          return state.map(u => u.id === action.user.id ? action.user : u);
+        case 'delete':
+          return state.filter(u => u.id !== action.user.id);
+        default:
+          return state;
+      }
+    }
+  );
   
   // Temporary state for editing
   const [editForm, setEditForm] = useState<Partial<User>>({});
 
-  const filteredUsers = initialUsers.filter(user =>
+  const filteredUsers = optimisticUsers.filter(user =>
     (user.fullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -63,21 +81,53 @@ export default function UsersPageClient({ initialUsers, currentUser }: UsersPage
     formData.set('avatarUrl', editForm.avatarUrl || '');
     formData.set('roles', JSON.stringify(editForm.roles || []));
 
-    await updateUser(formData);
+    // Optimistic Update
+    const updatedUser: User = {
+        ...allUsers.find(u => u.id === editingId)!,
+        fullName: editForm.fullName || '',
+        email: editForm.email || '',
+        avatarUrl: editForm.avatarUrl || '',
+        roles: editForm.roles || [],
+    };
+    addOptimisticUser({ type: 'update', user: updatedUser });
+
     setEditingId(null);
     setEditForm({});
+
+    try {
+        await updateUser(formData);
+        const users = await getUsers();
+        startTransition(() => {
+            setAllUsers(users);
+        });
+    } catch (err) {
+        console.error(err);
+        const users = await getUsers();
+        setAllUsers(users);
+    }
   };
 
   const handleDelete = async (user: User) => {
     if (confirm(`Are you sure you want to delete ${user.fullName || 'this user'}?`)) {
-      const formData = new FormData();
-      formData.set('id', user.id);
-      await deleteUser(formData);
+      addOptimisticUser({ type: 'delete', user });
+      try {
+        const formData = new FormData();
+        formData.set('id', user.id);
+        await deleteUser(formData);
+        const users = await getUsers();
+        startTransition(() => {
+            setAllUsers(users);
+        });
+      } catch (err) {
+        console.error(err);
+        const users = await getUsers();
+        setAllUsers(users);
+      }
     }
   };
 
   const userRoles = currentUser?.roles || [];
-  const canEdit = userRoles.some(r => ['super_admin', 'manager'].includes(r));
+  const canEdit = userRoles.includes('super_admin');
   const canDelete = userRoles.includes('super_admin');
 
   return (

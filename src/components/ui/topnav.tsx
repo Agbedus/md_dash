@@ -40,7 +40,7 @@ const TopNav = ({ user }: TopNavProps) => {
   return (
     <nav className="h-24 px-8 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center flex-1">
-        <h1 className="text-2xl font-bold text-white tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-white tracking-tight"></h1>
       </div>
 
       <div className="flex items-center gap-6">

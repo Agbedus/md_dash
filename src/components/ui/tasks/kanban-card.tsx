@@ -48,7 +48,7 @@ export default function KanbanCard({ task, columns, onMove, onDelete }: KanbanCa
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative overflow-hidden rounded-xl border p-4 cursor-grab active:cursor-grabbing transition-all duration-200 ${statusBg} ${
+      className={`group relative overflow-visible rounded-xl border p-4 cursor-grab active:cursor-grabbing transition-all duration-200 ${statusBg} ${
         isDragging ? 'opacity-90 ring-2 ring-indigo-500/50 shadow-2xl scale-[1.02] z-50' : 'hover:shadow-lg hover:-translate-y-1 hover:bg-white/[0.07]'
       }`}
       {...attributes}

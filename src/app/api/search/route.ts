@@ -1,7 +1,4 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/db';
-import { notes, tasks, users } from '@/db/schema';
-import { sql, eq } from 'drizzle-orm';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -12,35 +9,22 @@ export async function GET(request: Request) {
   }
 
   try {
-    const notesResults = await db
-      .select({
-        note: notes,
-        owner: {
-          name: users.name,
-          image: users.image,
-          email: users.email,
-        }
-      })
-      .from(notes)
-      .leftJoin(users, eq(notes.userId, users.id))
-      .where(sql`title LIKE ${'%' + query + '%'} OR content LIKE ${'%' + query + '%'}`);
-
-    const tasksResults = await db
-      .select()
-      .from(tasks)
-      .where(sql`name LIKE ${'%' + query + '%'} OR description LIKE ${'%' + query + '%'}`);
-
+    // Mock Search Results
     const results = [
-      ...notesResults.map(({ note, owner }) => ({
-        ...note,
-        owner: owner ? {
-          name: owner.name,
-          image: owner.image,
-          email: owner.email,
-        } : undefined,
-        type: 'note' as const
-      })),
-      ...tasksResults.map((task) => ({ ...task, type: 'task' as const })),
+      {
+        id: "mock-note-1",
+        title: "Meeting Notes",
+        content: `Discussed ${query} related topics.`,
+        type: 'note',
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: "mock-task-1",
+        name: `Implement ${query}`,
+        description: "Task description here",
+        type: 'task',
+        status: 'in_progress'
+      }
     ];
 
     return NextResponse.json(results);
@@ -49,4 +33,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-

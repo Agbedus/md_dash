@@ -8,9 +8,9 @@ export type Note = {
   notebook?: string | null;
   color?: string | null;
 
-  isPinned?: number | null;   // 0 | 1
-  isArchived?: number | null; // 0 | 1
-  isFavorite?: number | null; // 0 | 1
+  isPinned: number;   // 0 | 1
+  isArchived: number; // 0 | 1
+  isFavorite: number; // 0 | 1
 
   coverImage?: string | null;
   links?: string | null;        // JSON string array
@@ -20,14 +20,19 @@ export type Note = {
   dueDate?: string | null;
   priority?: 'low' | 'medium' | 'high' | null;
 
+  userId: string;
+  taskId?: number | null;
+
   createdAt?: string | null;
   updatedAt?: string | null;
   owner?: {
+    id: string;
     name?: string | null;
     image?: string | null;
     email?: string | null;
   };
   sharedWith?: {
+    id: string;
     name?: string | null;
     image?: string | null;
     email?: string | null;

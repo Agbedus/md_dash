@@ -2,11 +2,9 @@
 
 import { signIn, signOut } from '@/auth';
 import { AuthError } from 'next-auth';
-import { db } from '@/db';
-import { users } from '@/db/schema';
-import bcrypt from 'bcryptjs';
-import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+
+const API_BASE_URL = `${process.env.BASE_URL_LOCAL}/api/v1` || "http://127.0.0.1:8000/api/v1";
 
 export async function authenticate(
   prevState: string | undefined,
@@ -42,24 +40,42 @@ export async function register(prevState: string | undefined, formData: FormData
 
     const { email, password, fullName } = validatedFields.data;
 
-    const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
-    if (existingUser) {
-        return "Email already in use";
+    try {
+        const res = await fetch(`${API_BASE_URL}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email,
+                password,
+                full_name: fullName
+            }),
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("Registration failed:", errorText);
+            
+            // Try to parse JSON error if possible
+            try {
+                const errorJson = JSON.parse(errorText);
+                return errorJson.detail || "Registration failed";
+            } catch {
+                return "Registration failed. Please try again.";
+            }
+        }
+        
+    } catch (error) {
+        console.error("Registration error:", error);
+        return "Network error during registration";
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await db.insert(users).values({
-        email,
-        fullName,
-        password: hashedPassword,
-        roles: ['staff'], // Default role
-        createdAt: new Date().toISOString(),
-    });
 
     return "User created successfully";
 }
 
 export async function logout() {
+    // Optionally call API logout endpoint if needed to invalidate token on server
+    // const res = await fetch(`${API_BASE_URL}/auth/logout`); ...
     await signOut();
 }

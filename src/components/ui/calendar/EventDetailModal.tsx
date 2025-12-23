@@ -6,6 +6,8 @@ import { FiX, FiCalendar, FiMapPin, FiUser, FiUsers, FiShield, FiEdit2, FiTrash2
 
 type UICalendarEvent = CalendarEvent & { isTask?: boolean; taskStatus?: "pending" | "in_progress" | "completed" };
 
+import { updateEvent, deleteEvent } from "@/app/calendar/actions";
+
 interface Props {
   event: UICalendarEvent | null;
   onClose: () => void;
@@ -130,24 +132,20 @@ export default function EventDetailModal({ event, onClose, onUpdated }: Props) {
         });
         if (!res.ok) throw new Error("Failed to update task");
       } else {
-        const payload = {
-          title: title || "Untitled Event",
-          description: description || null,
-          start: new Date(start).toISOString(),
-          end: new Date(end).toISOString(),
-          allDay,
-          location: location || null,
-          organizer: organizer || null,
-          attendees: attendees ? attendees.split(",").map((s) => s.trim()).filter(Boolean) : [],
-          status: status || null,
-          privacy: privacy || null,
-        };
-        const res = await fetch(`/api/events/${event.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error("Failed to update event");
+        const formData = new FormData();
+        formData.append('id', event.id);
+        formData.append('title', title || "Untitled Event");
+        if (description) formData.append('description', description);
+        formData.append('start', new Date(start).toISOString());
+        formData.append('end', new Date(end).toISOString());
+        formData.append('allDay', String(allDay));
+        if (location) formData.append('location', location);
+        if (organizer) formData.append('organizer', organizer);
+        if (attendees) formData.append('attendees', JSON.stringify(attendees.split(",").map((s) => s.trim()).filter(Boolean)));
+        if (status) formData.append('status', status);
+        if (privacy) formData.append('privacy', privacy);
+
+        await updateEvent(formData);
       }
       await onUpdated?.();
       setEditing(false);
@@ -166,8 +164,7 @@ export default function EventDetailModal({ event, onClose, onUpdated }: Props) {
     if (!ok) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/events/${event.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete event");
+      await deleteEvent(event.id);
       await onUpdated?.();
       onClose();
     } catch (err) {

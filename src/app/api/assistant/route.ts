@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { notes, tasks, projects, events, clients } from "@/db/schema";
-import { desc, like, eq, and, gte, lte, sql } from "drizzle-orm";
 
 // --- Tool Definitions (OpenAI Format) ---
 
@@ -173,113 +170,75 @@ async function executeTool(name: string, args: any) {
   console.log(`Executing tool: ${name}`, args);
   try {
     if (name === "searchNotes") {
-      const results = await db.select().from(notes)
-        .where(like(notes.title, `%${args.query}%`))
-        .limit(10);
-      return { notes: results };
+      return { 
+        notes: [
+          { id: 1, title: "Mock Note 1", content: `Content matching ${args.query}`, tags: "mock" }
+        ] 
+      };
     }
     
     if (name === "getNote") {
-      const result = await db.select().from(notes).where(eq(notes.id, args.id)).limit(1);
-      return result[0] || { error: "Note not found" };
+      return { id: args.id, title: "Mock Note", content: "This is a mock note content." };
     }
 
     if (name === "listTasks") {
-      let query: any = db.select().from(tasks).orderBy(desc(tasks.createdAt));
-      if (args.status) {
-        query = query.where(eq(tasks.status, args.status));
-      }
-      const results = await query.limit(args.limit || 10);
-      return { tasks: results };
+      return { 
+        tasks: [
+          { id: 1, name: "Mock Task 1", status: args.status || "task", priority: "medium" },
+          { id: 2, name: "Mock Task 2", status: args.status || "completed", priority: "high" }
+        ] 
+      };
     }
 
     if (name === "getTask") {
-      const result = await db.select().from(tasks).where(eq(tasks.id, args.id)).limit(1);
-      return result[0] || { error: "Task not found" };
+      return { id: args.id, name: "Mock Task", status: "task", priority: "medium", description: "Mock description" };
     }
 
     if (name === "createNote") {
-      const [newNote] = await db.insert(notes).values({
-        title: args.title,
-        content: args.content,
-        tags: args.tags,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }).returning();
-      return { success: true, note: newNote };
+      return { success: true, note: { id: 100, ...args } };
     }
 
     if (name === "createTask") {
-      const [newTask] = await db.insert(tasks).values({
-        name: args.name,
-        description: args.description,
-        dueDate: args.dueDate,
-        priority: args.priority || "medium",
-        status: "task",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }).returning();
-      return { success: true, task: newTask };
+      return { success: true, task: { id: 100, ...args, status: "task" } };
     }
 
     if (name === "listProjects") {
-      let query = db.select().from(projects).orderBy(desc(projects.createdAt));
-      const conditions = [];
-      
-      if (args.status) {
-        conditions.push(eq(projects.status, args.status));
-      }
-      if (args.name) {
-        conditions.push(like(projects.name, `%${args.name}%`));
-      }
-      
-      if (conditions.length > 0) {
-        // @ts-expect-error - Drizzle and/or types issue with spread
-        query = query.where(and(...conditions));
-      }
-      
-      const results = await query.limit(args.limit || 10);
-      return { projects: results };
+      return { 
+        projects: [
+          { id: 1, name: "Mock Project Alpha", status: args.status || "in_progress" },
+          { id: 2, name: "Mock Project Beta", status: "planning" }
+        ] 
+      };
     }
 
     if (name === "getProject") {
-      const project = await db.select().from(projects).where(eq(projects.id, args.id)).limit(1);
-      if (!project.length) return { error: "Project not found" };
-      
-      // Fetch related tasks
-      const projectTasks = await db.select().from(tasks).where(eq(tasks.projectId, args.id));
-      
-      return { project: project[0], tasks: projectTasks };
+      return { 
+        project: { id: args.id, name: "Mock Project", status: "in_progress" },
+        tasks: [{ id: 1, name: "Project Task 1" }] 
+      };
     }
 
     if (name === "listEvents") {
-      const results = await db.select().from(events)
-        .where(
-          and(
-            gte(events.start, args.start),
-            lte(events.end, args.end)
-          )
-        )
-        .orderBy(events.start);
-      return { events: results };
+      return { 
+        events: [
+          { id: 1, title: "Mock Event", start: args.start, end: args.end }
+        ] 
+      };
     }
 
     if (name === "searchClients") {
-      const results = await db.select().from(clients)
-        .where(like(clients.companyName, `%${args.name}%`))
-        .limit(5);
-      return { clients: results };
+      return { 
+        clients: [
+          { id: 1, companyName: `Mock Client ${args.name}` }
+        ] 
+      };
     }
 
     if (name === "getStats") {
-      const [noteCount] = await db.select({ count: sql<number>`count(*)` }).from(notes);
-      const [taskCount] = await db.select({ count: sql<number>`count(*)` }).from(tasks);
-      const [projectCount] = await db.select({ count: sql<number>`count(*)` }).from(projects);
-      
       return {
-        notes: noteCount.count,
-        tasks: taskCount.count,
-        projects: projectCount.count
+        notes: 42,
+        tasks: 15,
+        projects: 3
       };
     }
 

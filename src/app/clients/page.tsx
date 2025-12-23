@@ -1,9 +1,11 @@
-import { db } from '@/db';
-import { clients } from '@/db/schema';
 import ClientsPageClient from '@/components/ui/clients/clients-page-client';
 
+import { getClients } from './actions';
+
 export default async function ClientsPage() {
-  const allClients = await db.select().from(clients);
+  const [allClients] = await Promise.all([
+    getClients(),
+  ]);
   
   return <ClientsPageClient initialClients={allClients} />;
 }

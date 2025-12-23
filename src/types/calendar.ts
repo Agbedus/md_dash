@@ -7,7 +7,7 @@ export interface CalendarEvent {
   // Accept either ISO string (from server) or Date (runtime)
   start: string | Date;
   end: string | Date;
-  allDay?: boolean;
+  allDay: boolean;
   location?: string;
   organizer?: string;
   attendees?: string[]; // emails or names
@@ -16,6 +16,7 @@ export interface CalendarEvent {
   recurrence?: string; // e.g., RRULE string
   reminders?: string; // e.g., "email:30m,popup:10m"
   color?: string; // tailwind class, e.g. 'bg-emerald-400'
+  userId?: string;
   createdAt?: string;
   updatedAt?: string;
 }

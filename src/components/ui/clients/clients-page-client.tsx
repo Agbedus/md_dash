@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useOptimistic, useTransition } from 'react';
+import { getClients } from '@/app/clients/actions';
 import { Client } from '@/types/client';
 import { FiPlus, FiSearch, FiX, FiCheck, FiEdit2, FiTrash2, FiMail, FiGlobe, FiUser } from 'react-icons/fi';
 import { createClient, updateClient, deleteClient } from '@/app/clients/actions';
@@ -10,31 +11,103 @@ interface ClientsPageClientProps {
 }
 
 export default function ClientsPageClient({ initialClients }: ClientsPageClientProps) {
+  const [allClients, setAllClients] = useState<Client[]>(initialClients);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [, startTransition] = useTransition();
 
-  const filteredClients = initialClients.filter(client =>
+  // Optimistic UI for Clients
+  const [optimisticClients, addOptimisticClient] = useOptimistic(
+    allClients,
+    (state: Client[], action: { type: 'add' | 'update' | 'delete', client: Client }) => {
+      switch (action.type) {
+        case 'add':
+          return [...state, action.client];
+        case 'update':
+          return state.map(c => c.id === action.client.id ? action.client : c);
+        case 'delete':
+          return state.filter(c => c.id !== action.client.id);
+        default:
+          return state;
+      }
+    }
+  );
+
+  const filteredClients = optimisticClients.filter(client =>
     client.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (client.contactEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
   );
 
   const handleCreate = async (formData: FormData) => {
-    await createClient(formData);
+    const newClient: Client = {
+      id: Date.now().toString(), // Temp ID
+      companyName: formData.get('companyName') as string,
+      contactPersonName: formData.get('contactPersonName') as string,
+      contactEmail: formData.get('contactEmail') as string,
+      websiteUrl: formData.get('websiteUrl') as string,
+      createdAt: new Date().toISOString(),
+    };
+    addOptimisticClient({ type: 'add', client: newClient });
     setIsCreateModalOpen(false);
+
+    try {
+      await createClient(formData);
+      const clients = await getClients();
+      startTransition(() => {
+        setAllClients(clients);
+      });
+    } catch (err) {
+      console.error(err);
+      const clients = await getClients();
+      setAllClients(clients);
+    }
   };
 
   const handleUpdate = async (formData: FormData) => {
-    formData.set('id', editingClient!.id);
-    await updateClient(formData);
+    const editing = editingClient;
+    if (editing) {
+      const updatedClient: Client = {
+        ...editing,
+        companyName: formData.get('companyName') as string,
+        contactPersonName: formData.get('contactPersonName') as string,
+        contactEmail: formData.get('contactEmail') as string,
+        websiteUrl: formData.get('websiteUrl') as string,
+      };
+      addOptimisticClient({ type: 'update', client: updatedClient });
+    }
     setEditingClient(null);
+
+    try {
+      formData.set('id', editing!.id);
+      await updateClient(formData);
+      const clients = await getClients();
+      startTransition(() => {
+        setAllClients(clients);
+      });
+    } catch (err) {
+      console.error(err);
+      const clients = await getClients();
+      setAllClients(clients);
+    }
   };
 
   const handleDelete = async (client: Client) => {
     if (confirm(`Are you sure you want to delete ${client.companyName}?`)) {
-      const formData = new FormData();
-      formData.set('id', client.id);
-      await deleteClient(formData);
+      addOptimisticClient({ type: 'delete', client });
+      try {
+        const formData = new FormData();
+        formData.set('id', client.id);
+        await deleteClient(formData);
+        const clients = await getClients();
+        startTransition(() => {
+          setAllClients(clients);
+        });
+      } catch (err) {
+        console.error(err);
+        const clients = await getClients();
+        setAllClients(clients);
+      }
     }
   };
 

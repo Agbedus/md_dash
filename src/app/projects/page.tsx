@@ -1,34 +1,25 @@
 import React from 'react';
 import ProjectsPageClient from '@/components/ui/projects/projects-page-client';
-import { db } from '@/db';
-import { projects, users, clients } from '@/db/schema';
-import { desc } from 'drizzle-orm';
-
+import { getProjects } from './actions';
+import { getClients } from '@/app/clients/actions';
+import { getUsers } from '@/app/users/actions';
+import { getTasks } from '@/app/tasks/actions';
+import { Project } from '@/types/project';
+import { Task } from '@/types/task';
 
 export default async function ProjectsPage() {
-  const allProjects = await db.query.projects.findMany({
-    orderBy: desc(projects.createdAt),
-    with: {
-        managers: {
-            with: {
-                user: true
-            }
-        },
-        owner: true,
-        client: true,
-        tasks: {
-            with: {
-                assignees: {
-                    with: {
-                        user: true
-                    }
-                }
-            }
-        }
-    }
-  });
-  const allUsers = await db.select().from(users);
-  const allClients = await db.select().from(clients);
+  const [allProjects, allClients, allUsers, allTasks] = await Promise.all([
+    getProjects(),
+    getClients(),
+    getUsers(),
+    getTasks(),
+  ]);
   
-  return <ProjectsPageClient initialProjects={allProjects as unknown as import("@/types/project").Project[]} users={allUsers} clients={allClients} />;
+  // Link tasks to projects
+  const projectsWithTasks: Project[] = allProjects.map((project: Project) => ({
+    ...project,
+    tasks: allTasks.filter((task: Task) => task.projectId === project.id)
+  }));
+  
+  return <ProjectsPageClient initialProjects={projectsWithTasks} users={allUsers} clients={allClients} />;
 }

@@ -8,6 +8,8 @@ import type { Note } from '@/types/note';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 
+import type { Task } from '@/types/task';
+
 interface NoteFormModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -15,9 +17,10 @@ interface NoteFormModalProps {
     noteTypes: Note['type'][];
     isSaving: boolean;
     initialNote?: Note;
+    tasks?: Task[];
 }
 
-export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSaving, initialNote }: NoteFormModalProps) {
+export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSaving, initialNote, tasks }: NoteFormModalProps) {
      const formRef = useRef<HTMLFormElement>(null);
      const titleRef = useRef<HTMLInputElement>(null);
      const editorContainerRef = useRef<HTMLDivElement | null>(null);
@@ -28,6 +31,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
      const [priority, setPriority] = useState<Note['priority'] | ''>('low');
      const [typeVal, setTypeVal] = useState<Note['type'] | ''>('note');
      const [noteId, setNoteId] = useState<string>('');
+     const [taskId, setTaskId] = useState<string>('');
 
     // Initialize Quill once when the component mounts and keep it mounted so content persists
     useEffect(() => {
@@ -62,6 +66,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
             setTitle(initialNote.title || '');
             setPriority(initialNote.priority || 'low');
             setTypeVal(initialNote.type || 'note');
+            setTaskId(initialNote.taskId ? String(initialNote.taskId) : '');
             setNoteId(String(initialNote.id));
             if (quillRef.current) {
                 quillRef.current.clipboard.dangerouslyPasteHTML(initialNote.content || '');
@@ -72,6 +77,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
             setPriority('low');
             setTypeVal('note');
             setNoteId('');
+            setTaskId('');
             if (quillRef.current) {
                 quillRef.current.setContents([]);
             }
@@ -140,6 +146,18 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                             >
                                 {noteTypes.map(type => (
                                     <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+                                ))}
+                            </select>
+                            <select
+                                name="taskId"
+                                id="taskId"
+                                value={taskId}
+                                onChange={(e) => setTaskId(e.target.value)}
+                                className="bg-slate-800 border border-slate-700 rounded-md px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[150px]"
+                            >
+                                <option value="">No Task</option>
+                                {tasks?.map(task => (
+                                    <option key={task.id} value={task.id}>{task.name}</option>
                                 ))}
                             </select>
                         </div>

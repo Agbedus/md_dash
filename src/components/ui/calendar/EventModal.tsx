@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { FiBell, FiX, FiCheck, FiClock, FiCalendar, FiMapPin, FiPlus } from "react-icons/fi";
+import { createEvent } from "@/app/calendar/actions";
 
 interface EventModalProps {
   open: boolean;
@@ -74,27 +75,20 @@ export default function EventModal({ open, initialStart, onClose, onCreated }: E
     e.preventDefault();
     setSubmitting(true);
     try {
-      const payload = {
-        title: title || "Untitled Event",
-        description: description || null,
-        start: new Date(start).toISOString(),
-        end: new Date(end).toISOString(),
-        allDay,
-        location: location || null,
-        organizer: organizer || null,
-        attendees: attendees ? attendees.split(",").map((s) => s.trim()).filter(Boolean) : [],
-        status: status || null,
-        privacy: privacy || null,
-        recurrence: null,
-        reminders: reminders.length ? reminders.join(",") : null,
-        color: null,
-      };
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error("Failed to create event");
+      const formData = new FormData();
+      formData.append('title', title || "Untitled Event");
+      if (description) formData.append('description', description);
+      formData.append('start', new Date(start).toISOString());
+      formData.append('end', new Date(end).toISOString());
+      formData.append('allDay', String(allDay));
+      if (location) formData.append('location', location);
+      if (organizer) formData.append('organizer', organizer);
+      if (attendees) formData.append('attendees', JSON.stringify(attendees.split(",").map((s) => s.trim()).filter(Boolean)));
+      if (status) formData.append('status', status);
+      if (privacy) formData.append('privacy', privacy);
+      if (reminders.length) formData.append('reminders', reminders.join(","));
+
+      await createEvent(formData);
       await onCreated();
       onClose();
     } catch (err) {

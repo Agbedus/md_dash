@@ -1,24 +1,15 @@
-import { db } from "@/db";
-import { users, projects } from "@/db/schema";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import TasksPageClient from "@/components/ui/tasks/tasks-page-client";
-
-export const dynamic = 'force-dynamic';
-
-type TaskWithRelations = Awaited<ReturnType<typeof db.query.tasks.findMany>>[number];
+import { getTasks } from './actions';
+import { getUsers } from '@/app/users/actions';
+import { getProjects } from '@/app/projects/actions';
 
 export default async function TasksPage() {
-    const allTasks = await db.query.tasks.findMany({
-        with: {
-            assignees: {
-                with: {
-                    user: true
-                }
-            },
-            project: true
-        }
-    });
-    const allUsers = await db.select().from(users);
-    const allProjects = await db.select().from(projects);
+    const [allTasks, allUsers, allProjects] = await Promise.all([
+        getTasks(),
+        getUsers(),
+        getProjects(),
+    ]);
 
-    return <TasksPageClient allTasks={allTasks as TaskWithRelations[]} users={allUsers} projects={allProjects} />;
+    return <TasksPageClient allTasks={allTasks as any[]} users={allUsers as any[]} projects={allProjects as any[]} />;
 }

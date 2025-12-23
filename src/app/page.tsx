@@ -1,5 +1,5 @@
 import Dashboard from "@/components/ui/dashboard";
-import { getDashboardData } from "./dashboard/actions";
+import { getDashboardData } from "@/app/lib/dashboard-actions";
 
 export default async function Home() {
   const dashboardData = await getDashboardData();

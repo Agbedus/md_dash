@@ -152,8 +152,8 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
         }
     };
     const noteTags = parseTags(note.tags);
-    const TypeIcon = noteTypeIcons[note.type];
-    const typeIconColorClass = noteTypeColors[note.type];
+    const TypeIcon = noteTypeIcons[note.type] || FiFileText;
+    const typeIconColorClass = noteTypeColors[note.type] || 'text-zinc-400';
 
     const renderContent = (content: string) => {
         const sanitized = sanitizeHtml(content);
@@ -213,7 +213,11 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
                                 {isExpanded ? <FiMinimize2 size={16} /> : <FiMaximize2 size={16} />}
                             </button>
                         )}
-                        <TypeIcon className={`${typeIconColorClass} flex-shrink-0`} size={20} />
+                        {TypeIcon ? (
+                            <TypeIcon className={`${typeIconColorClass || 'text-zinc-400'} flex-shrink-0`} size={20} />
+                        ) : (
+                            <div className="w-5 h-5 rounded bg-zinc-800 flex-shrink-0" />
+                        )}
                     </div>
                 </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useOptimistic } from 'react';
 import { Project } from '@/types/project';
 import { User } from '@/types/user';
 import { Client } from '@/types/client';
@@ -23,7 +23,24 @@ export default function ProjectsPageClient({ initialProjects, users, clients }: 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const filteredProjects = initialProjects.filter(project => {
+  // Optimistic UI
+  const [optimisticProjects, addOptimisticProject] = useOptimistic(
+    initialProjects,
+    (state: Project[], action: { type: 'add' | 'update' | 'delete', project: Project }) => {
+      switch (action.type) {
+        case 'add':
+          return [...state, action.project];
+        case 'update':
+          return state.map(p => p.id === action.project.id ? action.project : p);
+        case 'delete':
+          return state.filter(p => p.id !== action.project.id);
+        default:
+          return state;
+      }
+    }
+  );
+
+  const filteredProjects = optimisticProjects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
@@ -31,18 +48,56 @@ export default function ProjectsPageClient({ initialProjects, users, clients }: 
   });
 
   const handleCreate = async (formData: FormData) => {
-    await createProject(formData);
+    // Optimistic Update
+    const newProject: Project = {
+      id: -1, // Temporary ID
+      name: formData.get('name') as string,
+      key: formData.get('key') as string,
+      status: (formData.get('status') as Project['status']) || 'planning',
+      priority: (formData.get('priority') as Project['priority']) || 'medium',
+      ownerId: formData.get('ownerId') as string,
+      clientId: formData.get('clientId') as string,
+      description: '',
+      tags: '',
+      startDate: null,
+      endDate: null,
+      budget: null,
+      spent: null,
+      currency: 'USD',
+      billingType: null,
+      isArchived: 0,
+      tasks: [],
+    };
+    addOptimisticProject({ type: 'add', project: newProject });
+    
     setIsCreateModalOpen(false);
+    await createProject(formData);
   };
 
   const handleUpdate = async (formData: FormData) => {
-    formData.set('id', editingProject!.id.toString());
-    await updateProject(formData);
+    const id = editingProject!.id;
+    formData.set('id', id.toString());
+    
+    // Optimistic Update
+    const updatedProject: Project = {
+      ...editingProject!,
+      name: formData.get('name') as string,
+      key: formData.get('key') as string,
+      status: formData.get('status') as Project['status'],
+      priority: formData.get('priority') as Project['priority'],
+      ownerId: formData.get('ownerId') as string,
+      clientId: formData.get('clientId') as string,
+    };
+    addOptimisticProject({ type: 'update', project: updatedProject });
+    
     setEditingProject(null);
+    await updateProject(formData);
   };
 
   const handleDelete = async (project: Project) => {
     if (confirm('Are you sure you want to delete this project?')) {
+      addOptimisticProject({ type: 'delete', project });
+      
       const formData = new FormData();
       formData.set('id', project.id.toString());
       await deleteProject(formData);
@@ -51,65 +106,68 @@ export default function ProjectsPageClient({ initialProjects, users, clients }: 
 
   return (
     <div className="p-8 max-w-7xl mx-auto min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Projects</h1>
-          <p className="text-zinc-400 text-lg">Manage and track your ongoing projects.</p>
+      {/* Sticky Header & Controls Container */}
+      <div className="sticky top-0 z-30 -mx-8 px-8 py-4 mb-4 backdrop-blur-md">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Projects</h1>
+            <p className="text-zinc-400 text-lg">Manage and track your ongoing projects.</p>
+          </div>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm text-zinc-400 hover:text-white transition-all duration-200 group"
+          >
+            <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
+              <FiPlus className="w-4 h-4" />
+            </div>
+            <span className="pr-2">New Project</span>
+          </button>
         </div>
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm text-zinc-400 hover:text-white transition-all duration-200 group"
-        >
-          <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
-            <FiPlus className="w-4 h-4" />
-          </div>
-          <span className="pr-2">New Project</span>
-        </button>
-      </div>
 
-      {/* Controls */}
-      <div className="glass p-4 rounded-2xl mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex items-center gap-4 w-full md:w-auto flex-1">
-          <div className="relative flex-1 md:max-w-md">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-            />
+        {/* Controls */}
+        <div className="glass p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="flex items-center gap-4 w-full md:w-auto flex-1">
+            <div className="relative flex-1 md:max-w-md">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input
+                type="text"
+                placeholder="Search projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              />
+            </div>
+            <div className="relative">
+              <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-8 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
+              >
+                <option value="all">All Status</option>
+                <option value="planning">Planning</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="on_hold">On Hold</option>
+              </select>
+            </div>
           </div>
-          <div className="relative">
-            <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-8 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
+
+          <div className="flex items-center bg-white/5 rounded-xl border border-white/10 p-1">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
             >
-              <option value="all">All Status</option>
-              <option value="planning">Planning</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="on_hold">On Hold</option>
-            </select>
+              <FiGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+            >
+              <FiList className="w-4 h-4" />
+            </button>
           </div>
-        </div>
-
-        <div className="flex items-center bg-white/5 rounded-xl border border-white/10 p-1">
-          <button
-            onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
-          >
-            <FiGrid className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
-          >
-            <FiList className="w-4 h-4" />
-          </button>
         </div>
       </div>
 

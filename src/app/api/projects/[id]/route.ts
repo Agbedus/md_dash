@@ -1,7 +1,4 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/db';
-import { projects } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 
 export async function PATCH(
   request: Request,
@@ -10,19 +7,19 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
   
-  const updated = await db.update(projects)
-    .set({ ...body, updatedAt: new Date().toISOString() })
-    .where(eq(projects.id, parseInt(id)))
-    .returning();
+  // Mock return
+  const updated = {
+    id: parseInt(id),
+    ...body,
+    updatedAt: new Date().toISOString(),
+  };
 
-  return NextResponse.json(updated[0]);
+  return NextResponse.json(updated);
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  _request: Request,
+  _props: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  await db.delete(projects).where(eq(projects.id, parseInt(id)));
   return NextResponse.json({ success: true });
 }

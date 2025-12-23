@@ -1,11 +1,27 @@
-
-import { db } from "@/db";
-import { events } from "@/db/schema";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const allEvents = await db.select().from(events);
+    const allEvents = [
+      {
+        id: "event-1",
+        title: "Team Sync",
+        description: "Weekly team synchronization.",
+        start: new Date(Date.now() + 86400000).toISOString(),
+        end: new Date(Date.now() + 90000000).toISOString(),
+        allDay: 0,
+        location: "Conference Room A",
+        organizer: "manager@example.com",
+        attendees: null,
+        status: "confirmed",
+        privacy: "public",
+        recurrence: null,
+        reminders: null,
+        color: "#4285F4",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+    ];
     return NextResponse.json(allEvents);
   } catch (error) {
     console.error("Failed to fetch events:", error);
@@ -17,27 +33,14 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    // Basic validation could go here
-    
-    const result = await db.insert(events).values({
-      title: body.title,
-      description: body.description,
-      start: body.start,
-      end: body.end,
-      allDay: body.allDay ? 1 : 0,
-      location: body.location,
-      organizer: body.organizer,
-      attendees: body.attendees ? JSON.stringify(body.attendees) : null,
-      status: body.status,
-      privacy: body.privacy,
-      recurrence: body.recurrence,
-      reminders: body.reminders,
-      color: body.color,
+    const result = {
+      id: Math.floor(Math.random() * 10000),
+      ...body,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    }).returning();
+    };
 
-    return NextResponse.json(result[0]);
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Failed to create event:", error);
     return NextResponse.json({ error: "Failed to create event" }, { status: 500 });

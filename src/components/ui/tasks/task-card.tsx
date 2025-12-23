@@ -16,9 +16,17 @@ interface TaskCardProps {
     projects?: Project[];
     updateTask?: (formData: FormData) => Promise<void>;
     deleteTask?: (formData: FormData) => Promise<void>;
+    hideProject?: boolean;
 }
 
-export default function TaskCard({ task, users = [], projects = [], updateTask = async () => {}, deleteTask = async () => {} }: TaskCardProps) {
+export default function TaskCard({ 
+    task, 
+    users = [], 
+    projects = [], 
+    updateTask = async () => {}, 
+    deleteTask = async () => {},
+    hideProject = false
+}: TaskCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [selectedAssignees, setSelectedAssignees] = useState<(string | number)[]>(
       task.assignees?.map(a => a.user.id) || []
@@ -26,6 +34,12 @@ export default function TaskCard({ task, users = [], projects = [], updateTask =
     const [selectedProject, setSelectedProject] = useState<string | number | null>(
       task.projectId || null
     );
+
+    const displayAssignees = React.useMemo(() => {
+        if (task.assignees && task.assignees.length > 0) return task.assignees.map(a => a.user);
+        if (!task.assigneeIds || task.assigneeIds.length === 0) return [];
+        return users.filter(u => task.assigneeIds?.includes(u.id));
+    }, [task.assignees, task.assigneeIds, users]);
 
     const handleUpdateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -117,16 +131,18 @@ export default function TaskCard({ task, users = [], projects = [], updateTask =
               className="w-full"
             />
           </td>
-          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap min-w-[150px]">
-            <Combobox
-              options={projects.map(p => ({ value: p.id, label: p.name, subLabel: p.key || undefined }))}
-              value={selectedProject || ''}
-              onChange={(val) => setSelectedProject(val as string | number | null)}
-              placeholder="Project..."
-              searchPlaceholder="Search projects..."
-              className="w-full"
-            />
-          </td>
+          {!hideProject && (
+            <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap min-w-[150px]">
+              <Combobox
+                options={projects.map(p => ({ value: p.id, label: p.name, subLabel: p.key || undefined }))}
+                value={selectedProject || ''}
+                onChange={(val) => setSelectedProject(val as string | number | null)}
+                placeholder="Project..."
+                searchPlaceholder="Search projects..."
+                className="w-full"
+              />
+            </td>
+          )}
           <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
             <select
               form={`update-${task.id}`}
@@ -191,19 +207,21 @@ export default function TaskCard({ task, users = [], projects = [], updateTask =
           </span>
         </td>
         <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
-            {task.assignees && task.assignees.length > 0 ? (
-                <UserAvatarGroup users={task.assignees.map(a => a.user)} size="sm" limit={3} />
+            {displayAssignees.length > 0 ? (
+                <UserAvatarGroup users={displayAssignees} size="sm" limit={3} />
             ) : (
                 <span className="text-zinc-600 italic">Unassigned</span>
             )}
         </td>
-        <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
-            {task.projectId ? (
-                <span className="text-indigo-400">{projects.find(p => p.id === task.projectId)?.name}</span>
-            ) : (
-                <span className="text-zinc-600 italic">No Project</span>
-            )}
-        </td>
+        {!hideProject && (
+          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
+              {task.projectId ? (
+                  <span className="text-indigo-400">{projects.find(p => p.id === task.projectId)?.name}</span>
+              ) : (
+                  <span className="text-zinc-600 italic">No Project</span>
+              )}
+          </td>
+        )}
         <td className="px-4 py-2 text-xs whitespace-nowrap">
           <span
             className={`px-2 py-0.5 inline-flex text-[10px] font-medium rounded-full border ${

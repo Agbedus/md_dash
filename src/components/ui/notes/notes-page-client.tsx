@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useTransition, useEffect, useMemo } from 'react';
+import { useState, useTransition, useEffect, useMemo, useOptimistic } from 'react';
 import { 
     FiPlus, FiGrid, FiList, FiFileText, FiCheckSquare, 
     FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiSearch
 } from 'react-icons/fi';
 import { createNote, updateNote, deleteNote, getNotes, getUsers, shareNote } from '@/app/notes/actions';
+import { getTasks } from '@/app/tasks/actions';
 import type { Note } from "@/types/note";
+import type { Task } from "@/types/task";
 import NoteCard from './note-card';
 import NoteFormModal from './NoteFormModal';
 
@@ -44,7 +46,23 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [, startTransition] = useTransition();
-    const [savingCreate, setSavingCreate] = useState(false);
+
+    // Optimistic UI for Notes
+    const [optimisticNotes, addOptimisticNote] = useOptimistic(
+        allNotes,
+        (state: Note[], action: { type: 'add' | 'update' | 'delete' | 'share', note: Note }) => {
+            switch (action.type) {
+                case 'add':
+                    return [action.note, ...state];
+                case 'update':
+                    return state.map(n => n.id === action.note.id ? action.note : n);
+                case 'delete':
+                    return state.filter(n => n.id !== action.note.id);
+                default:
+                    return state;
+            }
+        }
+    );
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [filterType, setFilterType] = useState<Note['type'] | 'all'>('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -64,41 +82,86 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
     };
 
     const [availableUsers, setAvailableUsers] = useState<{id: string, name: string | null, email: string | null, image: string | null}[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
 
     useEffect(() => {
         getUsers().then(setAvailableUsers);
+        getTasks().then(setTasks);
     }, []);
 
     const handleModalSave = async (formData: FormData) => {
         setErrorMsg(null);
-        setSavingCreate(true);
+        // We close immediately for snappy feel
+        setIsModalOpen(false);
+        const editing = editingNote;
+        setEditingNote(null);
+
         try {
             const isEditingFlag = formData.get('_editing');
             const formId = formData.get('id');
+            const title = formData.get('title') as string;
+            const content = formData.get('content') as string;
+            const type = formData.get('type') as Note['type'];
+            const taskId = formData.get('taskId') ? Number(formData.get('taskId')) : null;
 
-            if (isEditingFlag || formId || editingNote) {
-                if (!formId && editingNote) {
-                    formData.set('id', String(editingNote.id));
-                }
+            if (isEditingFlag || formId || editing) {
+                const id = Number(formId || editing?.id);
+                const updatedNote: Note = {
+                    ...(editing || allNotes.find(n => n.id === id)!),
+                    title,
+                    content,
+                    type,
+                    taskId,
+                    updatedAt: new Date().toISOString()
+                };
+                addOptimisticNote({ type: 'update', note: updatedNote });
                 await updateNote(formData);
             } else {
+                const newNote: Note = {
+                    id: Date.now(), // Temp ID
+                    title,
+                    content,
+                    type,
+                    taskId,
+                    tags: '[]',
+                    isPinned: 0,
+                    isArchived: 0,
+                    isFavorite: 0,
+                    userId: 'me', // placeholder
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                addOptimisticNote({ type: 'add', note: newNote });
                 await createNote(formData);
             }
+            
+            // Re-fetch to sync
             const notes = (await getNotes()) as Note[];
             startTransition(() => {
                 setAllNotes(notes);
-                setIsModalOpen(false);
-                setEditingNote(null);
             });
         } catch (err) {
             console.error(err);
             setErrorMsg('Could not save the note. Please try again.');
-        } finally {
-            setSavingCreate(false);
+            // Re-fetch on error to revert optimistic state
+            const notes = (await getNotes()) as Note[];
+            setAllNotes(notes);
         }
     };
 
     const handleUpdate = async (formData: FormData) => {
+        const id = Number(formData.get('id'));
+        const existing = allNotes.find(n => n.id === id);
+        if (existing) {
+            const updated: Note = {
+                ...existing,
+                isPinned: formData.has('is_pinned') ? (formData.get('is_pinned') === '1' ? 1 : 0) : existing.isPinned,
+                isArchived: formData.has('is_archived') ? (formData.get('is_archived') === '1' ? 1 : 0) : existing.isArchived,
+                isFavorite: formData.has('is_favorite') ? (formData.get('is_favorite') === '1' ? 1 : 0) : existing.isFavorite,
+            };
+            addOptimisticNote({ type: 'update', note: updated });
+        }
+
         setErrorMsg(null);
         try {
             await updateNote(formData);
@@ -109,10 +172,18 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
         } catch (err) {
             console.error(err);
             setErrorMsg('Could not update the note. Please try again.');
+            const notes = (await getNotes()) as Note[];
+            setAllNotes(notes);
         }
     };
 
     const handleDelete = async (formData: FormData) => {
+        const id = Number(formData.get('id'));
+        const existing = allNotes.find(n => n.id === id);
+        if (existing) {
+            addOptimisticNote({ type: 'delete', note: existing });
+        }
+
         setErrorMsg(null);
         try {
             await deleteNote(formData);
@@ -123,6 +194,8 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
         } catch (err) {
             console.error(err);
             setErrorMsg('Could not delete the note. Please try again.');
+            const notes = (await getNotes()) as Note[];
+            setAllNotes(notes);
         }
     };
 
@@ -144,7 +217,7 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
     };
 
     const filteredNotes = useMemo(() => {
-        let notes = allNotes;
+        let notes = optimisticNotes;
 
         if (filterType !== 'all') {
             notes = notes.filter(note => note.type === filterType);
@@ -159,7 +232,7 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
         }
 
         return notes;
-    }, [allNotes, filterType, searchQuery]);
+    }, [optimisticNotes, filterType, searchQuery]);
 
     return (
         <div className="flex flex-col h-screen p-8 max-w-7xl mx-auto text-white">
@@ -208,13 +281,13 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                         All Notes
                     </button>
                     {noteTypes.map(type => {
-                        const Icon = noteTypeIcons[type];
+                        const Icon = noteTypeIcons[type] || FiFileText;
                         return (
                             <button 
                                 key={type} 
                                 onClick={() => setFilterType(type)} 
                                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all hover-scale ${filterType === type ? 'bg-white text-black' : 'bg-white/10 text-zinc-300 hover:bg-white/20'}`}>
-                                <Icon className={`${filterType === type ? 'text-black' : noteTypeColors[type]}`} />
+                                {Icon && <Icon className={`${filterType === type ? 'text-black' : (noteTypeColors[type] || 'text-zinc-400')}`} />}
                                 <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
                             </button>
                         );
@@ -287,7 +360,8 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                 onSave={handleModalSave}
                 initialNote={editingNote ?? undefined}
                  noteTypes={noteTypes}
-                 isSaving={savingCreate}
+                 isSaving={false}
+                 tasks={tasks}
              />
             <style jsx>{`
                 .masonry-container {

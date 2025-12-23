@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useOptimistic, useTransition } from "react";
 import { addDays, addMonths, addWeeks, startOfDay } from "date-fns";
 import type { CalendarEvent, CalendarView } from "@/types/calendar";
 import Toolbar from "./Toolbar";
@@ -9,29 +9,9 @@ import DayGrid from "./DayGrid";
 
 import EventModal from "./EventModal";
 import EventDetailModal from "./EventDetailModal";
+import { getEvents } from "@/app/calendar/actions";
 
-// Shape of rows returned by GET /api/events (derived from `src/db/schema.ts`)
-type EventRow = {
-  id: number | string;
-  title: string;
-  description: string | null;
-  start: string; // ISO string
-  end: string;   // ISO string
-  allDay?: number | null;
-  all_day?: number | null; // tolerate snake_case just in case
-  location: string | null;
-  organizer: string | null;
-  attendees: string | null; // JSON string array or comma list
-  status?: "tentative" | "confirmed" | "cancelled" | null;
-  privacy?: "public" | "private" | "confidential" | null;
-  recurrence?: string | null;
-  reminders?: string | null;
-  color?: string | null;
-  createdAt?: string | null;
-  created_at?: string | null; // tolerate snake_case
-  updatedAt?: string | null;
-  updated_at?: string | null; // tolerate snake_case
-};
+// Shape of rows returned by GET /api/tasks
 
 type TaskRow = {
   id: number;
@@ -61,6 +41,24 @@ export default function Calendar({ initialDate, initialView = "month", events = 
     // allow initial prop events (may contain string dates)
     events.map((ev) => ({ ...ev }))
   );
+  const [, ] = useTransition();
+
+  // Optimistic UI for Calendar
+  const [optimisticEvents, addOptimisticEvent] = useOptimistic(
+    serverEvents,
+    (state: UICalendarEvent[], action: { type: 'add' | 'update' | 'delete', event: UICalendarEvent }) => {
+      switch (action.type) {
+        case 'add':
+          return [...state, action.event];
+        case 'update':
+          return state.map(e => e.id === action.event.id ? action.event : e);
+        case 'delete':
+          return state.filter(e => e.id !== action.event.id);
+        default:
+          return state;
+      }
+    }
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStart, setModalStart] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<UICalendarEvent | null>(null);
@@ -77,64 +75,28 @@ export default function Calendar({ initialDate, initialView = "month", events = 
 
   const normalizedEvents = useMemo(
     () =>
-      serverEvents.map((e) => ({
+      optimisticEvents.map((e) => ({
         ...e,
         start: new Date(e.start),
         end: new Date(e.end),
       })),
-    [serverEvents]
+    [optimisticEvents]
   );
 
   const loadEvents = useCallback(async () => {
     try {
-      const [evRes, taskRes] = await Promise.all([
-        fetch("/api/events", { cache: "no-store" }),
+      const [eventsData, taskRes] = await Promise.all([
+        getEvents(),
         fetch("/api/tasks", { cache: "no-store" }),
       ]);
-      if (!evRes.ok) throw new Error("Failed to load events");
       if (!taskRes.ok) throw new Error("Failed to load tasks");
-      const data: EventRow[] = await evRes.json();
       const tasksData: TaskRow[] = await taskRes.json();
 
-      const mappedEvents: UICalendarEvent[] = data.map((row) => {
-        // safe attendees parsing: try JSON.parse, fallback to comma-split, else []
-        let attendees: string[] = [];
-        if (row.attendees) {
-          try {
-            const parsed = JSON.parse(row.attendees);
-            if (Array.isArray(parsed)) attendees = parsed.filter(Boolean).map(String);
-            else if (typeof parsed === "string") attendees = parsed.split(",").map((s) => s.trim()).filter(Boolean);
-          } catch {
-            attendees = row.attendees.split(",").map((s) => s.trim()).filter(Boolean);
-          }
-        }
-
-        // tolerant all-day detection (numeric 1/0, boolean true/false, or snake_case)
-        const allDay =
-          row.allDay === 1 ||
-          String(row.allDay) === "1" ||
-          row.all_day === 1 ||
-          String(row.all_day) === "1";
-
-        return {
-          id: String(row.id),
-          title: row.title,
-          description: row.description ?? undefined,
-          start: new Date(row.start),
-          end: new Date(row.end),
-          allDay,
-          location: row.location ?? undefined,
-          organizer: row.organizer ?? undefined,
-          attendees,
-          status: row.status ?? undefined,
-          privacy: row.privacy ?? undefined,
-          recurrence: row.recurrence ?? undefined,
-          reminders: row.reminders ?? undefined,
-          color: row.color ?? undefined,
-          createdAt: row.createdAt ?? row.created_at ?? undefined,
-          updatedAt: row.updatedAt ?? row.updated_at ?? undefined,
-        };
-      });
+      const mappedEvents: UICalendarEvent[] = eventsData.map((ev) => ({
+          ...ev,
+          start: new Date(ev.start),
+          end: new Date(ev.end),
+      }));
 
       // map tasks with dueDate into calendar items
       const taskItems: UICalendarEvent[] = tasksData
@@ -183,6 +145,7 @@ export default function Calendar({ initialDate, initialView = "month", events = 
       const ok = confirm(`Delete "${e.title}"?`);
       if (!ok) return;
       try {
+        addOptimisticEvent({ type: "delete", event: e });
         if (e.isTask || String(e.id).startsWith("task-")) {
           // extract numeric id for tasks
           const idStr = String(e.id).replace(/^task-/, "");
@@ -192,14 +155,16 @@ export default function Calendar({ initialDate, initialView = "month", events = 
           const res = await fetch(`/api/events/${e.id}`, { method: "DELETE" });
           if (!res.ok) throw new Error("Failed to delete event");
         }
+        // Load tasks again is hard here since it's a raw fetch, but I'll skip it for now or assume loadEvents is called
         await loadEvents();
         if (selectedEvent && selectedEvent.id === e.id) setSelectedEvent(null);
       } catch (err) {
         console.error(err);
         alert("Failed to delete item");
+        await loadEvents(); // revert
       }
     },
-    [loadEvents, selectedEvent]
+    [loadEvents, selectedEvent, addOptimisticEvent]
   );
 
   return (

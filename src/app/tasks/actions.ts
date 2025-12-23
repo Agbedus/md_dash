@@ -1,149 +1,291 @@
 'use server';
 
-import { db } from '@/db';
-import { tasks } from '@/db/schema';
-import { revalidatePath } from 'next/cache';
-import { eq, InferInsertModel } from 'drizzle-orm';
-import { parseTaskFormData, Task } from '@/types/task';
+const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+const API_BASE_URL = `${BASE_URL}/api/v1`;
 
-const ALLOWED_STATUSES = ['task', 'in_progress', 'completed'] as const;
-type Status = typeof ALLOWED_STATUSES[number];
+import { auth } from '@/auth';
+import { Task } from '@/types/task';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
-const ALLOWED_PRIORITIES = ['low', 'medium', 'high'] as const;
-type Priority = typeof ALLOWED_PRIORITIES[number];
-
-const isStatus = (val: unknown): val is Status =>
-  typeof val === 'string' && (ALLOWED_STATUSES as readonly string[]).includes(val);
-
-const isPriority = (val: unknown): val is Priority =>
-  typeof val === 'string' && (ALLOWED_PRIORITIES as readonly string[]).includes(val);
-
-export async function getTasks(): Promise<Task[]> {
-    return await db.query.tasks.findMany({
-        with: {
-            assignees: {
-                with: {
-                    user: true
-                }
-            }
-        },
-        orderBy: (tasks, { desc }) => [desc(tasks.createdAt)]
-    });
+// Interface for what the API returns (snake_case)
+interface ApiTask {
+    id: number;
+    name: string;
+    description: string | null;
+    status: string;
+    priority: string;
+    due_date: string | null;
+    created_at: string;
+    updated_at: string;
+    project_id: number | null;
+    assignees?: Array<{
+        id: string | number;
+        full_name?: string;
+        name?: string;
+        email?: string;
+        avatar_url?: string;
+        image?: string;
+        roles?: string[];
+    }>;
+    assignee_ids?: string[];
+    task_assignees?: Array<{
+        task_id: number;
+        user_id: string | number;
+    }>;
 }
 
-import { taskAssignees } from '@/db/schema';
-
-export async function createTask(formData: FormData) {
-    const taskData = parseTaskFormData(formData);
-
-    const status: Status = isStatus(taskData.status) ? taskData.status : 'task';
-
-    const priority: Priority = isPriority(taskData.priority) ? taskData.priority : 'medium';
-
-    const [newTask] = await db.insert(tasks).values({
-        name: taskData.name || '',
-        description: taskData.description || '',
-        dueDate: taskData.dueDate || new Date().toISOString(),
-        priority,
-        status,
-        // assigneeId: taskData.assigneeId || null, // Deprecated
-        projectId: taskData.projectId || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    }).returning({ id: tasks.id });
-
-    if (taskData.assigneeIds && taskData.assigneeIds.length > 0) {
-        await db.insert(taskAssignees).values(
-            taskData.assigneeIds.map(userId => ({
-                taskId: newTask.id,
-                userId
-            }))
-        );
+export async function getTasks(query?: string, priority?: string, status?: string, projectId?: number): Promise<Task[]> {
+    console.log("getTasks: Starting fetch...", { query, priority, status, projectId });
+    const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) {
+        console.log("getTasks: No access token found.");
+        return [];
     }
 
-    revalidatePath('/tasks');
+    try {
+        const queryParams = new URLSearchParams();
+        if (query) queryParams.append('q', query);
+        if (priority) queryParams.append('priority', priority);
+        if (status) queryParams.append('status', status);
+        if (projectId) queryParams.append('project_id', projectId.toString());
+
+        const response = await fetch(`${API_BASE_URL}/tasks?${queryParams.toString()}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                // @ts-expect-error accessToken is not in default session type
+                'Authorization': `Bearer ${session.user.accessToken}`
+            },
+            next: { tags: ['tasks', 'projects'], revalidate: 60 }
+        });
+
+        if (!response.ok) {
+            console.error("Failed to fetch tasks:", await response.text());
+            return [];
+        }
+
+        const apiTasks: ApiTask[] = await response.json();
+        
+        // Map API snake_case to Frontend camelCase
+        let tasks: Task[] = apiTasks.map(t => ({
+            id: t.id,
+            name: t.name,
+            description: t.description,
+            status: t.status as Task['status'],
+            priority: t.priority as Task['priority'],
+            dueDate: t.due_date,
+            createdAt: t.created_at,
+            updatedAt: t.updated_at,
+            projectId: t.project_id,
+            assignees: [], // Will be hydrated on client
+            assigneeIds: (() => {
+                if (t.assignee_ids && t.assignee_ids.length > 0) return t.assignee_ids;
+                if (t.task_assignees && t.task_assignees.length > 0) return t.task_assignees.map(a => String(a.user_id));
+                if (t.assignees && t.assignees.length > 0) return t.assignees.map(a => String(a.id));
+                return [];
+            })(),
+        }));
+
+        // Apply filters in-memory
+        if (query) {
+            const lowerQuery = query.toLowerCase();
+            tasks = tasks.filter(t => 
+                t.name.toLowerCase().includes(lowerQuery) || 
+                (t.description && t.description.toLowerCase().includes(lowerQuery))
+            );
+        }
+        if (priority) {
+            tasks = tasks.filter(t => t.priority === priority);
+        }
+        if (status) {
+            tasks = tasks.filter(t => t.status === status);
+        }
+
+        return tasks;
+    } catch (error) {
+        console.error("Error fetching tasks:", error);
+        return [];
+    }
+}
+
+export async function createTask(formData: FormData) {
+    const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) {
+        return { error: "Unauthorized" };
+    }
+
+    const rawData: Record<string, unknown> = {
+        name: formData.get('name'),
+        description: formData.get('description'),
+        status: formData.get('status'),
+        priority: formData.get('priority'),
+        due_date: formData.get('dueDate'),
+        project_id: formData.get('projectId') ? Number(formData.get('projectId')) : null,
+    };
+    
+    // Handle assignees if passed as JSON string
+    const assigneeIds = formData.get('assigneeIds');
+    if (assigneeIds) {
+        try {
+            const parsedIds = JSON.parse(assigneeIds as string);
+            // Based on docs and user feedback, we send array of IDs in 'assignees'
+            rawData.assignees = parsedIds;
+        } catch (e) {
+            console.error("Error parsing assigneeIds", e);
+        }
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // @ts-expect-error accessToken is not in default session type
+                'Authorization': `Bearer ${session.user.accessToken}`
+            },
+            body: JSON.stringify(rawData)
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            console.error("Failed to create task:", error);
+            return { error: "Failed to create task" };
+        }
+
+        revalidatePath('/tasks');
+        revalidateTag('tasks');
+        revalidateTag('projects');
+        return { success: true };
+    } catch (error) {
+        console.error("Error creating task:", error);
+        return { error: "Failed to create task" };
+    }
 }
 
 export async function updateTask(formData: FormData) {
+    const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) {
+        return;
+    }
+
     const id = formData.get('id');
+    if (!id) return;
+    const taskId = Number(id);
 
-    if (!id) {
-        throw new Error('Task ID is required for update');
-    }
-
-    const updates: Partial<InferInsertModel<typeof tasks>> = {
-        updatedAt: new Date().toISOString(),
-    };
-
-    if (formData.has('name')) {
-        updates.name = formData.get('name') as string;
-    }
-    if (formData.has('description')) {
-        updates.description = formData.get('description') as string;
-    }
-    if (formData.has('dueDate')) {
-        updates.dueDate = formData.get('dueDate') as string;
-    }
-    if (formData.has('priority')) {
-        const priority = formData.get('priority');
-        if (isPriority(priority)) {
-            updates.priority = priority;
-        }
-    }
-    if (formData.has('status')) {
-        const status = formData.get('status');
-        if (isStatus(status)) {
-            updates.status = status;
-        }
-    }
-    if (formData.has('projectId')) {
-        const projectId = formData.get('projectId');
-        updates.projectId = projectId ? Number(projectId) : null;
+    // Build payload dynamically based on what's in formData
+    const rawData: Record<string, unknown> = {};
+    const name = formData.get('name'); if (name) rawData.name = name;
+    const description = formData.get('description'); if (description !== null) rawData.description = description;
+    const status = formData.get('status'); if (status) rawData.status = status;
+    const priority = formData.get('priority'); if (priority) rawData.priority = priority;
+    const dueDate = formData.get('dueDate'); if (dueDate) rawData.due_date = dueDate;
+    const projectId = formData.get('projectId'); 
+    if (projectId !== null && projectId !== "") {
+        rawData.project_id = Number(projectId);
+    } else if (projectId === "") {
+        rawData.project_id = null;
     }
 
-    await db
-        .update(tasks)
-        .set(updates)
-        .where(eq(tasks.id, Number(id)));
-
-    // Only update assignees if the field is present in formData
-    if (formData.has('assigneeIds')) {
-        const assigneeIdsStr = formData.get('assigneeIds') as string;
-        let assigneeIds: string[] = [];
+    const assigneeIds = formData.get('assigneeIds');
+    if (assigneeIds !== null) {
         try {
-            assigneeIds = assigneeIdsStr ? JSON.parse(assigneeIdsStr) : [];
+            const parsedIds = JSON.parse(assigneeIds as string);
+            rawData.assignees = parsedIds;
         } catch (e) {
-            console.error("Failed to parse assigneeIds", e);
-        }
-
-        await db.delete(taskAssignees).where(eq(taskAssignees.taskId, Number(id)));
-
-        if (assigneeIds.length > 0) {
-            await db.insert(taskAssignees).values(
-                assigneeIds.map(userId => ({
-                    taskId: Number(id),
-                    userId
-                }))
-            );
+             console.error("Error parsing assigneeIds", e);
         }
     }
 
-    revalidatePath('/tasks');
+    try {
+        console.log("updateTask: Sending payload to", `${API_BASE_URL}/tasks/${taskId}`, JSON.stringify(rawData, null, 2));
+        const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                // @ts-expect-error accessToken is not in default session type
+                'Authorization': `Bearer ${session.user.accessToken}`
+            },
+            body: JSON.stringify(rawData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Failed to update task. Status:", response.status, "Error:", errorText);
+            return;
+        }
+
+        console.log("updateTask: Successfully updated task", taskId);
+        revalidatePath('/tasks');
+        revalidateTag('tasks');
+        revalidateTag('projects');
+    } catch (error) {
+        console.error("Error updating task:", error);
+    }
 }
 
 export async function deleteTask(formData: FormData) {
-    const { id } = Object.fromEntries(formData) as { id: string };
-    await db.delete(tasks).where(eq(tasks.id, parseInt(id, 10)));
-    revalidatePath('/tasks');
+    const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) {
+        return;
+    }
+
+    const id = formData.get('id');
+    if (!id) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                // @ts-expect-error accessToken is not in default session type
+                'Authorization': `Bearer ${session.user.accessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error("Failed to delete task:", await response.text());
+            return;
+        }
+
+        revalidatePath('/tasks');
+        revalidateTag('tasks');
+        revalidateTag('projects');
+    } catch (error) {
+        console.error("Error deleting task:", error);
+    }
 }
 
-export async function updateTaskStatus(taskId: number, status: Status) {
-    await db
-        .update(tasks)
-        .set({
-            status,
-            updatedAt: new Date().toISOString(),
-        })
-        .where(eq(tasks.id, taskId));
-    revalidatePath('/tasks');
+export async function updateTaskStatus(taskId: number, status: string) {
+     const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                // @ts-expect-error accessToken is not in default session type
+                'Authorization': `Bearer ${session.user.accessToken}`
+            },
+            body: JSON.stringify({ status })
+        });
+
+        if (!response.ok) {
+            console.error("Failed to update task status:", await response.text());
+            return;
+        }
+
+        revalidatePath('/tasks');
+        revalidateTag('tasks');
+        revalidateTag('projects');
+    } catch (error) {
+        console.error("Error updating task status:", error);
+    }
 }

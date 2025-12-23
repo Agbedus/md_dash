@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useLayoutEffect } from 'react';
 import { FiSearch, FiX, FiCheck, FiChevronDown } from 'react-icons/fi';
+import { Portal } from './portal';
 
 export interface ComboboxOption {
   value: string | number;
@@ -34,6 +35,35 @@ export function Combobox({
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
+
+  const updateCoords = () => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      updateCoords();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      window.addEventListener('scroll', updateCoords, true);
+      window.addEventListener('resize', updateCoords);
+    }
+    return () => {
+      window.removeEventListener('scroll', updateCoords, true);
+      window.removeEventListener('resize', updateCoords);
+    };
+  }, [isOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -113,14 +143,14 @@ export function Combobox({
       {/* Trigger */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full min-h-[38px] bg-zinc-900/50 border border-white/10 rounded-xl px-3 py-1.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer flex items-center justify-between gap-2"
+        className="w-full min-h-[34px] bg-zinc-900/50 border border-white/10 rounded-xl px-3 py-1.5 text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer flex items-center justify-between gap-2"
       >
         <div className="flex flex-wrap gap-1.5">
           {selectedOptions.length > 0 ? (
             selectedOptions.map((option) => (
               <span
                 key={option.value}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800 border border-white/10 text-xs text-zinc-200"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800 border border-white/10 text-[10px] text-zinc-200"
               >
                 {option.label}
                 <button
@@ -139,56 +169,64 @@ export function Combobox({
         <FiChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </div>
 
-      {/* Dropdown */}
+      {/* Dropdown in Portal */}
       {isOpen && (
-        <div
-          ref={dropdownRef}
-          className="absolute z-50 w-full mt-1 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100"
-        >
-          <div className="p-2 border-b border-white/5">
-            <div className="relative">
-              <FiSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 w-3.5 h-3.5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={searchPlaceholder}
-                className="w-full bg-zinc-800/50 border border-white/5 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:bg-zinc-800 transition-colors"
-                autoFocus
-              />
+        <Portal>
+          <div
+            ref={dropdownRef}
+            style={{
+              position: 'fixed',
+              top: `${coords.top + 4}px`,
+              left: `${coords.left}px`,
+              width: `${coords.width}px`,
+            }}
+            className="z-[9999] bg-zinc-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+          >
+            <div className="p-2 border-b border-white/5">
+              <div className="relative">
+                <FiSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 w-3.5 h-3.5" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="w-full bg-zinc-800/50 border border-white/5 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:bg-zinc-800 transition-colors"
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-48 overflow-y-auto p-1">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => {
+                  const isSelected = multiple
+                    ? (Array.isArray(value) && value.includes(option.value))
+                    : value === option.value;
+
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => handleSelect(option.value)}
+                      className={`w-full text-left px-3 py-1.5 rounded-lg text-xs flex items-center justify-between group transition-colors ${
+                        isSelected ? 'bg-indigo-500/10 text-indigo-400' : 'text-zinc-300 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      <div>
+                        <div className="font-medium text-xs text-white">{option.label}</div>
+                        {option.subLabel && <div className="text-[9px] text-zinc-500 group-hover:text-zinc-400">{option.subLabel}</div>}
+                      </div>
+                      {isSelected && <FiCheck className="w-4 h-4" />}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="px-3 py-4 text-center text-xs text-zinc-500 italic">
+                  No results found
+                </div>
+              )}
             </div>
           </div>
-          <div className="max-h-48 overflow-y-auto p-1">
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => {
-                const isSelected = multiple
-                  ? (Array.isArray(value) && value.includes(option.value))
-                  : value === option.value;
-
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => handleSelect(option.value)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center justify-between group transition-colors ${
-                      isSelected ? 'bg-indigo-500/10 text-indigo-400' : 'text-zinc-300 hover:bg-white/5 hover:text-white'
-                    }`}
-                  >
-                    <div>
-                      <div className="font-medium">{option.label}</div>
-                      {option.subLabel && <div className="text-[10px] text-zinc-500 group-hover:text-zinc-400">{option.subLabel}</div>}
-                    </div>
-                    {isSelected && <FiCheck className="w-4 h-4" />}
-                  </button>
-                );
-              })
-            ) : (
-              <div className="px-3 py-4 text-center text-xs text-zinc-500 italic">
-                No results found
-              </div>
-            )}
-          </div>
-        </div>
+        </Portal>
       )}
     </div>
   );
