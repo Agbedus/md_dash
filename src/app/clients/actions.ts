@@ -93,7 +93,7 @@ export async function createClient(formData: FormData) {
         }
 
         revalidatePath('/clients');
-        revalidateTag('clients');
+        revalidateTag('clients', 'max');
         return { success: true };
     } catch (error) {
         console.error("Error creating client:", error);
@@ -140,7 +140,7 @@ export async function updateClient(formData: FormData) {
         }
 
         revalidatePath('/clients');
-        revalidateTag('clients');
+        revalidateTag('clients', 'max');
     } catch (error) {
         console.error("Error updating client:", error);
     }
@@ -172,7 +172,7 @@ export async function deleteClient(formData: FormData) {
         }
 
         revalidatePath('/clients');
-        revalidateTag('clients');
+        revalidateTag('clients', 'max');
     } catch (error) {
         console.error("Error deleting client:", error);
     }

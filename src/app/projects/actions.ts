@@ -200,8 +200,8 @@ export async function createProject(formData: FormData) {
         }
 
         revalidatePath('/projects');
-        revalidateTag('projects');
-        revalidateTag('tasks');
+        revalidateTag('projects', 'max');
+        revalidateTag('tasks', 'max');
         return { success: true };
     } catch (error) {
         console.error("Error creating project:", error);
@@ -269,8 +269,8 @@ export async function updateProject(formData: FormData) {
         }
 
         revalidatePath('/projects');
-        revalidateTag('projects');
-        revalidateTag('tasks');
+        revalidateTag('projects', 'max');
+        revalidateTag('tasks', 'max');
     } catch (error) {
         console.error("Error updating project:", error);
     }
@@ -302,8 +302,8 @@ export async function deleteProject(formData: FormData) {
         }
 
         revalidatePath('/projects');
-        revalidateTag('projects');
-        revalidateTag('tasks');
+        revalidateTag('projects', 'max');
+        revalidateTag('tasks', 'max');
     } catch (error) {
         console.error("Error deleting project:", error);
     }

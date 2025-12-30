@@ -34,7 +34,7 @@ export async function updateUser(formData: FormData) {
         }
 
         revalidatePath('/users');
-        revalidateTag('users');
+        revalidateTag('users', 'max');
     } catch (error) {
         console.error("Error updating user:", error);
     }
@@ -62,7 +62,7 @@ export async function deleteUser(formData: FormData) {
         }
 
         revalidatePath('/users');
-        revalidateTag('users');
+        revalidateTag('users', 'max');
     } catch (error) {
         console.error("Error deleting user:", error);
     }

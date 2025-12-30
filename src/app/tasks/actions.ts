@@ -155,8 +155,8 @@ export async function createTask(formData: FormData) {
         }
 
         revalidatePath('/tasks');
-        revalidateTag('tasks');
-        revalidateTag('projects');
+        revalidateTag('tasks', 'max');
+        revalidateTag('projects', 'max');
         return { success: true };
     } catch (error) {
         console.error("Error creating task:", error);
@@ -219,8 +219,8 @@ export async function updateTask(formData: FormData) {
 
         console.log("updateTask: Successfully updated task", taskId);
         revalidatePath('/tasks');
-        revalidateTag('tasks');
-        revalidateTag('projects');
+        revalidateTag('tasks', 'max');
+        revalidateTag('projects', 'max');
     } catch (error) {
         console.error("Error updating task:", error);
     }
@@ -252,8 +252,8 @@ export async function deleteTask(formData: FormData) {
         }
 
         revalidatePath('/tasks');
-        revalidateTag('tasks');
-        revalidateTag('projects');
+        revalidateTag('tasks', 'max');
+        revalidateTag('projects', 'max');
     } catch (error) {
         console.error("Error deleting task:", error);
     }
@@ -283,8 +283,8 @@ export async function updateTaskStatus(taskId: number, status: string) {
         }
 
         revalidatePath('/tasks');
-        revalidateTag('tasks');
-        revalidateTag('projects');
+        revalidateTag('tasks', 'max');
+        revalidateTag('projects', 'max');
     } catch (error) {
         console.error("Error updating task status:", error);
     }

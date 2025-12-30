@@ -10,7 +10,9 @@ import { getTasks } from '@/app/tasks/actions';
 import type { Note } from "@/types/note";
 import type { Task } from "@/types/task";
 import NoteCard from './note-card';
-import NoteFormModal from './NoteFormModal';
+import dynamic from 'next/dynamic';
+
+const NoteFormModal = dynamic(() => import('./NoteFormModal'), { ssr: false });
 
 type ViewMode = 'grid' | 'table';
 const noteTypes: Note['type'][] = ['note', 'checklist', 'todo', 'journal', 'meeting', 'idea', 'link', 'code', 'bookmark', 'sketch'];
@@ -123,10 +125,10 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                     content,
                     type,
                     taskId,
-                    tags: '[]',
-                    isPinned: 0,
-                    isArchived: 0,
-                    isFavorite: 0,
+                    tags: [],
+                    isPinned: false,
+                    isArchived: false,
+                    isFavorite: false,
                     userId: 'me', // placeholder
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
@@ -155,9 +157,9 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
         if (existing) {
             const updated: Note = {
                 ...existing,
-                isPinned: formData.has('is_pinned') ? (formData.get('is_pinned') === '1' ? 1 : 0) : existing.isPinned,
-                isArchived: formData.has('is_archived') ? (formData.get('is_archived') === '1' ? 1 : 0) : existing.isArchived,
-                isFavorite: formData.has('is_favorite') ? (formData.get('is_favorite') === '1' ? 1 : 0) : existing.isFavorite,
+                isPinned: formData.has('is_pinned') ? formData.get('is_pinned') === '1' : existing.isPinned,
+                isArchived: formData.has('is_archived') ? formData.get('is_archived') === '1' : existing.isArchived,
+                isFavorite: formData.has('is_favorite') ? formData.get('is_favorite') === '1' : existing.isFavorite,
             };
             addOptimisticNote({ type: 'update', note: updated });
         }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { FiCheck, FiX, FiImage } from 'react-icons/fi';
+import { FiCheck, FiX, FiImage, FiStar, FiMapPin, FiArchive } from 'react-icons/fi';
 import type { Note } from '@/types/note';
 
 // Import Quill and styles
@@ -32,6 +32,10 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
      const [typeVal, setTypeVal] = useState<Note['type'] | ''>('note');
      const [noteId, setNoteId] = useState<string>('');
      const [taskId, setTaskId] = useState<string>('');
+     const [tags, setTags] = useState<string>('');
+     const [isPinned, setIsPinned] = useState(false);
+     const [isFavorite, setIsFavorite] = useState(false);
+     const [isArchived, setIsArchived] = useState(false);
 
     // Initialize Quill once when the component mounts and keep it mounted so content persists
     useEffect(() => {
@@ -68,6 +72,23 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
             setTypeVal(initialNote.type || 'note');
             setTaskId(initialNote.taskId ? String(initialNote.taskId) : '');
             setNoteId(String(initialNote.id));
+            
+            // Robust tag initialization
+            let initialTags = '';
+            if (Array.isArray(initialNote.tags)) {
+                initialTags = initialNote.tags.join(', ');
+            } else if (typeof initialNote.tags === 'string') {
+                try {
+                    const parsed = JSON.parse(initialNote.tags);
+                    initialTags = Array.isArray(parsed) ? parsed.join(', ') : initialNote.tags;
+                } catch {
+                    initialTags = initialNote.tags;
+                }
+            }
+            setTags(initialTags);
+            setIsPinned(initialNote.isPinned || false);
+            setIsFavorite(initialNote.isFavorite || false);
+            setIsArchived(initialNote.isArchived || false);
             if (quillRef.current) {
                 quillRef.current.clipboard.dangerouslyPasteHTML(initialNote.content || '');
             }
@@ -78,6 +99,10 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
             setTypeVal('note');
             setNoteId('');
             setTaskId('');
+            setTags('');
+            setIsPinned(false);
+            setIsFavorite(false);
+            setIsArchived(false);
             if (quillRef.current) {
                 quillRef.current.setContents([]);
             }
@@ -160,6 +185,32 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                                     <option key={task.id} value={task.id}>{task.name}</option>
                                 ))}
                             </select>
+                            <div className="flex items-center space-x-3 text-slate-400">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsPinned(!isPinned)}
+                                    className={`p-1.5 rounded-md transition-colors ${isPinned ? 'text-blue-400 bg-blue-400/10' : 'hover:bg-slate-800'}`}
+                                    title="Pin note"
+                                >
+                                    <FiMapPin className={isPinned ? 'fill-current' : ''} />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsFavorite(!isFavorite)}
+                                    className={`p-1.5 rounded-md transition-colors ${isFavorite ? 'text-yellow-400 bg-yellow-400/10' : 'hover:bg-slate-800'}`}
+                                    title="Favorite note"
+                                >
+                                    <FiStar className={isFavorite ? 'fill-current' : ''} />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsArchived(!isArchived)}
+                                    className={`p-1.5 rounded-md transition-colors ${isArchived ? 'text-zinc-400 bg-zinc-400/10' : 'hover:bg-slate-800'}`}
+                                    title="Archive note"
+                                >
+                                    <FiArchive className={isArchived ? 'fill-current' : ''} />
+                                </button>
+                            </div>
                         </div>
                         <div className="flex items-center space-x-2">
                             <button
@@ -192,10 +243,22 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                             className="text-3xl font-bold w-full bg-transparent pb-4 text-white focus:outline-none"
                             required
                         />
+                        <input
+                            type="text"
+                            name="tags"
+                            id="tags"
+                            placeholder="Add tags (comma separated)..."
+                            value={tags}
+                            onChange={(e) => setTags(e.target.value)}
+                            className="text-sm w-full bg-transparent pb-4 text-zinc-400 focus:outline-none italic"
+                        />
                         <div ref={editorContainerRef} id="quill-editor" className="min-h-[14rem]" />
                         {/* id hidden field will be set when editing an existing note via initialNote */}
                         <input type="hidden" name="content" value="" />
                         <input type="hidden" name="id" value={noteId} />
+                        <input type="hidden" name="is_pinned" value={isPinned ? '1' : '0'} />
+                        <input type="hidden" name="is_favorite" value={isFavorite ? '1' : '0'} />
+                        <input type="hidden" name="is_archived" value={isArchived ? '1' : '0'} />
                         {noteId ? <input type="hidden" name="_editing" value="1" /> : null}
                      </div>
 

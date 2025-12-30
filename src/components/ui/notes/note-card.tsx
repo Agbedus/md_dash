@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import type { Note } from "@/types/note";
 import 'quill/dist/quill.snow.css';
-import { FiEdit2, FiTrash2, FiFileText, FiCheckSquare, FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiUserPlus } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiFileText, FiCheckSquare, FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiUserPlus, FiLayers, FiClock } from "react-icons/fi";
 
 import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 
@@ -138,30 +138,67 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
     };
     
 
-    // Safely parse tags (accept null/undefined, malformed JSON or already-comma separated string)
-    const parseTags = (raw?: string | null) => {
-        if (!raw) return [];
-        try {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) return parsed;
-            if (typeof parsed === 'string') return parsed.split(',').map(s => s.trim()).filter(Boolean);
-            return [];
-        } catch {
-            // not JSON — try comma-separated fallback
-            return raw.split?.(',').map((s: string) => s.trim()).filter(Boolean) ?? [];
+    // Defensive tag parsing to handle arrays, JSON strings, or comma-separated lists
+    const getNoteTags = () => {
+        if (!note.tags) return [];
+        
+        // If it's already an array, return it
+        if (Array.isArray(note.tags)) return note.tags;
+
+        // If it's a string, try to parse as JSON or split by comma
+        if (typeof note.tags === 'string') {
+            try {
+                const parsed = JSON.parse(note.tags);
+                if (Array.isArray(parsed)) return parsed;
+                if (typeof parsed === 'object' && parsed !== null) {
+                    return Object.values(parsed).map(String).filter(Boolean);
+                }
+            } catch {
+                return (note.tags as unknown as string).split(',').map((t: string) => t.trim()).filter(Boolean);
+            }
         }
+
+        // If it's an object (but not an array), try to get its values
+        if (typeof note.tags === 'object' && note.tags !== null) {
+            return Object.values(note.tags).map(String).filter(Boolean);
+        }
+
+        return [];
     };
-    const noteTags = parseTags(note.tags);
+    const noteTags = getNoteTags();
+    
+    // Debug log for tags - remove after verification
+    if (note.tags && noteTags.length === 0) {
+        console.log(`Note [${note.id}] has tags but they failed to parse:`, note.tags);
+    }
     const TypeIcon = noteTypeIcons[note.type] || FiFileText;
     const typeIconColorClass = noteTypeColors[note.type] || 'text-zinc-400';
 
     const renderContent = (content: string) => {
         const sanitized = sanitizeHtml(content);
-        if (!searchQuery) {
+        if (!searchQuery || typeof window === 'undefined') {
             return sanitized;
         }
-        const regex = new RegExp(`(${searchQuery})`, 'gi');
-        return sanitized.replace(regex, `<mark class="bg-yellow-300 text-black">$1</mark>`);
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(sanitized, 'text/html');
+        const highlightRegex = new RegExp(`(${searchQuery})`, 'gi');
+
+        const walk = (node: Node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.textContent || '';
+                if (highlightRegex.test(text)) {
+                    const span = document.createElement('span');
+                    span.innerHTML = text.replace(highlightRegex, '<mark class="bg-yellow-300 text-black">$1</mark>');
+                    node.parentNode?.replaceChild(span, node);
+                }
+            } else {
+                Array.from(node.childNodes).forEach(walk);
+            }
+        };
+
+        walk(doc.body);
+        return doc.body.innerHTML;
     };
 
     if (viewMode === 'grid') {
@@ -177,31 +214,19 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
                                     {note.owner.name.charAt(0).toUpperCase()}
                                 </div>
                             ) : null}
-                            <h3 className="font-bold text-xl text-white tracking-tight">
-                                <TextHighlight text={note.title} highlight={searchQuery} />
-                            </h3>
-                        </div>
-                        {note.sharedWith && note.sharedWith.length > 0 && (
-                            <div className="flex items-center gap-1 ml-8">
-                                <span className="text-xs text-zinc-500">Shared with:</span>
-                                <div className="flex -space-x-2">
-                                    {note.sharedWith.slice(0, 3).map((user, idx) => (
-                                        user.image ? (
-                                            <Image key={idx} src={user.image} alt={user.name || user.email || 'User'} width={20} height={20} className="rounded-full border-2 border-slate-900" title={user.name || user.email || ''} />
-                                        ) : (
-                                            <div key={idx} className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-300 flex items-center justify-center text-[10px] font-bold border-2 border-slate-900" title={user.name || user.email || ''}>
-                                                {(user.name || user.email || '?').charAt(0).toUpperCase()}
-                                            </div>
-                                        )
-                                    ))}
-                                    {note.sharedWith.length > 3 && (
-                                        <div className="w-5 h-5 rounded-full bg-zinc-700 text-zinc-300 flex items-center justify-center text-[10px] font-bold border-2 border-slate-900">
-                                            +{note.sharedWith.length - 3}
-                                        </div>
-                                    )}
-                                </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                                <h3 className="font-bold text-xl text-white tracking-tight truncate">
+                                    <TextHighlight text={note.title} highlight={searchQuery} />
+                                </h3>
+                                {note.taskId && (
+                                    <FiLayers className="text-purple-400 flex-shrink-0" size={16} title="Associated with a task" />
+                                )}
                             </div>
-                        )}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 ml-8">
+                            <FiClock size={10} />
+                            <span>{note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : note.createdAt ? new Date(note.createdAt).toLocaleDateString() : 'No date'}</span>
+                        </div>
                     </div>
                     <div className="flex items-center gap-2">
                         {onToggleExpand && (
@@ -233,9 +258,30 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
                         ))}
                     </div>
                     <div className="flex items-center justify-between">
-                         <span className={`px-2.5 py-1 inline-flex text-xs font-medium rounded-full ${priorityBgColorClass(note.priority)} ${priorityTextColorClass(note.priority)}`}>
-                            {formatPriority(note.priority)}
-                        </span>
+                        <div className="flex items-center gap-4">
+                            <span className={`px-2.5 py-1 inline-flex text-xs font-medium rounded-full ${priorityBgColorClass(note.priority)} ${priorityTextColorClass(note.priority)}`}>
+                                {formatPriority(note.priority)}
+                            </span>
+                            
+                            {note.sharedWith && note.sharedWith.length > 0 && (
+                                <div className="flex -space-x-2">
+                                    {note.sharedWith.slice(0, 3).map((user, idx) => (
+                                        user.image ? (
+                                            <Image key={idx} src={user.image} alt={user.name || user.email || 'User'} width={20} height={20} className="rounded-full border-2 border-slate-900" title={user.name || user.email || ''} />
+                                        ) : (
+                                            <div key={idx} className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-300 flex items-center justify-center text-[10px] font-bold border-2 border-slate-900" title={user.name || user.email || ''}>
+                                                {(user.name || user.email || '?').charAt(0).toUpperCase()}
+                                            </div>
+                                        )
+                                    ))}
+                                    {note.sharedWith.length > 3 && (
+                                        <div className="w-5 h-5 rounded-full bg-zinc-700 text-zinc-300 flex items-center justify-center text-[10px] font-bold border-2 border-slate-900">
+                                            +{note.sharedWith.length - 3}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                         <div className="flex items-center space-x-2">
                             <div className="relative" ref={dropdownRef}>
                                 <button 

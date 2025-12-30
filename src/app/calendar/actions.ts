@@ -108,7 +108,7 @@ export async function createEvent(formData: FormData) {
 
     if (response.ok) {
         revalidatePath('/calendar');
-        revalidateTag('events');
+        revalidateTag('events', 'max');
     }
   } catch (error) {
     console.error("Error creating event:", error);
@@ -143,7 +143,7 @@ export async function updateEvent(formData: FormData) {
 
     if (response.ok) {
         revalidatePath('/calendar');
-        revalidateTag('events');
+        revalidateTag('events', 'max');
     }
   } catch (error) {
     console.error("Error updating event:", error);
@@ -166,7 +166,7 @@ export async function deleteEvent(id: string | number) {
 
     if (response.ok) {
         revalidatePath('/calendar');
-        revalidateTag('events');
+        revalidateTag('events', 'max');
     }
   } catch (error) {
     console.error("Error deleting event:", error);

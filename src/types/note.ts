@@ -4,13 +4,13 @@ export type Note = {
   content: string;
 
   type: 'note' | 'checklist' | 'todo' | 'journal' | 'meeting' | 'idea' | 'link' | 'code' | 'bookmark' | 'sketch';
-  tags?: string | null; // JSON string array
+  tags: string[];
   notebook?: string | null;
   color?: string | null;
 
-  isPinned: number;   // 0 | 1
-  isArchived: number; // 0 | 1
-  isFavorite: number; // 0 | 1
+  isPinned: boolean;
+  isArchived: boolean;
+  isFavorite: boolean;
 
   coverImage?: string | null;
   links?: string | null;        // JSON string array
