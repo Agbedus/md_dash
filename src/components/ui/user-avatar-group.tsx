@@ -6,9 +6,11 @@ interface UserLike {
     id?: string | number;
     name?: string | null;
     fullName?: string | null;
+    full_name?: string | null;
     email?: string | null;
     image?: string | null;
     avatarUrl?: string | null;
+    avatar_url?: string | null;
 }
 
 interface UserAvatarGroupProps {
@@ -46,8 +48,8 @@ export default function UserAvatarGroup({ users, limit = 3, size = 'md' }: UserA
     return (
         <div className="flex -space-x-2">
             {displayUsers.map((user, index) => {
-                const name = user.name || user.fullName || 'User';
-                const image = user.image || user.avatarUrl;
+                const name = user.name || user.fullName || user.full_name || 'User';
+                const image = user.avatar_url || user.avatarUrl || user.image;
                 const initials = (name || '?').charAt(0).toUpperCase();
 
                 return (
@@ -88,16 +90,16 @@ export default function UserAvatarGroup({ users, limit = 3, size = 'md' }: UserA
                     >
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">
-                                {hoveredUser.image || hoveredUser.avatarUrl ? (
-                                    <Image src={hoveredUser.image || hoveredUser.avatarUrl || ''} alt={hoveredUser.name || ''} fill className="object-cover" />
+                                {hoveredUser.avatar_url || hoveredUser.avatarUrl || hoveredUser.image ? (
+                                    <Image src={hoveredUser.avatar_url || hoveredUser.avatarUrl || hoveredUser.image || ''} alt={hoveredUser.name || ''} fill className="object-cover" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-emerald-400 bg-emerald-500/10">
-                                        {(hoveredUser.name || hoveredUser.fullName || '?').charAt(0).toUpperCase()}
+                                        {(hoveredUser.name || hoveredUser.fullName || hoveredUser.full_name || '?').charAt(0).toUpperCase()}
                                     </div>
                                 )}
                             </div>
                             <div className="min-w-0">
-                                <p className="text-xs font-semibold text-white truncate">{hoveredUser.name || hoveredUser.fullName}</p>
+                                <p className="text-xs font-semibold text-white truncate">{hoveredUser.name || hoveredUser.fullName || hoveredUser.full_name}</p>
                                 {hoveredUser.email && <p className="text-[10px] text-zinc-500 truncate">{hoveredUser.email}</p>}
                             </div>
                         </div>

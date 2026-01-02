@@ -103,8 +103,10 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
             const formId = formData.get('id');
             const title = formData.get('title') as string;
             const content = formData.get('content') as string;
+
             const type = formData.get('type') as Note['type'];
-            const taskId = formData.get('taskId') ? Number(formData.get('taskId')) : null;
+            const tags = (formData.get('tags') as string) || '';
+            const task_id = formData.get('task_id') ? Number(formData.get('task_id')) : null;
 
             if (isEditingFlag || formId || editing) {
                 const id = Number(formId || editing?.id);
@@ -113,8 +115,9 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                     title,
                     content,
                     type,
-                    taskId,
-                    updatedAt: new Date().toISOString()
+                    task_id,
+                    tags,
+                    updated_at: new Date().toISOString()
                 };
                 addOptimisticNote({ type: 'update', note: updatedNote });
                 await updateNote(formData);
@@ -124,15 +127,16 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                     title,
                     content,
                     type,
-                    taskId,
-                    tags: [],
-                    isPinned: false,
-                    isArchived: false,
-                    isFavorite: false,
-                    userId: 'me', // placeholder
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
+                    task_id,
+                    tags,
+                    is_pinned: 0,
+                    is_archived: 0,
+                    is_favorite: 0,
+                    user_id: 'me', // placeholder
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
                 };
+
                 addOptimisticNote({ type: 'add', note: newNote });
                 await createNote(formData);
             }
@@ -150,17 +154,24 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
             setAllNotes(notes);
         }
     };
-
     const handleUpdate = async (formData: FormData) => {
         const id = Number(formData.get('id'));
         const existing = allNotes.find(n => n.id === id);
         if (existing) {
             const updated: Note = {
                 ...existing,
-                isPinned: formData.has('is_pinned') ? formData.get('is_pinned') === '1' : existing.isPinned,
-                isArchived: formData.has('is_archived') ? formData.get('is_archived') === '1' : existing.isArchived,
-                isFavorite: formData.has('is_favorite') ? formData.get('is_favorite') === '1' : existing.isFavorite,
+                is_pinned: formData.has('is_pinned') ? (formData.get('is_pinned') === '1' ? 1 : 0) : existing.is_pinned,
+                is_archived: formData.has('is_archived') ? (formData.get('is_archived') === '1' ? 1 : 0) : existing.is_archived,
+                is_favorite: formData.has('is_favorite') ? (formData.get('is_favorite') === '1' ? 1 : 0) : existing.is_favorite,
             };
+
+            if (formData.has('shared_with')) {
+                try {
+                    const sw = JSON.parse(formData.get('shared_with') as string);
+                    updated.shared_with = sw;
+                } catch {}
+            }
+
             addOptimisticNote({ type: 'update', note: updated });
         }
 
@@ -201,22 +212,7 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
         }
     };
 
-    const handleAddUser = async (noteId: number, userEmail: string) => {
-        setErrorMsg(null);
-        try {
-            const fd = new FormData();
-            fd.append('noteId', String(noteId));
-            fd.append('email', userEmail);
-            await shareNote(fd);
-            const notes = (await getNotes()) as Note[];
-            startTransition(() => {
-                setAllNotes(notes);
-            });
-        } catch (err) {
-            console.error(err);
-            setErrorMsg('Could not add user to note. Please try again.');
-        }
-    };
+
 
     const filteredNotes = useMemo(() => {
         let notes = optimisticNotes;
@@ -322,7 +318,6 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                                         onNoteUpdate={handleUpdate} 
                                         onNoteDelete={handleDelete} 
                                         onEdit={(n)=>{ setEditingNote(n); setIsModalOpen(true); }} 
-                                        onAddUser={handleAddUser} 
                                         availableUsers={availableUsers} 
                                         viewMode="grid" 
                                         searchQuery={searchQuery}
@@ -348,7 +343,7 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                             </thead>
                             <tbody className="divide-y divide-white/5">
                                 {filteredNotes.map((note) => (
-                                    <NoteCard key={note.id} note={note} onNoteUpdate={handleUpdate} onNoteDelete={handleDelete} onEdit={(n)=>{ setEditingNote(n); setIsModalOpen(true); }} onAddUser={handleAddUser} availableUsers={availableUsers} viewMode="table" searchQuery={searchQuery} />
+                                    <NoteCard key={note.id} note={note} onNoteUpdate={handleUpdate} onNoteDelete={handleDelete} onEdit={(n)=>{ setEditingNote(n); setIsModalOpen(true); }} availableUsers={availableUsers} viewMode="table" searchQuery={searchQuery} />
                                 ))}
                             </tbody>
                         </table>

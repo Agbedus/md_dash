@@ -714,7 +714,7 @@ Notes support ownership and sharing with other users.
 
 Base path: `/api/v1/events`
 
-Events are shared calendar resources. All users can view, but only admins can modify.
+Events are shared calendar resources. All users can view, but only creators or admins can modify.
 
 #### List Events
 
@@ -739,20 +739,27 @@ Events are shared calendar resources. All users can view, but only admins can mo
     "organizer": "manager@example.com",
     "attendees": "[\"user1@example.com\", \"user2@example.com\"]",
     "status": "confirmed",
-    "privacy": "public"
+    "privacy": "public",
+    "color": "#6366f1",
+    "user_id": "creator-uuid",
+    "created_at": "2025-01-20T10:00:00Z",
+    "updated_at": "2025-01-20T10:00:00Z"
   }
 ]
 ```
 
-**Field Reference:**
+**Field Reference:** (Note: `status`, `privacy`, and `recurrence` are case-insensitive)
 
 - `start` / `end`: ISO 8601 datetime strings (required)
 - `all_day`: 0 (time-specific) or 1 (all-day event)
 - `status`: `"tentative"`, `"confirmed"`, `"cancelled"`
 - `privacy`: `"public"`, `"private"`, `"confidential"`
-- `attendees`: JSON string array
-- `recurrence`: RRULE format for repeating events
-- `reminders`: JSON array of reminder configurations
+- `attendees`: JSON array of email strings (e.g., `["user1@example.com", "user2@example.com"]`)
+- `recurrence`: `"none"`, `"daily"`, `"weekly"`, `"monthly"`, `"yearly"`
+- `reminders`: JSON array of EventReminder objects `{ days, hours, minutes }`
+- `color`: HEX color string (e.g., `"#6366f1"`)
+- `user_id`: UUID of the event creator
+- `created_at` / `updated_at`: ISO 8601 timestamp strings
 
 #### Get Event
 
@@ -769,9 +776,15 @@ Events are shared calendar resources. All users can view, but only admins can mo
     "all_day": 0,
     "location": "Zoom",
     "organizer": "manager@example.com",
-    "attendees": "[\"user1@example.com\", \"user2@example.com\"]",
+    "attendees": ["user1@example.com", "user2@example.com"],
     "status": "confirmed",
-    "privacy": "public"
+    "privacy": "public",
+    "recurrence": "none",
+    "reminders": [{ "days": 0, "hours": 0, "minutes": 15 }],
+    "color": "#6366f1",
+    "user_id": "creator-uuid",
+    "created_at": "2025-01-20T10:00:00Z",
+    "updated_at": "2025-01-20T10:00:00Z"
   }
   ```
 
@@ -787,9 +800,12 @@ Events are shared calendar resources. All users can view, but only admins can mo
     "start": "2025-01-25T14:00:00Z",
     "end": "2025-01-25T15:30:00Z",
     "location": "Conference Room A",
-    "attendees": "[\"client@acme.com\", \"sales@example.com\"]",
+    "attendees": ["client@acme.com", "sales@example.com"],
     "status": "confirmed",
-    "privacy": "private"
+    "privacy": "private",
+    "recurrence": "none",
+    "reminders": [{ "days": 1, "hours": 0, "minutes": 0 }],
+    "color": "#f43f5e"
   }
   ```
 - **Returns:** Created event object
@@ -797,7 +813,7 @@ Events are shared calendar resources. All users can view, but only admins can mo
 #### Update Event
 
 - **PATCH** `/api/v1/events/{event_id}`
-- **Auth Required:** Admin only
+- **Auth Required:** Yes (creator) or Admin
 - **Expected Payload:**
   ```json
   {
@@ -810,7 +826,7 @@ Events are shared calendar resources. All users can view, but only admins can mo
 #### Delete Event
 
 - **DELETE** `/api/v1/events/{event_id}`
-- **Auth Required:** Admin only
+- **Auth Required:** Yes (creator) or Admin
 - **Returns:** `{ status: "success", detail: "Event deleted" }`
 
 ---
@@ -953,7 +969,7 @@ These endpoints are restricted to Administrators and Super Administrators.
 | **Projects**  | Owner or Admin | All users | Owner or Admin          | Owner or Admin   |
 | **Tasks**     | All users      | All users | All users               | All users        |
 | **Notes**     | Owner or Admin | All users | Owner or Admin          | Owner or Admin   |
-| **Events**    | All users      | All users | Admin                   | Admin            |
+| **Events**    | All users      | All users | Creator or Admin        | Creator or Admin |
 | **Decisions** | Owner or Admin | All users | Owner or Admin          | Owner or Admin   |
 
 ---
@@ -1073,4 +1089,4 @@ For additional support or questions:
 3. Contact the backend team
 
 **API Version:** 1.0.0  
-**Last Updated:** December 22, 2025
+**Last Updated:** December 31, 2025

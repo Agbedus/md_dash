@@ -226,15 +226,21 @@ export async function updateTask(formData: FormData) {
     }
 }
 
-export async function deleteTask(formData: FormData) {
+export async function deleteTask(input: FormData | string | number) {
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
         return;
     }
 
-    const id = formData.get('id');
-    if (!id) return;
+    let id: string | number;
+    if (input instanceof FormData) {
+        const formDataId = input.get('id');
+        if (!formDataId) return;
+        id = formDataId as string;
+    } else {
+        id = input;
+    }
 
     try {
         const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {

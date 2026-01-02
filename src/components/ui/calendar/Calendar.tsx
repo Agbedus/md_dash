@@ -9,10 +9,10 @@ import DayGrid from "./DayGrid";
 
 import EventModal from "./EventModal";
 import EventDetailModal from "./EventDetailModal";
-import { getEvents } from "@/app/calendar/actions";
+import { getEvents, deleteEvent } from "@/app/calendar/actions";
+import { getTasks, deleteTask } from "@/app/tasks/actions";
 
-// Shape of rows returned by GET /api/tasks
-
+// Shape of rows returned by GET /api/tasks (simplified for internal use or imported if needed)
 type TaskRow = {
   id: number;
   name: string;
@@ -25,7 +25,7 @@ type TaskRow = {
 };
 
 // UI-level event that may include task metadata
-type UICalendarEvent = CalendarEvent & { isTask?: boolean; taskStatus?: "pending" | "in_progress" | "completed" };
+type UICalendarEvent = CalendarEvent;
 
 interface CalendarProps {
   initialDate?: Date;
@@ -85,12 +85,10 @@ export default function Calendar({ initialDate, initialView = "month", events = 
 
   const loadEvents = useCallback(async () => {
     try {
-      const [eventsData, taskRes] = await Promise.all([
+      const [eventsData, tasksData] = await Promise.all([
         getEvents(),
-        fetch("/api/tasks", { cache: "no-store" }),
+        getTasks(),
       ]);
-      if (!taskRes.ok) throw new Error("Failed to load tasks");
-      const tasksData: TaskRow[] = await taskRes.json();
 
       const mappedEvents: UICalendarEvent[] = eventsData.map((ev) => ({
           ...ev,
@@ -106,7 +104,7 @@ export default function Calendar({ initialDate, initialView = "month", events = 
           // place at 09:00 local for visibility
           const start = new Date(due.getFullYear(), due.getMonth(), due.getDate(), 9, 0, 0, 0);
           const statusMap: UICalendarEvent["taskStatus"] =
-            t.status === "in_progress" ? "in_progress" : t.status === "completed" ? "completed" : "pending";
+            t.status === "in_progress" ? "in_progress" : t.status === "completed" ? "completed" : "task";
           const color =
             statusMap === "completed" ? "bg-emerald-400" : statusMap === "in_progress" ? "bg-amber-400" : "bg-sky-400";
           return {
@@ -149,13 +147,10 @@ export default function Calendar({ initialDate, initialView = "month", events = 
         if (e.isTask || String(e.id).startsWith("task-")) {
           // extract numeric id for tasks
           const idStr = String(e.id).replace(/^task-/, "");
-          const res = await fetch(`/api/tasks/${idStr}`, { method: "DELETE" });
-          if (!res.ok) throw new Error("Failed to delete task");
+          await deleteTask(idStr);
         } else {
-          const res = await fetch(`/api/events/${e.id}`, { method: "DELETE" });
-          if (!res.ok) throw new Error("Failed to delete event");
+          await deleteEvent(e.id);
         }
-        // Load tasks again is hard here since it's a raw fetch, but I'll skip it for now or assume loadEvents is called
         await loadEvents();
         if (selectedEvent && selectedEvent.id === e.id) setSelectedEvent(null);
       } catch (err) {
@@ -224,6 +219,7 @@ export default function Calendar({ initialDate, initialView = "month", events = 
 
         <EventDetailModal
           event={selectedEvent}
+          open={!!selectedEvent}
           onClose={() => setSelectedEvent(null)}
           onUpdated={async () => {
             await loadEvents();

@@ -16,11 +16,11 @@ interface ApiEvent {
     all_day: number;
     location: string | null;
     organizer: string | null;
-    attendees: string | null;
+    attendees: string[] | string | null;
     status: "tentative" | "confirmed" | "cancelled" | null;
     privacy: "public" | "private" | "confidential" | null;
-    recurrence: string | null;
-    reminders: string | null;
+    recurrence: "none" | "daily" | "weekly" | "monthly" | "yearly" | null;
+    reminders: any[] | string | null;
     color: string | null;
     user_id: string;
     created_at: string;
@@ -28,6 +28,28 @@ interface ApiEvent {
 }
 
 function mapApiEvent(p: ApiEvent): CalendarEvent {
+    let parsedAttendees: string[] = [];
+    if (Array.isArray(p.attendees)) {
+        parsedAttendees = p.attendees;
+    } else if (typeof p.attendees === 'string') {
+        try {
+            parsedAttendees = JSON.parse(p.attendees);
+        } catch {
+            parsedAttendees = p.attendees.split(',').map(s => s.trim()).filter(Boolean);
+        }
+    }
+
+    let parsedReminders: any[] = [];
+    if (Array.isArray(p.reminders)) {
+        parsedReminders = p.reminders;
+    } else if (typeof p.reminders === 'string') {
+        try {
+            parsedReminders = JSON.parse(p.reminders);
+        } catch {
+            parsedReminders = [];
+        }
+    }
+
     return {
         id: String(p.id),
         title: p.title,
@@ -37,11 +59,11 @@ function mapApiEvent(p: ApiEvent): CalendarEvent {
         allDay: p.all_day === 1,
         location: p.location ?? undefined,
         organizer: p.organizer ?? undefined,
-        attendees: p.attendees ? JSON.parse(p.attendees) : [],
-        status: p.status ?? undefined,
-        privacy: p.privacy ?? undefined,
-        recurrence: p.recurrence ?? undefined,
-        reminders: p.reminders ?? undefined,
+        attendees: parsedAttendees,
+        status: (p.status as any) ?? undefined,
+        privacy: (p.privacy as any) ?? undefined,
+        recurrence: (p.recurrence as any) ?? undefined,
+        reminders: parsedReminders,
         color: p.color ?? undefined,
         userId: p.user_id,
         createdAt: p.created_at,
@@ -58,13 +80,18 @@ export async function getEvents(): Promise<CalendarEvent[]> {
     const response = await fetch(`${API_BASE_URL}/events`, {
         method: 'GET',
         headers: {
+            'Content-Type': 'application/json',
             // @ts-expect-error accessToken is not in default session type
             'Authorization': `Bearer ${session.user.accessToken}`
         },
         next: { tags: ['events'], revalidate: 60 }
     });
 
-    if (!response.ok) return [];
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("getEvents: API error", response.status, errorText);
+        return [];
+    }
 
     const events: ApiEvent[] = await response.json();
     return events.map(mapApiEvent);
@@ -77,23 +104,50 @@ export async function getEvents(): Promise<CalendarEvent[]> {
 export async function createEvent(formData: FormData) {
   const session = await auth();
   // @ts-expect-error accessToken is not in default session type
-  if (!session?.user?.accessToken) return;
+  if (!session?.user?.accessToken) return { success: false, error: "Unauthorized" };
 
-  const payload = {
-    title: formData.get('title'),
-    description: formData.get('description'),
+  const payload: Record<string, any> = {
+    title: formData.get('title') || "Untitled Event",
+    description: formData.get('description') || null,
     start: formData.get('start'),
     end: formData.get('end'),
     all_day: formData.get('allDay') === 'true' ? 1 : 0,
-    location: formData.get('location'),
-    organizer: formData.get('organizer'),
-    attendees: formData.get('attendees'), // Assuming JSON string
-    status: formData.get('status'),
-    privacy: formData.get('privacy'),
-    recurrence: formData.get('recurrence'),
-    reminders: formData.get('reminders'),
-    color: formData.get('color'),
+    location: formData.get('location') || null,
+    organizer: formData.get('organizer') || null,
+    status: formData.get('status') || "tentative",
+    privacy: formData.get('privacy') || "public",
+    recurrence: formData.get('recurrence') || "none",
+    color: formData.get('color') || "#6366f1",
   };
+
+  const attendeesRaw = formData.get('attendees');
+  if (attendeesRaw) {
+    try {
+        // Parse the JSON string from FormData
+        const parsed = JSON.parse(attendeesRaw as string);
+        // Send as actual array, NOT stringified
+        payload.attendees = parsed;
+    } catch {
+        // Fallback: split by comma if not JSON, send as array
+        payload.attendees = (attendeesRaw as string).split(',').map(s => s.trim()).filter(Boolean);
+    }
+  } else {
+    payload.attendees = [];
+  }
+
+  const remindersRaw = formData.get('reminders');
+  if (remindersRaw) {
+    try {
+        const parsed = JSON.parse(remindersRaw as string);
+        payload.reminders = parsed;
+    } catch {
+        payload.reminders = [];
+    }
+  } else {
+    payload.reminders = [];
+  }
+
+  console.log("createEvent: POST payload", JSON.stringify(payload, null, 2));
 
   try {
     const response = await fetch(`${API_BASE_URL}/events`, {
@@ -106,29 +160,69 @@ export async function createEvent(formData: FormData) {
         body: JSON.stringify(payload)
     });
 
-    if (response.ok) {
-        revalidatePath('/calendar');
-        revalidateTag('events', 'max');
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("createEvent: API error", response.status, errorText);
+        return { success: false, error: `API Error ${response.status}: ${errorText}` };
     }
+
+    revalidatePath('/calendar');
+    revalidateTag('events', 'max');
+    return { success: true };
   } catch (error) {
     console.error("Error creating event:", error);
+    return { success: false, error: "Network error creating event" };
   }
 }
 
 export async function updateEvent(formData: FormData) {
   const session = await auth();
   // @ts-expect-error accessToken is not in default session type
-  if (!session?.user?.accessToken) return;
+  if (!session?.user?.accessToken) return { success: false, error: "Unauthorized" };
 
   const id = formData.get('id');
-  if (!id) return;
+  if (!id) return { success: false, error: "Missing event ID" };
 
   const payload: Record<string, unknown> = {};
-  const fields = ['title', 'description', 'start', 'end', 'location', 'organizer', 'attendees', 'status', 'privacy', 'recurrence', 'reminders', 'color'];
+  const fields = ['title', 'description', 'start', 'end', 'location', 'organizer', 'status', 'privacy', 'recurrence', 'color'];
   fields.forEach(field => {
-    if (formData.has(field)) payload[field] = formData.get(field);
+    if (formData.has(field)) {
+      const val = formData.get(field);
+      // Only set if not empty string, or use explicit null if your API supports it. 
+      // Safest is typically to send empty string if that's what was in the form, 
+      // OR null if it's optional. Let's stick to null for empty optional text fields.
+      if (['description', 'location', 'organizer'].includes(field)) {
+         payload[field] = val ? val : null;
+      } else {
+         // for others like title, status, color, keep the value (or default if needed)
+         if (val) payload[field] = val;
+      }
+    }
   });
+  
   if (formData.has('allDay')) payload.all_day = formData.get('allDay') === 'true' ? 1 : 0;
+
+  if (formData.has('attendees')) {
+    const attendeesRaw = formData.get('attendees') as string;
+    try {
+        const parsed = JSON.parse(attendeesRaw);
+        payload.attendees = parsed;
+    } catch {
+        payload.attendees = attendeesRaw.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+
+  if (formData.has('reminders')) {
+    const remindersRaw = formData.get('reminders') as string;
+    try {
+        const parsed = JSON.parse(remindersRaw);
+        payload.reminders = parsed;
+    } catch {
+        payload.reminders = [];
+    }
+  }
+
+  console.log("updateEvent: PATCH payload", JSON.stringify(payload, null, 2));
 
   try {
     const response = await fetch(`${API_BASE_URL}/events/${id}`, {
@@ -141,12 +235,18 @@ export async function updateEvent(formData: FormData) {
         body: JSON.stringify(payload)
     });
 
-    if (response.ok) {
-        revalidatePath('/calendar');
-        revalidateTag('events', 'max');
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("updateEvent: API error", response.status, errorText);
+        return { success: false, error: `API Error ${response.status}: ${errorText}` };
     }
+
+    revalidatePath('/calendar');
+    revalidateTag('events', 'max');
+    return { success: true };
   } catch (error) {
     console.error("Error updating event:", error);
+    return { success: false, error: "Network error updating event" };
   }
 }
 
@@ -163,6 +263,11 @@ export async function deleteEvent(id: string | number) {
             'Authorization': `Bearer ${session.user.accessToken}`
         }
     });
+
+    if (!response.ok) {
+        console.error("deleteEvent: API error", response.status, await response.text());
+        return;
+    }
 
     if (response.ok) {
         revalidatePath('/calendar');

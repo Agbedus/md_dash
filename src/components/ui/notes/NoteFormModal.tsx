@@ -70,25 +70,15 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
             setTitle(initialNote.title || '');
             setPriority(initialNote.priority || 'low');
             setTypeVal(initialNote.type || 'note');
-            setTaskId(initialNote.taskId ? String(initialNote.taskId) : '');
+            setTaskId(initialNote.task_id ? String(initialNote.task_id) : '');
             setNoteId(String(initialNote.id));
             
-            // Robust tag initialization
-            let initialTags = '';
-            if (Array.isArray(initialNote.tags)) {
-                initialTags = initialNote.tags.join(', ');
-            } else if (typeof initialNote.tags === 'string') {
-                try {
-                    const parsed = JSON.parse(initialNote.tags);
-                    initialTags = Array.isArray(parsed) ? parsed.join(', ') : initialNote.tags;
-                } catch {
-                    initialTags = initialNote.tags;
-                }
-            }
-            setTags(initialTags);
-            setIsPinned(initialNote.isPinned || false);
-            setIsFavorite(initialNote.isFavorite || false);
-            setIsArchived(initialNote.isArchived || false);
+            // Tag initialization - now a simple string
+            setTags(initialNote.tags || '');
+            
+            setIsPinned(initialNote.is_pinned === 1);
+            setIsFavorite(initialNote.is_favorite === 1);
+            setIsArchived(initialNote.is_archived === 1);
             if (quillRef.current) {
                 quillRef.current.clipboard.dangerouslyPasteHTML(initialNote.content || '');
             }
@@ -147,18 +137,19 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
         <div className={`${visibilityClass} fixed z-50 right-6 bottom-6 pointer-events-none`} aria-hidden={!isOpen}>
             <div className="pointer-events-auto bg-slate-900 rounded-lg shadow-xl w-full max-w-xl max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
                 <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col h-full max-h-[80vh]">
-                    <div className="p-4 flex items-center justify-between border-b border-slate-800">
-                        <div className="flex items-center space-x-4">
+                    <div className="px-4 py-1.5 flex items-center justify-between border-b border-slate-800 bg-slate-900/50">
+                        {/* Group 1: Selections */}
+                        <div className="flex items-center gap-1.5">
                             <select
                                 name="priority"
                                 id="priority"
                                 value={priority || 'low'}
                                 onChange={(e) => setPriority(e.target.value as Note['priority'])}
-                                className="bg-slate-800 border border-slate-700 rounded-md px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="h-7 bg-slate-800 border border-slate-700 rounded-md px-1.5 py-0 text-[9px] uppercase font-bold tracking-wider text-white focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer hover:bg-slate-700 transition-colors"
                                 required
                             >
                                 <option value="low">Low</option>
-                                <option value="medium">Medium</option>
+                                <option value="medium">Med</option>
                                 <option value="high">High</option>
                             </select>
                             <select
@@ -166,67 +157,73 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                                 id="type"
                                 value={typeVal}
                                 onChange={(e) => setTypeVal(e.target.value as Note['type'])}
-                                className="bg-slate-800 border border-slate-700 rounded-md px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="h-7 bg-slate-800 border border-slate-700 rounded-md px-1.5 py-0 text-[9px] uppercase font-bold tracking-wider text-white focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer hover:bg-slate-700 transition-colors"
                                 required
                             >
                                 {noteTypes.map(type => (
-                                    <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
+                                    <option key={type} value={type}>{type.length > 5 ? type.slice(0, 4) + '.' : type}</option>
                                 ))}
                             </select>
                             <select
-                                name="taskId"
-                                id="taskId"
+                                name="task_id"
+                                id="task_id"
                                 value={taskId}
                                 onChange={(e) => setTaskId(e.target.value)}
-                                className="bg-slate-800 border border-slate-700 rounded-md px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[150px]"
+                                className="h-7 bg-slate-800 border border-slate-700 rounded-md px-1.5 py-0 text-[9px] uppercase font-bold tracking-wider text-white focus:outline-none focus:ring-1 focus:ring-purple-500 max-w-[100px] cursor-pointer hover:bg-slate-700 transition-colors"
                             >
                                 <option value="">No Task</option>
                                 {tasks?.map(task => (
                                     <option key={task.id} value={task.id}>{task.name}</option>
                                 ))}
                             </select>
-                            <div className="flex items-center space-x-3 text-slate-400">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsPinned(!isPinned)}
-                                    className={`p-1.5 rounded-md transition-colors ${isPinned ? 'text-blue-400 bg-blue-400/10' : 'hover:bg-slate-800'}`}
-                                    title="Pin note"
-                                >
-                                    <FiMapPin className={isPinned ? 'fill-current' : ''} />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsFavorite(!isFavorite)}
-                                    className={`p-1.5 rounded-md transition-colors ${isFavorite ? 'text-yellow-400 bg-yellow-400/10' : 'hover:bg-slate-800'}`}
-                                    title="Favorite note"
-                                >
-                                    <FiStar className={isFavorite ? 'fill-current' : ''} />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsArchived(!isArchived)}
-                                    className={`p-1.5 rounded-md transition-colors ${isArchived ? 'text-zinc-400 bg-zinc-400/10' : 'hover:bg-slate-800'}`}
-                                    title="Archive note"
-                                >
-                                    <FiArchive className={isArchived ? 'fill-current' : ''} />
-                                </button>
-                            </div>
                         </div>
-                        <div className="flex items-center space-x-2">
+
+                        {/* Group 2: Status */}
+                        <div className="flex items-center gap-1 p-0.5 bg-slate-800/50 rounded-lg border border-white/5 h-7">
+                            <button
+                                type="button"
+                                onClick={() => setIsPinned(!isPinned)}
+                                className={`h-full px-2 rounded-md transition-all ${isPinned ? 'text-blue-400 bg-blue-400/10' : 'text-slate-500 hover:text-slate-300'}`}
+                                title="Pin note"
+                            >
+                                <FiMapPin size={12} className={isPinned ? 'fill-current' : ''} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsFavorite(!isFavorite)}
+                                className={`h-full px-2 rounded-md transition-all ${isFavorite ? 'text-yellow-400 bg-yellow-400/10' : 'text-slate-500 hover:text-slate-300'}`}
+                                title="Favorite note"
+                            >
+                                <FiStar size={12} className={isFavorite ? 'fill-current' : ''} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsArchived(!isArchived)}
+                                className={`h-full px-2 rounded-md transition-all ${isArchived ? 'text-zinc-400 bg-zinc-400/10' : 'text-slate-500 hover:text-slate-300'}`}
+                                title="Archive note"
+                            >
+                                <FiArchive size={12} className={isArchived ? 'fill-current' : ''} />
+                            </button>
+                        </div>
+
+                        {/* Group 3: Actions */}
+                        <div className="flex items-center gap-1.5">
                             <button
                                 type="button"
                                 onClick={onClose}
                                 disabled={isSaving}
-                                className="p-2 rounded-full text-slate-400 hover:bg-slate-800 disabled:opacity-50 flex items-center justify-center"
+                                className="h-7 w-7 rounded-md text-slate-400 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50 flex items-center justify-center"
+                                title="Cancel"
                             >
-                                <FiX />
+                                <FiX size={16} />
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSaving}
-                                className="p-2 rounded-full text-white bg-emerald-400 hover:bg-emerald-500 disabled:opacity-50 flex items-center justify-center"
+                                className="h-7 px-3 rounded-md text-slate-900 bg-emerald-400 hover:bg-emerald-500 transition-colors disabled:opacity-50 flex items-center justify-center shadow-lg shadow-emerald-500/20"
+                                title={initialNote ? 'Update Note' : 'Save Note'}
                             >
-                                <FiCheck />
+                                <FiCheck size={16} />
                             </button>
                         </div>
                     </div>
@@ -261,6 +258,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                         <input type="hidden" name="is_archived" value={isArchived ? '1' : '0'} />
                         {noteId ? <input type="hidden" name="_editing" value="1" /> : null}
                      </div>
+
 
                     <div id="toolbar-container" className="p-2 border-t border-slate-800">
                         <span className="ql-formats">

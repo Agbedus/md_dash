@@ -5,7 +5,7 @@ import { addDays, eachHourOfInterval, endOfDay, format, isSameDay, startOfDay, s
 import type { CalendarEvent } from "@/types/calendar";
 import TimezoneClocks from "./TimezoneClocks";
 
-type UICalendarEvent = CalendarEvent & { isTask?: boolean; taskStatus?: "pending" | "in_progress" | "completed" };
+type UICalendarEvent = CalendarEvent;
 
 interface WeekGridProps {
   date: Date; // any date inside the target week
@@ -30,13 +30,13 @@ function privacyClasses(p?: CalendarEvent["privacy"]) {
   }
 }
 
-function taskClasses(status?: "pending" | "in_progress" | "completed") {
+function taskClasses(status?: "task" | "in_progress" | "completed") {
   switch (status) {
     case "completed":
       return { dot: "", border: "border-emerald-500/50", text: "text-emerald-200" };
     case "in_progress":
       return { dot: "", border: "border-amber-500/50", text: "text-amber-200" };
-    case "pending":
+    case "task":
     default:
       return { dot: "", border: "border-sky-500/50", text: "text-sky-200" };
   }

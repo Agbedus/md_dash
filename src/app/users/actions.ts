@@ -127,8 +127,10 @@ export async function getUsers() {
             email: u.email,
             image: u.avatar_url, // Use avatar_url for image
             fullName: u.full_name,
+            full_name: u.full_name,
             roles: u.roles || [],
             avatarUrl: u.avatar_url,
+            avatar_url: u.avatar_url,
         }));
     } catch (error) {
         console.error("Error fetching users:", error);

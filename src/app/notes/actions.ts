@@ -13,8 +13,10 @@ import { getUsers as getRealUsers } from '@/app/users/actions';
 interface HydratedUser {
     id: string;
     name: string | null;
+    full_name: string | null;
     email: string | null;
     image: string | null;
+    avatar_url: string | null;
 }
 
 interface ApiNote {
@@ -22,43 +24,70 @@ interface ApiNote {
     title: string;
     content: string;
     type: Note['type'];
-    tags: string[];
-    is_pinned: boolean;
-    is_archived: boolean;
-    is_favorite: boolean;
+    tags: string;
+    is_pinned: 0 | 1;
+    is_archived: 0 | 1;
+    is_favorite: 0 | 1;
     cover_image: string | null;
     user_id: string;
     task_id: number | null;
-    shared_with: string[];
+    shared_with: (string | any)[];
     created_at: string;
     updated_at: string;
 }
 
 function mapApiNote(p: ApiNote): Note {
     const validTypes: Note['type'][] = ['note', 'checklist', 'todo', 'journal', 'meeting', 'idea', 'link', 'code', 'bookmark', 'sketch'];
+    
+    // Robust tag parsing for JSON array strings or raw text
+    let tags = p.tags || '';
+    if (typeof tags === 'string' && tags.trim().startsWith('[')) {
+        try {
+            const parsed = JSON.parse(tags);
+            if (Array.isArray(parsed)) {
+                tags = parsed.join(', ');
+            }
+        } catch {
+            // Fallback to original string if parsing fails
+        }
+    }
+
     return {
         id: p.id,
         title: p.title,
         content: p.content,
         type: validTypes.includes(p.type) ? p.type : 'note',
-        tags: p.tags || [],
-        isPinned: p.is_pinned,
-        isArchived: p.is_archived,
-        isFavorite: p.is_favorite,
-        coverImage: p.cover_image,
-        userId: p.user_id,
-        taskId: p.task_id,
-        createdAt: p.created_at,
-        updatedAt: p.updated_at,
+        tags: tags,
+        is_pinned: p.is_pinned,
+        is_archived: p.is_archived,
+        is_favorite: p.is_favorite,
+        cover_image: p.cover_image,
+        user_id: p.user_id,
+        task_id: p.task_id,
+        created_at: p.created_at,
+        updated_at: p.updated_at,
     };
 }
 
+
 export async function getNotes(): Promise<Note[]> {
+  console.log("getNotes: Starting fetch...");
   const session = await auth();
+  console.log("getNotes: Session check:", { 
+    hasSession: !!session, 
+    hasUser: !!session?.user, 
+    // @ts-expect-error accessToken is not in default session type
+    hasToken: !!session?.user?.accessToken 
+  });
+
   // @ts-expect-error accessToken is not in default session type
-  if (!session?.user?.accessToken) return [];
+  if (!session?.user?.accessToken) {
+    console.log("getNotes: No access token found.");
+    return [];
+  }
 
   try {
+    console.log(`getNotes: Fetching from ${API_BASE_URL}/notes`);
     const [notesRes, users] = await Promise.all([
       fetch(`${API_BASE_URL}/notes`, {
         method: 'GET',
@@ -71,33 +100,78 @@ export async function getNotes(): Promise<Note[]> {
       getRealUsers()
     ]);
 
-    if (!notesRes.ok) return [];
+    console.log("getNotes: Response status:", notesRes.status);
+
+
+    if (!notesRes.ok) {
+        console.error("Failed to fetch notes:", await notesRes.text());
+        return [];
+    }
 
     const apiNotes: ApiNote[] = await notesRes.json();
+    console.log("getNotes: Notes payload received:", JSON.stringify(apiNotes, null, 2));
+
     return apiNotes.map(apiNote => {
       const note = mapApiNote(apiNote);
       
       // Hydrate Owner
-      const owner = (users as HydratedUser[]).find(u => u.id === note.userId);
+      const owner = (users as HydratedUser[]).find(u => u.id === note.user_id);
       if (owner) {
         note.owner = {
           id: owner.id,
           name: owner.name,
+          full_name: owner.full_name,
           image: owner.image,
+          avatar_url: owner.avatar_url,
           email: owner.email
         };
       }
 
       // Hydrate Shared With
       if (apiNote.shared_with && apiNote.shared_with.length > 0) {
-        note.sharedWith = apiNote.shared_with.map(shUserId => {
-          const u = (users as HydratedUser[]).find(user => user.id === shUserId);
+        note.shared_with = apiNote.shared_with.map(shUser => {
+          // If it's already an object with an ID, check if it has the required fields
+          if (typeof shUser !== 'string' && shUser.id) {
+            // Find in hydrated users to get full data if missing
+            const u = (users as HydratedUser[]).find(user => user.id === String(shUser.id));
+            if (u) {
+              return {
+                id: u.id,
+                name: u.name,
+                full_name: u.full_name,
+                image: u.image,
+                avatar_url: u.avatar_url,
+                email: u.email
+              };
+            }
+            // If not found in users list, return the object as is (mapped to Note structure)
+            return {
+              id: String(shUser.id),
+              name: shUser.name || shUser.full_name,
+              full_name: shUser.full_name,
+              image: shUser.image || shUser.avatar_url,
+              avatar_url: shUser.avatar_url,
+              email: shUser.email
+            };
+          }
+
+          // If it's a string (name, email, or ID), find by those fields
+          const shIdentifier = String(shUser);
+          const u = (users as HydratedUser[]).find(user => 
+            user.id === shIdentifier ||
+            user.name === shIdentifier || 
+            user.full_name === shIdentifier || 
+            user.email === shIdentifier
+          );
+
           return u ? {
             id: u.id,
             name: u.name,
+            full_name: u.full_name,
             image: u.image,
+            avatar_url: u.avatar_url,
             email: u.email
-          } : { id: shUserId };
+          } : shIdentifier;
         });
       }
 
@@ -122,15 +196,16 @@ export async function createNote(formData: FormData) {
     title: formData.get('title'),
     content: formData.get('content'),
     type: formData.get('type'),
-    is_pinned: formData.get('is_pinned') === '1',
-    is_archived: formData.get('is_archived') === '1',
-    is_favorite: formData.get('is_favorite') === '1',
-    cover_image: formData.get('coverImage') || formData.get('cover_image'),
-    tags: formData.get('tags') ? (formData.get('tags') as string).split(',').map(t => t.trim()) : [],
-    task_id: formData.get('taskId') ? Number(formData.get('taskId')) : null,
+    is_pinned: formData.get('is_pinned') === '1' ? 1 : 0,
+    is_archived: formData.get('is_archived') === '1' ? 1 : 0,
+    is_favorite: formData.get('is_favorite') === '1' ? 1 : 0,
+    cover_image: formData.get('cover_image'),
+    tags: formData.get('tags') || '',
+    task_id: formData.get('task_id') ? Number(formData.get('task_id')) : null,
     user_id: session.user?.id, // Use current user's ID
     shared_with: [],
   };
+
 
   console.log("createNote: payload", payload);
 
@@ -171,18 +246,23 @@ export async function updateNote(formData: FormData) {
   if (formData.has('title')) payload.title = formData.get('title');
   if (formData.has('content')) payload.content = formData.get('content');
   if (formData.has('type')) payload.type = formData.get('type');
-  if (formData.has('is_pinned')) payload.is_pinned = formData.get('is_pinned') === '1';
-  if (formData.has('is_archived')) payload.is_archived = formData.get('is_archived') === '1';
-  if (formData.has('is_favorite')) payload.is_favorite = formData.get('is_favorite') === '1';
-  if (formData.has('coverImage')) payload.cover_image = formData.get('coverImage');
+  if (formData.has('is_pinned')) payload.is_pinned = formData.get('is_pinned') === '1' ? 1 : 0;
+  if (formData.has('is_archived')) payload.is_archived = formData.get('is_archived') === '1' ? 1 : 0;
+  if (formData.has('is_favorite')) payload.is_favorite = formData.get('is_favorite') === '1' ? 1 : 0;
   if (formData.has('cover_image')) payload.cover_image = formData.get('cover_image');
-  if (formData.has('tags')) {
-      const tagsStr = formData.get('tags') as string;
-      payload.tags = tagsStr ? tagsStr.split(',').map(t => t.trim()) : [];
+  if (formData.has('tags')) payload.tags = formData.get('tags') || '';
+  if (formData.has('task_id')) payload.task_id = formData.get('task_id') ? Number(formData.get('task_id')) : null;
+  if (formData.has('shared_with')) {
+    try {
+      const sw = formData.get('shared_with') as string;
+      payload.shared_with = JSON.parse(sw);
+    } catch {
+      payload.shared_with = [];
+    }
   }
-  if (formData.has('taskId')) payload.task_id = formData.get('taskId') ? Number(formData.get('taskId')) : null;
 
-  console.log("updateNote: id", id, "payload", payload);
+
+  console.log("updateNote: PATCH payload", JSON.stringify(payload, null, 2));
 
   try {
     const response = await fetch(`${API_BASE_URL}/notes/${id}`, {
@@ -195,8 +275,12 @@ export async function updateNote(formData: FormData) {
         body: JSON.stringify(payload)
     });
 
+    const responseText = await response.text();
+    console.log("updateNote: API response status", response.status);
+    console.log("updateNote: API response text", responseText);
+
     if (!response.ok) {
-        console.error("updateNote: API error", response.status, await response.text());
+        console.error("updateNote: API error", response.status, responseText);
         return;
     }
 
@@ -235,13 +319,12 @@ export async function deleteNote(formData: FormData) {
   }
 }
 
-export async function toggleNoteFlag(noteId: number, field: 'isPinned' | 'isFavorite' | 'isArchived', value: boolean) {
+export async function toggleNoteFlag(noteId: number, field: 'is_pinned' | 'is_favorite' | 'is_archived', value: 0 | 1) {
   const session = await auth();
   // @ts-expect-error accessToken is not in default session type
   if (!session?.user?.accessToken) return;
 
-  const apiField = field === 'isPinned' ? 'is_pinned' : field === 'isFavorite' ? 'is_favorite' : 'is_archived';
-  const payload = { [apiField]: value };
+  const payload = { [field]: value };
 
   try {
     const response = await fetch(`${API_BASE_URL}/notes/${noteId}`, {
@@ -253,6 +336,7 @@ export async function toggleNoteFlag(noteId: number, field: 'isPinned' | 'isFavo
         },
         body: JSON.stringify(payload)
     });
+
 
     if (response.ok) {
         revalidatePath('/notes');
@@ -269,8 +353,8 @@ export async function shareNote(formData: FormData) {
   if (!session?.user?.accessToken) return;
 
   const noteId = formData.get('noteId');
-  const email = formData.get('email');
-  if (!noteId || !email) return;
+  const sharedWith = formData.get('email'); // This is actually the name/email from the dropdown
+  if (!noteId || !sharedWith) return;
 
   try {
     const response = await fetch(`${API_BASE_URL}/notes/${noteId}/share`, {
@@ -280,7 +364,7 @@ export async function shareNote(formData: FormData) {
             // @ts-expect-error accessToken is not in default session type
             'Authorization': `Bearer ${session.user.accessToken}`
         },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email: sharedWith }) // Keeping field name 'email' but content is name/email
     });
 
     if (response.ok) {

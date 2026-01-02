@@ -1,11 +1,12 @@
 "use client";
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import type { Note } from "@/types/note";
 import 'quill/dist/quill.snow.css';
-import { FiEdit2, FiTrash2, FiFileText, FiCheckSquare, FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiUserPlus, FiLayers, FiClock } from "react-icons/fi";
-
+import { FiEdit2, FiTrash2, FiFileText, FiCheckSquare, FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiUserPlus, FiLayers, FiClock, FiStar, FiMapPin, FiArchive } from "react-icons/fi";
 import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
+import UserAvatarGroup from "@/components/ui/user-avatar-group";
+import { Portal } from "@/components/ui/portal";
 
 interface NoteCardProps {
     note: Note;
@@ -15,11 +16,11 @@ interface NoteCardProps {
     viewMode: 'grid' | 'table';
     searchQuery?: string;
     onEdit?: (note: Note) => void;
-    onAddUser?: (noteId: number, userEmail: string) => Promise<void>;
     availableUsers?: {id: string, name: string | null, email: string | null, image: string | null}[];
     isExpanded?: boolean;
     onToggleExpand?: () => void;
 }
+
 
 function sanitizeHtml(html: string): string {
     if (!html) return '';
@@ -96,12 +97,28 @@ const TextHighlight: React.FC<{ text: string; highlight: string }> = ({ text, hi
     );
 };
 
-export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '', onEdit, onAddUser, availableUsers = [], isExpanded = false, onToggleExpand }: NoteCardProps) {
-    const [showUserDropdown, setShowUserDropdown] = React.useState(false);
-    const [selectedUser, setSelectedUser] = React.useState('');
-    const dropdownRef = React.useRef<HTMLDivElement>(null);
+export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, searchQuery = '', onEdit, availableUsers = [], isExpanded = false, onToggleExpand }: NoteCardProps) {
+    const [showUserDropdown, setShowUserDropdown] = useState(false);
+    const [selectedUser, setSelectedUser] = useState('');
+    const [isSharing, setIsSharing] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
-    React.useEffect(() => {
+    const [hoveredOwner, setHoveredOwner] = useState(false);
+    const [ownerCoords, setOwnerCoords] = useState({ top: 0, left: 0 });
+    const ownerRef = useRef<HTMLDivElement>(null);
+
+    const handleOwnerMouseEnter = () => {
+        if (ownerRef.current) {
+            const rect = ownerRef.current.getBoundingClientRect();
+            setOwnerCoords({
+                top: rect.top,
+                left: rect.left + rect.width / 2,
+            });
+            setHoveredOwner(true);
+        }
+    };
+
+    useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setShowUserDropdown(false);
@@ -112,12 +129,27 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
     }, []);
 
     const handleAddUser = async () => {
-        if (selectedUser && onAddUser) {
-            await onAddUser(note.id, selectedUser);
-            setSelectedUser('');
-            setShowUserDropdown(false);
+        if (!selectedUser) return;
+        setIsSharing(true);
+        setShowUserDropdown(false);
+        const currentShared = note.shared_with || [];
+        // Map hydrated objects back to IDs for the API
+        const sharedValues = currentShared.map(u => typeof u === 'string' ? u : u.id);
+        
+        try {
+            if (!sharedValues.includes(selectedUser)) {
+                const newList = [...sharedValues, selectedUser];
+                const fd = new FormData();
+                fd.append('id', String(note.id));
+                fd.append('shared_with', JSON.stringify(newList));
+                await onNoteUpdate(fd);
+            }
+        } finally {
+            setIsSharing(false);
+            setSelectedUser("");
         }
     };
+
 
     const priorityBgColorClass = (priority: Note['priority']) => {
         switch (priority) {
@@ -138,39 +170,15 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
     };
     
 
-    // Defensive tag parsing to handle arrays, JSON strings, or comma-separated lists
     const getNoteTags = () => {
         if (!note.tags) return [];
-        
-        // If it's already an array, return it
-        if (Array.isArray(note.tags)) return note.tags;
-
-        // If it's a string, try to parse as JSON or split by comma
         if (typeof note.tags === 'string') {
-            try {
-                const parsed = JSON.parse(note.tags);
-                if (Array.isArray(parsed)) return parsed;
-                if (typeof parsed === 'object' && parsed !== null) {
-                    return Object.values(parsed).map(String).filter(Boolean);
-                }
-            } catch {
-                return (note.tags as unknown as string).split(',').map((t: string) => t.trim()).filter(Boolean);
-            }
+            return note.tags.split(',').map(t => t.trim()).filter(Boolean);
         }
-
-        // If it's an object (but not an array), try to get its values
-        if (typeof note.tags === 'object' && note.tags !== null) {
-            return Object.values(note.tags).map(String).filter(Boolean);
-        }
-
         return [];
     };
     const noteTags = getNoteTags();
     
-    // Debug log for tags - remove after verification
-    if (note.tags && noteTags.length === 0) {
-        console.log(`Note [${note.id}] has tags but they failed to parse:`, note.tags);
-    }
     const TypeIcon = noteTypeIcons[note.type] || FiFileText;
     const typeIconColorClass = noteTypeColors[note.type] || 'text-zinc-400';
 
@@ -205,27 +213,18 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
         return (
             <div className={`glass rounded-2xl p-6 flex flex-col h-full hover-glow transition-all duration-300 ${isExpanded ? 'ring-2 ring-purple-500/50' : ''}`}>
                 <div className="flex justify-between items-start mb-4">
-                    <div className="flex flex-col gap-2 flex-1">
-                        <div className="flex items-center gap-2">
-                            {note.owner?.image ? (
-                                <Image src={note.owner.image} alt={note.owner.name || 'Owner'} width={24} height={24} className="rounded-full border border-white/10" />
-                            ) : note.owner?.name ? (
-                                <div className="w-6 h-6 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center text-xs font-bold border border-white/10">
-                                    {note.owner.name.charAt(0).toUpperCase()}
-                                </div>
-                            ) : null}
-                            <div className="flex items-center gap-2 min-w-0">
-                                <h3 className="font-bold text-xl text-white tracking-tight truncate">
-                                    <TextHighlight text={note.title} highlight={searchQuery} />
-                                </h3>
-                                {note.taskId && (
-                                    <FiLayers className="text-purple-400 flex-shrink-0" size={16} title="Associated with a task" />
-                                )}
-                            </div>
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <h3 className="font-bold text-xl text-white tracking-tight truncate">
+                                <TextHighlight text={note.title} highlight={searchQuery} />
+                            </h3>
+                            {note.task_id && (
+                                <FiLayers className="text-purple-400 flex-shrink-0" size={16} title="Associated with a task" />
+                            )}
                         </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 ml-8">
+                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500">
                             <FiClock size={10} />
-                            <span>{note.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : note.createdAt ? new Date(note.createdAt).toLocaleDateString() : 'No date'}</span>
+                            <span>{note.updated_at ? new Date(note.updated_at).toLocaleDateString() : note.created_at ? new Date(note.created_at).toLocaleDateString() : 'No date'}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -258,35 +257,103 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
                         ))}
                     </div>
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <span className={`px-2.5 py-1 inline-flex text-xs font-medium rounded-full ${priorityBgColorClass(note.priority)} ${priorityTextColorClass(note.priority)}`}>
-                                {formatPriority(note.priority)}
-                            </span>
-                            
-                            {note.sharedWith && note.sharedWith.length > 0 && (
-                                <div className="flex -space-x-2">
-                                    {note.sharedWith.slice(0, 3).map((user, idx) => (
-                                        user.image ? (
-                                            <Image key={idx} src={user.image} alt={user.name || user.email || 'User'} width={20} height={20} className="rounded-full border-2 border-slate-900" title={user.name || user.email || ''} />
-                                        ) : (
-                                            <div key={idx} className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-300 flex items-center justify-center text-[10px] font-bold border-2 border-slate-900" title={user.name || user.email || ''}>
-                                                {(user.name || user.email || '?').charAt(0).toUpperCase()}
-                                            </div>
-                                        )
-                                    ))}
-                                    {note.sharedWith.length > 3 && (
-                                        <div className="w-5 h-5 rounded-full bg-zinc-700 text-zinc-300 flex items-center justify-center text-[10px] font-bold border-2 border-slate-900">
-                                            +{note.sharedWith.length - 3}
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-lg border border-white/10">
+                                {note.is_pinned === 1 && (
+                                    <div className="text-blue-400" title="Pinned">
+                                        <FiMapPin size={12} className="fill-current" />
+                                    </div>
+                                )}
+                                {note.is_favorite === 1 && (
+                                    <div className="text-yellow-400" title="Favorite">
+                                        <FiStar size={12} className="fill-current" />
+                                    </div>
+                                )}
+                                {note.is_archived === 1 && (
+                                    <div className="text-zinc-500" title="Archived">
+                                        <FiArchive size={12} className="fill-current" />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <div 
+                                    ref={ownerRef}
+                                    onMouseEnter={handleOwnerMouseEnter}
+                                    onMouseLeave={() => setHoveredOwner(false)}
+                                    className="relative flex-shrink-0 cursor-pointer"
+                                >
+                                    {note.owner?.avatar_url || note.owner?.image ? (
+                                        <Image 
+                                            src={(note.owner.avatar_url || note.owner.image)!} 
+                                            alt={note.owner.full_name || note.owner.name || 'Owner'} 
+                                            width={32} 
+                                            height={32} 
+                                            className="rounded-full border-2 border-zinc-900 ring-2 ring-purple-500/20 object-cover" 
+                                        />
+                                    ) : note.owner?.name || note.owner?.full_name ? (
+                                        <div 
+                                            className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center text-xs font-bold border-2 border-zinc-900 ring-2 ring-purple-500/20"
+                                        >
+                                            {(note.owner.full_name || note.owner.name)!.charAt(0).toUpperCase()}
                                         </div>
-                                    )}
+                                    ) : null}
                                 </div>
-                            )}
+                                
+                                {( (note.shared_with && note.shared_with.length > 0) || isSharing ) && (
+                                    <div className="flex items-center gap-1 border-l border-white/5 pl-3">
+                                        {note.shared_with && note.shared_with.length > 0 && (
+                                            <UserAvatarGroup 
+                                                users={note.shared_with.map(u => typeof u === 'string' ? { name: u } : u)} 
+                                                size="sm" 
+                                                limit={3} 
+                                            />
+                                        )}
+                                        {isSharing && (
+                                            <div className="w-6 h-6 rounded-full bg-white/10 animate-pulse" />
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
+
+                        {/* Owner Tooltip */}
+                        {hoveredOwner && note.owner && (
+                            <Portal>
+                                <div 
+                                    style={{
+                                        position: 'fixed',
+                                        top: `${ownerCoords.top - 8}px`,
+                                        left: `${ownerCoords.left}px`,
+                                        transform: 'translate(-50%, -100%)',
+                                    }}
+                                    className="mb-2 w-48 p-2 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">
+                                            {note.owner.avatar_url || note.owner.image ? (
+                                                <Image src={note.owner.avatar_url || note.owner.image || ''} alt={note.owner.name || ''} fill className="object-cover" />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-emerald-400 bg-emerald-500/10">
+                                                    {(note.owner.full_name || note.owner.name || '?').charAt(0).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-semibold text-white truncate">{note.owner.full_name || note.owner.name}</p>
+                                            <p className="text-[10px] text-zinc-500 truncate">Creator</p>
+                                            {note.owner.email && <p className="text-[10px] text-zinc-500 truncate">{note.owner.email}</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </Portal>
+                        )}
                         <div className="flex items-center space-x-2">
                             <div className="relative" ref={dropdownRef}>
                                 <button 
                                     onClick={() => setShowUserDropdown(!showUserDropdown)} 
-                                    className="text-zinc-400 hover:text-white transition-colors"
+                                    disabled={isSharing}
+                                    className={`transition-colors ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white'}`}
                                     title="Add User"
                                 >
                                     <FiUserPlus size={16} />
@@ -300,7 +367,7 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
                                         >
                                             <option value="">Select user...</option>
                                             {availableUsers.map(u => (
-                                                <option key={u.id} value={u.email || ''}>
+                                                <option key={u.id} value={u.id}>
                                                     {u.name || u.email}
                                                 </option>
                                             ))}
@@ -334,34 +401,54 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
             <td className="px-6 py-4 text-sm font-medium text-white">
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                        {note.owner?.image ? (
-                            <Image src={note.owner.image} alt={note.owner.name || 'Owner'} width={20} height={20} className="rounded-full border border-white/10" />
-                        ) : note.owner?.name ? (
-                            <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center text-[10px] font-bold border border-white/10">
-                                {note.owner.name.charAt(0).toUpperCase()}
-                            </div>
-                        ) : null}
+                        <div className="flex items-center gap-1">
+                            {note.is_pinned === 1 && (
+                                <div className="text-blue-400" title="Pinned">
+                                    <FiMapPin size={10} className="fill-current" />
+                                </div>
+                            )}
+                            {note.is_favorite === 1 && (
+                                <div className="text-yellow-400" title="Favorite">
+                                    <FiStar size={10} className="fill-current" />
+                                </div>
+                            )}
+                            {note.is_archived === 1 && (
+                                <div className="text-zinc-500" title="Archived">
+                                    <FiArchive size={10} className="fill-current" />
+                                </div>
+                            )}
+                        </div>
+                        <div 
+                            ref={ownerRef}
+                            onMouseEnter={handleOwnerMouseEnter}
+                            onMouseLeave={() => setHoveredOwner(false)}
+                            className="relative flex-shrink-0 cursor-pointer"
+                        >
+                            {note.owner?.avatar_url || note.owner?.image ? (
+                                <Image src={(note.owner.avatar_url || note.owner.image)!} alt={note.owner.full_name || note.owner.name || 'Owner'} width={28} height={28} className="rounded-full border border-white/10 object-cover" />
+                            ) : note.owner?.name || note.owner?.full_name ? (
+                                <div className="w-7 h-7 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center text-[10px] font-bold border border-white/10">
+                                    {(note.owner.full_name || note.owner.name)!.charAt(0).toUpperCase()}
+                                </div>
+                            ) : null}
+                        </div>
                         <TextHighlight text={note.title} highlight={searchQuery} />
                     </div>
-                    {note.sharedWith && note.sharedWith.length > 0 && (
-                        <div className="flex items-center gap-1 ml-6">
-                            <span className="text-[10px] text-zinc-500">+</span>
-                            <div className="flex -space-x-1">
-                                {note.sharedWith.slice(0, 2).map((user, idx) => (
-                                    user.image ? (
-                                        <Image key={idx} src={user.image} alt={user.name || user.email || 'User'} width={16} height={16} className="rounded-full border border-slate-900" title={user.name || user.email || ''} />
-                                    ) : (
-                                        <div key={idx} className="w-4 h-4 rounded-full bg-blue-500/20 text-blue-300 flex items-center justify-center text-[8px] font-bold border border-slate-900" title={user.name || user.email || ''}>
-                                            {(user.name || user.email || '?').charAt(0).toUpperCase()}
-                                        </div>
-                                    )
-                                ))}
-                                {note.sharedWith.length > 2 && (
-                                    <div className="w-4 h-4 rounded-full bg-zinc-700 text-zinc-300 flex items-center justify-center text-[8px] font-bold border border-slate-900">
-                                        +{note.sharedWith.length - 2}
-                                    </div>
-                                )}
-                            </div>
+                    {( (note.shared_with && note.shared_with.length > 0) || isSharing ) && (
+                        <div className="flex items-center gap-1 ml-6 shrink-0">
+                            {note.shared_with && note.shared_with.length > 0 && (
+                                <>
+                                    <span className="text-[10px] text-zinc-500">+</span>
+                                    <UserAvatarGroup 
+                                        users={note.shared_with.map(u => typeof u === 'string' ? { name: u } : u)} 
+                                        size="sm" 
+                                        limit={2} 
+                                    />
+                                </>
+                            )}
+                            {isSharing && (
+                                <div className="w-5 h-5 rounded-full bg-white/10 animate-pulse" />
+                            )}
                         </div>
                     )}
                 </div>
@@ -388,7 +475,8 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
                     <button 
                         type="button" 
                         onClick={() => setShowUserDropdown(!showUserDropdown)} 
-                        className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"
+                        disabled={isSharing}
+                        className={`p-2 rounded-lg transition-colors ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
                         title="Add User"
                     >
                         <FiUserPlus size={16} />
@@ -402,7 +490,7 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
                             >
                                 <option value="">Select user...</option>
                                 {availableUsers.map(u => (
-                                    <option key={u.id} value={u.email || ''}>
+                                    <option key={u.id} value={u.id}>
                                         {u.name || u.email}
                                     </option>
                                 ))}
@@ -423,6 +511,37 @@ export default function NoteCard({ note, onNoteDelete, viewMode, searchQuery = '
                     <button type="submit" className="p-2 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-white/10"><FiTrash2 size={16} /></button>
                 </form>
             </td>
+            {/* Owner Tooltip */}
+            {hoveredOwner && note.owner && (
+                <Portal>
+                    <div 
+                        style={{
+                            position: 'fixed',
+                            top: `${ownerCoords.top - 8}px`,
+                            left: `${ownerCoords.left}px`,
+                            transform: 'translate(-50%, -100%)',
+                        }}
+                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                    >
+                        <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">
+                                {note.owner.avatar_url || note.owner.image ? (
+                                    <Image src={note.owner.avatar_url || note.owner.image || ''} alt={note.owner.name || ''} fill className="object-cover" />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-emerald-400 bg-emerald-500/10">
+                                        {(note.owner.full_name || note.owner.name || '?').charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-xs font-semibold text-white truncate">{note.owner.full_name || note.owner.name}</p>
+                                <p className="text-[10px] text-zinc-500 truncate">Creator</p>
+                                {note.owner.email && <p className="text-[10px] text-zinc-500 truncate">{note.owner.email}</p>}
+                            </div>
+                        </div>
+                    </div>
+                </Portal>
+            )}
         </tr>
     );
 }
