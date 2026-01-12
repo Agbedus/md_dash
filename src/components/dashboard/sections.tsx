@@ -1,38 +1,20 @@
 import React from 'react';
-import { ProductivityChart, TasksChart, WorkloadChart, TimeAllocationChart } from './client-charts';
+import { 
+    getProductivityData, 
+    getTasksOverviewData, 
+    getWorkloadData, 
+    getTimeAllocationData, 
+    getKeyTasks, 
+    getRecentDecisions, 
+    getRecentNotes 
+} from '@/app/lib/dashboard-actions';
+import { ProductivityChart, TasksChart, WorkloadChart, TimeAllocationChart } from '@/components/ui/client-charts';
 import { FaEllipsisH, FaLightbulb, FaStickyNote, FaPlus, FaClock, FaRobot, FaArrowRight } from 'react-icons/fa';
 
-type DashboardProps = {
-  dashboardData: {
-    userName: string;
-    productivityData: Array<{ name: string; productivity: number }>;
-    tasksOverviewData: Array<{ name: string; value: number }>;
-    workloadData: Array<{ name: string; tasks: number }>;
-    timeAllocationData: Array<{ name: string; value: number }>;
-    keyTasks: Array<{ title: string; status: string; color: string; bg: string }>;
-    decisions: Array<{ name: string; dueDate?: string | null }>;
-    recentNotes: Array<{ title: string; type: string; color?: string | null; updatedAt?: string | null }>;
-  };
-};
-
-const Dashboard = ({ dashboardData }: DashboardProps) => {
-  const { userName, productivityData, tasksOverviewData, workloadData, timeAllocationData, keyTasks, decisions, recentNotes } = dashboardData;
-
-  // Determine greeting based on time
-  const hour = new Date().getHours();
-  let greeting = 'Good morning';
-  if (hour >= 12 && hour < 18) greeting = 'Good afternoon';
-  else if (hour >= 18) greeting = 'Good evening';
-
-  return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-10">
-        <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">{greeting}, {userName}</h1>
-        <p className="text-zinc-400 text-lg">Here is a summary of your day.</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Charts Section */}
+export async function ProductivitySection() {
+    const data = await getProductivityData();
+    
+    return (
         <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-2 hover-glow flex flex-col h-96">
           <div className="flex justify-between items-center mb-6 shrink-0">
             <h2 className="text-xl font-bold text-white tracking-tight">Productivity Trend</h2>
@@ -43,32 +25,52 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
             </select>
           </div>
           <div className="flex-1 w-full min-h-0">
-             <ProductivityChart data={productivityData} />
+             <ProductivityChart data={data} />
           </div>
         </div>
+    );
+}
 
+export async function StatsOverviewSection() {
+    const data = await getTasksOverviewData();
+    return (
         <div className="glass p-6 rounded-2xl col-span-1 hover-glow flex flex-col h-96">
             <h2 className="text-xl font-bold text-white tracking-tight mb-4 shrink-0">Tasks Overview</h2>
             <div className="flex-1 w-full min-h-0">
-                <TasksChart data={tasksOverviewData} />
+                <TasksChart data={data} />
             </div>
         </div>
+    );
+}
 
+export async function WorkloadSection() {
+    const data = await getWorkloadData();
+    return (
         <div className="glass p-6 rounded-2xl col-span-1 hover-glow flex flex-col h-96">
             <h2 className="text-xl font-bold text-white tracking-tight mb-4 shrink-0">Workload</h2>
             <div className="flex-1 w-full min-h-0">
-                <WorkloadChart data={workloadData} />
+                <WorkloadChart data={data} />
             </div>
         </div>
+    );
+}
 
+export async function TimeAllocationSection() {
+    const data = await getTimeAllocationData();
+    return (
         <div className="glass p-6 rounded-2xl col-span-1 hover-glow flex flex-col h-96">
             <h2 className="text-xl font-bold text-white tracking-tight mb-4 shrink-0">Time Allocation</h2>
             <div className="flex-1 w-full min-h-0">
-                <TimeAllocationChart data={timeAllocationData} />
+                <TimeAllocationChart data={data} />
             </div>
         </div>
+    );
+}
 
-        {/* Key Tasks */}
+export async function KeyTasksSection() {
+    const keyTasks = await getKeyTasks();
+    
+    return (
         <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-2 hover-glow">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-white tracking-tight">Key Tasks</h2>
@@ -95,12 +97,17 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
             View All Tasks
           </button>
         </div>
+    );
+}
 
-        {/* Upcoming Decisions */}
+export async function DecisionsSection() {
+    const decisions = await getRecentDecisions();
+    
+    return (
         <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-1 hover-glow">
           <h2 className="text-xl font-bold text-white tracking-tight mb-6">Decisions Needed</h2>
           <div className="space-y-4">
-            {decisions.length > 0 ? decisions.slice(0, 1).map((decision, i) => (
+            {decisions.length > 0 ? decisions.map((decision, i) => (
              <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all cursor-pointer group">
                <div className="flex items-start gap-3">
                  <div className="p-2 rounded-lg bg-purple-500/20 text-purple-400 mt-1">
@@ -121,8 +128,13 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
             )}
           </div>
         </div>
+    );
+}
 
-        {/* Recent Notes */}
+export async function RecentNotesSection() {
+    const recentNotes = await getRecentNotes();
+    
+    return (
         <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-2 hover-glow">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-white tracking-tight">Recent Notes</h2>
@@ -150,8 +162,12 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
             )}
           </div>
         </div>
+    );
+}
 
-        {/* Focus Mode */}
+// Static sections (no async data needed, but good to have as components)
+export function FocusModeSection() {
+    return (
         <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-1 hover-glow flex flex-col justify-center items-center text-center relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="p-4 rounded-full bg-white/5 mb-4 border border-white/10 relative z-10">
@@ -163,8 +179,11 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
             Start Session
           </button>
         </div>
+    );
+}
 
-        {/* Assistant Teaser */}
+export function AssistantSection() {
+    return (
         <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-1 hover-glow flex flex-col relative overflow-hidden">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
@@ -173,7 +192,7 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
             <h2 className="text-lg font-bold text-white">AI Assistant</h2>
           </div>
           <div className="flex-1 bg-white/5 rounded-xl p-4 mb-4 border border-white/5">
-            <p className="text-sm text-zinc-300 italic">&quot;I noticed you have {keyTasks.length} pending tasks for today. Would you like me to prioritize them?&quot;</p>
+            <p className="text-sm text-zinc-300 italic">&quot;How can I help you be more productive today?&quot;</p>
           </div>
           <div className="flex gap-2">
             <input
@@ -186,10 +205,5 @@ const Dashboard = ({ dashboardData }: DashboardProps) => {
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
-
-export default Dashboard;
-
+    );
+}

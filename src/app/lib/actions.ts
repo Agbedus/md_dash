@@ -4,7 +4,8 @@ import { signIn, signOut } from '@/auth';
 import { AuthError } from 'next-auth';
 import { z } from 'zod';
 
-const API_BASE_URL = `${process.env.BASE_URL_LOCAL}/api/v1` || "http://127.0.0.1:8000/api/v1";
+const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 export async function authenticate(
   prevState: string | undefined,

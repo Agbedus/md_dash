@@ -19,11 +19,11 @@ interface ApiClient {
 }
 
 export async function getClients(): Promise<Client[]> {
-    console.log("getClients: Starting fetch...");
+
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
-        console.log("getClients: No access token found.");
+
         return [];
     }
 

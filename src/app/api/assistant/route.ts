@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
+import { getAggregatedDashboardData } from "@/app/lib/dashboard-actions";
+import { getTasks } from "@/app/tasks/actions";
+import { getNotes } from "@/app/notes/actions";
+import { getProjects } from "@/app/projects/actions";
+import { getEvents } from "@/app/calendar/actions";
+
 
 // --- Tool Definitions (OpenAI Format) ---
 
@@ -162,6 +168,72 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "displayTasks",
+      description: "Display tasks as interactive cards. Use this when the user asks to see their tasks.",
+      parameters: {
+        type: "object",
+        properties: {
+          status: { type: "string", enum: ["task", "in_progress", "completed"], description: "Filter by status" },
+          priority: { type: "string", enum: ["low", "medium", "high"], description: "Filter by priority" },
+          limit: { type: "integer", description: "Number of tasks to display (default 5, max 10)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "displayNotes",
+      description: "Display notes as interactive cards. Use this when the user asks to see their notes.",
+      parameters: {
+        type: "object",
+        properties: {
+          limit: { type: "integer", description: "Number of notes to display (default 5, max 10)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "displayEvents",
+      description: "Display calendar events as interactive cards. Use this when the user asks about their schedule or calendar.",
+      parameters: {
+        type: "object",
+        properties: {
+          limit: { type: "integer", description: "Number of events to display (default 5, max 10)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "displayProjects",
+      description: "Display projects as interactive cards. Use this when the user asks about their projects.",
+      parameters: {
+        type: "object",
+        properties: {
+          status: { type: "string", enum: ["planning", "in_progress", "completed", "on_hold"], description: "Filter by status" },
+          limit: { type: "integer", description: "Number of projects to display (default 5, max 10)" },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "displayStats",
+      description: "Display statistics and metrics. Use this when the user asks about productivity, task counts, or overview.",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
 ];
 
 // --- Helper Functions ---
@@ -242,6 +314,80 @@ async function executeTool(name: string, args: any) {
       };
     }
 
+    // Widget display tools - return real data
+    if (name === "displayTasks") {
+      const limit = Math.min(args.limit || 5, 10);
+      const tasks = await getTasks(undefined, args.priority, args.status, undefined, limit);
+      return {
+        widget: "task",
+        data: tasks
+      };
+    }
+
+    if (name === "displayNotes") {
+      const limit = Math.min(args.limit || 5, 10);
+      const notes = await getNotes(limit);
+      return {
+        widget: "note",
+        data: notes
+      };
+    }
+
+    if (name === "displayEvents") {
+      const limit = Math.min(args.limit || 5, 10);
+      const allEvents = await getEvents();
+      // Get upcoming events
+      const now = new Date();
+      const upcomingEvents = allEvents
+        .filter(e => new Date(e.start) >= now)
+        .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+        .slice(0, limit);
+      return {
+        widget: "event",
+        data: upcomingEvents
+      };
+    }
+
+    if (name === "displayProjects") {
+      const limit = Math.min(args.limit || 5, 10);
+      const allProjects = await getProjects();
+      let filtered = allProjects;
+      if (args.status) {
+        filtered = allProjects.filter(p => p.status === args.status);
+      }
+      return {
+        widget: "project",
+        data: filtered.slice(0, limit)
+      };
+    }
+
+    if (name === "displayStats") {
+      const [tasks, notes, projects] = await Promise.all([
+        getTasks(undefined, undefined, undefined, undefined, 500),
+        getNotes(100),
+        getProjects()
+      ]);
+      
+      const completedTasks = tasks.filter(t => t.status === 'completed').length;
+      const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
+      const pendingTasks = tasks.filter(t => t.status === 'task').length;
+      
+      return {
+        widget: "stats",
+        data: {
+          title: "Your Overview",
+          stats: [
+            { label: "Total Tasks", value: tasks.length, color: "text-blue-400" },
+            { label: "Completed", value: completedTasks, color: "text-emerald-400" },
+            { label: "In Progress", value: inProgressTasks, color: "text-yellow-400" },
+            { label: "Pending", value: pendingTasks, color: "text-zinc-400" },
+            { label: "Total Notes", value: notes.length, color: "text-purple-400" },
+            { label: "Projects", value: projects.length, color: "text-pink-400" },
+          ]
+        }
+      };
+    }
+
     return { error: "Unknown tool" };
   } catch (e: unknown) {
     console.error("Tool execution error:", e);
@@ -267,7 +413,11 @@ export async function POST(req: Request) {
     const messages: any[] = [
       {
         role: "system",
-        content: "You are a helpful assistant for a markdown note-taking app. You have access to the user's database to search notes and tasks. Always check the database before saying you don't know."
+        content: `You are a helpful assistant for a markdown note-taking app. You have access to the user's database to search notes and tasks. Always check the database before saying you don't know.
+        
+        Here is the current status of the user's dashboard (cached data):
+        ${await getAggregatedDashboardData()}
+        `
       },
       {
         role: "assistant",
@@ -399,6 +549,20 @@ export async function POST(req: Request) {
         }
 
         const result = await executeTool(functionName, functionArgs);
+
+        // If result contains widget data, we need to stream it to the client
+        if (result.widget && result.data) {
+          // Create a simple stream to send the widget
+          const widgetStream = new ReadableStream({
+            start(controller) {
+              const encoder = new TextEncoder();
+              const widgetMarker = `__WIDGET__${JSON.stringify(result)}__WIDGET__`;
+              controller.enqueue(encoder.encode(widgetMarker));
+              controller.close();
+            }
+          });
+          return new NextResponse(widgetStream);
+        }
 
         messages.push({
           role: "tool",

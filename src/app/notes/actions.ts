@@ -70,26 +70,21 @@ function mapApiNote(p: ApiNote): Note {
 }
 
 
-export async function getNotes(): Promise<Note[]> {
-  console.log("getNotes: Starting fetch...");
+export async function getNotes(limit?: number, skip?: number): Promise<Note[]> {
+
   const session = await auth();
-  console.log("getNotes: Session check:", { 
-    hasSession: !!session, 
-    hasUser: !!session?.user, 
-    // @ts-expect-error accessToken is not in default session type
-    hasToken: !!session?.user?.accessToken 
-  });
+
 
   // @ts-expect-error accessToken is not in default session type
   if (!session?.user?.accessToken) {
-    console.log("getNotes: No access token found.");
+
     return [];
   }
 
   try {
-    console.log(`getNotes: Fetching from ${API_BASE_URL}/notes`);
+
     const [notesRes, users] = await Promise.all([
-      fetch(`${API_BASE_URL}/notes`, {
+      fetch(`${API_BASE_URL}/notes?${limit ? `limit=${limit}` : ''}${skip ? `&skip=${skip}` : ''}`, {
         method: 'GET',
         headers: {
           // @ts-expect-error accessToken is not in default session type
@@ -100,7 +95,7 @@ export async function getNotes(): Promise<Note[]> {
       getRealUsers()
     ]);
 
-    console.log("getNotes: Response status:", notesRes.status);
+
 
 
     if (!notesRes.ok) {
@@ -109,7 +104,7 @@ export async function getNotes(): Promise<Note[]> {
     }
 
     const apiNotes: ApiNote[] = await notesRes.json();
-    console.log("getNotes: Notes payload received:", JSON.stringify(apiNotes, null, 2));
+
 
     return apiNotes.map(apiNote => {
       const note = mapApiNote(apiNote);
@@ -207,7 +202,7 @@ export async function createNote(formData: FormData) {
   };
 
 
-  console.log("createNote: payload", payload);
+
 
   try {
     const response = await fetch(`${API_BASE_URL}/notes`, {
@@ -262,7 +257,7 @@ export async function updateNote(formData: FormData) {
   }
 
 
-  console.log("updateNote: PATCH payload", JSON.stringify(payload, null, 2));
+
 
   try {
     const response = await fetch(`${API_BASE_URL}/notes/${id}`, {
@@ -276,8 +271,7 @@ export async function updateNote(formData: FormData) {
     });
 
     const responseText = await response.text();
-    console.log("updateNote: API response status", response.status);
-    console.log("updateNote: API response text", responseText);
+
 
     if (!response.ok) {
         console.error("updateNote: API error", response.status, responseText);

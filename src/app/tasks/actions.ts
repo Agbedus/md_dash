@@ -34,12 +34,12 @@ interface ApiTask {
     }>;
 }
 
-export async function getTasks(query?: string, priority?: string, status?: string, projectId?: number): Promise<Task[]> {
-    console.log("getTasks: Starting fetch...", { query, priority, status, projectId });
+export async function getTasks(query?: string, priority?: string, status?: string, projectId?: number, limit?: number, skip?: number): Promise<Task[]> {
+
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
-        console.log("getTasks: No access token found.");
+
         return [];
     }
 
@@ -49,6 +49,8 @@ export async function getTasks(query?: string, priority?: string, status?: strin
         if (priority) queryParams.append('priority', priority);
         if (status) queryParams.append('status', status);
         if (projectId) queryParams.append('project_id', projectId.toString());
+        if (limit) queryParams.append('limit', limit.toString());
+        if (skip) queryParams.append('skip', skip.toString());
 
         const response = await fetch(`${API_BASE_URL}/tasks?${queryParams.toString()}`, {
             method: 'GET',
@@ -96,10 +98,10 @@ export async function getTasks(query?: string, priority?: string, status?: strin
             );
         }
         if (priority) {
-            tasks = tasks.filter(t => t.priority === priority);
+            tasks = tasks.filter(t => t.priority.toLowerCase() === priority.toLowerCase());
         }
         if (status) {
-            tasks = tasks.filter(t => t.status === status);
+            tasks = tasks.filter(t => t.status.toLowerCase() === status.toLowerCase());
         }
 
         return tasks;
@@ -200,7 +202,7 @@ export async function updateTask(formData: FormData) {
     }
 
     try {
-        console.log("updateTask: Sending payload to", `${API_BASE_URL}/tasks/${taskId}`, JSON.stringify(rawData, null, 2));
+
         const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
             method: 'PATCH',
             headers: {
@@ -217,7 +219,7 @@ export async function updateTask(formData: FormData) {
             return;
         }
 
-        console.log("updateTask: Successfully updated task", taskId);
+
         revalidatePath('/tasks');
         revalidateTag('tasks', 'max');
         revalidateTag('projects', 'max');

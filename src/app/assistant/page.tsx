@@ -3,8 +3,11 @@ import { useState, useEffect, useRef } from "react";
 import ChatBubble from "@/components/ui/assistant/ChatBubble";
 import ChatInput from "@/components/ui/assistant/ChatInput";
 import AssistantCard from "@/components/ui/assistant/AssistantCard";
+import { TaskWidget, NoteWidget, EventWidget, ProjectWidget, StatsWidget } from "@/components/ui/assistant/widgets";
 import type { Note } from "@/types/note";
 import type { Task } from "@/types/task";
+import type { CalendarEvent } from "@/types/calendar";
+import type { Project } from "@/types/project";
 
 interface Message {
   id?: number;
@@ -15,6 +18,10 @@ interface Message {
     args: Record<string, unknown>;
   };
   data?: Note | Task;
+  widgets?: {
+    type: 'task' | 'note' | 'event' | 'project' | 'stats';
+    items: any[];
+  };
 }
 
 export default function AssistantPage() {
@@ -73,8 +80,45 @@ export default function AssistantPage() {
 
         // Process buffer for JSON markers
         const jsonRegex = /__JSON__(.*?)__JSON__/g;
+        const widgetRegex = /__WIDGET__(.*?)__WIDGET__/g;
         let match;
         let lastIndex = 0;
+
+        // Process widgets first
+        while ((match = widgetRegex.exec(buffer)) !== null) {
+          const textPart = buffer.substring(lastIndex, match.index);
+          if (textPart) {
+            accumulatedText += textPart;
+            setMessages((prevMessages) => 
+              prevMessages.map(msg => 
+                msg.id === aiMessageId ? { ...msg, text: accumulatedText } : msg
+              )
+            );
+          }
+
+          try {
+            const widgetStr = match[1];
+            const widgetData = JSON.parse(widgetStr);
+            
+            if (widgetData.widget && widgetData.data) {
+              const widgetMessage: Message = {
+                isUser: false,
+                widgets: {
+                  type: widgetData.widget,
+                  items: Array.isArray(widgetData.data) ? widgetData.data : [widgetData.data]
+                }
+              };
+              setMessages((prevMessages) => [...prevMessages, widgetMessage]);
+            }
+          } catch (e) {
+            console.error("Failed to parse widget from stream", e);
+          }
+
+          lastIndex = widgetRegex.lastIndex;
+        }
+
+        // Reset for JSON parsing
+        lastIndex = 0;
 
         while ((match = jsonRegex.exec(buffer)) !== null) {
           // Add text before the JSON
@@ -162,6 +206,18 @@ export default function AssistantPage() {
             {msg.text && <ChatBubble message={{ text: msg.text, isUser: msg.isUser }} />}
             {msg.data && (
               <AssistantCard item={msg.data} type={'content' in msg.data ? 'note' : 'task'} />
+            )}
+            {msg.widgets && (
+              <div className="space-y-3">
+                {msg.widgets.items.map((item, idx) => {
+                  if (msg.widgets!.type === 'task') return <TaskWidget key={idx} task={item as Task} />;
+                  if (msg.widgets!.type === 'note') return <NoteWidget key={idx} note={item as Note} />;
+                  if (msg.widgets!.type === 'event') return <EventWidget key={idx} event={item as CalendarEvent} />;
+                  if (msg.widgets!.type === 'project') return <ProjectWidget key={idx} project={item as Project} />;
+                  if (msg.widgets!.type === 'stats') return <StatsWidget key={idx} {...item} />;
+                  return null;
+                })}
+              </div>
             )}
           </div>
         ))}

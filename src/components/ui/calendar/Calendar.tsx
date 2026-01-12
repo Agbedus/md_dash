@@ -215,6 +215,7 @@ export default function Calendar({ initialDate, initialView = "month", events = 
           onCreated={async () => {
             await loadEvents();
           }}
+          onOptimisticAdd={(evt) => addOptimisticEvent({ type: 'add', event: evt })}
         />
 
         <EventDetailModal
@@ -224,6 +225,8 @@ export default function Calendar({ initialDate, initialView = "month", events = 
           onUpdated={async () => {
             await loadEvents();
           }}
+          onOptimisticUpdate={(evt) => addOptimisticEvent({ type: 'update', event: evt })}
+          onOptimisticDelete={(evt) => addOptimisticEvent({ type: 'delete', event: evt })}
         />
       </div>
     </div>

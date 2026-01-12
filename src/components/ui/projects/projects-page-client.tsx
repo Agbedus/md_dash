@@ -199,13 +199,15 @@ export default function ProjectsPageClient({ initialProjects, users, clients }: 
       {/* Create Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+          <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-white/10 flex justify-between items-center">
               <h2 className="text-xl font-bold text-white">Create New Project</h2>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-zinc-400 hover:text-white">×</button>
             </div>
             <form action={handleCreate} className="p-6">
-              <ProjectFormFields users={users} clients={clients} />
+              <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                <ProjectFormFields users={users} clients={clients} />
+              </div>
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="button"
@@ -231,13 +233,15 @@ export default function ProjectsPageClient({ initialProjects, users, clients }: 
       {/* Edit Modal */}
       {editingProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+          <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-white/10 flex justify-between items-center">
               <h2 className="text-xl font-bold text-white">Edit Project</h2>
               <button onClick={() => setEditingProject(null)} className="text-zinc-400 hover:text-white">×</button>
             </div>
             <form action={handleUpdate} className="p-6">
-              <ProjectFormFields defaultValues={editingProject} users={users} clients={clients} />
+              <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                <ProjectFormFields defaultValues={editingProject} users={users} clients={clients} />
+              </div>
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="button"

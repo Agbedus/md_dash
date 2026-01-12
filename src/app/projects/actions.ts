@@ -31,17 +31,17 @@ interface ApiProject {
     updated_at: string;
 }
 
-export async function getProjects(): Promise<Project[]> {
-    console.log("getProjects: Starting fetch...");
+export async function getProjects(limit?: number, skip?: number): Promise<Project[]> {
+
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
-        console.log("getProjects: No access token found.");
+
         return [];
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/projects`, {
+        const response = await fetch(`${API_BASE_URL}/projects?${limit ? `limit=${limit}` : ''}${skip ? `&skip=${skip}` : ''}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export async function getProjects(): Promise<Project[]> {
         });
 
         if (!response.ok) {
-            console.error("Failed to fetch projects:", await response.text());
+            console.error(`Failed to fetch projects: ${response.status} ${response.statusText}`, await response.text());
             return [];
         }
 
@@ -110,7 +110,10 @@ export async function getProject(id: number): Promise<Project | null> {
             next: { tags: ['projects'], revalidate: 60 }
         });
 
-        if (!response.ok) return null;
+        if (!response.ok) {
+            console.error(`Failed to fetch project ${id}: ${response.status} ${response.statusText}`);
+            return null;
+        }
 
         const p: ApiProject = await response.json();
         return {

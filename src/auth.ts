@@ -3,7 +3,8 @@ import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { z } from "zod";
 
-const API_BASE_URL = `${process.env.BASE_URL_LOCAL}/api/v1` || "http://127.0.0.1:8000/api/v1";
+const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
   ...authConfig,

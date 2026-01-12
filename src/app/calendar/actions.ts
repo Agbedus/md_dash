@@ -147,7 +147,7 @@ export async function createEvent(formData: FormData) {
     payload.reminders = [];
   }
 
-  console.log("createEvent: POST payload", JSON.stringify(payload, null, 2));
+
 
   try {
     const response = await fetch(`${API_BASE_URL}/events`, {
@@ -222,7 +222,7 @@ export async function updateEvent(formData: FormData) {
     }
   }
 
-  console.log("updateEvent: PATCH payload", JSON.stringify(payload, null, 2));
+
 
   try {
     const response = await fetch(`${API_BASE_URL}/events/${id}`, {
@@ -253,7 +253,7 @@ export async function updateEvent(formData: FormData) {
 export async function deleteEvent(id: string | number) {
   const session = await auth();
   // @ts-expect-error accessToken is not in default session type
-  if (!session?.user?.accessToken) return;
+  if (!session?.user?.accessToken) return { success: false, error: "Unauthorized" };
 
   try {
     const response = await fetch(`${API_BASE_URL}/events/${id}`, {
@@ -266,14 +266,14 @@ export async function deleteEvent(id: string | number) {
 
     if (!response.ok) {
         console.error("deleteEvent: API error", response.status, await response.text());
-        return;
+        return { success: false, error: `API Error ${response.status}` };
     }
 
-    if (response.ok) {
-        revalidatePath('/calendar');
-        revalidateTag('events', 'max');
-    }
+    revalidatePath('/calendar');
+    revalidateTag('events', 'max');
+    return { success: true };
   } catch (error) {
     console.error("Error deleting event:", error);
+    return { success: false, error: "Network error deleting event" };
   }
 }

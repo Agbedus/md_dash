@@ -29,8 +29,8 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Basic Information</h3>
         
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
             <label htmlFor="name" className="block text-sm font-medium text-zinc-400 mb-1">
               Project Name *
             </label>
@@ -133,7 +133,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Timeline</h3>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div>
             <label htmlFor="startDate" className="block text-sm font-medium text-zinc-400 mb-1">
               Start Date
@@ -143,7 +143,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
               name="startDate"
               id="startDate"
               defaultValue={defaultValues?.startDate || ''}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono"
             />
           </div>
 
@@ -156,7 +156,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
               name="endDate"
               id="endDate"
               defaultValue={defaultValues?.endDate || ''}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono"
             />
           </div>
         </div>

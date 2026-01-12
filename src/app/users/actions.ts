@@ -74,23 +74,18 @@ const API_BASE_URL = `${BASE_URL}/api/v1`;
 import { auth } from '@/auth';
 
 export async function getUsers() {
-    console.log("getUsers: Starting fetch...");
+
     const session = await auth();
-    console.log("getUsers: Session check:", { 
-        hasSession: !!session, 
-        hasUser: !!session?.user, 
-        // @ts-expect-error accessToken is not in default session type
-        hasToken: !!session?.user?.accessToken 
-    });
+
 
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
-        console.log("getUsers: No access token found.");
+
         return [];
     }
 
     try {
-        console.log(`getUsers: Fetching from ${API_BASE_URL}/users`);
+
         const response = await fetch(`${API_BASE_URL}/users`, {
             method: 'GET',
             headers: {
@@ -101,7 +96,7 @@ export async function getUsers() {
             next: { tags: ['users'], revalidate: 60 }
         });
 
-        console.log("getUsers: Response status:", response.status);
+
 
         if (!response.ok) {
             console.error("Failed to fetch users:", await response.text());
@@ -109,7 +104,7 @@ export async function getUsers() {
         }
 
         const users = await response.json();
-        console.log("getUsers: Use payload received:", JSON.stringify(users, null, 2));
+
         
         // Define interface for API response
         interface ApiUser {
