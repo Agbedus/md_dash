@@ -131,17 +131,17 @@ export default function UsersPageClient({ initialUsers, currentUser }: UsersPage
   const canDelete = userRoles.includes('super_admin');
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+      <div className="flex flex-col md:flex-row md:flex-items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Users</h1>
-          <p className="text-zinc-400 text-lg">Manage team members and their roles.</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">Users</h1>
+          <p className="text-zinc-400 text-sm md:text-lg">Manage team members and their roles.</p>
         </div>
       </div>
 
       {/* Search */}
-      <div className="glass p-4 rounded-2xl mb-8">
+      <div className="glass p-3 md:p-4 rounded-2xl mb-6 md:mb-8 hidden md:block">
         <div className="relative">
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input

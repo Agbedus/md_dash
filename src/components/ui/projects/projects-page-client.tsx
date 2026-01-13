@@ -105,30 +105,30 @@ export default function ProjectsPageClient({ initialProjects, users, clients }: 
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
       {/* Sticky Header & Controls Container */}
-      <div className="sticky top-0 z-30 -mx-8 px-8 py-4 mb-4 backdrop-blur-md">
+      <div className="sticky top-0 z-30 -mx-4 md:-mx-8 px-4 md:px-8 py-4 mb-4 backdrop-blur-md">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Projects</h1>
-            <p className="text-zinc-400 text-lg">Manage and track your ongoing projects.</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">Projects</h1>
+            <p className="text-zinc-400 text-sm md:text-lg">Manage and track your ongoing projects.</p>
           </div>
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm text-zinc-400 hover:text-white transition-all duration-200 group"
+            className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-xs md:text-sm text-zinc-400 hover:text-white transition-all duration-200 group self-start md:self-auto"
           >
             <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
-              <FiPlus className="w-4 h-4" />
+              <FiPlus className="w-3 h-3 md:w-4 md:h-4" />
             </div>
             <span className="pr-2">New Project</span>
           </button>
         </div>
 
         {/* Controls */}
-        <div className="glass p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-4 w-full md:w-auto flex-1">
-            <div className="relative flex-1 md:max-w-md">
+        <div className="glass p-3 md:p-4 rounded-2xl flex flex-col md:flex-row gap-3 md:gap-4 items-stretch md:items-center justify-between">
+          <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto flex-1 overflow-x-auto scrollbar-hide pb-1">
+            <div className="relative flex-1 md:max-w-md hidden md:block">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
               <input
                 type="text"
@@ -138,12 +138,12 @@ export default function ProjectsPageClient({ initialProjects, users, clients }: 
                 className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
               />
             </div>
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-8 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
+                className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-8 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer text-xs md:text-sm"
               >
                 <option value="all">All Status</option>
                 <option value="planning">Planning</option>
@@ -154,18 +154,18 @@ export default function ProjectsPageClient({ initialProjects, users, clients }: 
             </div>
           </div>
 
-          <div className="flex items-center bg-white/5 rounded-xl border border-white/10 p-1">
+          <div className="flex items-center bg-white/5 rounded-xl border border-white/10 p-1 self-end md:self-auto">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+              className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
             >
-              <FiGrid className="w-4 h-4" />
+              <FiGrid className="w-3 h-3 md:w-4 md:h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
+              className={`p-1.5 md:p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
             >
-              <FiList className="w-4 h-4" />
+              <FiList className="w-3 h-3 md:w-4 md:h-4" />
             </button>
           </div>
         </div>

@@ -60,11 +60,13 @@ const Sidebar = ({ user }: SidebarProps) => {
     isExpandedDesktop ? "hidden" : "block"
   }`;
 
-  const iconSpacingClass = `${isExpandedMobile ? "gap-4" : ""} md:${
+  // Mobile: smaller spacing, Desktop: normal spacing
+  const iconSpacingClass = `${isExpandedMobile ? "gap-3 md:gap-4" : ""} md:${
     isExpandedDesktop ? "gap-4" : ""
   }`;
 
-  const iconSizeClass = `${isExpandedMobile ? "text-base" : "text-xl"} md:${
+  // Mobile: smaller icons, Desktop: normal icons
+  const iconSizeClass = `${isExpandedMobile ? "text-sm md:text-base" : "text-lg md:text-xl"} md:${
     isExpandedDesktop ? "text-base" : "text-xl"
   }`;
 
@@ -86,8 +88,9 @@ const Sidebar = ({ user }: SidebarProps) => {
     py-4 px-0.5
   `;
 
+  // Mobile: smaller padding, Desktop: normal padding
   const baseLinkClasses =
-    "flex items-center py-2 rounded-lg transition-all duration-200 font-light text-sm hover:bg-white/5 hover:text-white whitespace-nowrap";
+    "flex items-center py-1.5 md:py-2 rounded-lg transition-all duration-200 font-light text-sm hover:bg-white/5 hover:text-white whitespace-nowrap";
 
   const activeLinkClasses =
     "bg-white/10 text-white border border-white/10 font-medium";

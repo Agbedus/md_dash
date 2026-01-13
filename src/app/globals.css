@@ -6,8 +6,12 @@
 }
 
 @keyframes spinner {
-  0% { opacity: 1; }
-  100% { opacity: 0.15; }
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.15;
+  }
 }
 
 .animate-spinner {
@@ -85,7 +89,9 @@ body {
 
 /* Scrollbar styling: hide visible scrollbars globally while preserving scroll behavior */
 /* Firefox */
-html, body, * {
+html,
+body,
+* {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }
@@ -95,4 +101,14 @@ html, body, * {
   width: 0px;
   height: 0px;
   background: transparent;
+}
+
+/* Utility class for hiding scrollbars on specific elements */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

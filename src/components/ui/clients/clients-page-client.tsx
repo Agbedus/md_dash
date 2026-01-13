@@ -112,26 +112,25 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Clients</h1>
-          <p className="text-zinc-400 text-lg">Manage client companies and contacts.</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">Clients</h1>
+          <p className="text-zinc-400 text-sm md:text-lg">Manage client companies and contacts.</p>
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm text-zinc-400 hover:text-white transition-all duration-200 group"
-        >
+          className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-xs md:text-sm text-zinc-400 hover:text-white transition-all duration-200 group self-start md:self-auto">
           <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
-            <FiPlus className="w-4 h-4" />
+            <FiPlus className="w-3 h-3 md:w-4 md:h-4" />
           </div>
           <span className="pr-2">New Client</span>
         </button>
       </div>
 
       {/* Search */}
-      <div className="glass p-4 rounded-2xl mb-8">
+      <div className="glass p-3 md:p-4 rounded-2xl mb-6 md:mb-8 hidden md:block">
         <div className="relative">
           <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input

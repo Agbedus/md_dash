@@ -233,18 +233,18 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
     }, [optimisticNotes, filterType, searchQuery]);
 
     return (
-        <div className="flex flex-col h-screen p-8 max-w-7xl mx-auto text-white">
+        <div className="flex flex-col h-screen p-4 md:p-8 max-w-7xl mx-auto text-white">
             {/* Non-scrolling Header */}
             <div>
                 {/* Page Header */}
-                <div className="mb-10">
-                    <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Notes</h1>
-                    <p className="text-zinc-400 text-lg">Create, organize, and manage your notes.</p>
+                <div className="mb-6 md:mb-10">
+                    <h1 className="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">Notes</h1>
+                    <p className="text-zinc-400 text-sm md:text-lg">Create, organize, and manage your notes.</p>
                 </div>
 
                 {/* Controls Bar */}
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-                    <div className="relative flex-1 md:flex-none md:w-64">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
+                    <div className="relative flex-1 md:flex-none md:w-64 hidden md:block">
                         <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                         <input
                             type="text"
@@ -255,27 +255,28 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                         />
                     </div>
                     
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 md:gap-4 ml-auto">
                         <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10">
-                            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Grid view">
-                                <FiGrid className="w-5 h-5" />
+                            <button onClick={() => setViewMode('grid')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Grid view">
+                                <FiGrid className="w-4 h-4 md:w-5 md:h-5" />
                             </button>
-                            <button onClick={() => setViewMode('table')} className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Table view">
-                                <FiList className="w-5 h-5" />
+                            <button onClick={() => setViewMode('table')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Table view">
+                                <FiList className="w-4 h-4 md:w-5 md:h-5" />
                             </button>
                         </div>
 
-                        <button onClick={() => setIsModalOpen(true)} className="flex items-center px-5 py-2.5 border border-white/10 text-sm font-medium text-white rounded-xl bg-white/5 hover:bg-white/10 transition-all hover-scale">
-                            <FiPlus className="mr-2" />
-                            Add new note
+                        <button onClick={() => setIsModalOpen(true)} className="flex items-center px-3 md:px-5 py-2 md:py-2.5 border border-white/10 text-xs md:text-sm font-medium text-white rounded-xl bg-white/5 hover:bg-white/10 transition-all hover-scale">
+                            <FiPlus className="mr-1 md:mr-2" />
+                            <span className="hidden sm:inline">Add new note</span>
+                            <span className="sm:hidden">Add</span>
                         </button>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 mb-8">
+                <div className="flex overflow-x-auto scrollbar-hide gap-2 mb-6 md:mb-8 pb-2">
                     <button
                         onClick={() => setFilterType('all')}
-                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all hover-scale ${filterType === 'all' ? 'bg-white text-black' : 'bg-white/10 text-zinc-300 hover:bg-white/20'}`}>
+                        className={`px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-all hover-scale whitespace-nowrap flex-shrink-0 ${filterType === 'all' ? 'bg-white text-black' : 'bg-white/10 text-zinc-300 hover:bg-white/20'}`}>
                         All Notes
                     </button>
                     {noteTypes.map(type => {
@@ -284,7 +285,7 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                             <button 
                                 key={type} 
                                 onClick={() => setFilterType(type)} 
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all hover-scale ${filterType === type ? 'bg-white text-black' : 'bg-white/10 text-zinc-300 hover:bg-white/20'}`}>
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-all hover-scale whitespace-nowrap flex-shrink-0 ${filterType === type ? 'bg-white text-black' : 'bg-white/10 text-zinc-300 hover:bg-white/20'}`}>
                                 {Icon && <Icon className={`${filterType === type ? 'text-black' : (noteTypeColors[type] || 'text-zinc-400')}`} />}
                                 <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
                             </button>
