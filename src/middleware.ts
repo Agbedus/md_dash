@@ -11,7 +11,7 @@ export default auth((req) => {
 
     if (isAuthRoute) {
         if (isLoggedIn) {
-            return Response.redirect(new URL('/dashboard', nextUrl));
+            return Response.redirect(new URL('/', nextUrl));
         }
         return;
     }
@@ -24,7 +24,7 @@ export default auth((req) => {
     if (isUsers) {
         const hasAccess = req.auth?.user?.roles?.some(role => ['super_admin', 'manager'].includes(role));
         if (!hasAccess) {
-             return Response.redirect(new URL('/dashboard', nextUrl));
+             return Response.redirect(new URL('/', nextUrl));
         }
     }
 });

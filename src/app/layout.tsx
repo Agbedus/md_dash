@@ -4,6 +4,8 @@ import "./globals.css";
 import Sidebar from "@/components/ui/sidebar";
 import TopNav from "@/components/ui/topnav";
 import Content from "@/components/ui/content";
+import DashboardLayout from "@/components/ui/dashboard-layout";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,13 +35,12 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex h-screen">
-          <Sidebar user={session?.user} />
-          <div className="flex-1 flex flex-col">
-            <TopNav user={session?.user} />
-            <Content>{children}</Content>
-          </div>
-        </div>
+        <DashboardLayout 
+          sidebar={<Sidebar user={session?.user} />}
+          topnav={<TopNav user={session?.user} />}
+        >
+          {children}
+        </DashboardLayout>
       </body>
     </html>
   );

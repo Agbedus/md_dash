@@ -24,7 +24,7 @@ export const authConfig = {
       } else if (isLoggedIn) {
         // Redirect authenticated users to dashboard page if they visit login or home
         if (nextUrl.pathname === '/login') {
-             return Response.redirect(new URL('/dashboard', nextUrl));
+             return Response.redirect(new URL('/', nextUrl));
         }
       }
       return true;

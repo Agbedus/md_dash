@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { FaBell, FaSearch, FaUser, FaCog, FaSignOutAlt } from 'react-icons/fa';
 import Link from 'next/link';
 import { logout } from '@/app/lib/actions';
+import { useDashboard } from './dashboard-layout';
+import { FiMenu, FiX } from 'react-icons/fi';
 
 interface TopNavProps {
   user?: {
@@ -20,6 +22,7 @@ const TopNav = ({ user }: TopNavProps) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const { isMobileExpanded, setIsMobileExpanded } = useDashboard();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -38,8 +41,14 @@ const TopNav = ({ user }: TopNavProps) => {
   }, []);
 
   return (
-    <nav className="h-24 px-8 flex items-center justify-between sticky top-0 z-40">
-      <div className="flex items-center flex-1">
+    <nav className="h-20 md:h-24 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-xl">
+      <div className="flex items-center gap-4 flex-1">
+        <button 
+          onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+          className="md:hidden p-2 text-zinc-400 hover:text-white transition-colors"
+        >
+          {isMobileExpanded ? <FiX className="text-2xl" /> : <FiMenu className="text-2xl" />}
+        </button>
         <h1 className="text-2xl font-bold text-white tracking-tight"></h1>
       </div>
 

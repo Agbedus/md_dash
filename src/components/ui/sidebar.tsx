@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { useDashboard } from './dashboard-layout';
 import { 
     FiHome, 
     FiFileText, 
@@ -15,7 +16,8 @@ import {
     FiClock, 
     FiLogOut,
     FiBriefcase,
-    FiUsers
+    FiUsers,
+    FiMenu
 } from 'react-icons/fi';
 import { LuPanelLeftClose, LuPanelLeftOpen } from "react-icons/lu";
 
@@ -32,7 +34,10 @@ interface SidebarProps {
 
 const Sidebar = ({ user }: SidebarProps) => {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isMobileExpanded, setIsMobileExpanded, isDesktopCollapsed, setIsDesktopCollapsed } = useDashboard();
+  
+  const isCollapsed = isDesktopCollapsed;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const baseLinkClasses =
     "flex items-center py-2 px-4 rounded-xl transition-all duration-200 font-light text-sm hover:bg-white/5 hover:text-white hover-scale whitespace-nowrap";
@@ -42,12 +47,12 @@ const Sidebar = ({ user }: SidebarProps) => {
 
   return (
     <div 
-        className={`glass border-r border-white/5 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-all duration-300 ease-in-out flex flex-col z-20 ${
-            isCollapsed ? 'w-20' : 'w-64'
-        }`}
+        className={`glass border-r border-white/5 fixed md:relative inset-y-0 left-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col z-40 ${
+            isMobileExpanded ? 'w-[250px] translate-x-0' : (isCollapsed ? 'w-20' : 'w-64 md:translate-x-0 -translate-x-full')
+        } ${!isMobileExpanded && 'md:translate-x-0'}`}
     >
       <div className={`h-16 flex items-center border-b border-white/5 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'justify-between px-6'}`}>
-        {!isCollapsed && (
+        {(!isCollapsed || isMobileExpanded) && (
             <Link href="/" className="flex items-center gap-3 hover-scale">
             <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
                 <FiLayers className="text-lg text-white" />
@@ -57,14 +62,20 @@ const Sidebar = ({ user }: SidebarProps) => {
             </span>
             </Link>
         )}
-        {isCollapsed && (
+        {(isCollapsed && !isMobileExpanded) && (
              <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
                 <FiLayers className="text-lg text-white" />
             </div>
         )}
         
         <button 
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            onClick={() => {
+                if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                    setIsMobileExpanded(!isMobileExpanded);
+                } else {
+                    setIsDesktopCollapsed(!isDesktopCollapsed);
+                }
+            }}
             className="text-zinc-400 hover:text-white transition-colors p-1"
         >
             {isCollapsed ? <LuPanelLeftOpen className="text-xl" /> : <LuPanelLeftClose className="text-xl" />}
@@ -72,9 +83,8 @@ const Sidebar = ({ user }: SidebarProps) => {
       </div>
 
       <div className="px-3 space-y-6 flex-1 overflow-y-auto py-4 overflow-x-hidden">
-        {/* ... existing menu items ... */}
         <div>
-          {!isCollapsed && (
+          {(!isCollapsed || isMobileExpanded) && (
               <h3 className="px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300">
                 Menu
               </h3>
@@ -84,57 +94,57 @@ const Sidebar = ({ user }: SidebarProps) => {
               href="/"
               className={`${baseLinkClasses} ${
                 pathname === "/" ? activeLinkClasses : inactiveLinkClasses
-              } ${isCollapsed ? 'justify-center px-2' : ''}`}
-              title={isCollapsed ? "Dashboard" : ""}
+              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+              title={(isCollapsed && !isMobileExpanded) ? "Dashboard" : ""}
             >
-              <FiHome className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-blue-400`} />
-              {!isCollapsed && "Dashboard"}
+              <FiHome className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-blue-400`} />
+              {(!isCollapsed || isMobileExpanded) && "Dashboard"}
             </Link>
             <Link
               href="/tasks"
               className={`${baseLinkClasses} ${
                 pathname === "/tasks" ? activeLinkClasses : inactiveLinkClasses
-              } ${isCollapsed ? 'justify-center px-2' : ''}`}
-              title={isCollapsed ? "Tasks" : ""}
+              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+              title={(isCollapsed && !isMobileExpanded) ? "Tasks" : ""}
             >
-              <FiCheckSquare className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-purple-400`} />
-              {!isCollapsed && "Tasks"}
+              <FiCheckSquare className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-purple-400`} />
+              {(!isCollapsed || isMobileExpanded) && "Tasks"}
             </Link>
             <Link
               href="/projects"
               className={`${baseLinkClasses} ${
                 pathname === "/projects" ? activeLinkClasses : inactiveLinkClasses
-              } ${isCollapsed ? 'justify-center px-2' : ''}`}
-              title={isCollapsed ? "Projects" : ""}
+              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+              title={(isCollapsed && !isMobileExpanded) ? "Projects" : ""}
             >
-              <FiBriefcase className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-pink-400`} />
-              {!isCollapsed && "Projects"}
+              <FiBriefcase className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-pink-400`} />
+              {(!isCollapsed || isMobileExpanded) && "Projects"}
             </Link>
             <Link
               href="/notes"
               className={`${baseLinkClasses} ${
                 pathname === "/notes" ? activeLinkClasses : inactiveLinkClasses
-              } ${isCollapsed ? 'justify-center px-2' : ''}`}
-              title={isCollapsed ? "Notes" : ""}
+              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+              title={(isCollapsed && !isMobileExpanded) ? "Notes" : ""}
             >
-              <FiFileText className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-yellow-400`} />
-              {!isCollapsed && "Notes"}
+              <FiFileText className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-yellow-400`} />
+              {(!isCollapsed || isMobileExpanded) && "Notes"}
             </Link>
             <Link
               href="/calendar"
               className={`${baseLinkClasses} ${
                 pathname === "/calendar" ? activeLinkClasses : inactiveLinkClasses
-              } ${isCollapsed ? 'justify-center px-2' : ''}`}
-              title={isCollapsed ? "Calendar" : ""}
+              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+              title={(isCollapsed && !isMobileExpanded) ? "Calendar" : ""}
             >
-              <FiCalendar className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-green-400`} />
-              {!isCollapsed && "Calendar"}
+              <FiCalendar className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-green-400`} />
+              {(!isCollapsed || isMobileExpanded) && "Calendar"}
             </Link>
           </nav>
         </div>
 
         <div>
-          {!isCollapsed && (
+          {(!isCollapsed || isMobileExpanded) && (
               <h3 className="px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300">
                 Tools
               </h3>
@@ -144,31 +154,31 @@ const Sidebar = ({ user }: SidebarProps) => {
               href="/focus"
               className={`${baseLinkClasses} ${
                 pathname === "/focus" ? activeLinkClasses : inactiveLinkClasses
-              } ${isCollapsed ? 'justify-center px-2' : ''}`}
-              title={isCollapsed ? "Focus Mode" : ""}
+              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+              title={(isCollapsed && !isMobileExpanded) ? "Focus Mode" : ""}
             >
-              <FiClock className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-orange-400`} />
-              {!isCollapsed && "Focus Mode"}
+              <FiClock className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-orange-400`} />
+              {(!isCollapsed || isMobileExpanded) && "Focus Mode"}
             </Link>
             <Link
               href="/assistant"
               className={`${baseLinkClasses} ${
                 pathname === "/assistant" ? activeLinkClasses : inactiveLinkClasses
-              } ${isCollapsed ? 'justify-center px-2' : ''}`}
-              title={isCollapsed ? "AI Assistant" : ""}
+              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+              title={(isCollapsed && !isMobileExpanded) ? "AI Assistant" : ""}
             >
-              <FiCpu className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-cyan-400`} />
-              {!isCollapsed && "AI Assistant"}
+              <FiCpu className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-cyan-400`} />
+              {(!isCollapsed || isMobileExpanded) && "AI Assistant"}
             </Link>
             <Link
               href="/settings"
               className={`${baseLinkClasses} ${
                 pathname === "/settings" ? activeLinkClasses : inactiveLinkClasses
-              } ${isCollapsed ? 'justify-center px-2' : ''}`}
-              title={isCollapsed ? "Settings" : ""}
+              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+              title={(isCollapsed && !isMobileExpanded) ? "Settings" : ""}
             >
-              <FiSettings className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-indigo-400`} />
-              {!isCollapsed && "Settings"}
+              <FiSettings className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-indigo-400`} />
+              {(!isCollapsed || isMobileExpanded) && "Settings"}
             </Link>
             {(user?.roles?.some(r => ['super_admin', 'admin'].includes(r))) && (
               <>
@@ -176,21 +186,21 @@ const Sidebar = ({ user }: SidebarProps) => {
                   href="/users"
                   className={`${baseLinkClasses} ${
                     pathname === "/users" ? activeLinkClasses : inactiveLinkClasses
-                  } ${isCollapsed ? 'justify-center px-2' : ''}`}
-                  title={isCollapsed ? "Users" : ""}
+                  } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+                  title={(isCollapsed && !isMobileExpanded) ? "Users" : ""}
                 >
-                  <FiUsers className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-teal-400`} />
-                  {!isCollapsed && "Users"}
+                  <FiUsers className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-teal-400`} />
+                  {(!isCollapsed || isMobileExpanded) && "Users"}
                 </Link>
                 <Link
                   href="/clients"
                   className={`${baseLinkClasses} ${
                     pathname === "/clients" ? activeLinkClasses : inactiveLinkClasses
-                  } ${isCollapsed ? 'justify-center px-2' : ''}`}
-                  title={isCollapsed ? "Clients" : ""}
+                  } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
+                  title={(isCollapsed && !isMobileExpanded) ? "Clients" : ""}
                 >
-                  <FiUsers className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} text-violet-400`} />
-                  {!isCollapsed && "Clients"}
+                  <FiUsers className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-violet-400`} />
+                  {(!isCollapsed || isMobileExpanded) && "Clients"}
                 </Link>
               </>
             )}
@@ -200,7 +210,7 @@ const Sidebar = ({ user }: SidebarProps) => {
 
       <div className="p-3 border-t border-white/5 space-y-3">
         {user && (
-            <div className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-4'} py-2 transition-all duration-300`}>
+            <div className={`flex items-center ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-0' : 'px-4'} py-2 transition-all duration-300`}>
                 {user.image ? (
                     <div className="relative w-8 h-8 flex-shrink-0">
                         <Image 
@@ -215,7 +225,7 @@ const Sidebar = ({ user }: SidebarProps) => {
                         {(user.name || user.email || '?').charAt(0).toUpperCase()}
                     </div>
                 )}
-                {!isCollapsed && (
+                {(!isCollapsed || isMobileExpanded) && (
                     <div className="ml-3 overflow-hidden transition-opacity duration-300">
                         <p className="text-sm font-medium text-white truncate">{user.name || 'User'}</p>
                         <p className="text-xs text-zinc-500 truncate capitalize">{user.roles?.[0]?.replace('_', ' ') || 'Member'}</p>
@@ -226,20 +236,20 @@ const Sidebar = ({ user }: SidebarProps) => {
         {user ? (
             <button 
                 onClick={() => logout()} 
-                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 hover-scale ${isCollapsed ? 'justify-center px-2' : 'px-4'}`}
-                title={isCollapsed ? "Sign Out" : ""}
+                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 hover-scale ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : 'px-4'}`}
+                title={(isCollapsed && !isMobileExpanded) ? "Sign Out" : ""}
             >
-            <FiLogOut className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'}`} />
-            {!isCollapsed && "Sign Out"}
+            <FiLogOut className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'}`} />
+            {(!isCollapsed || isMobileExpanded) && "Sign Out"}
             </button>
         ) : (
             <Link 
                 href="/login" 
-                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-emerald-500/10 hover:text-emerald-400 transition-all duration-200 hover-scale ${isCollapsed ? 'justify-center px-2' : 'px-4'}`}
-                title={isCollapsed ? "Login" : ""}
+                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-emerald-500/10 hover:text-emerald-400 transition-all duration-200 hover-scale ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : 'px-4'}`}
+                title={(isCollapsed && !isMobileExpanded) ? "Login" : ""}
             >
-            <FiLogOut className={`${isCollapsed ? 'text-xl' : 'mr-3 text-base'} rotate-180`} />
-            {!isCollapsed && "Login"}
+            <FiLogOut className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} rotate-180`} />
+            {(!isCollapsed || isMobileExpanded) && "Login"}
             </Link>
         )}
       </div>

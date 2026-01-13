@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { authenticate } from '@/app/lib/actions';
-import { FiMail, FiLock, FiArrowRight, FiAlertCircle } from 'react-icons/fi';
+import { FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLoader } from 'react-icons/fi';
 
 export default function LoginForm() {
   const [errorMessage, dispatch, isPending] = useActionState(authenticate, undefined);
@@ -77,11 +77,17 @@ export default function LoginForm() {
         )}
       </div>
       <button
-        className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        className="w-full flex justify-center items-center py-3 px-4 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover-scale"
         aria-disabled={isPending}
         disabled={isPending}
       >
-        Sign in <FiArrowRight className="ml-2 h-4 w-4" />
+        {isPending ? (
+          <FiLoader className="animate-spin h-5 w-5" />
+        ) : (
+          <>
+            Sign in <FiArrowRight className="ml-2 h-4 w-4" />
+          </>
+        )}
       </button>
     </form>
   );
