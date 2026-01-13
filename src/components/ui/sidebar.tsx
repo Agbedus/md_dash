@@ -50,9 +50,8 @@ const Sidebar = ({ user }: SidebarProps) => {
     isExpandedDesktop ? "w-64" : "w-20"
   }`;
 
-  const itemAlignmentClass = `${isExpandedMobile ? "justify-start px-6" : "justify-center px-0"} md:${
-    isExpandedDesktop ? "justify-start px-6" : "justify-center px-0"
-  }`;
+  // Always left-aligned with consistent padding
+  const itemAlignmentClass = "justify-start px-6";
 
   const contentVisibilityClass = `${isExpandedMobile ? "block" : "hidden"} md:${
     isExpandedDesktop ? "block" : "hidden"
@@ -70,28 +69,22 @@ const Sidebar = ({ user }: SidebarProps) => {
     isExpandedDesktop ? "text-base" : "text-xl"
   }`;
 
-  /* ---------- Header (example 1) ---------- */
+  /* ---------- Header ---------- */
 
   const headerClass = `
     h-20 flex items-center border-b border-white/5 transition-all duration-300
-    ${isExpandedMobile ? "justify-between px-6" : "justify-center px-4"}
-    md:${isExpandedDesktop ? "justify-between px-6" : "justify-center px-4"}
+    justify-start px-6
   `;
 
   const headerInnerClass = `
     flex items-center w-full
-    ${isExpandedMobile ? "justify-between" : "justify-center"}
-    md:${isExpandedDesktop ? "justify-between" : "justify-center"}
+    ${isExpandedMobile || isExpandedDesktop ? "justify-between" : "justify-start gap-2"}
   `;
 
-  /* ---------- Menu container (UPDATED) ---------- */
-  // ✅ padded
-  // ✅ stays near top
-  // ❌ no bottom pinning
-
+  /* ---------- Menu container ---------- */
   const menuContainerClass = `
     flex-1 overflow-y-auto overflow-x-hidden
-    px-2 py-4
+    py-4
   `;
 
   const baseLinkClasses =
