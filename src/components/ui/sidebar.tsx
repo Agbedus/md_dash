@@ -17,7 +17,6 @@ import {
   FiLogOut,
   FiBriefcase,
   FiUsers,
-  FiMenu,
 } from "react-icons/fi";
 
 import { logout } from "@/app/lib/actions";
@@ -61,8 +60,8 @@ const Sidebar = ({ user }: SidebarProps) => {
     isExpandedDesktop ? "hidden" : "block"
   }`;
 
-  const iconSpacingClass = `${isExpandedMobile ? "gap-6" : ""} md:${
-    isExpandedDesktop ? "gap-6" : ""
+  const iconSpacingClass = `${isExpandedMobile ? "gap-4" : ""} md:${
+    isExpandedDesktop ? "gap-4" : ""
   }`;
 
   const iconSizeClass = `${isExpandedMobile ? "text-base" : "text-xl"} md:${
@@ -84,11 +83,11 @@ const Sidebar = ({ user }: SidebarProps) => {
   /* ---------- Menu container ---------- */
   const menuContainerClass = `
     flex-1 overflow-y-auto overflow-x-hidden
-    py-4
+    py-4 px-0.5
   `;
 
   const baseLinkClasses =
-    "flex items-center py-2 rounded-xl transition-all duration-200 font-light text-sm hover:bg-white/5 hover:text-white whitespace-nowrap";
+    "flex items-center py-2 rounded-lg transition-all duration-200 font-light text-sm hover:bg-white/5 hover:text-white whitespace-nowrap";
 
   const activeLinkClasses =
     "bg-white/10 text-white border border-white/10 font-medium";
@@ -131,15 +130,6 @@ const Sidebar = ({ user }: SidebarProps) => {
       {/* ---------- Header ---------- */}
       <div className={headerClass}>
         <div className={headerInnerClass}>
-          <Link href="/" className="flex items-center gap-3">
-            <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
-              <FiLayers className="text-lg text-white" />
-            </div>
-            <span className={`text-xl font-bold text-white ${contentVisibilityClass}`}>
-              MD<span className="text-emerald-500">*</span>
-            </span>
-          </Link>
-
           <button
             onClick={() => {
               if (typeof window !== "undefined" && window.innerWidth < 768) {
@@ -148,9 +138,14 @@ const Sidebar = ({ user }: SidebarProps) => {
                 setIsDesktopCollapsed(!isDesktopCollapsed);
               }
             }}
-            className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5"
+            className="flex items-center gap-3 hover-scale focus:outline-none"
           >
-            <FiMenu className="text-xl" />
+            <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
+              <FiLayers className="text-lg text-white" />
+            </div>
+            <span className={`text-xl font-bold text-white ${contentVisibilityClass}`}>
+              MD<span className="text-emerald-500">*</span>
+            </span>
           </button>
         </div>
       </div>
@@ -162,14 +157,14 @@ const Sidebar = ({ user }: SidebarProps) => {
         >
           Menu
         </h3>
-        <nav className="space-y-1">{mainMenuItems.map(renderMenuItem)}</nav>
+        <nav className="space-y-2">{mainMenuItems.map(renderMenuItem)}</nav>
 
         <h3
           className={`px-6 mt-6 text-[10px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
         >
           Tools
         </h3>
-        <nav className="space-y-1">
+        <nav className="space-y-2">
           {toolMenuItems.map(renderMenuItem)}
 
           {user?.roles?.some((r) => ["admin", "super_admin"].includes(r)) && (
