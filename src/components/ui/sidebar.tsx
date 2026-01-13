@@ -17,8 +17,8 @@ import {
   FiLogOut,
   FiBriefcase,
   FiUsers,
+  FiMenu,
 } from "react-icons/fi";
-import { LuPanelLeftClose, LuPanelLeftOpen } from "react-icons/lu";
 
 import { logout } from "@/app/lib/actions";
 
@@ -61,8 +61,8 @@ const Sidebar = ({ user }: SidebarProps) => {
     isExpandedDesktop ? "hidden" : "block"
   }`;
 
-  const iconSpacingClass = `${isExpandedMobile ? "gap-4" : ""} md:${
-    isExpandedDesktop ? "gap-4" : ""
+  const iconSpacingClass = `${isExpandedMobile ? "gap-6" : ""} md:${
+    isExpandedDesktop ? "gap-6" : ""
   }`;
 
   const iconSizeClass = `${isExpandedMobile ? "text-base" : "text-xl"} md:${
@@ -150,12 +150,7 @@ const Sidebar = ({ user }: SidebarProps) => {
             }}
             className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5"
           >
-            <span className={contentVisibilityClass}>
-              <LuPanelLeftClose className="text-xl" />
-            </span>
-            <span className={inverseContentVisibilityClass}>
-              <LuPanelLeftOpen className="text-xl" />
-            </span>
+            <FiMenu className="text-xl" />
           </button>
         </div>
       </div>
