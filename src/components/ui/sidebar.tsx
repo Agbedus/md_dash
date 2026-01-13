@@ -47,11 +47,12 @@ const Sidebar = ({ user }: SidebarProps) => {
   // Desktop Default: w-64 (Expanded) | Desktop Collapsed: w-20
   
   const widthClass = `${isMobileExpanded ? 'w-64' : 'w-20'} md:${isDesktopCollapsed ? 'w-20' : 'w-64'}`;
-  const itemJustifyClass = `${isMobileExpanded ? 'justify-start px-4' : 'justify-center px-2'} md:${isDesktopCollapsed ? 'justify-center px-2' : 'justify-start px-4'}`;
+  const itemAlignmentClass = `${isMobileExpanded ? 'justify-start px-6' : 'justify-center px-0'} md:${isDesktopCollapsed ? 'justify-center px-0' : 'justify-start px-6'}`;
   const contentVisibilityClass = `${isMobileExpanded ? 'block' : 'hidden'} md:${isDesktopCollapsed ? 'hidden' : 'block'}`;
   const inverseContentVisibilityClass = `${isMobileExpanded ? 'hidden' : 'block'} md:${isDesktopCollapsed ? 'block' : 'hidden'}`;
-  const iconClass = `${isMobileExpanded ? 'mr-3 text-base' : 'text-xl'} md:${isDesktopCollapsed ? 'text-xl' : 'mr-3 text-base'}`;
-  const headerPaddingClass = `${isMobileExpanded ? 'justify-between px-6' : 'justify-center px-0'} md:${isDesktopCollapsed ? 'justify-center px-0' : 'justify-between px-6'}`;
+  const iconSpacingClass = `${isMobileExpanded ? 'gap-4' : ''} md:${isDesktopCollapsed ? '' : 'gap-4'}`;
+  const iconSizeClass = `${isMobileExpanded ? 'text-base' : 'text-xl'} md:${isDesktopCollapsed ? 'text-xl' : 'text-base'}`;
+  const headerPaddingClass = `${isMobileExpanded ? 'px-6' : 'px-0'} md:${isDesktopCollapsed ? 'px-0' : 'px-6'}`;
 
   // Menu Items Config
   const mainMenuItems = [
@@ -72,9 +73,9 @@ const Sidebar = ({ user }: SidebarProps) => {
     <Link
       key={item.href}
       href={item.href}
-      className={`${baseLinkClasses} ${pathname === item.href ? activeLinkClasses : inactiveLinkClasses} ${itemJustifyClass}`}
+      className={`${baseLinkClasses} ${pathname === item.href ? activeLinkClasses : inactiveLinkClasses} ${itemAlignmentClass} ${iconSpacingClass}`}
     >
-      <item.icon className={`${iconClass} ${item.color}`} />
+      <item.icon className={`flex-shrink-0 ${iconSizeClass} ${item.color}`} />
       <span className={contentVisibilityClass}>{item.label}</span>
     </Link>
   );
@@ -83,45 +84,42 @@ const Sidebar = ({ user }: SidebarProps) => {
     <div 
         className={`glass border-r border-white/5 relative inset-y-0 left-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col z-40 h-full ${widthClass}`}
     >
-      <div className={`h-16 flex items-center border-b border-white/5 transition-all duration-300 ${headerPaddingClass}`}>
-        
-        {/* Full Logo */}
-        <div className={contentVisibilityClass}>
-            <Link href="/" className="flex items-center gap-3 hover-scale">
-            <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
-                <FiLayers className="text-lg text-white" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-white">
-                MD<span className="text-emerald-500">*</span>
-            </span>
+      <div className={`h-20 flex items-center border-b border-white/5 transition-all duration-300 ${headerPaddingClass} ${isDesktopCollapsed && !isMobileExpanded ? 'justify-center' : 'justify-start'}`}>
+        <div className={`flex items-center gap-2 ${contentVisibilityClass !== 'hidden' ? 'w-full justify-between' : ''}`}>
+            {/* Logo Group */}
+            <Link href="/" className="flex items-center gap-3 hover-scale flex-shrink-0">
+                <div className="p-1.5 bg-white/5 rounded-lg border border-white/10 flex-shrink-0">
+                    <FiLayers className="text-lg text-white" />
+                </div>
+                <span className={`text-xl font-bold tracking-tight text-white ${contentVisibilityClass}`}>
+                    MD<span className="text-emerald-500">*</span>
+                </span>
             </Link>
-        </div>
 
-        {/* Collapsed Logo */}
-        <div className={inverseContentVisibilityClass}>
-             <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
-                <FiLayers className="text-lg text-white" />
-            </div>
+            {/* Toggle Button */}
+            <button 
+                onClick={() => {
+                    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                        setIsMobileExpanded(!isMobileExpanded);
+                    } else {
+                        setIsDesktopCollapsed(!isDesktopCollapsed);
+                    }
+                }}
+                className="text-zinc-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/5 flex-shrink-0"
+            >
+                <div className={contentVisibilityClass}>
+                    <LuPanelLeftClose className="text-xl" />
+                </div>
+                <div className={inverseContentVisibilityClass}>
+                    <LuPanelLeftOpen className="text-xl" />
+                </div>
+            </button>
         </div>
-        
-        <button 
-            onClick={() => {
-                if (typeof window !== 'undefined' && window.innerWidth < 768) {
-                    setIsMobileExpanded(!isMobileExpanded);
-                } else {
-                    setIsDesktopCollapsed(!isDesktopCollapsed);
-                }
-            }}
-            className="text-zinc-400 hover:text-white transition-colors p-1"
-        >
-            <LuPanelLeftOpen className={`text-xl ${inverseContentVisibilityClass}`} />
-            <LuPanelLeftClose className={`text-xl ${contentVisibilityClass}`} />
-        </button>
       </div>
 
-      <div className="px-3 space-y-6 flex-1 overflow-y-auto py-4 overflow-x-hidden">
+      <div className="space-y-6 flex-1 overflow-y-auto py-4 overflow-x-hidden">
         <div>
-           <h3 className={`px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300 ${contentVisibilityClass}`}>
+           <h3 className={`px-6 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300 ${contentVisibilityClass}`}>
                 Menu
             </h3>
           <nav className="space-y-1">
@@ -130,7 +128,7 @@ const Sidebar = ({ user }: SidebarProps) => {
         </div>
 
         <div>
-           <h3 className={`px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300 ${contentVisibilityClass}`}>
+           <h3 className={`px-6 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300 ${contentVisibilityClass}`}>
                 Tools
             </h3>
           <nav className="space-y-1">
@@ -139,16 +137,16 @@ const Sidebar = ({ user }: SidebarProps) => {
                 <>
                 <Link
                   href="/users"
-                  className={`${baseLinkClasses} ${pathname === "/users" ? activeLinkClasses : inactiveLinkClasses} ${itemJustifyClass}`}
+                  className={`${baseLinkClasses} ${pathname === "/users" ? activeLinkClasses : inactiveLinkClasses} ${itemAlignmentClass} ${iconSpacingClass}`}
                 >
-                  <FiUsers className={`${iconClass} text-teal-400`} />
+                  <FiUsers className={`${iconSizeClass} text-teal-400 flex-shrink-0`} />
                   <span className={contentVisibilityClass}>Users</span>
                 </Link>
                 <Link
                   href="/clients"
-                  className={`${baseLinkClasses} ${pathname === "/clients" ? activeLinkClasses : inactiveLinkClasses} ${itemJustifyClass}`}
+                  className={`${baseLinkClasses} ${pathname === "/clients" ? activeLinkClasses : inactiveLinkClasses} ${itemAlignmentClass} ${iconSpacingClass}`}
                 >
-                  <FiUsers className={`${iconClass} text-violet-400`} />
+                  <FiUsers className={`${iconSizeClass} text-violet-400 flex-shrink-0`} />
                   <span className={contentVisibilityClass}>Clients</span>
                 </Link>
                 </>
@@ -157,13 +155,11 @@ const Sidebar = ({ user }: SidebarProps) => {
         </div>
       </div>
 
-      <div className="p-3 border-t border-white/5 space-y-3">
+      <div className="py-3 border-t border-white/5 space-y-3">
         {user && (
-            <div className={`flex items-center ${itemJustifyClass.replace('justify-start', 'justify-between')} py-2 transition-all duration-300`}> 
-            {/* Note: Justify behavior for footer user card might differ lightly, using flex-row helpers */}
-            
+            <div className={`flex items-center ${itemAlignmentClass} py-2 transition-all duration-300 justify-between`}> 
                 {/* User Avatar */}
-                <div className={`relative w-8 h-8 flex-shrink-0 ${contentVisibilityClass !== 'hidden' ? '' : 'mx-auto'}`}>
+                <div className={`relative w-8 h-8 flex-shrink-0 ${contentVisibilityClass !== 'hidden' ? '' : 'md:block'}`}>
                     {user.image ? (
                          <Image 
                             src={user.image} 
@@ -179,7 +175,7 @@ const Sidebar = ({ user }: SidebarProps) => {
                 </div>
 
                 {/* User Info Text */}
-                <div className={`ml-3 overflow-hidden transition-opacity duration-300 ${contentVisibilityClass}`}>
+                <div className={`flex-1 ml-3 overflow-hidden transition-opacity duration-300 ${contentVisibilityClass}`}>
                     <p className="text-sm font-medium text-white truncate">{user.name || 'User'}</p>
                     <p className="text-xs text-zinc-500 truncate capitalize">{user.roles?.[0]?.replace('_', ' ') || 'Member'}</p>
                 </div>
@@ -189,17 +185,17 @@ const Sidebar = ({ user }: SidebarProps) => {
         {user ? (
             <button 
                 onClick={() => logout()} 
-                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 hover-scale ${itemJustifyClass}`}
+                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 hover-scale ${itemAlignmentClass} ${iconSpacingClass}`}
             >
-            <FiLogOut className={iconClass} />
+            <FiLogOut className={`${iconSizeClass} flex-shrink-0`} />
             <span className={contentVisibilityClass}>Sign Out</span>
             </button>
         ) : (
             <Link 
                 href="/login" 
-                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-emerald-500/10 hover:text-emerald-400 transition-all duration-200 hover-scale ${itemJustifyClass}`}
+                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-emerald-500/10 hover:text-emerald-400 transition-all duration-200 hover-scale ${itemAlignmentClass} ${iconSpacingClass}`}
             >
-            <FiLogOut className={`${iconClass} rotate-180`} />
+            <FiLogOut className={`${iconSizeClass} rotate-180 flex-shrink-0`} />
             <span className={contentVisibilityClass}>Login</span>
             </Link>
         )}

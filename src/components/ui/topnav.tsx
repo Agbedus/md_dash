@@ -47,7 +47,7 @@ const TopNav = ({ user }: TopNavProps) => {
       </div>
 
       <div className="flex items-center gap-6">
-        <div className="relative group">
+        <div className="relative group hidden md:block">
           <input
             type="text"
             placeholder="Search..."
