@@ -42,17 +42,25 @@ const Sidebar = ({ user }: SidebarProps) => {
     "bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)] border border-white/10 font-medium";
   const inactiveLinkClasses = "text-zinc-400";
 
+  // Unified expansion state for easier logic Check
+  // Note: We still use responsive classes for CSS, but these help with layout decisions
+  const isExpandedMobile = isMobileExpanded;
+  const isExpandedDesktop = !isDesktopCollapsed;
+
   // Responsive State Classes
-  // Mobile Default: w-20 (Collapsed) | Mobile Expanded: w-64
-  // Desktop Default: w-64 (Expanded) | Desktop Collapsed: w-20
+  const widthClass = `${isExpandedMobile ? 'w-64' : 'w-20'} md:${isExpandedDesktop ? 'w-64' : 'w-20'}`;
   
-  const widthClass = `${isMobileExpanded ? 'w-64' : 'w-20'} md:${isDesktopCollapsed ? 'w-20' : 'w-64'}`;
-  const itemAlignmentClass = `${isMobileExpanded ? 'justify-start px-6' : 'justify-center px-0'} md:${isDesktopCollapsed ? 'justify-center px-0' : 'justify-start px-6'}`;
-  const contentVisibilityClass = `${isMobileExpanded ? 'block' : 'hidden'} md:${isDesktopCollapsed ? 'hidden' : 'block'}`;
-  const inverseContentVisibilityClass = `${isMobileExpanded ? 'hidden' : 'block'} md:${isDesktopCollapsed ? 'block' : 'hidden'}`;
-  const iconSpacingClass = `${isMobileExpanded ? 'gap-4' : ''} md:${isDesktopCollapsed ? '' : 'gap-4'}`;
-  const iconSizeClass = `${isMobileExpanded ? 'text-base' : 'text-xl'} md:${isDesktopCollapsed ? 'text-xl' : 'text-base'}`;
-  const headerPaddingClass = `${isMobileExpanded ? 'px-6' : 'px-0'} md:${isDesktopCollapsed ? 'px-0' : 'px-6'}`;
+  const itemAlignmentClass = `${isExpandedMobile ? 'justify-start px-6' : 'justify-center px-0'} md:${isExpandedDesktop ? 'justify-start px-6' : 'justify-center px-0'}`;
+  
+  const contentVisibilityClass = `${isExpandedMobile ? 'block' : 'hidden'} md:${isExpandedDesktop ? 'block' : 'hidden'}`;
+  
+  const inverseContentVisibilityClass = `${isExpandedMobile ? 'hidden' : 'block'} md:${isExpandedDesktop ? 'hidden' : 'block'}`;
+  
+  const iconSpacingClass = `${isExpandedMobile ? 'gap-4' : ''} md:${isExpandedDesktop ? 'gap-4' : ''}`;
+  
+  const iconSizeClass = `${isExpandedMobile ? 'text-base' : 'text-xl'} md:${isExpandedDesktop ? 'text-base' : 'text-xl'}`;
+  
+  const headerPaddingClass = `${isExpandedMobile ? 'px-6' : 'px-0'} md:${isExpandedDesktop ? 'px-6' : 'px-0'}`;
 
   // Menu Items Config
   const mainMenuItems = [
@@ -84,8 +92,13 @@ const Sidebar = ({ user }: SidebarProps) => {
     <div 
         className={`glass border-r border-white/5 relative inset-y-0 left-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col z-40 h-full ${widthClass}`}
     >
-      <div className={`h-20 flex items-center border-b border-white/5 transition-all duration-300 ${headerPaddingClass} ${isDesktopCollapsed && !isMobileExpanded ? 'justify-center' : 'justify-start'}`}>
-        <div className={`flex items-center gap-2 ${contentVisibilityClass !== 'hidden' ? 'w-full justify-between' : ''}`}>
+      {/* Header Branding & Toggle */}
+      <div className={`h-20 flex items-center border-b border-white/5 transition-all duration-300 ${headerPaddingClass} ${
+          isExpandedMobile ? 'justify-between' : (isExpandedDesktop ? 'md:justify-between' : 'justify-center')
+      }`}>
+        <div className={`flex items-center gap-2 ${
+            (isExpandedMobile || isExpandedDesktop) ? 'w-full justify-between' : 'justify-center'
+        }`}>
             {/* Logo Group */}
             <Link href="/" className="flex items-center gap-3 hover-scale flex-shrink-0">
                 <div className="p-1.5 bg-white/5 rounded-lg border border-white/10 flex-shrink-0">
@@ -107,12 +120,12 @@ const Sidebar = ({ user }: SidebarProps) => {
                 }}
                 className="text-zinc-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/5 flex-shrink-0"
             >
-                <div className={contentVisibilityClass}>
+                <span className={contentVisibilityClass}>
                     <LuPanelLeftClose className="text-xl" />
-                </div>
-                <div className={inverseContentVisibilityClass}>
+                </span>
+                <span className={inverseContentVisibilityClass}>
                     <LuPanelLeftOpen className="text-xl" />
-                </div>
+                </span>
             </button>
         </div>
       </div>
@@ -157,9 +170,9 @@ const Sidebar = ({ user }: SidebarProps) => {
 
       <div className="py-3 border-t border-white/5 space-y-3">
         {user && (
-            <div className={`flex items-center ${itemAlignmentClass} py-2 transition-all duration-300 justify-between`}> 
+            <div className={`flex items-center ${itemAlignmentClass} py-2 transition-all duration-300`}> 
                 {/* User Avatar */}
-                <div className={`relative w-8 h-8 flex-shrink-0 ${contentVisibilityClass !== 'hidden' ? '' : 'md:block'}`}>
+                <div className={`relative w-8 h-8 flex-shrink-0`}>
                     {user.image ? (
                          <Image 
                             src={user.image} 
