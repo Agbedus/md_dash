@@ -36,23 +36,57 @@ const Sidebar = ({ user }: SidebarProps) => {
   const pathname = usePathname();
   const { isMobileExpanded, setIsMobileExpanded, isDesktopCollapsed, setIsDesktopCollapsed } = useDashboard();
   
-  const isCollapsed = isDesktopCollapsed;
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-
   const baseLinkClasses =
-    "flex items-center py-2 px-4 rounded-xl transition-all duration-200 font-light text-sm hover:bg-white/5 hover:text-white hover-scale whitespace-nowrap";
+    "flex items-center py-2 rounded-xl transition-all duration-200 font-light text-sm hover:bg-white/5 hover:text-white hover-scale whitespace-nowrap";
   const activeLinkClasses =
     "bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)] border border-white/10 font-medium";
   const inactiveLinkClasses = "text-zinc-400";
 
+  // Responsive State Classes
+  // Mobile Default: w-20 (Collapsed) | Mobile Expanded: w-64
+  // Desktop Default: w-64 (Expanded) | Desktop Collapsed: w-20
+  
+  const widthClass = `${isMobileExpanded ? 'w-64' : 'w-20'} md:${isDesktopCollapsed ? 'w-20' : 'w-64'}`;
+  const itemJustifyClass = `${isMobileExpanded ? 'justify-start px-4' : 'justify-center px-2'} md:${isDesktopCollapsed ? 'justify-center px-2' : 'justify-start px-4'}`;
+  const contentVisibilityClass = `${isMobileExpanded ? 'block' : 'hidden'} md:${isDesktopCollapsed ? 'hidden' : 'block'}`;
+  const inverseContentVisibilityClass = `${isMobileExpanded ? 'hidden' : 'block'} md:${isDesktopCollapsed ? 'block' : 'hidden'}`;
+  const iconClass = `${isMobileExpanded ? 'mr-3 text-base' : 'text-xl'} md:${isDesktopCollapsed ? 'text-xl' : 'mr-3 text-base'}`;
+  const headerPaddingClass = `${isMobileExpanded ? 'justify-between px-6' : 'justify-center px-0'} md:${isDesktopCollapsed ? 'justify-center px-0' : 'justify-between px-6'}`;
+
+  // Menu Items Config
+  const mainMenuItems = [
+    { href: '/', icon: FiHome, label: 'Dashboard', color: 'text-blue-400' },
+    { href: '/tasks', icon: FiCheckSquare, label: 'Tasks', color: 'text-purple-400' },
+    { href: '/projects', icon: FiBriefcase, label: 'Projects', color: 'text-pink-400' },
+    { href: '/notes', icon: FiFileText, label: 'Notes', color: 'text-yellow-400' },
+    { href: '/calendar', icon: FiCalendar, label: 'Calendar', color: 'text-green-400' },
+  ];
+
+  const toolMenuItems = [
+    { href: '/focus', icon: FiClock, label: 'Focus Mode', color: 'text-orange-400' },
+    { href: '/assistant', icon: FiCpu, label: 'AI Assistant', color: 'text-cyan-400' },
+    { href: '/settings', icon: FiSettings, label: 'Settings', color: 'text-indigo-400' },
+  ];
+
+  const renderMenuItem = (item: any) => (
+    <Link
+      key={item.href}
+      href={item.href}
+      className={`${baseLinkClasses} ${pathname === item.href ? activeLinkClasses : inactiveLinkClasses} ${itemJustifyClass}`}
+    >
+      <item.icon className={`${iconClass} ${item.color}`} />
+      <span className={contentVisibilityClass}>{item.label}</span>
+    </Link>
+  );
+
   return (
     <div 
-        className={`glass border-r border-white/5 fixed md:relative inset-y-0 left-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col z-40 ${
-            isMobileExpanded ? 'w-[250px] translate-x-0' : (isCollapsed ? 'w-20' : 'w-64 md:translate-x-0 -translate-x-full')
-        } ${!isMobileExpanded && 'md:translate-x-0'}`}
+        className={`glass border-r border-white/5 relative inset-y-0 left-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] flex flex-col z-40 h-full ${widthClass}`}
     >
-      <div className={`h-16 flex items-center border-b border-white/5 transition-all duration-300 ${isCollapsed ? 'justify-center px-0' : 'justify-between px-6'}`}>
-        {(!isCollapsed || isMobileExpanded) && (
+      <div className={`h-16 flex items-center border-b border-white/5 transition-all duration-300 ${headerPaddingClass}`}>
+        
+        {/* Full Logo */}
+        <div className={contentVisibilityClass}>
             <Link href="/" className="flex items-center gap-3 hover-scale">
             <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
                 <FiLayers className="text-lg text-white" />
@@ -61,12 +95,14 @@ const Sidebar = ({ user }: SidebarProps) => {
                 MD<span className="text-emerald-500">*</span>
             </span>
             </Link>
-        )}
-        {(isCollapsed && !isMobileExpanded) && (
+        </div>
+
+        {/* Collapsed Logo */}
+        <div className={inverseContentVisibilityClass}>
              <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
                 <FiLayers className="text-lg text-white" />
             </div>
-        )}
+        </div>
         
         <button 
             onClick={() => {
@@ -78,131 +114,44 @@ const Sidebar = ({ user }: SidebarProps) => {
             }}
             className="text-zinc-400 hover:text-white transition-colors p-1"
         >
-            {isCollapsed ? <LuPanelLeftOpen className="text-xl" /> : <LuPanelLeftClose className="text-xl" />}
+            <LuPanelLeftOpen className={`text-xl ${inverseContentVisibilityClass}`} />
+            <LuPanelLeftClose className={`text-xl ${contentVisibilityClass}`} />
         </button>
       </div>
 
       <div className="px-3 space-y-6 flex-1 overflow-y-auto py-4 overflow-x-hidden">
         <div>
-          {(!isCollapsed || isMobileExpanded) && (
-              <h3 className="px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300">
+           <h3 className={`px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300 ${contentVisibilityClass}`}>
                 Menu
-              </h3>
-          )}
+            </h3>
           <nav className="space-y-1">
-            <Link
-              href="/"
-              className={`${baseLinkClasses} ${
-                pathname === "/" ? activeLinkClasses : inactiveLinkClasses
-              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-              title={(isCollapsed && !isMobileExpanded) ? "Dashboard" : ""}
-            >
-              <FiHome className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-blue-400`} />
-              {(!isCollapsed || isMobileExpanded) && "Dashboard"}
-            </Link>
-            <Link
-              href="/tasks"
-              className={`${baseLinkClasses} ${
-                pathname === "/tasks" ? activeLinkClasses : inactiveLinkClasses
-              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-              title={(isCollapsed && !isMobileExpanded) ? "Tasks" : ""}
-            >
-              <FiCheckSquare className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-purple-400`} />
-              {(!isCollapsed || isMobileExpanded) && "Tasks"}
-            </Link>
-            <Link
-              href="/projects"
-              className={`${baseLinkClasses} ${
-                pathname === "/projects" ? activeLinkClasses : inactiveLinkClasses
-              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-              title={(isCollapsed && !isMobileExpanded) ? "Projects" : ""}
-            >
-              <FiBriefcase className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-pink-400`} />
-              {(!isCollapsed || isMobileExpanded) && "Projects"}
-            </Link>
-            <Link
-              href="/notes"
-              className={`${baseLinkClasses} ${
-                pathname === "/notes" ? activeLinkClasses : inactiveLinkClasses
-              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-              title={(isCollapsed && !isMobileExpanded) ? "Notes" : ""}
-            >
-              <FiFileText className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-yellow-400`} />
-              {(!isCollapsed || isMobileExpanded) && "Notes"}
-            </Link>
-            <Link
-              href="/calendar"
-              className={`${baseLinkClasses} ${
-                pathname === "/calendar" ? activeLinkClasses : inactiveLinkClasses
-              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-              title={(isCollapsed && !isMobileExpanded) ? "Calendar" : ""}
-            >
-              <FiCalendar className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-green-400`} />
-              {(!isCollapsed || isMobileExpanded) && "Calendar"}
-            </Link>
+            {mainMenuItems.map(renderMenuItem)}
           </nav>
         </div>
 
         <div>
-          {(!isCollapsed || isMobileExpanded) && (
-              <h3 className="px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300">
+           <h3 className={`px-4 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 transition-opacity duration-300 ${contentVisibilityClass}`}>
                 Tools
-              </h3>
-          )}
+            </h3>
           <nav className="space-y-1">
-            <Link
-              href="/focus"
-              className={`${baseLinkClasses} ${
-                pathname === "/focus" ? activeLinkClasses : inactiveLinkClasses
-              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-              title={(isCollapsed && !isMobileExpanded) ? "Focus Mode" : ""}
-            >
-              <FiClock className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-orange-400`} />
-              {(!isCollapsed || isMobileExpanded) && "Focus Mode"}
-            </Link>
-            <Link
-              href="/assistant"
-              className={`${baseLinkClasses} ${
-                pathname === "/assistant" ? activeLinkClasses : inactiveLinkClasses
-              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-              title={(isCollapsed && !isMobileExpanded) ? "AI Assistant" : ""}
-            >
-              <FiCpu className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-cyan-400`} />
-              {(!isCollapsed || isMobileExpanded) && "AI Assistant"}
-            </Link>
-            <Link
-              href="/settings"
-              className={`${baseLinkClasses} ${
-                pathname === "/settings" ? activeLinkClasses : inactiveLinkClasses
-              } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-              title={(isCollapsed && !isMobileExpanded) ? "Settings" : ""}
-            >
-              <FiSettings className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-indigo-400`} />
-              {(!isCollapsed || isMobileExpanded) && "Settings"}
-            </Link>
-            {(user?.roles?.some(r => ['super_admin', 'admin'].includes(r))) && (
-              <>
+            {toolMenuItems.map(renderMenuItem)}
+            {user?.roles?.some(r => ['super_admin', 'admin'].includes(r)) && (
+                <>
                 <Link
                   href="/users"
-                  className={`${baseLinkClasses} ${
-                    pathname === "/users" ? activeLinkClasses : inactiveLinkClasses
-                  } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-                  title={(isCollapsed && !isMobileExpanded) ? "Users" : ""}
+                  className={`${baseLinkClasses} ${pathname === "/users" ? activeLinkClasses : inactiveLinkClasses} ${itemJustifyClass}`}
                 >
-                  <FiUsers className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-teal-400`} />
-                  {(!isCollapsed || isMobileExpanded) && "Users"}
+                  <FiUsers className={`${iconClass} text-teal-400`} />
+                  <span className={contentVisibilityClass}>Users</span>
                 </Link>
                 <Link
                   href="/clients"
-                  className={`${baseLinkClasses} ${
-                    pathname === "/clients" ? activeLinkClasses : inactiveLinkClasses
-                  } ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : ''}`}
-                  title={(isCollapsed && !isMobileExpanded) ? "Clients" : ""}
+                  className={`${baseLinkClasses} ${pathname === "/clients" ? activeLinkClasses : inactiveLinkClasses} ${itemJustifyClass}`}
                 >
-                  <FiUsers className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} text-violet-400`} />
-                  {(!isCollapsed || isMobileExpanded) && "Clients"}
+                  <FiUsers className={`${iconClass} text-violet-400`} />
+                  <span className={contentVisibilityClass}>Clients</span>
                 </Link>
-              </>
+                </>
             )}
           </nav>
         </div>
@@ -210,46 +159,48 @@ const Sidebar = ({ user }: SidebarProps) => {
 
       <div className="p-3 border-t border-white/5 space-y-3">
         {user && (
-            <div className={`flex items-center ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-0' : 'px-4'} py-2 transition-all duration-300`}>
-                {user.image ? (
-                    <div className="relative w-8 h-8 flex-shrink-0">
-                        <Image 
+            <div className={`flex items-center ${itemJustifyClass.replace('justify-start', 'justify-between')} py-2 transition-all duration-300`}> 
+            {/* Note: Justify behavior for footer user card might differ lightly, using flex-row helpers */}
+            
+                {/* User Avatar */}
+                <div className={`relative w-8 h-8 flex-shrink-0 ${contentVisibilityClass !== 'hidden' ? '' : 'mx-auto'}`}>
+                    {user.image ? (
+                         <Image 
                             src={user.image} 
                             alt={user.name || 'User'} 
                             fill
                             className="rounded-full object-cover border border-emerald-500/30"
                         />
-                    </div>
-                ) : (
-                    <div className="w-8 h-8 flex-shrink-0 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/30">
-                        {(user.name || user.email || '?').charAt(0).toUpperCase()}
-                    </div>
-                )}
-                {(!isCollapsed || isMobileExpanded) && (
-                    <div className="ml-3 overflow-hidden transition-opacity duration-300">
-                        <p className="text-sm font-medium text-white truncate">{user.name || 'User'}</p>
-                        <p className="text-xs text-zinc-500 truncate capitalize">{user.roles?.[0]?.replace('_', ' ') || 'Member'}</p>
-                    </div>
-                )}
+                    ) : (
+                        <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/30">
+                            {(user.name || user.email || '?').charAt(0).toUpperCase()}
+                        </div>
+                    )}
+                </div>
+
+                {/* User Info Text */}
+                <div className={`ml-3 overflow-hidden transition-opacity duration-300 ${contentVisibilityClass}`}>
+                    <p className="text-sm font-medium text-white truncate">{user.name || 'User'}</p>
+                    <p className="text-xs text-zinc-500 truncate capitalize">{user.roles?.[0]?.replace('_', ' ') || 'Member'}</p>
+                </div>
             </div>
         )}
+        
         {user ? (
             <button 
                 onClick={() => logout()} 
-                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 hover-scale ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : 'px-4'}`}
-                title={(isCollapsed && !isMobileExpanded) ? "Sign Out" : ""}
+                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 hover-scale ${itemJustifyClass}`}
             >
-            <FiLogOut className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'}`} />
-            {(!isCollapsed || isMobileExpanded) && "Sign Out"}
+            <FiLogOut className={iconClass} />
+            <span className={contentVisibilityClass}>Sign Out</span>
             </button>
         ) : (
             <Link 
                 href="/login" 
-                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-emerald-500/10 hover:text-emerald-400 transition-all duration-200 hover-scale ${(isCollapsed && !isMobileExpanded) ? 'justify-center px-2' : 'px-4'}`}
-                title={(isCollapsed && !isMobileExpanded) ? "Login" : ""}
+                className={`flex items-center w-full py-2 rounded-xl text-zinc-400 text-sm hover:bg-emerald-500/10 hover:text-emerald-400 transition-all duration-200 hover-scale ${itemJustifyClass}`}
             >
-            <FiLogOut className={`${(isCollapsed && !isMobileExpanded) ? 'text-xl' : 'mr-3 text-base'} rotate-180`} />
-            {(!isCollapsed || isMobileExpanded) && "Login"}
+            <FiLogOut className={`${iconClass} rotate-180`} />
+            <span className={contentVisibilityClass}>Login</span>
             </Link>
         )}
       </div>

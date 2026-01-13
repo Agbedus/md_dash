@@ -41,14 +41,8 @@ const TopNav = ({ user }: TopNavProps) => {
   }, []);
 
   return (
-    <nav className="h-20 md:h-24 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 bg-zinc-950/50 backdrop-blur-xl">
+    <nav className="h-20 md:h-24 px-4 md:px-8 flex items-center justify-between md:sticky md:top-0 z-40 md:bg-zinc-950/50 md:backdrop-blur-xl">
       <div className="flex items-center gap-4 flex-1">
-        <button 
-          onClick={() => setIsMobileExpanded(!isMobileExpanded)}
-          className="md:hidden p-2 text-zinc-400 hover:text-white transition-colors"
-        >
-          {isMobileExpanded ? <FiX className="text-2xl" /> : <FiMenu className="text-2xl" />}
-        </button>
         <h1 className="text-2xl font-bold text-white tracking-tight"></h1>
       </div>
 

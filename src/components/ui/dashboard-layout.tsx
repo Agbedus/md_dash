@@ -46,24 +46,14 @@ export default function DashboardLayout({
 
         {/* Main Content Area */}
         <div 
-          className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] relative ${
-            isMobileExpanded 
-              ? 'translate-x-[200px] scale-[0.9] opacity-50 pointer-events-none rounded-3xl overflow-hidden shadow-2xl' 
-              : 'translate-x-0 scale-100 opacity-100'
-          }`}
+          className="flex-1 flex flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] relative"
         >
           {topnav}
           <div className="flex-1 overflow-y-auto w-full">
             {children}
           </div>
           
-          {/* Overlay to close mobile nav */}
-          {isMobileExpanded && (
-            <div 
-              className="absolute inset-0 z-50 cursor-pointer"
-              onClick={() => setIsMobileExpanded(false)}
-            />
-          )}
+
         </div>
       </div>
     </DashboardContext.Provider>
