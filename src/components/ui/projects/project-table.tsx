@@ -23,6 +23,8 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
   const [addingTaskId, setAddingTaskId] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Combobox state
 
@@ -51,19 +53,53 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
 
   const handleUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    formData.set('id', editingId!.toString());
+    setError(null);
+    setIsSubmitting(true);
+    
+    try {
+      const formData = new FormData(event.currentTarget);
+      const name = formData.get('name') as string;
+      
+      if (!name || name.trim().length === 0) {
+        throw new Error('Project name is required');
+      }
 
-    await updateProject(formData);
-    setEditingId(null);
+      formData.set('id', editingId!.toString());
+      const result = await updateProject(formData);
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      setEditingId(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update project');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    setError(null);
+    setIsSubmitting(true);
 
-    await createProject(formData);
-    setIsAdding(false);
+    try {
+      const formData = new FormData(event.currentTarget);
+      const name = formData.get('name') as string;
+      
+      if (!name || name.trim().length === 0) {
+        throw new Error('Project name is required');
+      }
+
+      const result = await createProject(formData);
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      setIsAdding(false);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create project');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDelete = async (project: Project) => {
@@ -87,12 +123,60 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
     high: "text-rose-400",
   };
 
+  const calculateCompletion = (project: Project) => {
+    if (!project.tasks || project.tasks.length === 0) return 0;
+    const completed = project.tasks.filter(t => t.status === 'completed').length;
+    return (completed / project.tasks.length) * 100;
+  };
+
+  const CircularProgress = ({ percentage, size = 32 }: { percentage: number; size?: number }) => {
+    const radius = (size / 2) - 2;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+    return (
+      <div className="relative inline-flex items-center justify-center shrink-0">
+        <svg width={size} height={size} className="transform -rotate-90">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="3"
+            fill="transparent"
+            className="text-white/10"
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="3"
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            className="text-indigo-500 transition-all duration-500"
+            strokeLinecap="round"
+          />
+        </svg>
+        <span className="absolute text-[8px] font-bold text-white">{Math.round(percentage)}%</span>
+      </div>
+    );
+  };
+
   return (
-    <div className="w-full overflow-x-auto rounded-2xl border border-white/5 bg-zinc-900/30">
+    <div className="w-full space-y-4">
+      {error && (
+        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-in fade-in slide-in-from-top-2">
+          {error}
+        </div>
+      )}
+      <div className="w-full overflow-x-auto rounded-2xl border border-white/5 bg-zinc-900/30">
       <table className="w-full text-left text-sm min-w-[1400px]">
         <thead className="bg-white/5 text-zinc-400 font-medium">
           <tr>
             <th className="px-4 py-3 w-[200px]">Project</th>
+            <th className="px-4 py-3 w-[60px]">Progress</th>
             <th className="px-4 py-3 w-[100px]">Key</th>
             <th className="px-4 py-3 w-[120px]">Status</th>
             <th className="px-4 py-3 w-[100px]">Priority</th>
@@ -212,10 +296,15 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
                               <div className="flex items-center justify-end gap-1">
                                 <button
                                   type="submit"
-                                  className="p-1 rounded hover:bg-emerald-500/10 text-emerald-400 transition-colors"
+                                  disabled={isSubmitting}
+                                  className="p-1 rounded hover:bg-emerald-500/10 text-emerald-400 transition-colors disabled:opacity-50"
                                   title="Save"
                                 >
-                                  <FiCheck className="w-4 h-4" />
+                                  {isSubmitting ? (
+                                    <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                                  ) : (
+                                    <FiCheck className="w-4 h-4" />
+                                  )}
                                 </button>
                                 <button
                                   type="button"
@@ -252,12 +341,17 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
                         <FiChevronRight className="w-4 h-4" />
                       )}
                     </button>
-                    <div className="font-medium text-white truncate">{project.name}</div>
-                  </div>
+                      <div className="font-medium text-white truncate">{project.name}</div>
+                    </div>
+                </td>
+                <td className="px-4 py-3">
+                    <CircularProgress percentage={calculateCompletion(project)} size={36} />
                 </td>
                 <td className="px-4 py-3">
                   {project.key && (
-                    <span className="text-xs font-mono text-zinc-500">{project.key}</span>
+                    <div className="px-2 py-1 rounded-lg text-xs font-mono text-zinc-500 bg-white/5 border border-white/5">
+                      {project.key}
+                    </div>
                   )}
                 </td>
                 <td className="px-4 py-3">
@@ -423,7 +517,7 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
-                                    {project.tasks.map(task => (
+                                    {project.tasks?.map(task => (
                                         <TaskCard 
                                             key={task.id} 
                                             task={task} 
@@ -545,12 +639,17 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
                         <td className="px-4 py-2 w-[80px]">
                           <div className="flex items-center justify-end gap-1">
                             <button
-                              type="submit"
-                              className="p-1 rounded hover:bg-emerald-500/10 text-emerald-400 transition-colors"
-                              title="Save"
-                            >
-                              <FiCheck className="w-4 h-4" />
-                            </button>
+                               type="submit"
+                               disabled={isSubmitting}
+                               className="p-1 rounded hover:bg-emerald-500/10 text-emerald-400 transition-colors disabled:opacity-50"
+                               title="Save"
+                             >
+                               {isSubmitting ? (
+                                 <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                               ) : (
+                                 <FiCheck className="w-4 h-4" />
+                               )}
+                             </button>
                             <button
                               type="button"
                               onClick={() => setIsAdding(false)}
@@ -595,6 +694,7 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
           )}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

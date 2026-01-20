@@ -86,7 +86,7 @@ export default function KanbanCard({ task, columns, onMove, onDelete }: KanbanCa
                 {statusMapping[task.status]}
             </span>
             {task.dueDate && (
-            <span className="inline-flex items-center gap-1 text-[10px] text-zinc-500">
+            <span className="inline-flex items-center gap-1 text-[10px] text-zinc-500" suppressHydrationWarning>
                 <FiCalendar className="h-3 w-3" />
                 {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
             </span>

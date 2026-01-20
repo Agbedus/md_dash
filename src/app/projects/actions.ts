@@ -151,38 +151,29 @@ export async function createProject(formData: FormData) {
         return { error: "Unauthorized" };
     }
 
-    // Basic mapping, assuming simple fields for now
     const rawData: Record<string, unknown> = {
         name: formData.get('name'),
-        key: formData.get('key'),
-        description: formData.get('description'),
-        status: formData.get('status'),
-        priority: formData.get('priority'),
-        client_id: formData.get('clientId'),
-        owner_id: formData.get('ownerId'),
-        start_date: formData.get('startDate'),
-        end_date: formData.get('endDate'),
+        key: formData.get('key') || null,
+        description: formData.get('description') || null,
+        status: formData.get('status') || 'planning',
+        priority: formData.get('priority') || 'medium',
+        client_id: formData.get('clientId') || null,
+        owner_id: formData.get('ownerId') || null,
+        start_date: formData.get('startDate') || null,
+        end_date: formData.get('endDate') || null,
         budget: formData.get('budget') ? Number(formData.get('budget')) : null,
         spent: formData.get('spent') ? Number(formData.get('spent')) : 0,
-        currency: formData.get('currency'),
-        billing_type: formData.get('billingType'),
+        currency: formData.get('currency') || 'USD',
+        billing_type: formData.get('billingType') || 'non_billable',
         is_archived: formData.get('isArchived') ? Number(formData.get('isArchived')) : 0,
     };
 
-    // Handle tags: convert comma-separated string to JSON array string
+    // Tags as JSON string array
     const tags = formData.get('tags') as string;
     if (tags) {
         rawData.tags = JSON.stringify(tags.split(',').map(t => t.trim()).filter(t => t !== ''));
-    }
-
-    // Handle managerIds if present
-    const managerIds = formData.get('managerIds');
-    if (managerIds) {
-        try {
-            rawData.manager_ids = JSON.parse(managerIds as string);
-        } catch (e) {
-            console.error("Error parsing managerIds", e);
-        }
+    } else {
+        rawData.tags = JSON.stringify([]);
     }
 
     try {
@@ -204,7 +195,6 @@ export async function createProject(formData: FormData) {
 
         revalidatePath('/projects');
         revalidateTag('projects', 'max');
-        revalidateTag('tasks', 'max');
         return { success: true };
     } catch (error) {
         console.error("Error creating project:", error);
@@ -216,43 +206,57 @@ export async function updateProject(formData: FormData) {
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
-        return;
+        return { error: "Unauthorized" };
     }
 
     const id = formData.get('id');
-    if (!id) return;
+    if (!id) return { error: "Missing Project ID" };
 
-    const rawData: Record<string, unknown> = {
-        name: formData.get('name'),
-        key: formData.get('key'),
-        description: formData.get('description'),
-        status: formData.get('status'),
-        priority: formData.get('priority'),
-        client_id: formData.get('clientId'),
-        owner_id: formData.get('ownerId'),
-        start_date: formData.get('startDate'),
-        end_date: formData.get('endDate'),
-        budget: formData.get('budget') ? Number(formData.get('budget')) : null,
-        spent: formData.get('spent') ? Number(formData.get('spent')) : 0,
-        currency: formData.get('currency'),
-        billing_type: formData.get('billingType'),
-        is_archived: formData.get('isArchived') ? Number(formData.get('isArchived')) : 0,
-    };
+    // Build payload dynamically (PATCH)
+    const rawData: Record<string, unknown> = {};
+    
+    const fields = [
+        ['name', 'name'],
+        ['key', 'key'],
+        ['description', 'description'],
+        ['status', 'status'],
+        ['priority', 'priority'],
+        ['clientId', 'client_id'],
+        ['ownerId', 'owner_id'],
+        ['startDate', 'start_date'],
+        ['endDate', 'end_date'],
+        ['currency', 'currency'],
+        ['billingType', 'billing_type'],
+        ['isArchived', 'is_archived'],
+    ];
 
-    // Handle tags
-    const tags = formData.get('tags') as string;
-    if (tags !== null) {
-        rawData.tags = JSON.stringify(tags.split(',').map(t => t.trim()).filter(t => t !== ''));
+    fields.forEach(([formKey, apiKey]) => {
+        const val = formData.get(formKey);
+        if (val !== null) {
+            if (formKey === 'isArchived') {
+                rawData[apiKey] = Number(val);
+            } else if (val === "") {
+                rawData[apiKey] = null;
+            } else {
+                rawData[apiKey] = val;
+            }
+        }
+    });
+
+    // Numeric fields
+    const budget = formData.get('budget');
+    if (budget !== null) {
+        rawData.budget = budget === "" ? null : Number(budget);
+    }
+    const spent = formData.get('spent');
+    if (spent !== null) {
+        rawData.spent = spent === "" ? 0 : Number(spent);
     }
 
-    // Handle managerIds
-    const managerIds = formData.get('managerIds');
-    if (managerIds) {
-        try {
-            rawData.manager_ids = JSON.parse(managerIds as string);
-        } catch (e) {
-            console.error("Error parsing managerIds", e);
-        }
+    // Tags
+    const tags = formData.get('tags');
+    if (tags !== null) {
+        rawData.tags = JSON.stringify((tags as string).split(',').map(t => t.trim()).filter(t => t !== ''));
     }
 
     try {
@@ -267,15 +271,17 @@ export async function updateProject(formData: FormData) {
         });
 
         if (!response.ok) {
-            console.error("Failed to update project:", await response.text());
-            return;
+            const errorText = await response.text();
+            console.error("Failed to update project:", errorText);
+            return { error: `Failed to update project: ${errorText}` };
         }
 
         revalidatePath('/projects');
         revalidateTag('projects', 'max');
-        revalidateTag('tasks', 'max');
+        return { success: true };
     } catch (error) {
         console.error("Error updating project:", error);
+        return { error: "Failed to update project" };
     }
 }
 

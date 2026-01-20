@@ -178,6 +178,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients }: 
             <ProjectCard
               key={project.id}
               project={project}
+              users={users}
               onEdit={setEditingProject}
               onDelete={handleDelete}
             />

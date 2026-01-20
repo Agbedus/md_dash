@@ -16,9 +16,6 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
   const [selectedOwner, setSelectedOwner] = useState<string | number | null>(
     defaultValues?.ownerId || null
   );
-  const [selectedManagers, setSelectedManagers] = useState<(string | number)[]>(
-    defaultValues?.managers ? defaultValues.managers.map(m => m.user.id) : []
-  );
   const [selectedClient, setSelectedClient] = useState<string | number | null>(
     defaultValues?.clientId || null
   );
@@ -248,25 +245,8 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
             />
           </div>
 
-          {/* Managers (Multi-Select) */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-zinc-400 mb-1">
-              Managers
-            </label>
-            <Combobox
-              name="managerIds"
-              options={users.map(u => ({ value: u.id, label: u.fullName || u.email, subLabel: u.email }))}
-              value={selectedManagers}
-              onChange={(val) => setSelectedManagers(val as (string | number)[])}
-              multiple
-              placeholder="Select managers..."
-              searchPlaceholder="Search users..."
-              className="w-full"
-            />
-          </div>
-
           {/* Client */}
-          <div>
+          <div className="col-span-2">
             <label className="block text-sm font-medium text-zinc-400 mb-1">
               Client
             </label>

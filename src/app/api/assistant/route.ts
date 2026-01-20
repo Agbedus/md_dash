@@ -242,75 +242,85 @@ async function executeTool(name: string, args: any) {
   console.log(`Executing tool: ${name}`, args);
   try {
     if (name === "searchNotes") {
-      return { 
-        notes: [
-          { id: 1, title: "Mock Note 1", content: `Content matching ${args.query}`, tags: "mock" }
-        ] 
-      };
+      const notes = await getNotes(50);
+      const query = args.query.toLowerCase();
+      const filtered = notes.filter(n => 
+        n.title.toLowerCase().includes(query) || 
+        n.content.toLowerCase().includes(query)
+      );
+      return { notes: filtered.slice(0, 10) };
     }
     
     if (name === "getNote") {
-      return { id: args.id, title: "Mock Note", content: "This is a mock note content." };
+      const notes = await getNotes(500);
+      const note = notes.find(n => n.id === args.id);
+      return note ? { note } : { error: "Note not found" };
     }
 
     if (name === "listTasks") {
-      return { 
-        tasks: [
-          { id: 1, name: "Mock Task 1", status: args.status || "task", priority: "medium" },
-          { id: 2, name: "Mock Task 2", status: args.status || "completed", priority: "high" }
-        ] 
-      };
+      const tasks = await getTasks(undefined, args.priority, args.status, undefined, args.limit || 10);
+      return { tasks };
     }
 
     if (name === "getTask") {
-      return { id: args.id, name: "Mock Task", status: "task", priority: "medium", description: "Mock description" };
+      const tasks = await getTasks(undefined, undefined, undefined, undefined, 500);
+      const task = tasks.find(t => t.id === args.id);
+      return task ? { task } : { error: "Task not found" };
     }
 
     if (name === "createNote") {
-      return { success: true, note: { id: 100, ...args } };
+      return { success: true, message: "Use the UI to finalize note creation.", note: { ...args } };
     }
 
     if (name === "createTask") {
-      return { success: true, task: { id: 100, ...args, status: "task" } };
+      return { success: true, message: "Use the UI to finalize task creation.", task: { ...args, status: "task" } };
     }
 
     if (name === "listProjects") {
-      return { 
-        projects: [
-          { id: 1, name: "Mock Project Alpha", status: args.status || "in_progress" },
-          { id: 2, name: "Mock Project Beta", status: "planning" }
-        ] 
-      };
+      const allProjects = await getProjects();
+      let filtered = allProjects;
+      if (args.status) filtered = filtered.filter(p => p.status === args.status);
+      if (args.name) filtered = filtered.filter(p => p.name.toLowerCase().includes(args.name.toLowerCase()));
+      return { projects: filtered.slice(0, args.limit || 10) };
     }
 
     if (name === "getProject") {
-      return { 
-        project: { id: args.id, name: "Mock Project", status: "in_progress" },
-        tasks: [{ id: 1, name: "Project Task 1" }] 
-      };
+      const allProjects = await getProjects();
+      const project = allProjects.find(p => p.id === args.id);
+      return project ? { project } : { error: "Project not found" };
     }
 
     if (name === "listEvents") {
-      return { 
-        events: [
-          { id: 1, title: "Mock Event", start: args.start, end: args.end }
-        ] 
-      };
+      const allEvents = await getEvents();
+      const start = new Date(args.start);
+      const end = new Date(args.end);
+      const filtered = allEvents.filter(e => {
+        const eStart = new Date(e.start);
+        return eStart >= start && eStart <= end;
+      });
+      return { events: filtered };
     }
 
     if (name === "searchClients") {
+      // Mock for now as we don't have a direct getClients action here yet
       return { 
         clients: [
-          { id: 1, companyName: `Mock Client ${args.name}` }
+          { id: 1, companyName: `Search result for: ${args.name}` }
         ] 
       };
     }
 
     if (name === "getStats") {
+      const [tasks, notes, projects] = await Promise.all([
+        getTasks(undefined, undefined, undefined, undefined, 500),
+        getNotes(100),
+        getProjects()
+      ]);
       return {
-        notes: 42,
-        tasks: 15,
-        projects: 3
+        totalTasks: tasks.length,
+        completedTasks: tasks.filter(t => t.status === 'completed').length,
+        totalNotes: notes.length,
+        totalProjects: projects.length
       };
     }
 
@@ -415,13 +425,19 @@ export async function POST(req: Request) {
         role: "system",
         content: `You are a helpful assistant for a markdown note-taking app. You have access to the user's database to search notes and tasks. Always check the database before saying you don't know.
         
-        Here is the current status of the user's dashboard (cached data):
-        ${await getAggregatedDashboardData()}
+        Here is the current status of the user's dashboard (real data):
+        ${JSON.stringify(await getAggregatedDashboardData(), null, 2)}
+
+        IMPORTANT INSTRUCTIONS:
+        1. When the user asks to "show", "list", or "display" specific items (tasks, notes, projects, events), ALWAYS call the corresponding 'displayX' tool (e.g., displayTasks).
+        2. When a 'displayX' tool returns a __WIDGET__ content marker, you MUST include that EXACT marker string in your response to the user.
+        3. Do NOT summarize the widget content in text unless asked; let the widget do the talking.
+        4. The marker triggers an interactive UI element for the user.
         `
       },
       {
         role: "assistant",
-        content: "Understood. I am ready to help you manage your notes and tasks using your database."
+        content: "Understood. I will use the database and interactive widgets to help you."
       },
       {
         role: "user",
@@ -549,26 +565,17 @@ export async function POST(req: Request) {
         }
 
         const result = await executeTool(functionName, functionArgs);
-
-        // If result contains widget data, we need to stream it to the client
-        if (result.widget && result.data) {
-          // Create a simple stream to send the widget
-          const widgetStream = new ReadableStream({
-            start(controller) {
-              const encoder = new TextEncoder();
-              const widgetMarker = `__WIDGET__${JSON.stringify(result)}__WIDGET__`;
-              controller.enqueue(encoder.encode(widgetMarker));
-              controller.close();
-            }
-          });
-          return new NextResponse(widgetStream);
-        }
+        
+        // If it's a widget result, we return the marker so the LLM can include it in its text
+        const content = (result.widget && result.data) 
+          ? `__WIDGET__${JSON.stringify(result)}__WIDGET__`
+          : JSON.stringify(result);
 
         messages.push({
           role: "tool",
           tool_call_id: tc.id,
           name: functionName,
-          content: JSON.stringify(result)
+          content: content
         });
       }
 

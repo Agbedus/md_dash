@@ -48,7 +48,7 @@ export default function EventWidget({ event }: EventWidgetProps) {
           <div className="space-y-1.5 text-sm text-zinc-400 mb-3">
             <div className="flex items-center gap-2">
               <span className="text-zinc-500">📅</span>
-              <span>{formatDateTime(event.start)}</span>
+              <span suppressHydrationWarning>{formatDateTime(event.start)}</span>
             </div>
             
             {event.location && (

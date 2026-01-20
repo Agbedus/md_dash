@@ -6,15 +6,16 @@ import {
   StatsOverviewSection, 
   WorkloadSection, 
   TimeAllocationSection, 
+  ProjectProgressSection,
   KeyTasksSection, 
   RecentNotesSection, 
-  DecisionsSection, 
-  FocusModeSection, 
-  AssistantSection
+  PrioritiesSection, 
+  FocusModeSection
 } from '@/components/dashboard/sections';
 import { ChartSkeleton, ListSkeleton, CardSkeleton } from '@/components/dashboard/skeletons';
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ range?: string }> }) {
+  const params = await searchParams;
   const session = await auth();
   
   if (!session?.user?.id) {
@@ -47,7 +48,7 @@ export default async function Home() {
         {/* Charts Section */}
         
         <Suspense fallback={<div className="col-span-1 lg:col-span-2 h-96"><ChartSkeleton /></div>}>
-            <ProductivitySection />
+            <ProductivitySection range={params.range} />
         </Suspense>
 
         <Suspense fallback={<div className="col-span-1 h-96"><ChartSkeleton /></div>}>
@@ -62,14 +63,18 @@ export default async function Home() {
             <TimeAllocationSection />
         </Suspense>
 
+        <Suspense fallback={<div className="col-span-1 h-96"><ChartSkeleton /></div>}>
+            <ProjectProgressSection />
+        </Suspense>
+
         {/* Key Tasks */}
         <Suspense fallback={<div className="col-span-1 lg:col-span-2"><ListSkeleton /></div>}>
             <KeyTasksSection />
         </Suspense>
 
-        {/* Upcoming Decisions */}
+        {/* Upcoming Priorities */}
         <Suspense fallback={<div className="col-span-1 lg:col-span-1"><CardSkeleton /></div>}>
-             <DecisionsSection />
+             <PrioritiesSection />
         </Suspense>
 
         {/* Recent Notes */}
@@ -79,7 +84,6 @@ export default async function Home() {
 
         {/* Static Sections */}
         <FocusModeSection />
-        <AssistantSection />
       </div>
     </div>
   );

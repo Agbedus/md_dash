@@ -13,7 +13,6 @@ export type Project = {
     ownerId: string | null;
     // managerId: string | null; // Deprecated
     managers?: { user: User }[]; // For display
-    managerIds?: string[]; // For form handling
     tasks?: Task[];
     clientId: string | null;
 
@@ -43,7 +42,6 @@ export function parseProjectFormData(formData: FormData): Partial<Project> {
         tags: data.tags as string,
         
         ownerId: data.ownerId as string,
-        managerIds: data.managerIds ? JSON.parse(data.managerIds as string) : [],
         clientId: data.clientId as string,
 
         startDate: data.startDate as string,

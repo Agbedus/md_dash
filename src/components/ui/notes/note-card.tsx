@@ -224,7 +224,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                         </div>
                         <div className="flex items-center gap-1.5 text-[10px] text-zinc-500">
                             <FiClock size={10} />
-                            <span>{note.updated_at ? new Date(note.updated_at).toLocaleDateString() : note.created_at ? new Date(note.created_at).toLocaleDateString() : 'No date'}</span>
+                            <span suppressHydrationWarning>{note.updated_at ? new Date(note.updated_at).toLocaleDateString() : note.created_at ? new Date(note.created_at).toLocaleDateString() : 'No date'}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
