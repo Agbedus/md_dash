@@ -211,11 +211,11 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
 
     if (viewMode === 'grid') {
         return (
-            <div className={`glass rounded-2xl p-6 flex flex-col h-full hover-glow transition-all duration-300 ${isExpanded ? 'ring-2 ring-purple-500/50' : ''}`}>
-                <div className="flex justify-between items-start mb-4">
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <div className={`glass rounded-2xl p-5 flex flex-col h-full hover-glow transition-all duration-300 ${isExpanded ? 'ring-2 ring-purple-500/50' : ''}`}>
+                <div className="flex justify-between items-start mb-3">
+                    <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                         <div className="flex items-center gap-2 min-w-0">
-                            <h3 className="font-bold text-xl text-white tracking-tight truncate">
+                            <h3 className="font-bold text-lg text-white tracking-tight truncate">
                                 <TextHighlight text={note.title} highlight={searchQuery} />
                             </h3>
                             {note.task_id && (
@@ -238,9 +238,9 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                             </button>
                         )}
                         {TypeIcon ? (
-                            <TypeIcon className={`${typeIconColorClass || 'text-zinc-400'} flex-shrink-0`} size={20} />
+                            <TypeIcon className={`${typeIconColorClass || 'text-zinc-400'} flex-shrink-0`} size={18} />
                         ) : (
-                            <div className="w-5 h-5 rounded bg-zinc-800 flex-shrink-0" />
+                            <div className="w-4 h-4 rounded bg-zinc-800 flex-shrink-0" />
                         )}
                     </div>
                 </div>
@@ -250,8 +250,8 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                     <div className="ql-editor" dangerouslySetInnerHTML={{ __html: renderContent(note.content || '') }} />
                 </div>
 
-                <div className="mt-6">
-                    <div className="flex flex-wrap gap-2 mb-4">
+                <div className="mt-4">
+                    <div className="flex flex-wrap gap-2 mb-3">
                         {noteTags.map((tag: string) => (
                             <span key={tag} className="px-2.5 py-1 bg-white/5 text-zinc-300 text-xs rounded-full">{tag}</span>
                         ))}

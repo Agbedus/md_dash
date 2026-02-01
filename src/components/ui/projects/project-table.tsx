@@ -10,15 +10,18 @@ import { createProject, updateProject, deleteProject } from '@/app/projects/acti
 import { updateTask, deleteTask, createTask } from '@/app/tasks/actions';
 import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import TaskCard from '@/components/ui/tasks/task-card';
-import { FiChevronRight, FiChevronDown, FiPlus } from 'react-icons/fi';
+import { FiChevronRight, FiChevronDown, FiPlus, FiPieChart } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
 
 interface ProjectTableProps {
   projects: Project[];
   users: User[];
   clients: Client[];
+  onSelectProject?: (project: Project) => void;
 }
 
-export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
+export function ProjectTable({ projects, users, clients, onSelectProject }: ProjectTableProps) {
+  const router = useRouter();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
@@ -111,10 +114,10 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
   };
 
   const statusColors = {
-    planning: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    in_progress: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    on_hold: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+    planning: "bg-white/5 text-zinc-400 border-white/10",
+    in_progress: "bg-[var(--pastel-blue)]/10 text-[var(--pastel-blue)] border-[var(--pastel-blue)]/20",
+    completed: "bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20",
+    on_hold: "bg-[var(--pastel-amber)]/10 text-[var(--pastel-amber)] border-[var(--pastel-amber)]/20",
   };
 
   const priorityColors = {
@@ -129,10 +132,15 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
     return (completed / project.tasks.length) * 100;
   };
 
-  const CircularProgress = ({ percentage, size = 32 }: { percentage: number; size?: number }) => {
+  const CircularProgress = ({ percentage, size = 32, status }: { percentage: number; size?: number; status: Project['status'] }) => {
     const radius = (size / 2) - 2;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
+    
+    const colorClass = 
+      status === 'completed' ? 'text-[var(--pastel-emerald)]' : 
+      status === 'in_progress' ? 'text-[var(--pastel-blue)]' : 
+      'text-zinc-500';
 
     return (
       <div className="relative inline-flex items-center justify-center shrink-0">
@@ -142,24 +150,24 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
             cy={size / 2}
             r={radius}
             stroke="currentColor"
-            strokeWidth="3"
+            strokeWidth="2.5"
             fill="transparent"
-            className="text-white/10"
+            className="text-white/5"
           />
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             stroke="currentColor"
-            strokeWidth="3"
+            strokeWidth="2.5"
             fill="transparent"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            className="text-indigo-500 transition-all duration-500"
+            className={`${colorClass} transition-all duration-700 ease-in-out`}
             strokeLinecap="round"
           />
         </svg>
-        <span className="absolute text-[8px] font-bold text-white">{Math.round(percentage)}%</span>
+        <span className="absolute text-[9px] font-black text-white/90">{Math.round(percentage)}%</span>
       </div>
     );
   };
@@ -171,21 +179,20 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
           {error}
         </div>
       )}
-      <div className="w-full overflow-x-auto rounded-2xl border border-white/5 bg-zinc-900/30">
+      <div className="glass rounded-2xl overflow-x-auto border border-white/5 bg-zinc-900/30">
       <table className="w-full text-left text-sm min-w-[1400px]">
-        <thead className="bg-white/5 text-zinc-400 font-medium">
+        <thead className="bg-white/5 border-b border-white/5">
           <tr>
-            <th className="px-4 py-3 w-[200px]">Project</th>
-            <th className="px-4 py-3 w-[60px]">Progress</th>
-            <th className="px-4 py-3 w-[100px]">Key</th>
-            <th className="px-4 py-3 w-[120px]">Status</th>
-            <th className="px-4 py-3 w-[100px]">Priority</th>
-            <th className="px-4 py-3 w-[120px]">Owner</th>
-            <th className="px-4 py-3 w-[120px]">Client</th>
-            <th className="px-4 py-3 w-[110px]">Start Date</th>
-            <th className="px-4 py-3 w-[110px]">End Date</th>
-            <th className="px-4 py-3 w-[140px]">Budget</th>
-            <th className="px-4 py-3 w-[80px] text-right">Actions</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Project</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-center">Progress</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Key</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Status</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Priority</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Owner</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Client</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Timeline</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Budget</th>
+            <th className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/5">
@@ -328,98 +335,101 @@ export function ProjectTable({ projects, users, clients }: ProjectTableProps) {
 
             return (
               <React.Fragment key={project.id}>
-              <tr className="group hover:bg-white/[0.02] transition-colors">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleExpand(project.id)}
-                      className="p-1 rounded hover:bg-white/10 text-zinc-500 hover:text-white transition-colors"
-                    >
-                      {expandedIds.includes(project.id) ? (
-                        <FiChevronDown className="w-4 h-4" />
-                      ) : (
-                        <FiChevronRight className="w-4 h-4" />
-                      )}
-                    </button>
-                      <div className="font-medium text-white truncate">{project.name}</div>
-                    </div>
+              <tr 
+                className={`group hover:bg-white/5 transition-colors items-center cursor-pointer ${expandedIds.includes(project.id) ? 'bg-white/[0.03]' : ''}`}
+                onClick={() => router.push(`/projects/${project.id}`)}
+              >
+                <td className="px-6 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-1.5 h-1.5 rounded-full ${statusColors[project.status].split(' ')[1].replace('text-', 'bg-')}`} />
+                    <div className="font-black text-white text-sm tracking-tight truncate group-hover:text-[var(--pastel-indigo)] transition-colors">{project.name}</div>
+                  </div>
                 </td>
-                <td className="px-4 py-3">
-                    <CircularProgress percentage={calculateCompletion(project)} size={36} />
+                <td className="px-6 py-3 text-center">
+                    <CircularProgress percentage={calculateCompletion(project)} size={32} status={project.status} />
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-6 py-3">
                   {project.key && (
-                    <div className="px-2 py-1 rounded-lg text-xs font-mono text-zinc-500 bg-white/5 border border-white/5">
+                    <div className="px-2 py-0.5 rounded-md text-[9px] font-black font-mono text-zinc-500 bg-white/5 border border-white/10 uppercase tracking-widest inline-block">
                       {project.key}
                     </div>
                   )}
                 </td>
-                <td className="px-4 py-3">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${statusColors[project.status]}`}>
+                <td className="px-6 py-3">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${statusColors[project.status]}`}>
                     {statusMapping[project.status]}
                   </span>
                 </td>
-                <td className="px-4 py-3">
-                  <div className={`flex items-center gap-1 text-xs ${priorityColors[project.priority]}`}>
-                    <FiClock className="w-3 h-3" />
-                    <span>{priorityMapping[project.priority]}</span>
-                  </div>
+                <td className="px-6 py-3">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${
+                    project.priority === 'high' ? 'bg-[var(--pastel-rose)]/10 text-[var(--pastel-rose)] border-[var(--pastel-rose)]/20 shadow-[0_0_15px_rgba(244,63,94,0.1)]' :
+                    project.priority === 'medium' ? 'bg-[var(--pastel-amber)]/10 text-[var(--pastel-amber)] border-[var(--pastel-amber)]/20' :
+                    'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20'
+                  }`}>
+                    {priorityMapping[project.priority]}
+                  </span>
                 </td>
-                <td className="px-4 py-3 text-zinc-400 text-xs">
-                  {owner ? <UserAvatarGroup users={[owner]} size="sm" /> : '-'}
-                </td>
-                <td className="px-4 py-3 text-zinc-400 text-xs">
-                  {client ? client.companyName : '-'}
-                </td>
-                <td className="px-4 py-3 text-zinc-400 text-xs">
-                  {project.startDate ? (() => {
-                    try {
-                      return format(new Date(project.startDate), "MMM d, yy");
-                    } catch {
-                      return project.startDate;
-                    }
-                  })() : '-'}
-                </td>
-                <td className="px-4 py-3 text-zinc-400 text-xs">
-                  {project.endDate ? (() => {
-                    try {
-                      return format(new Date(project.endDate), "MMM d, yy");
-                    } catch {
-                      return project.endDate;
-                    }
-                  })() : '-'}
-                </td>
-                <td className="px-4 py-3 text-zinc-400 text-xs">
-                  {project.budget ? (
-                    <div className="flex items-center gap-1">
-                      <FiDollarSign className="w-3 h-3" />
-                      <span>{project.budget.toLocaleString()} {project.currency}</span>
+                <td className="px-6 py-3">
+                  {owner ? (
+                    <div className="flex items-center gap-2">
+                      <UserAvatarGroup users={[owner]} size="sm" limit={1} />
+                      <span className="text-[10px] font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors uppercase tracking-tight">{owner.fullName}</span>
                     </div>
                   ) : '-'}
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <td className="px-6 py-3">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight group-hover:text-zinc-200 transition-colors">
+                    {client ? client.companyName : <span className="text-zinc-600 italic">No Client</span>}
+                  </span>
+                </td>
+                <td className="px-6 py-3">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] font-black text-white/80 uppercase tracking-tighter">
+                      {project.startDate ? format(new Date(project.startDate), "MMM dd") : '-'}
+                    </span>
+                    <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">
+                      {project.endDate ? `UNTIL ${format(new Date(project.endDate), "MMM dd, yyyy")}` : '-'}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-6 py-3">
+                  {project.budget ? (
+                    <div className="flex flex-col">
+                      <span className="text-xs font-black text-white tracking-tight uppercase">
+                        ${project.budget.toLocaleString()}
+                      </span>
+                      <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">
+                        {project.currency}
+                      </span>
+                    </div>
+                  ) : <span className="text-zinc-600 italic text-[10px]">-</span>}
+                </td>
+                <td className="px-6 py-3 text-right">
+                  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <button
-                      onClick={() => startEditing(project)}
-                      className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                      onClick={(e) => { e.stopPropagation(); startEditing(project); }}
+                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/5 transition-all"
                       title="Edit"
                     >
                       <FiEdit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(project)}
-                      className="p-1 rounded hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400 transition-colors"
+                      onClick={(e) => { e.stopPropagation(); handleDelete(project); }}
+                      className="p-2 rounded-xl bg-red-500/5 hover:bg-red-500/10 text-zinc-400 hover:text-red-400 border border-white/5 hover:border-red-500/20 transition-all"
                       title="Delete"
                     >
                       <FiTrash2 className="w-3.5 h-3.5" />
                     </button>
+                    <div className="p-2 rounded-xl bg-white/5 text-zinc-500">
+                      <FiChevronRight className={`w-4 h-4 transition-transform duration-300 ${expandedIds.includes(project.id) ? 'rotate-90 text-[var(--pastel-indigo)]' : ''}`} />
+                    </div>
                   </div>
                 </td>
               </tr>
               {expandedIds.includes(project.id) && (
                 <tr className="bg-white/[0.02]">
                   <td colSpan={10} className="p-0 border-none">
-                    <div className="sticky left-0 p-4 pl-12 bg-zinc-900/30 border-y border-white/5 w-[calc(100vw-6rem)] md:w-[calc(100vw-22rem)] max-w-7xl overflow-x-auto">
+                    <div className="sticky left-0 p-6 pl-12 bg-zinc-900/30 border-y border-white/5 w-full">
                       <div className="flex justify-between items-center mb-3">
                         <h4 className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Tasks ({project.tasks?.length || 0})</h4>
                         <button 

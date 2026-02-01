@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useTransition, useRef, useEffect, useCallback, useOptimistic } from 'react';
-import { FiCheck, FiX, FiPlus, FiGrid, FiList, FiSearch } from 'react-icons/fi';
+import { FiCheck, FiX, FiPlus, FiGrid, FiList, FiSearch, FiFilter } from 'react-icons/fi';
 import { createTask, updateTask, deleteTask, getTasks } from '@/app/tasks/actions';
 import { statusMapping, priorityMapping } from "@/types/task";
 import type { Task } from "@/types/task";
 import TaskCard from './task-card';
 import KanbanBoard from './kanban-board';
+import { TaskSummarySection } from './task-summary';
+import { UserLeaderboard } from './user-leaderboard';
 
 type ViewMode = 'table' | 'kanban';
 
@@ -192,60 +194,69 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     };
 
     return (
-        <div className="p-4 md:p-8 max-w-7xl mx-auto">
-            <div className="mb-6 md:mb-8">
-                <h1 className="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">Tasks</h1>
-                <p className="text-zinc-400 text-sm md:text-lg">Manage your tasks and track progress.</p>
+        <div className="px-4 py-8 max-w-[1600px] mx-auto">
+            <div className="mb-10">
+                <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Tasks</h1>
+                <p className="text-zinc-400 text-lg">Manage team work and track progress.</p>
             </div>
 
-            <div className="sticky top-20 md:top-24 z-10 glass p-3 md:p-6 rounded-2xl mb-6 md:mb-8">
-                <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-                        <div className="relative flex-1 min-w-[200px] lg:w-64 hidden md:block">
-                            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"/>
-                            <input
-                                type="text"
-                                placeholder="Search tasks..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:bg-white/10 focus:border-white/20 text-white placeholder:text-zinc-600 transition-all text-sm"
-                            />
-                        </div>
-                        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            <TaskSummarySection tasks={optimisticTasks} />
+            
+            <UserLeaderboard tasks={optimisticTasks} users={users} />
+
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+                    <div className="relative flex-1 min-w-[280px] lg:w-96 hidden md:block group">
+                        <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--pastel-indigo)] transition-colors"/>
+                        <input
+                            type="text"
+                            placeholder="Search tasks..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 h-11 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:bg-white/10 focus:border-white/20 text-white placeholder:text-zinc-600 transition-all text-sm"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="relative group">
+                            <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors pointer-events-none w-3.5 h-3.5" />
                             <select
                                 value={filterPriority}
                                 onChange={(e) => setFilterPriority(e.target.value)}
-                                className="flex-shrink-0 w-36 sm:w-40 bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus:outline-none focus:bg-white/10 focus:border-white/20 text-zinc-300 cursor-pointer hover:bg-white/10 transition-colors text-xs md:text-sm"
+                                className="flex-shrink-0 w-36 h-11 bg-white/5 border border-white/10 rounded-xl pl-8 pr-4 focus:outline-none focus:bg-white/10 focus:border-white/20 text-zinc-400 cursor-pointer hover:bg-white/10 transition-all text-[11px] appearance-none font-bold uppercase tracking-wider"
                             >
-                                <option value="">All Priorities</option>
-                                {Object.entries(priorityMapping).map(([key, value]) => <option key={key} value={key}>{value}</option>)}
+                                <option value="" className="bg-zinc-900">Priority</option>
+                                {Object.entries(priorityMapping).map(([key, value]) => <option key={key} value={key} className="bg-zinc-900">{value}</option>)}
                             </select>
+                        </div>
+                        <div className="relative group">
+                            <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors pointer-events-none w-3.5 h-3.5" />
                             <select
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
-                                className="flex-shrink-0 w-36 sm:w-40 bg-white/5 border border-white/10 rounded-xl px-3 py-2 focus:outline-none focus:bg-white/10 focus:border-white/20 text-zinc-300 cursor-pointer hover:bg-white/10 transition-colors text-xs md:text-sm"
+                                className="flex-shrink-0 w-36 h-11 bg-white/5 border border-white/10 rounded-xl pl-8 pr-4 focus:outline-none focus:bg-white/10 focus:border-white/20 text-zinc-400 cursor-pointer hover:bg-white/10 transition-all text-[11px] appearance-none font-bold uppercase tracking-wider"
                             >
-                                <option value="">All Statuses</option>
-                                {Object.entries(statusMapping).map(([key, value]) => <option key={key} value={key}>{value}</option>)}
+                                <option value="" className="bg-zinc-900">Status</option>
+                                {Object.entries(statusMapping).map(([key, value]) => <option key={key} value={key} className="bg-zinc-900">{value}</option>)}
                             </select>
                         </div>
                     </div>
-                    <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10 self-end lg:self-auto">
-                        <button
-                            onClick={() => setViewMode('table')}
-                            className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
-                            title="Table view"
-                        >
-                            <FiList className="w-4 h-4 md:w-5 md:h-5"/>
-                        </button>
-                        <button
-                            onClick={() => setViewMode('kanban')}
-                            className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'kanban' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
-                            title="Kanban view"
-                        >
-                            <FiGrid className="w-4 h-4 md:w-5 md:h-5"/>
-                        </button>
-                    </div>
+                </div>
+                
+                <div className="flex items-center space-x-1 bg-white/5 p-1 h-11 rounded-xl border border-white/10">
+                    <button
+                        onClick={() => setViewMode('table')}
+                        className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        title="Table view"
+                    >
+                        <FiList className="w-5 h-5"/>
+                    </button>
+                    <button
+                        onClick={() => setViewMode('kanban')}
+                        className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'kanban' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        title="Kanban view"
+                    >
+                        <FiGrid className="w-5 h-5"/>
+                    </button>
                 </div>
             </div>
 
@@ -259,6 +270,8 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
             {viewMode === 'kanban' ? (
                 <KanbanBoard
                     tasks={optimisticTasks}
+                    users={users}
+                    projects={projects}
                     updateTask={handleUpdate}
                     deleteTask={handleDelete}
                 />
@@ -269,14 +282,14 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                             <caption className="sr-only">Tasks table</caption>
                             <thead>
                                 <tr className="border-b border-white/5 bg-white/5">
-                                    <th scope="col" className="px-4 py-3 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Name</th>
-                                    <th scope="col" className="px-4 py-3 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Description</th>
-                                    <th scope="col" className="px-4 py-3 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Due Date</th>
-                                    <th scope="col" className="px-4 py-3 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Priority</th>
-                                    <th scope="col" className="px-4 py-3 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Assignee</th>
-                                    <th scope="col" className="px-4 py-3 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Project</th>
-                                    <th scope="col" className="px-4 py-3 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Status</th>
-                                    <th scope="col" className="px-4 py-3 text-right text-[10px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Actions</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Name</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Description</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Due Date</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Priority</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Assignee</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Project</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Status</th>
+                                    <th scope="col" className="px-6 py-4 text-right text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -312,7 +325,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                     type="text"
                                                     name="name"
                                                     placeholder="Task name"
-                                                    className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white placeholder:text-zinc-600 text-xs transition-colors"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
                                                     required
                                                 />
                                             </form>
@@ -323,7 +336,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 name="description"
                                                 placeholder="Description"
                                                 form="create-task-form"
-                                                className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white placeholder:text-zinc-600 text-xs transition-colors"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
                                             />
                                         </td>
                                         <td className="px-4 py-2">
@@ -331,14 +344,14 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 type="date"
                                                 name="dueDate"
                                                 form="create-task-form"
-                                                className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white placeholder:text-zinc-600 text-xs [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert transition-colors"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert transition-all"
                                             />
                                         </td>
                                         <td className="px-4 py-2">
                                             <select
                                                 name="priority"
                                                 form="create-task-form"
-                                                className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white text-xs appearance-none cursor-pointer transition-colors"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
                                                 required
                                             >
                                                 <option value="low" className="bg-zinc-900">Low</option>
@@ -371,7 +384,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                             <select
                                                 name="status"
                                                 form="create-task-form"
-                                                className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white text-xs appearance-none cursor-pointer transition-colors"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
                                                 required
                                             >
                                                 {Object.entries(statusMapping).map(([key, value]) => (

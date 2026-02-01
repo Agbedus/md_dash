@@ -3,7 +3,13 @@
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
+const COLORS = [
+  'var(--pastel-emerald)', 
+  'var(--pastel-amber)', 
+  'var(--pastel-rose)',
+  'var(--pastel-blue)',
+  'var(--pastel-purple)'
+];
 
 const TasksChart = ({ data }: { data: Array<{ name: string; value: number }> }) => {
   return (
@@ -23,13 +29,13 @@ const TasksChart = ({ data }: { data: Array<{ name: string; value: number }> }) 
           cy="50%"
           innerRadius={60}
           outerRadius={80}
-          fill="#8884d8"
           paddingAngle={5}
           dataKey="value"
           labelLine={false}
+          stroke="none"
         >
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke={COLORS[index % COLORS.length]} />
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
       </PieChart>

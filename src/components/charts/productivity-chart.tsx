@@ -27,20 +27,19 @@ const ProductivityChart = ({ data }: { data: Array<{ name: string; productivity:
             name="Current Period"
             type="monotone" 
             dataKey="productivity" 
-            stroke="#6366f1" 
+            stroke="var(--pastel-indigo)" 
             strokeWidth={3} 
-            dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#1e293b' }} 
+            dot={{ r: 4, fill: 'var(--pastel-indigo)', strokeWidth: 2, stroke: 'var(--background)' }} 
             activeDot={{ r: 6, strokeWidth: 0 }} 
         />
         <Line 
             name="Previous Period"
             type="monotone" 
             dataKey="previousProductivity" 
-            stroke="#94a3b8" 
+            stroke="var(--pastel-rose)" 
             strokeWidth={2} 
             strokeDasharray="5 5"
             dot={false}
-            opacity={0.5}
         />
       </LineChart>
     </ResponsiveContainer>

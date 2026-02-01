@@ -2,11 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { FaBell, FaSearch, FaUser, FaCog, FaSignOutAlt } from 'react-icons/fa';
 import Link from 'next/link';
 import { logout } from '@/app/lib/actions';
 import { useDashboard } from './dashboard-layout';
-import { FiMenu, FiX } from 'react-icons/fi';
+import { FiBell, FiSearch, FiUser, FiSettings, FiLogOut, FiPlus, FiHelpCircle, FiMessageSquare, FiMenu, FiX, FiCheck } from 'react-icons/fi';
 
 interface TopNavProps {
   user?: {
@@ -42,27 +41,30 @@ const TopNav = ({ user }: TopNavProps) => {
 
   return (
     <nav className="h-20 md:h-24 px-4 md:px-8 flex items-center justify-between md:sticky md:top-0 z-40 md:bg-zinc-950/50 md:backdrop-blur-xl">
-      <div className="flex items-center gap-4 flex-1">
-        <h1 className="text-2xl font-bold text-white tracking-tight"></h1>
-      </div>
-
-      <div className="flex items-center gap-6">
-        <div className="relative group hidden md:block">
+      <div className="flex items-center gap-6 flex-1">
+        <div className="relative group hidden md:block w-full max-w-md">
+          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--pastel-indigo)] transition-colors" />
           <input
             type="text"
-            placeholder="Search..."
-            className="bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:bg-white/10 focus:border-white/20 w-64 transition-all duration-300 focus:w-72"
+            placeholder="Search anything..."
+            className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-16 py-2.5 text-sm focus:outline-none focus:bg-white/10 focus:border-white/20 w-full transition-all duration-300 placeholder:text-zinc-600"
           />
-          <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px] font-medium text-zinc-500">
+            <span className="text-[12px]">⌘</span>
+            <span>K</span>
+          </div>
         </div>
+      </div>
+
+      <div className="flex items-center gap-3 md:gap-5">
 
         <div className="relative" ref={notificationRef}>
           <button 
             onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-            className="relative p-2 text-zinc-400 hover:text-white transition-colors hover-scale"
+            className="relative p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/5 border border-white/10 rounded-xl hover:border-white/20 group hover-scale"
           >
-            <FaBell className="text-xl" />
-            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#09090b]"></span>
+            <FiBell className="text-xl group-hover:text-[var(--pastel-yellow)] transition-colors" />
+            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#09090b]"></span>
           </button>
 
           {isNotificationsOpen && (
@@ -76,8 +78,8 @@ const TopNav = ({ user }: TopNavProps) => {
                 {[1, 2, 3].map((_, i) => (
                   <div key={i} className="px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer border-b border-white/5 last:border-0">
                     <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0">
-                        <FaBell size={12} />
+                      <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 flex-shrink-0 border border-blue-500/20">
+                        <FiBell size={14} />
                       </div>
                       <div>
                         <p className="text-sm text-zinc-300 line-clamp-2">
@@ -99,34 +101,42 @@ const TopNav = ({ user }: TopNavProps) => {
           )}
         </div>
 
+        <div className="flex gap-2 hidden md:flex">
+          <button className="p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/5 border border-white/10 rounded-xl hover:border-white/20 hover-scale" title="Help & Support">
+            <FiHelpCircle className="text-xl" />
+          </button>
+          <button className="p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/5 border border-white/10 rounded-xl hover:border-white/20 hover-scale" title="Send Feedback">
+            <FiMessageSquare className="text-xl" />
+          </button>
+        </div>
+
+        <div className="h-8 w-[1px] bg-white/10 hidden md:block"></div>
+
         {user ? (
           <div className="relative" ref={dropdownRef}>
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-4 pl-2 rounded-full hover:bg-white/5 p-1.5 pr-4 transition-all cursor-pointer group hover-scale focus:outline-none"
+                className="flex items-center gap-3 p-1 rounded-xl hover:bg-white/5 transition-all cursor-pointer group focus:outline-none"
             >
                 <div className="relative">
                 {user.image ? (
                     <Image
                         src={user.image}
                         alt="Avatar"
-                        width={40}
-                        height={40}
-                        className="rounded-full object-cover border-2 border-white/10 group-hover:border-white/30 transition-colors"
+                        width={36}
+                        height={36}
+                        className="rounded-lg object-cover border-2 border-white/10 group-hover:border-[var(--pastel-purple)]/50 transition-colors"
                     />
                 ) : (
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold border-2 border-white/10 group-hover:border-white/30 transition-colors">
+                    <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/20 group-hover:border-emerald-500/50 transition-colors">
                         {user.name?.charAt(0) || user.email?.charAt(0)}
                     </div>
                 )}
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#09090b]"></span>
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#09090b]"></span>
                 </div>
-                <div className="hidden md:block text-left">
-                <p className="text-sm font-medium text-white group-hover:text-purple-400 transition-colors">
+                <div className="hidden lg:block text-left">
+                <p className="text-xs font-bold text-white group-hover:text-[var(--pastel-purple)] transition-colors uppercase tracking-tight">
                     {user.name || 'User'}
-                </p>
-                <p className="text-xs text-zinc-500 capitalize">
-                    {user.roles?.[0]?.replace('_', ' ') || 'Member'}
                 </p>
                 </div>
             </button>
@@ -141,18 +151,18 @@ const TopNav = ({ user }: TopNavProps) => {
                     
                     <Link 
                         href="/profile" 
-                        className="flex items-center px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+                        className="flex items-center px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors group"
                         onClick={() => setIsOpen(false)}
                     >
-                        <FaUser className="mr-3 text-zinc-500" />
+                        <FiUser className="mr-3 text-zinc-500 group-hover:text-[var(--pastel-blue)]" />
                         My Profile
                     </Link>
                     <Link 
                         href="/settings" 
-                        className="flex items-center px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+                        className="flex items-center px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors group"
                         onClick={() => setIsOpen(false)}
                     >
-                        <FaCog className="mr-3 text-zinc-500" />
+                        <FiSettings className="mr-3 text-zinc-500 group-hover:text-[var(--pastel-teal)]" />
                         Settings
                     </Link>
                     
@@ -160,9 +170,9 @@ const TopNav = ({ user }: TopNavProps) => {
                     
                     <button 
                         onClick={() => logout()}
-                        className="flex w-full items-center px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                        className="flex w-full items-center px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors group"
                     >
-                        <FaSignOutAlt className="mr-3" />
+                        <FiLogOut className="mr-3 group-hover:translate-x-0.5 transition-transform" />
                         Sign Out
                     </button>
                 </div>

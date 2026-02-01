@@ -72,22 +72,21 @@ export default function TaskCard({
     const rowClasses = "border-b border-white/5";
 
     return isEditing ? (
-      <>
-        <form
-          id={`update-${task.id}`}
-          onSubmit={handleUpdateSubmit}
-          method="post"
-          style={{ display: "none" }}
-        ></form>
-        <tr className={rowClasses}>
-          <td className="px-4 py-2 text-xs font-medium text-white whitespace-nowrap">
-            <input className="text-white" form={`update-${task.id}`} type="hidden" name="id" value={task.id} />
+      <tr className={rowClasses}>
+        <td className="px-4 py-2 text-xs font-medium text-white whitespace-nowrap">
+          <form
+            id={`update-${task.id}`}
+            onSubmit={handleUpdateSubmit}
+            method="post"
+            style={{ display: "none" }}
+          ></form>
+          <input className="text-white" form={`update-${task.id}`} type="hidden" name="id" value={task.id} />
             <input
               form={`update-${task.id}`}
               type="text"
               name="name"
               defaultValue={task.name}
-              className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white placeholder:text-zinc-600 text-xs transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs transition-all"
             />
           </td>
           <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
@@ -96,7 +95,7 @@ export default function TaskCard({
               type="text"
               name="description"
               defaultValue={task.description || ''}
-              className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white placeholder:text-zinc-600 text-xs transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs transition-all"
             />
           </td>
           <td className="px-4 py-2 text-[10px] text-zinc-400 whitespace-nowrap">
@@ -105,7 +104,7 @@ export default function TaskCard({
               type="date"
               name="dueDate"
               defaultValue={task.dueDate?.split('T')[0]}
-              className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white placeholder:text-zinc-600 text-xs [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert transition-all"
             />
           </td>
           <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
@@ -113,7 +112,7 @@ export default function TaskCard({
               form={`update-${task.id}`}
               name="priority"
               defaultValue={task.priority}
-              className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white text-xs appearance-none cursor-pointer transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white text-xs appearance-none cursor-pointer transition-all"
             >
               <option value="low" className="bg-zinc-900">Low</option>
               <option value="medium" className="bg-zinc-900">Medium</option>
@@ -148,7 +147,7 @@ export default function TaskCard({
               form={`update-${task.id}`}
               name="status"
               defaultValue={task.status}
-              className="w-full bg-transparent border-b border-white/10 focus:border-emerald-500/50 focus:ring-0 p-1 text-white text-xs appearance-none cursor-pointer transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white text-xs appearance-none cursor-pointer transition-all"
             >
               <option value="task" className="bg-zinc-900">To Do</option>
               <option value="in_progress" className="bg-zinc-900">In Progress</option>
@@ -170,40 +169,39 @@ export default function TaskCard({
             </div>
           </td>
         </tr>
-      </>
     ) : (
       <tr className={`${rowClasses} hover:bg-white/5 transition-colors group items-center`}>
-        <td className="px-4 py-2 text-xs font-medium text-white whitespace-nowrap flex items-center">
+        <td className="px-6 py-4 text-xs font-medium text-white whitespace-nowrap flex items-center">
           <div className="relative flex items-center shrink-0">
             <input
               type="checkbox"
               checked={task.status === "completed"}
               onChange={() => { void handleStatusToggle(); }}
-              className="peer h-3.5 w-3.5 cursor-pointer appearance-none rounded-md border border-white/20 bg-white/5 checked:border-emerald-500 checked:bg-emerald-500 transition-all hover:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              className="peer h-4 w-4 cursor-pointer appearance-none rounded-md border border-white/20 bg-white/5 checked:border-[var(--pastel-emerald)] checked:bg-[var(--pastel-emerald)]/20 transition-all hover:border-[var(--pastel-emerald)]/50 focus:outline-none ring-offset-zinc-950 focus:ring-2 focus:ring-[var(--pastel-emerald)]/20"
             />
-            <FiCheck className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity w-2.5 h-2.5" />
+            <FiCheck className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--pastel-emerald)] opacity-0 peer-checked:opacity-100 transition-opacity w-3 h-3" />
           </div>
-          <span className={`ml-3 truncate max-w-[200px] ${task.status === "completed" ? "line-through text-zinc-500" : "text-zinc-200"}`}>
+          <span className={`ml-4 truncate max-w-[250px] font-bold tracking-tight ${task.status === "completed" ? "line-through text-zinc-500" : "text-zinc-100"}`}>
             {task.name}
           </span>
         </td>
         <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap max-w-[300px] truncate">
           {task.description || <span className="text-zinc-600 italic">No description</span>}
         </td>
-        <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
-          {task.dueDate ? format(new Date(task.dueDate), "MMM d, yyyy") : <span className="text-zinc-600">-</span>}
+        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
+          {task.dueDate ? format(new Date(task.dueDate as string), "MMM dd, yyyy") : <span className="text-zinc-600">-</span>}
         </td>
-        <td className="px-4 py-2 text-xs whitespace-nowrap">
+        <td className="px-6 py-4 text-xs whitespace-nowrap">
           <span
-            className={`px-2 py-0.5 inline-flex text-[10px] font-medium rounded-full border ${
+            className={`px-3 py-1 inline-flex text-[10px] font-bold rounded-lg border uppercase tracking-wider ${
               task.priority === 'high'
-                ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                ? 'bg-[var(--pastel-rose)]/10 text-[var(--pastel-rose)] border-[var(--pastel-rose)]/20 pulse-soft'
                 : task.priority === 'medium'
-                ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
-                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                ? 'bg-[var(--pastel-amber)]/10 text-[var(--pastel-amber)] border-[var(--pastel-amber)]/20'
+                : 'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20'
             }`}
           >
-            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+            {task.priority}
           </span>
         </td>
         <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
@@ -213,26 +211,26 @@ export default function TaskCard({
                 <span className="text-zinc-600 italic">Unassigned</span>
             )}
         </td>
-        {!hideProject && (
-          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
-              {task.projectId ? (
-                  <span className="text-indigo-400">{projects.find(p => p.id === task.projectId)?.name}</span>
-              ) : (
-                  <span className="text-zinc-600 italic">No Project</span>
-              )}
-          </td>
-        )}
-        <td className="px-4 py-2 text-xs whitespace-nowrap">
+        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
+            {task.projectId ? (
+                <span className="text-[var(--pastel-indigo)] font-bold uppercase tracking-tight text-[10px] bg-[var(--pastel-indigo)]/5 px-2 py-0.5 rounded-md border border-[var(--pastel-indigo)]/10">
+                    {projects.find(p => p.id === task.projectId)?.name}
+                </span>
+            ) : (
+                <span className="text-zinc-600 italic">No Project</span>
+            )}
+        </td>
+        <td className="px-6 py-4 text-xs whitespace-nowrap">
           <span
-            className={`px-2 py-0.5 inline-flex text-[10px] font-medium rounded-full border ${
+            className={`px-3 py-1 inline-flex text-[10px] font-bold rounded-lg border uppercase tracking-wider ${
               task.status === 'completed'
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                ? 'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20'
                 : task.status === 'in_progress'
-                ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                ? 'bg-[var(--pastel-blue)]/10 text-[var(--pastel-blue)] border-[var(--pastel-blue)]/20'
+                : 'bg-white/5 text-zinc-400 border-white/10'
             }`}
           >
-            {task.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+            {task.status.replace(/_/g, ' ')}
           </span>
         </td>
         <td className="px-4 py-2 text-xs font-medium text-right whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">

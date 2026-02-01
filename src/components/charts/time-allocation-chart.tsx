@@ -3,7 +3,12 @@
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const COLORS = ['#8b5cf6', '#10b981'];
+const COLORS = [
+  'var(--pastel-purple)', 
+  'var(--pastel-emerald)',
+  'var(--pastel-amber)',
+  'var(--pastel-orange)'
+];
 
 const TimeAllocationChart = ({ data }: { data: Array<{ name: string; value: number }> }) => {
   return (
@@ -23,13 +28,13 @@ const TimeAllocationChart = ({ data }: { data: Array<{ name: string; value: numb
           cy="50%"
           innerRadius={60}
           outerRadius={80}
-          fill="#8884d8"
           paddingAngle={5}
           dataKey="value"
           labelLine={false}
+          stroke="none"
         >
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke={COLORS[index % COLORS.length]} />
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
       </PieChart>

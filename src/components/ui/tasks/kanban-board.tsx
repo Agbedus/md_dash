@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import type { Task } from "@/types/task";
 import { statusMapping } from "@/types/task";
+import { User } from "@/types/user";
+import { Project } from "@/types/project";
 import KanbanCard from "./kanban-card";
 import {
   DndContext,
@@ -16,6 +18,8 @@ import { useDroppable } from "@dnd-kit/core";
 
 interface KanbanBoardProps {
   tasks?: Task[];
+  users: User[];
+  projects: Project[];
   updateTask: (formData: FormData) => Promise<void>;
   deleteTask: (formData: FormData) => Promise<void>;
 }
@@ -23,6 +27,8 @@ interface KanbanBoardProps {
 interface ColumnProps {
   col: keyof typeof statusMapping;
   items: Task[];
+  users: User[];
+  projects: Project[];
   columns: Array<keyof typeof statusMapping>;
   onMove: (task: Task, status: Task["status"]) => Promise<void>;
   onDelete: (task: Task) => Promise<void>;
@@ -30,7 +36,7 @@ interface ColumnProps {
   flash: boolean;
 }
 
-function Column({ col, items, columns, onMove, onDelete, highlightedIds, flash }: ColumnProps) {
+function Column({ col, items, users, projects, columns, onMove, onDelete, highlightedIds, flash }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: col });
   return (
     <div
@@ -40,19 +46,30 @@ function Column({ col, items, columns, onMove, onDelete, highlightedIds, flash }
       className={`glass rounded-2xl p-4 flex flex-col transition-all duration-300 ${
         isOver
           ? 'bg-white/10 ring-2 ring-indigo-500/50 shadow-[0_0_30px_rgba(99,102,241,0.1)]'
-          : 'hover:bg-white/[0.07]'
+          : 'bg-zinc-900/10'
       } ${flash ? 'ring-2 ring-emerald-500/50 bg-emerald-500/10' : ''}`}
     >
-      <div className="flex items-center justify-between mb-4 px-1">
-        <h3 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wider">
-          {statusMapping[col]}
+      <div className="flex items-center justify-between mb-6 px-1">
+        <div className="flex items-center gap-3">
+          <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${
+            col === 'completed' ? 'bg-[var(--pastel-emerald)] shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 
+            col === 'in_progress' ? 'bg-[var(--pastel-blue)] shadow-[0_0_10px_rgba(59,130,246,0.3)]' : 
+            'bg-zinc-500'
+          }`} />
+          <h3 className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">
+            {statusMapping[col]}
+          </h3>
           {flash && (
-            <span className="inline-flex items-center text-emerald-400 text-[10px] animate-pulse font-normal normal-case bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-              ✓ Dropped
+            <span className="inline-flex items-center text-emerald-400 text-[10px] animate-pulse font-bold uppercase tracking-tight bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              Updated
             </span>
           )}
-        </h3>
-        <span className="text-xs font-medium text-zinc-400 bg-white/5 px-2 py-1 rounded-lg border border-white/5">{items?.length ?? 0}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-black text-zinc-500 bg-white/5 px-2 py-1 rounded-lg border border-white/5 min-w-[28px] text-center">
+            {items?.length ?? 0}
+          </span>
+        </div>
       </div>
       <SortableContext items={(items ?? []).map((t) => String(t.id))} strategy={verticalListSortingStrategy}>
         <div className="flex-1 space-y-3 min-h-[150px]">
@@ -63,6 +80,8 @@ function Column({ col, items, columns, onMove, onDelete, highlightedIds, flash }
             >
               <KanbanCard
                 task={task}
+                users={users}
+                projects={projects}
                 columns={columns}
                 onMove={onMove}
                 onDelete={onDelete}
@@ -85,7 +104,7 @@ function Column({ col, items, columns, onMove, onDelete, highlightedIds, flash }
   );
 }
 
-export default function KanbanBoard({ tasks = [], updateTask, deleteTask }: KanbanBoardProps) {
+export default function KanbanBoard({ tasks = [], users, projects, updateTask, deleteTask }: KanbanBoardProps) {
   const columns = useMemo(() => Object.keys(statusMapping) as Array<keyof typeof statusMapping>, []);
 
   const [grouped, setGrouped] = useState<Record<string, Task[]>>(() => {
@@ -182,6 +201,8 @@ export default function KanbanBoard({ tasks = [], updateTask, deleteTask }: Kanb
             key={col}
             col={col}
             items={grouped[col] ?? []}
+            users={users}
+            projects={projects}
             columns={columns}
             onMove={moveTo}
             onDelete={handleDelete}

@@ -23,6 +23,19 @@
   --background: #09090b; /* Zinc 950 */
   --foreground: #fafafa; /* Zinc 50 */
 
+  /* Brighter Pastel Highlights (Level 300) */
+  --pastel-blue: #67e8f9;    /* Cyan 300 */
+  --pastel-purple: #c4b5fd;  /* Violet 300 */
+  --pastel-indigo: #a5b4fc;  /* Indigo 300 */
+  --pastel-emerald: #6ee7b7; /* Emerald 300 */
+  --pastel-rose: #fda4af;     /* Rose 300 */
+  --pastel-amber: #fcd34d;    /* Amber 300 */
+  --pastel-orange: #fb923c;   /* Orange 400ish */
+  --pastel-pink: #f472b6;     /* Pink 400ish */
+  --pastel-teal: #2dd4bf;     /* Teal 400ish */
+  --pastel-lime: #a3e635;     /* Lime 400ish */
+  --pastel-cyan: #22d3ee;     /* Cyan 400ish */
+
   /* Custom glassmorphism variables */
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-bg: rgba(255, 255, 255, 0.03);
@@ -40,16 +53,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  background-image: radial-gradient(
-      circle at 50% 0%,
-      rgba(120, 119, 198, 0.1) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 0% 0%,
-      rgba(56, 189, 248, 0.05) 0%,
-      transparent 50%
-    );
   background-attachment: fixed;
 }
 
@@ -80,10 +83,14 @@ body {
 }
 
 .hover-glow {
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  transition:
+    border-color 0.3s ease,
+    background-color 0.3s ease,
+    transform 0.2s ease;
 }
 .hover-glow:hover {
-  box-shadow: 0 0 15px rgba(124, 58, 237, 0.3); /* purple-600 glow */
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.05);
   transform: translateY(-2px);
 }
 
@@ -111,4 +118,21 @@ body,
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+@layer utilities {
+  .pulse-soft {
+    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
 }

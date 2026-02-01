@@ -24,6 +24,16 @@ export function ListSkeleton() {
   );
 }
 
+export function SummarySkeleton() {
+    return (
+        <div className="col-span-1 lg:col-span-12 grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-32 glass rounded-2xl animate-pulse"></div>
+            ))}
+        </div>
+    );
+}
+
 export function CardSkeleton() {
     return (
         <div className="glass p-6 rounded-2xl animate-pulse h-full">

@@ -5,12 +5,40 @@ import { getTasks } from '@/app/tasks/actions';
 import { getNotes } from '@/app/notes/actions';
 import { getProjects } from '@/app/projects/actions';
 import { getEvents } from '@/app/calendar/actions';
+import { getUsers } from '@/app/users/actions';
 import { cache } from 'react';
 import { format, startOfWeek, endOfWeek, subWeeks, subDays, isSameDay } from 'date-fns';
 
 export async function getUserName() {
   const session = await auth();
   return session?.user?.name || 'User';
+}
+
+export async function getSummaryStats() {
+    const [tasks, events, notes, users] = await Promise.all([
+        getTasks(undefined, undefined, undefined, undefined, 1000),
+        getEvents(),
+        getNotes(1000),
+        getUsers()
+    ]);
+
+    const now = new Date();
+    const startOfCurrentWeek = startOfWeek(now);
+
+    const upcomingEvents = events.filter(e => new Date(e.start) >= now);
+    const completedTasks = tasks.filter(t => t.status === 'completed');
+    const recentNotes = notes.filter(n => n.updated_at && new Date(n.updated_at) >= startOfCurrentWeek);
+
+    return {
+        totalTasks: tasks.length,
+        completedTasks: completedTasks.length,
+        upcomingEvents: upcomingEvents.length,
+        totalNotes: notes.length,
+        recentNotesCount: recentNotes.length,
+        pendingTasks: tasks.length - completedTasks.length,
+        totalUsers: users.length,
+        users: users.slice(0, 3).map((u: any) => ({ name: u.name, image: u.image }))
+    };
 }
 
 export const getProductivityData = cache(async function(range: string = '7d') {

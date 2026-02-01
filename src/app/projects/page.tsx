@@ -4,15 +4,17 @@ import { getProjects } from './actions';
 import { getClients } from '@/app/clients/actions';
 import { getUsers } from '@/app/users/actions';
 import { getTasks } from '@/app/tasks/actions';
+import { getNotes } from '@/app/notes/actions';
 import { Project } from '@/types/project';
 import { Task } from '@/types/task';
 
 export default async function ProjectsPage() {
-  const [allProjects, allClients, allUsers, allTasks] = await Promise.all([
+  const [allProjects, allClients, allUsers, allTasks, allNotes] = await Promise.all([
     getProjects(),
     getClients(),
     getUsers(),
     getTasks(),
+    getNotes(),
   ]);
   
   // Link tasks to projects
@@ -21,5 +23,5 @@ export default async function ProjectsPage() {
     tasks: allTasks.filter((task: Task) => task.projectId === project.id)
   }));
   
-  return <ProjectsPageClient initialProjects={projectsWithTasks} users={allUsers} clients={allClients} />;
+  return <ProjectsPageClient initialProjects={projectsWithTasks} users={allUsers} clients={allClients} notes={allNotes} />;
 }

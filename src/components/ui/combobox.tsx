@@ -36,12 +36,18 @@ export function Combobox({
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
+  const [openUpward, setOpenUpward] = useState(false);
 
   const updateCoords = () => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
+      const dropdownHeight = 250; // Max height approximation
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const shouldOpenUpward = spaceBelow < dropdownHeight && rect.top > dropdownHeight;
+      
+      setOpenUpward(shouldOpenUpward);
       setCoords({
-        top: rect.bottom,
+        top: shouldOpenUpward ? rect.top - 4 : rect.bottom + 4,
         left: rect.left,
         width: rect.width,
       });
@@ -176,11 +182,14 @@ export function Combobox({
             ref={dropdownRef}
             style={{
               position: 'fixed',
-              top: `${coords.top + 4}px`,
+              top: openUpward ? 'auto' : `${coords.top}px`,
+              bottom: openUpward ? `${window.innerHeight - coords.top}px` : 'auto',
               left: `${coords.left}px`,
               width: `${coords.width}px`,
             }}
-            className="z-[9999] bg-zinc-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+            className={`z-[9999] bg-zinc-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${
+              openUpward ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'
+            }`}
           >
             <div className="p-2 border-b border-white/5">
               <div className="relative">

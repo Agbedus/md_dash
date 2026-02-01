@@ -23,7 +23,7 @@ const ProjectProgressChart = ({ data }: { data: Array<{ name: string; progress: 
           fontSize={10}
         />
         <Tooltip
-          cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+          cursor={{ fill: 'transparent' }}
           contentStyle={{
             backgroundColor: 'rgba(15, 23, 42, 0.9)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -36,8 +36,7 @@ const ProjectProgressChart = ({ data }: { data: Array<{ name: string; progress: 
           {data.map((entry, index) => (
             <Cell 
                 key={`cell-${index}`} 
-                fill={entry.progress === 100 ? '#10b981' : '#6366f1'} 
-                fillOpacity={0.8}
+                fill={entry.progress === 100 ? 'var(--pastel-emerald)' : 'var(--pastel-indigo)'} 
             />
           ))}
         </Bar>

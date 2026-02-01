@@ -1,27 +1,39 @@
 "use client";
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 
-const WorkloadChart = ({ data }: { data: Array<{ name: string; tasks: number }> }) => {
+const COLORS = [
+  'var(--pastel-purple)', 
+  'var(--pastel-blue)', 
+  'var(--pastel-indigo)', 
+  'var(--pastel-teal)', 
+  'var(--pastel-rose)'
+];
+
+export function WorkloadChart({ data }: { data: any[] }) {
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-        <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-        <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: 'rgba(30, 41, 59, 0.9)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '0.75rem',
-          }}
+      <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <XAxis 
+          dataKey="name" 
+          axisLine={false} 
+          tickLine={false} 
+          tick={{ fill: '#71717a', fontSize: 10 }}
         />
-        <Legend wrapperStyle={{ fontSize: '0.875rem' }} />
-        <Bar dataKey="tasks" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+        <Tooltip 
+          contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+          itemStyle={{ color: '#fafafa', fontSize: '12px' }}
+          cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+        />
+        <Bar dataKey="tasks" radius={[6, 6, 0, 0]}>
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );
-};
+}
 
 export default WorkloadChart;

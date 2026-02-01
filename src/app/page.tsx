@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { auth } from '@/auth';
-import { getUserName } from '@/app/lib/dashboard-actions';
 import { 
+  SummaryStatsSection,
   ProductivitySection, 
   StatsOverviewSection, 
   WorkloadSection, 
@@ -10,9 +10,9 @@ import {
   KeyTasksSection, 
   RecentNotesSection, 
   PrioritiesSection, 
-  FocusModeSection
+  FocusModeSection,
 } from '@/components/dashboard/sections';
-import { ChartSkeleton, ListSkeleton, CardSkeleton } from '@/components/dashboard/skeletons';
+import { ChartSkeleton, ListSkeleton, CardSkeleton, SummarySkeleton } from '@/components/dashboard/skeletons';
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ range?: string }> }) {
   const params = await searchParams;
@@ -20,7 +20,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   
   if (!session?.user?.id) {
     return (
-      <div className="p-8 max-w-7xl mx-auto">
+      <div className="px-4 py-8 max-w-[1600px] mx-auto">
         <div className="glass p-6 rounded-2xl text-center">
           <h2 className="text-xl font-bold text-white mb-2">Please log in</h2>
           <p className="text-zinc-400">You need to be logged in to view the dashboard.</p>
@@ -38,52 +38,57 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   else if (hour >= 18) greeting = 'Good evening';
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="px-4 py-8 max-w-[1600px] mx-auto">
       <div className="mb-10">
         <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">{greeting}, {userName}</h1>
         <p className="text-zinc-400 text-lg">Here is a summary of your day.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Charts Section */}
-        
-        <Suspense fallback={<div className="col-span-1 lg:col-span-2 h-96"><ChartSkeleton /></div>}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Summary Stats */}
+        <Suspense fallback={<SummarySkeleton />}>
+            <SummaryStatsSection />
+        </Suspense>
+
+        {/* Row 1 */}
+        <Suspense fallback={<div className="col-span-1 lg:col-span-6 h-96"><ChartSkeleton /></div>}>
             <ProductivitySection range={params.range} />
         </Suspense>
 
-        <Suspense fallback={<div className="col-span-1 h-96"><ChartSkeleton /></div>}>
+        <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><CardSkeleton /></div>}>
             <StatsOverviewSection />
         </Suspense>
 
-        <Suspense fallback={<div className="col-span-1 h-96"><ChartSkeleton /></div>}>
+        <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><ChartSkeleton /></div>}>
             <WorkloadSection />
         </Suspense>
 
-        <Suspense fallback={<div className="col-span-1 h-96"><ChartSkeleton /></div>}>
-            <TimeAllocationSection />
-        </Suspense>
-
-        <Suspense fallback={<div className="col-span-1 h-96"><ChartSkeleton /></div>}>
+        {/* Row 2 */}
+        <Suspense fallback={<div className="col-span-1 lg:col-span-5 h-96"><ChartSkeleton /></div>}>
             <ProjectProgressSection />
         </Suspense>
 
-        {/* Key Tasks */}
-        <Suspense fallback={<div className="col-span-1 lg:col-span-2"><ListSkeleton /></div>}>
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><ChartSkeleton /></div>}>
+            <TimeAllocationSection />
+        </Suspense>
+
+        <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><ListSkeleton /></div>}>
             <KeyTasksSection />
         </Suspense>
 
-        {/* Upcoming Priorities */}
-        <Suspense fallback={<div className="col-span-1 lg:col-span-1"><CardSkeleton /></div>}>
-             <PrioritiesSection />
-        </Suspense>
-
-        {/* Recent Notes */}
-        <Suspense fallback={<div className="col-span-1 lg:col-span-2"><ListSkeleton /></div>}>
+        {/* Row 3 */}
+        <Suspense fallback={<div className="col-span-1 lg:col-span-6 h-96"><ListSkeleton /></div>}>
             <RecentNotesSection />
         </Suspense>
 
-        {/* Static Sections */}
-        <FocusModeSection />
+        <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><CardSkeleton /></div>}>
+             <PrioritiesSection />
+        </Suspense>
+
+        <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><CardSkeleton /></div>}>
+            <FocusModeSection />
+        </Suspense>
+
       </div>
     </div>
   );

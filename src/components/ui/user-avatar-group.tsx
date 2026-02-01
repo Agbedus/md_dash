@@ -40,9 +40,9 @@ export default function UserAvatarGroup({ users, limit = 3, size = 'md' }: UserA
     };
 
     const sizeClasses = {
-        sm: 'h-6 w-6 text-[10px]',
-        md: 'h-8 w-8 text-xs',
-        lg: 'h-10 w-10 text-sm',
+        sm: 'h-8 w-8 text-[10px]',
+        md: 'h-10 w-10 text-xs',
+        lg: 'h-12 w-12 text-sm',
     };
 
     return (
