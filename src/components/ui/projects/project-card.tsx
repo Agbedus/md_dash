@@ -51,6 +51,7 @@ const CircularProgress = ({ percentage, size = 32 }: { percentage: number; size?
 };
 
 export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardProps) {
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const statusColors = {
     planning: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     in_progress: "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -93,11 +94,21 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
             <FiEdit2 className="w-3.5 h-3.5" />
           </button>
           <button
-            onClick={() => onDelete(project)}
-            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400 transition-colors"
+            onClick={async () => {
+              if (confirm('Are you sure you want to delete this project?')) {
+                 setIsDeleting(true);
+                 try {
+                   await onDelete(project);
+                 } finally {
+                   setIsDeleting(false);
+                 }
+              }
+            }}
+            disabled={isDeleting}
+            className="p-1.5 rounded-lg hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400 transition-colors disabled:opacity-50"
             title="Delete project"
           >
-            <FiTrash2 className="w-3.5 h-3.5" />
+            {isDeleting ? <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-rose-400"></div> : <FiTrash2 className="w-3.5 h-3.5" />}
           </button>
           <Link
             href={`/projects/${project.id}`}
@@ -128,23 +139,13 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
         <div className="flex items-center gap-1.5 mb-3 flex-wrap">
           <FiTag className="w-3 h-3 text-zinc-500" />
           {(() => {
-            try {
-              // Try to parse if it's a JSON string array
-              const tags = typeof project.tags === 'string' && project.tags.startsWith('[') 
-                ? JSON.parse(project.tags) 
-                : (typeof project.tags === 'string' ? project.tags.split(',') : project.tags);
-              
-              const tagList = Array.isArray(tags) ? tags : [];
-              
-              return tagList.slice(0, 3).map((tag: string, idx: number) => (
-                <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] bg-white/5 text-zinc-400 border border-white/5">
-                  {String(tag).trim()}
-                </span>
-              ));
-            } catch (e) {
-              console.error("Error rendering tags", e);
-              return null;
-            }
+            if (!project.tags || !Array.isArray(project.tags)) return null;
+            
+            return project.tags.slice(0, 3).map((tag: string, idx: number) => (
+              <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] bg-white/5 text-zinc-400 border border-white/5">
+                {tag}
+              </span>
+            ));
           })()}
         </div>
       )}

@@ -5,6 +5,7 @@ import { getTasks } from "@/app/tasks/actions";
 import { getNotes } from "@/app/notes/actions";
 import { getProjects } from "@/app/projects/actions";
 import { getEvents } from "@/app/calendar/actions";
+import { getClients } from "@/app/clients/actions";
 
 
 // --- Tool Definitions (OpenAI Format) ---
@@ -302,12 +303,13 @@ async function executeTool(name: string, args: any) {
     }
 
     if (name === "searchClients") {
-      // Mock for now as we don't have a direct getClients action here yet
-      return { 
-        clients: [
-          { id: 1, companyName: `Search result for: ${args.name}` }
-        ] 
-      };
+      const clients = await getClients();
+      const query = args.name.toLowerCase();
+      const filtered = clients.filter(c => 
+        c.companyName.toLowerCase().includes(query) ||
+        (c.contactPersonName && c.contactPersonName.toLowerCase().includes(query))
+      );
+      return { clients: filtered.slice(0, 10) };
     }
 
     if (name === "getStats") {

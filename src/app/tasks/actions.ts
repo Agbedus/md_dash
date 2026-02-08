@@ -89,21 +89,6 @@ export async function getTasks(query?: string, priority?: string, status?: strin
             })(),
         }));
 
-        // Apply filters in-memory
-        if (query) {
-            const lowerQuery = query.toLowerCase();
-            tasks = tasks.filter(t => 
-                t.name.toLowerCase().includes(lowerQuery) || 
-                (t.description && t.description.toLowerCase().includes(lowerQuery))
-            );
-        }
-        if (priority) {
-            tasks = tasks.filter(t => t.priority.toLowerCase() === priority.toLowerCase());
-        }
-        if (status) {
-            tasks = tasks.filter(t => t.status.toLowerCase() === status.toLowerCase());
-        }
-
         return tasks;
     } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -153,7 +138,7 @@ export async function createTask(formData: FormData) {
         if (!response.ok) {
             const error = await response.text();
             console.error("Failed to create task:", error);
-            return { error: "Failed to create task" };
+            return { success: false, error: "Failed to create task" };
         }
 
         revalidatePath('/tasks');
@@ -162,7 +147,7 @@ export async function createTask(formData: FormData) {
         return { success: true };
     } catch (error) {
         console.error("Error creating task:", error);
-        return { error: "Failed to create task" };
+        return { success: false, error: "Failed to create task" };
     }
 }
 
@@ -170,11 +155,11 @@ export async function updateTask(formData: FormData) {
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
-        return;
+        return { success: false, error: "Unauthorized" };
     }
 
     const id = formData.get('id');
-    if (!id) return;
+    if (!id) return { success: false, error: "Missing task ID" };
     const taskId = Number(id);
 
     // Build payload dynamically based on what's in formData
@@ -216,33 +201,28 @@ export async function updateTask(formData: FormData) {
         if (!response.ok) {
             const errorText = await response.text();
             console.error("Failed to update task. Status:", response.status, "Error:", errorText);
-            return;
+            return { success: false, error: "Failed to update task" };
         }
-
 
         revalidatePath('/tasks');
         revalidateTag('tasks', 'max');
         revalidateTag('projects', 'max');
+        return { success: true };
     } catch (error) {
         console.error("Error updating task:", error);
+        return { success: false, error: "Failed to update task" };
     }
 }
 
-export async function deleteTask(input: FormData | string | number) {
+export async function deleteTask(formData: FormData) {
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
-        return;
+        return { success: false, error: "Unauthorized" };
     }
 
-    let id: string | number;
-    if (input instanceof FormData) {
-        const formDataId = input.get('id');
-        if (!formDataId) return;
-        id = formDataId as string;
-    } else {
-        id = input;
-    }
+    const id = formData.get('id');
+    if (!id) return { success: false, error: "Missing task ID" };
 
     try {
         const response = await fetch(`${API_BASE_URL}/tasks/${id}`, {
@@ -256,14 +236,16 @@ export async function deleteTask(input: FormData | string | number) {
 
         if (!response.ok) {
             console.error("Failed to delete task:", await response.text());
-            return;
+            return { success: false, error: "Failed to delete task" };
         }
 
         revalidatePath('/tasks');
         revalidateTag('tasks', 'max');
         revalidateTag('projects', 'max');
+        return { success: true };
     } catch (error) {
         console.error("Error deleting task:", error);
+        return { success: false, error: "Failed to delete task" };
     }
 }
 
@@ -271,7 +253,7 @@ export async function updateTaskStatus(taskId: number, status: string) {
      const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
-        return;
+        return { success: false, error: "Unauthorized" };
     }
 
     try {
@@ -287,13 +269,15 @@ export async function updateTaskStatus(taskId: number, status: string) {
 
         if (!response.ok) {
             console.error("Failed to update task status:", await response.text());
-            return;
+            return { success: false, error: "Failed to update task status" };
         }
 
         revalidatePath('/tasks');
         revalidateTag('tasks', 'max');
         revalidateTag('projects', 'max');
+        return { success: true };
     } catch (error) {
         console.error("Error updating task status:", error);
+        return { success: false, error: "Failed to update task status" };
     }
 }

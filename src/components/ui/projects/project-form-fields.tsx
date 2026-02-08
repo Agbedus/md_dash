@@ -79,7 +79,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
             type="text"
             name="tags"
             id="tags"
-            defaultValue={defaultValues?.tags || ''}
+            defaultValue={defaultValues?.tags ? (Array.isArray(defaultValues.tags) ? defaultValues.tags.join(', ') : defaultValues.tags) : ''}
             className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
             placeholder="Comma-separated tags"
           />

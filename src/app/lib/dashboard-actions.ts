@@ -15,11 +15,12 @@ export async function getUserName() {
 }
 
 export async function getSummaryStats() {
-    const [tasks, events, notes, users] = await Promise.all([
+    const [tasks, events, notes, users, projects] = await Promise.all([
         getTasks(undefined, undefined, undefined, undefined, 1000),
         getEvents(),
         getNotes(1000),
-        getUsers()
+        getUsers(),
+        getProjects()
     ]);
 
     const now = new Date();
@@ -37,6 +38,7 @@ export async function getSummaryStats() {
         recentNotesCount: recentNotes.length,
         pendingTasks: tasks.length - completedTasks.length,
         totalUsers: users.length,
+        totalProjects: projects.length,
         users: users.slice(0, 3).map((u: any) => ({ name: u.name, image: u.image }))
     };
 }
@@ -202,18 +204,11 @@ export async function getTimeAllocationData() {
 }
 
 export async function getKeyTasks() {
-    // High priority, in progress. 
-    // We can filter by params!
-    let tasks = await getTasks(undefined, 'high', 'in_progress', undefined, 10);
+    // Only show high priority tasks that are in progress (never completed)
+    const allTasks = await getTasks(undefined, 'high', 'in_progress', undefined, 20);
     
-    if (tasks.length < 5) {
-        // Fallback: try just 'high' priority if not enough in progress
-         const moreTasks = await getTasks(undefined, 'high', undefined, undefined, 10);
-         // dedup using Set or Map
-         const currentIds = new Set(tasks.map(t => t.id));
-         const nonCompleted = moreTasks.filter(t => t.status !== 'completed' && !currentIds.has(t.id));
-         tasks = [...tasks, ...nonCompleted];
-    }
+    // Explicitly filter for in_progress only (in case API doesn't filter correctly)
+    const tasks = allTasks.filter(t => t.status === 'in_progress');
     
     const sorted = tasks.sort((a, b) => {
         if (!a.dueDate) return 1;
@@ -221,28 +216,14 @@ export async function getKeyTasks() {
         return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     }).slice(0, 5);
 
-    return sorted.map(t => {
-        let statusColor = 'text-zinc-400';
-        let statusBg = 'bg-zinc-400/10';
-        
-        if (t.status === 'in_progress') {
-            statusColor = 'text-blue-400';
-            statusBg = 'bg-blue-400/10';
-        } else if (t.status === 'completed') {
-            statusColor = 'text-emerald-400';
-            statusBg = 'bg-emerald-400/10';
-        } else {
-            statusColor = 'text-yellow-400';
-            statusBg = 'bg-yellow-400/10';
-        }
-
-        return {
-            title: t.name,
-            status: t.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-            color: statusColor,
-            bg: statusBg
-        };
-    });
+    return sorted.map(t => ({
+        title: t.name,
+        status: 'In Progress',
+        priority: t.priority,
+        dueDate: t.dueDate,
+        color: 'text-blue-400',
+        bg: 'bg-blue-400/10'
+    }));
 }
 
 export async function getRecentDecisions() {

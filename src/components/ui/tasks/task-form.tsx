@@ -24,9 +24,11 @@ export function TaskForm({ onSubmit, task, onCancel }: TaskFormProps) {
   const [dueDate, setDueDate] = useState(task?.dueDate || "");
   const [priority, setPriority] = useState(task?.priority || "medium");
   const [status, setStatus] = useState(task?.status || "task");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       await onSubmit({ name, description, dueDate, priority, status });
       toast.success(`Task ${task ? 'updated' : 'created'} successfully!`);
@@ -38,6 +40,8 @@ export function TaskForm({ onSubmit, task, onCancel }: TaskFormProps) {
       }
     } catch {
       toast.error(`Failed to ${task ? 'update' : 'create'} task.`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -89,8 +93,17 @@ export function TaskForm({ onSubmit, task, onCancel }: TaskFormProps) {
             Cancel
           </button>
         )}
-        <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
-          {task ? "Update Task" : "Add Task"}
+        <button 
+          type="submit" 
+          disabled={isSubmitting}
+          className="px-4 py-2 bg-blue-500 text-white rounded flex items-center gap-2 disabled:opacity-50"
+        >
+          {isSubmitting ? (
+            <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            task ? "Update Task" : "Add Task"
+          )}
+          {isSubmitting && <span>{task ? "Updating..." : "Adding..."}</span>}
         </button>
       </div>
     </form>

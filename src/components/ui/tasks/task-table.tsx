@@ -3,22 +3,36 @@ import { Task } from "@/types/task";
 import { FiEdit, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { useState } from "react";
 import TaskFormFields from "./task-form-fields";
+import toast from "react-hot-toast";
 
 interface TaskTableProps {
     tasks: Task[];
-    updateTask: (formData: FormData) => void;
-    deleteTask: (formData: FormData) => void;
+    updateTask: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
+    deleteTask: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
 }
 
 export default function TaskTable({ tasks, updateTask, deleteTask }: TaskTableProps) {
     const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleUpdate = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        formData.set('id', editingTask!.id.toString());
-        updateTask(formData);
-        setEditingTask(null);
+        setIsSubmitting(true);
+        try {
+            const formData = new FormData(event.currentTarget);
+            formData.set('id', editingTask!.id.toString());
+            const result = await updateTask(formData);
+            if (result?.success) {
+                toast.success('Task updated successfully');
+                setEditingTask(null);
+            } else {
+                toast.error(result?.error || 'Failed to update task');
+            }
+        } catch (err) {
+            toast.error('An unexpected error occurred');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleDelete = (task: Task) => {
@@ -48,8 +62,16 @@ export default function TaskTable({ tasks, updateTask, deleteTask }: TaskTablePr
                                             <TaskFormFields />
                                         </div>
                                         <div className="flex items-center justify-end space-x-2">
-                                            <button type="submit" className="p-2 text-green-500 hover:text-green-400">
-                                                <FiCheck />
+                                            <button 
+                                                type="submit" 
+                                                disabled={isSubmitting}
+                                                className="p-2 text-green-500 hover:text-green-400 disabled:opacity-50"
+                                            >
+                                                {isSubmitting ? (
+                                                    <div className="h-3.5 w-3.5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                                                ) : (
+                                                    <FiCheck className="w-4 h-4" />
+                                                )}
                                             </button>
                                             <button type="button" onClick={() => setEditingTask(null)} className="p-2 text-red-500 hover:text-red-400">
                                                 <FiX />

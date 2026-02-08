@@ -945,6 +945,12 @@ These endpoints are restricted to Administrators and Super Administrators.
   ```
 - **Returns:** `{ status: "success", detail: "Record created" }`
 
+#### Generic Table Delete
+
+- **DELETE** `/api/v1/admin-db/tables/{table_name}/{pk_column}/{pk_value}`
+- **Auth Required:** Super Admin only
+- **Returns:** `{ status: "success", detail: "Record deleted" }`
+
 ---
 
 ## Permission Model

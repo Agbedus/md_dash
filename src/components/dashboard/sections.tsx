@@ -227,22 +227,39 @@ export async function KeyTasksSection() {
           <FiMoreHorizontal />
         </button>
       </div>
-      <div className="space-y-4">
+      <div className="flex-1 min-h-0 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
         {keyTasks.length > 0 ? (
           keyTasks.map((task, i) => (
             <div
               key={i}
-              className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group"
+              className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all cursor-pointer group"
             >
-              <div className="flex items-center gap-3">
-                <div className={`w-2.5 h-2.5 rounded-full`} style={{ backgroundColor: `var(--pastel-${task.color.split('-')[1]})` }}></div>
-                <span className="text-zinc-300 font-medium group-hover:text-white transition-colors">
+              <div className="shrink-0 w-2 h-2 mt-1.5 rounded-full bg-blue-400"></div>
+              <div className="flex-1 min-w-0">
+                <span className="text-sm text-zinc-300 font-medium group-hover:text-white transition-colors block truncate">
                   {task.title}
                 </span>
+                <div className="flex items-center justify-between gap-2 mt-1.5">
+                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-semibold uppercase tracking-wider">
+                    <FiActivity className="text-[8px]" />
+                    {task.status}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {task.priority && (
+                      <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${task.priority === 'high' ? 'bg-rose-500/10 text-rose-400' : task.priority === 'medium' ? 'bg-amber-500/10 text-amber-400' : 'bg-zinc-500/10 text-zinc-400'}`}>
+                        <FiZap className="text-[8px]" />
+                        {task.priority}
+                      </span>
+                    )}
+                    {task.dueDate && (
+                      <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-zinc-500/10 text-zinc-400 font-medium">
+                        <FiClock className="text-[8px]" />
+                        {new Date(task.dueDate).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-              <span className={`text-[10px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider bg-white/5 border border-white/5`} style={{ color: `var(--pastel-${task.color.split('-')[1]})` }}>
-                {task.status}
-              </span>
             </div>
           ))
         ) : (

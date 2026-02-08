@@ -1,32 +1,50 @@
 "use client";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { FaSearch } from "react-icons/fa";
 import type { Note } from "@/types/note";
 import type { Task } from "@/types/task";
 import NoteCard from "@/components/ui/notes/note-card";
 import TaskCard from "@/components/ui/tasks/task-card";
+import { getNotes } from "@/app/notes/actions";
+import { getTasks } from "@/app/tasks/actions";
 
 type SearchResult = (Note & { type: 'note' }) | (Task & { type: 'task' });
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query) return;
+    if (!query.trim()) return;
 
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/search?query=${query}`);
-      const data = await res.json();
-      setResults(data);
-    } catch (error) {
-      console.error("Search failed:", error);
-    } finally {
-      setLoading(false);
-    }
+    startTransition(async () => {
+      try {
+        const lowerQuery = query.toLowerCase();
+        
+        // Fetch from real backend via server actions
+        const [notes, tasks] = await Promise.all([
+          getNotes(100),
+          getTasks(query, undefined, undefined, undefined, 100)
+        ]);
+
+        // Filter notes locally (API doesn't support text search)
+        const filteredNotes = notes.filter(n => 
+          n.title.toLowerCase().includes(lowerQuery) || 
+          n.content.toLowerCase().includes(lowerQuery)
+        );
+
+        // Map to search result type
+        const noteResults: SearchResult[] = filteredNotes.map(n => ({ ...n, type: 'note' as const }));
+        const taskResults: SearchResult[] = tasks.map(t => ({ ...t, type: 'task' as const }));
+
+        setResults([...noteResults, ...taskResults]);
+      } catch (error) {
+        console.error("Search failed:", error);
+        setResults([]);
+      }
+    });
   };
 
   return (
@@ -43,13 +61,13 @@ export default function SearchPage() {
           <button
             type="submit"
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-slate-600"
-            disabled={loading}
+            disabled={isPending}
           >
             <FaSearch />
           </button>
         </form>
 
-        {loading ? (
+        {isPending ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 space-y-3">
@@ -79,7 +97,7 @@ export default function SearchPage() {
           </div>
         )}
 
-        {results.length === 0 && !loading && query && (
+        {results.length === 0 && !isPending && query && (
           <div className="text-center py-24">
             <FaSearch className="text-6xl text-sky-400 mb-4 mx-auto" />
             <h1 className="text-2xl font-semibold text-white">No results found</h1>
@@ -87,7 +105,7 @@ export default function SearchPage() {
           </div>
         )}
 
-        {results.length === 0 && !loading && !query && (
+        {results.length === 0 && !isPending && !query && (
             <div className="text-center py-24">
                 <FaSearch className="text-6xl text-sky-400 mb-4 mx-auto" />
                 <h1 className="text-2xl font-semibold text-white">Search</h1>

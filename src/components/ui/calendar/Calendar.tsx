@@ -147,7 +147,9 @@ export default function Calendar({ initialDate, initialView = "month", events = 
         if (e.isTask || String(e.id).startsWith("task-")) {
           // extract numeric id for tasks
           const idStr = String(e.id).replace(/^task-/, "");
-          await deleteTask(idStr);
+          const formData = new FormData();
+          formData.append("id", idStr);
+          await deleteTask(formData);
         } else {
           await deleteEvent(e.id);
         }
@@ -163,21 +165,20 @@ export default function Calendar({ initialDate, initialView = "month", events = 
   );
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
+    <div className="space-y-4 pb-40">
+      <div className="mb-10">
         <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Calendar</h1>
         <p className="text-zinc-400 text-lg">Manage your schedule and upcoming events.</p>
       </div>
 
-      <div className="space-y-4 pb-40">
-        <Toolbar
-          currentDate={currentDate}
-          view={view}
-          onPrev={onPrev}
-          onNext={onNext}
-          onToday={onToday}
-          onChangeView={setView}
-        />
+      <Toolbar
+        currentDate={currentDate}
+        view={view}
+        onPrev={onPrev}
+        onNext={onNext}
+        onToday={onToday}
+        onChangeView={setView}
+      />
 
         {/* Views */}
         {view === "month" && (
@@ -229,6 +230,5 @@ export default function Calendar({ initialDate, initialView = "month", events = 
           onOptimisticDelete={(evt) => addOptimisticEvent({ type: 'delete', event: evt })}
         />
       </div>
-    </div>
   );
 }

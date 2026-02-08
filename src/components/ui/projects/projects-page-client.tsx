@@ -28,6 +28,8 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Optimistic UI
   const [optimisticProjects, addOptimisticProject] = useOptimistic(
@@ -64,7 +66,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
       ownerId: formData.get('ownerId') as string,
       clientId: formData.get('clientId') as string,
       description: '',
-      tags: '',
+      tags: [],
       startDate: null,
       endDate: null,
       budget: null,
@@ -76,8 +78,13 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
     };
     addOptimisticProject({ type: 'add', project: newProject });
     
-    setIsCreateModalOpen(false);
-    await createProject(formData);
+    setIsCreating(true);
+    try {
+      await createProject(formData);
+      setIsCreateModalOpen(false);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleUpdate = async (formData: FormData) => {
@@ -93,11 +100,17 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
       priority: formData.get('priority') as Project['priority'],
       ownerId: formData.get('ownerId') as string,
       clientId: formData.get('clientId') as string,
+      tags: formData.get('tags') ? (formData.get('tags') as string).split(',').map(t => t.trim()).filter(Boolean) : [],
     };
     addOptimisticProject({ type: 'update', project: updatedProject });
     
-    setEditingProject(null);
-    await updateProject(formData);
+    setIsUpdating(true);
+    try {
+      await updateProject(formData);
+      setEditingProject(null);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleDelete = async (project: Project) => {
@@ -341,10 +354,11 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
                 </button>
                 <button
                   type="submit"
-                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all shadow-lg shadow-emerald-500/10 backdrop-blur-md"
+                  disabled={isCreating}
+                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all shadow-lg shadow-emerald-500/10 backdrop-blur-md disabled:opacity-50"
                   title="Create Project"
                 >
-                  <FiCheck className="w-5 h-5" />
+                  {isCreating ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400"></div> : <FiCheck className="w-5 h-5" />}
                 </button>
               </div>
             </form>
@@ -375,10 +389,11 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
                 </button>
                 <button
                   type="submit"
-                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all shadow-lg shadow-emerald-500/10 backdrop-blur-md"
+                  disabled={isUpdating}
+                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all shadow-lg shadow-emerald-500/10 backdrop-blur-md disabled:opacity-50"
                   title="Save Changes"
                 >
-                  <FiCheck className="w-5 h-5" />
+                  {isUpdating ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400"></div> : <FiCheck className="w-5 h-5" />}
                 </button>
               </div>
             </form>

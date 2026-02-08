@@ -20,8 +20,8 @@ interface KanbanBoardProps {
   tasks?: Task[];
   users: User[];
   projects: Project[];
-  updateTask: (formData: FormData) => Promise<void>;
-  deleteTask: (formData: FormData) => Promise<void>;
+  updateTask: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
+  deleteTask: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
 }
 
 interface ColumnProps {
@@ -146,6 +146,7 @@ export default function KanbanBoard({ tasks = [], users, projects, updateTask, d
     const fd = new FormData();
     fd.append("id", String(task.id));
     fd.append("status", status);
+    // We can await this, but DND usually doesn't need the return value immediately
     await updateTask(fd);
   };
 

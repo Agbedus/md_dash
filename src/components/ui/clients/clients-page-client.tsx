@@ -1,10 +1,13 @@
 'use client';
+// Force rebuild for hydration
 
 import React, { useState, useOptimistic, useTransition } from 'react';
 import { getClients } from '@/app/clients/actions';
 import { Client } from '@/types/client';
 import { FiPlus, FiSearch, FiX, FiCheck, FiEdit2, FiTrash2, FiMail, FiGlobe, FiUser } from 'react-icons/fi';
 import { createClient, updateClient, deleteClient } from '@/app/clients/actions';
+import ClientCard from './client-card';
+import toast from 'react-hot-toast';
 
 interface ClientsPageClientProps {
   initialClients: Client[];
@@ -20,7 +23,7 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
   // Optimistic UI for Clients
   const [optimisticClients, addOptimisticClient] = useOptimistic(
     allClients,
-    (state: Client[], action: { type: 'add' | 'update' | 'delete', client: Client }) => {
+    (state: Client[], action: { type: 'add' | 'update' | 'delete', client: Client & { pending?: boolean } }) => {
       switch (action.type) {
         case 'add':
           return [...state, action.client];
@@ -40,25 +43,37 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
   );
 
   const handleCreate = async (formData: FormData) => {
-    const newClient: Client = {
-      id: Date.now().toString(), // Temp ID
+    const tempId = `temp-${Date.now()}`;
+    const newClient: Client & { pending?: boolean } = {
+      id: tempId,
       companyName: formData.get('companyName') as string,
       contactPersonName: formData.get('contactPersonName') as string,
       contactEmail: formData.get('contactEmail') as string,
       websiteUrl: formData.get('websiteUrl') as string,
       createdAt: new Date().toISOString(),
+      pending: true,
     };
+
+    // UI Feedback
     addOptimisticClient({ type: 'add', client: newClient });
     setIsCreateModalOpen(false);
 
     try {
-      await createClient(formData);
-      const clients = await getClients();
-      startTransition(() => {
+      const result = await createClient(formData);
+      if (result?.success) {
+        toast.success("Client created successfully");
+        const clients = await getClients();
+        startTransition(() => {
+          setAllClients(clients);
+        });
+      } else {
+        toast.error(result?.error || "Failed to create client");
+        // Revert UI if needed by refreshing from source
+        const clients = await getClients();
         setAllClients(clients);
-      });
+      }
     } catch (err) {
-      console.error(err);
+      toast.error("An unexpected error occurred");
       const clients = await getClients();
       setAllClients(clients);
     }
@@ -66,27 +81,37 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
 
   const handleUpdate = async (formData: FormData) => {
     const editing = editingClient;
-    if (editing) {
-      const updatedClient: Client = {
-        ...editing,
-        companyName: formData.get('companyName') as string,
-        contactPersonName: formData.get('contactPersonName') as string,
-        contactEmail: formData.get('contactEmail') as string,
-        websiteUrl: formData.get('websiteUrl') as string,
-      };
-      addOptimisticClient({ type: 'update', client: updatedClient });
-    }
+    if (!editing) return;
+
+    const updatedClient: Client & { pending?: boolean } = {
+      ...editing,
+      companyName: formData.get('companyName') as string,
+      contactPersonName: formData.get('contactPersonName') as string,
+      contactEmail: formData.get('contactEmail') as string,
+      websiteUrl: formData.get('websiteUrl') as string,
+      pending: true,
+    };
+
+    // UI Feedback
+    addOptimisticClient({ type: 'update', client: updatedClient });
     setEditingClient(null);
 
     try {
-      formData.set('id', editing!.id);
-      await updateClient(formData);
-      const clients = await getClients();
-      startTransition(() => {
+      formData.set('id', editing.id);
+      const result = await updateClient(formData);
+      if (result?.success) {
+        toast.success("Client updated successfully");
+        const clients = await getClients();
+        startTransition(() => {
+          setAllClients(clients);
+        });
+      } else {
+        toast.error(result?.error || "Failed to update client");
+        const clients = await getClients();
         setAllClients(clients);
-      });
+      }
     } catch (err) {
-      console.error(err);
+      toast.error("An unexpected error occurred");
       const clients = await getClients();
       setAllClients(clients);
     }
@@ -98,13 +123,20 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
       try {
         const formData = new FormData();
         formData.set('id', client.id);
-        await deleteClient(formData);
-        const clients = await getClients();
-        startTransition(() => {
+        const result = await deleteClient(formData);
+        if (result?.success) {
+          toast.success("Client deleted successfully");
+          const clients = await getClients();
+          startTransition(() => {
+            setAllClients(clients);
+          });
+        } else {
+          toast.error(result?.error || "Failed to delete client");
+          const clients = await getClients();
           setAllClients(clients);
-        });
+        }
       } catch (err) {
-        console.error(err);
+        toast.error("An unexpected error occurred");
         const clients = await getClients();
         setAllClients(clients);
       }
@@ -112,33 +144,34 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-10">
         <div>
-          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">Clients</h1>
-          <p className="text-zinc-400 text-sm md:text-lg">Manage client companies and contacts.</p>
+          <h1 className="text-4xl font-black text-white mb-2 tracking-tight uppercase">Client Ecosystem</h1>
+          <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Global company coordination & contact intelligence.</p>
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-xs md:text-sm text-zinc-400 hover:text-white transition-all duration-200 group self-start md:self-auto">
+          className="flex items-center gap-2 h-11 px-6 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-sm font-bold text-white transition-all duration-300 hover-scale"
+        >
           <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
-            <FiPlus className="w-3 h-3 md:w-4 md:h-4" />
+            <FiPlus className="w-4 h-4" />
           </div>
-          <span className="pr-2">New Client</span>
+          <span>Initialize Client</span>
         </button>
       </div>
 
-      {/* Search */}
-      <div className="glass p-3 md:p-4 rounded-2xl mb-6 md:mb-8 hidden md:block">
-        <div className="relative">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+      {/* Strategic Search */}
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="relative w-full lg:w-96 group">
+          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--pastel-indigo)] transition-colors"/>
           <input
             type="text"
-            placeholder="Search clients..."
+            placeholder="Search ecosystem..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="w-full h-11 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:bg-white/10 focus:border-white/20 text-white placeholder:text-zinc-600 transition-all text-sm"
           />
         </div>
       </div>
@@ -146,49 +179,20 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
       {/* Clients Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredClients.map((client) => (
-          <div key={client.id} className="group relative bg-zinc-900/30 hover:bg-zinc-900/50 border border-white/5 hover:border-white/10 rounded-2xl p-5 transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-1">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-lg font-semibold text-white">{client.companyName}</h3>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => setEditingClient(client)}
-                  className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
-                >
-                  <FiEdit2 className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => handleDelete(client)}
-                  className="p-1.5 rounded-lg hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400 transition-colors"
-                >
-                  <FiTrash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {client.contactPersonName && (
-              <div className="flex items-center gap-2 text-sm text-zinc-400 mb-2">
-                <FiUser className="w-4 h-4" />
-                <span>{client.contactPersonName}</span>
-              </div>
-            )}
-
-            {client.contactEmail && (
-              <div className="flex items-center gap-2 text-sm text-zinc-400 mb-2">
-                <FiMail className="w-4 h-4" />
-                <span className="truncate">{client.contactEmail}</span>
-              </div>
-            )}
-
-            {client.websiteUrl && (
-              <div className="flex items-center gap-2 text-sm text-zinc-400">
-                <FiGlobe className="w-4 h-4" />
-                <a href={client.websiteUrl} target="_blank" rel="noopener noreferrer" className="truncate hover:text-indigo-400 transition-colors">
-                  {client.websiteUrl}
-                </a>
-              </div>
-            )}
-          </div>
+          <ClientCard 
+            key={client.id} 
+            client={client} 
+            onEdit={setEditingClient} 
+            onDelete={handleDelete}
+            isPending={(client as any).pending}
+          />
         ))}
+        {filteredClients.length === 0 && (
+          <div className="col-span-full py-20 text-center glass rounded-3xl">
+            <FiUser className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
+            <p className="text-zinc-500 font-medium">No clients found matching your search.</p>
+          </div>
+        )}
       </div>
 
       {/* Create Modal */}

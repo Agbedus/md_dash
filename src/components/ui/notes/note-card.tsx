@@ -106,6 +106,11 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
     const [hoveredOwner, setHoveredOwner] = useState(false);
     const [ownerCoords, setOwnerCoords] = useState({ top: 0, left: 0 });
     const ownerRef = useRef<HTMLDivElement>(null);
+    const [hasMounted, setHasMounted] = useState(false);
+
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
 
     const handleOwnerMouseEnter = () => {
         if (ownerRef.current) {
@@ -247,7 +252,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
 
                 {/* content area now flexes and scrolls internally */}
                 <div className="ql-snow text-sm text-zinc-400 overflow-y-auto notes-scroll flex-1">
-                    <div className="ql-editor" dangerouslySetInnerHTML={{ __html: renderContent(note.content || '') }} />
+                    <div className="ql-editor" dangerouslySetInnerHTML={{ __html: hasMounted ? renderContent(note.content || '') : '' }} />
                 </div>
 
                 <div className="mt-4">
@@ -455,7 +460,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
             </td>
             <td className="px-6 py-4 text-sm text-zinc-400">
                 <div className="ql-snow">
-                    <div className="ql-editor !p-0" dangerouslySetInnerHTML={{ __html: renderContent(note.content || '') }} />
+                    <div className="ql-editor !p-0" dangerouslySetInnerHTML={{ __html: hasMounted ? renderContent(note.content || '') : '' }} />
                 </div>
             </td>
             <td className="px-6 py-4 text-sm text-zinc-400">

@@ -66,7 +66,7 @@ export async function getProjects(limit?: number, skip?: number): Promise<Projec
             description: p.description,
             status: p.status as Project['status'],
             priority: p.priority as Project['priority'],
-            tags: p.tags, // Mapped correctly now
+            tags: p.tags ? JSON.parse(p.tags) : [],
             
             ownerId: p.owner_id,
             clientId: p.client_id,
@@ -123,7 +123,7 @@ export async function getProject(id: number): Promise<Project | null> {
             description: p.description,
             status: p.status as Project['status'],
             priority: p.priority as Project['priority'],
-            tags: p.tags,
+            tags: p.tags ? JSON.parse(p.tags) : [],
             ownerId: p.owner_id,
             clientId: p.client_id,
             startDate: p.start_date,
@@ -171,7 +171,9 @@ export async function createProject(formData: FormData) {
     // Tags as JSON string array
     const tags = formData.get('tags') as string;
     if (tags) {
-        rawData.tags = JSON.stringify(tags.split(',').map(t => t.trim()).filter(t => t !== ''));
+        // Create clean array: split, trim, remove empty
+        const tagList = tags.split(',').map(t => t.trim()).filter(t => t !== '');
+        rawData.tags = JSON.stringify(tagList);
     } else {
         rawData.tags = JSON.stringify([]);
     }
@@ -256,7 +258,9 @@ export async function updateProject(formData: FormData) {
     // Tags
     const tags = formData.get('tags');
     if (tags !== null) {
-        rawData.tags = JSON.stringify((tags as string).split(',').map(t => t.trim()).filter(t => t !== ''));
+        // Create clean array: split, trim, remove empty
+        const tagList = (tags as string).split(',').map(t => t.trim()).filter(t => t !== '');
+        rawData.tags = JSON.stringify(tagList);
     }
 
     try {

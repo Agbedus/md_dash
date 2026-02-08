@@ -10,30 +10,48 @@ import { Combobox } from "@/components/ui/combobox";
 import { User } from "@/types/user";
 import { Project } from "@/types/project";
 
+import toast from "react-hot-toast";
+
 interface TaskCardProps {
     task: Task;
     users?: User[];
     projects?: Project[];
-    updateTask?: (formData: FormData) => Promise<void>;
-    deleteTask?: (formData: FormData) => Promise<void>;
+    updateTask?: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
+    deleteTask?: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
     hideProject?: boolean;
+    isEditing?: boolean;
+    onEdit?: () => void;
+    onCancel?: () => void;
 }
 
 export default function TaskCard({ 
     task, 
     users = [], 
     projects = [], 
-    updateTask = async () => {}, 
-    deleteTask = async () => {},
-    hideProject = false
+    updateTask = async () => ({ success: true }), 
+    deleteTask = async () => ({ success: true }),
+    hideProject = false,
+    isEditing = false,
+    onEdit = () => {},
+    onCancel = () => {}
 }: TaskCardProps) {
-    const [isEditing, setIsEditing] = useState(false);
     const [selectedAssignees, setSelectedAssignees] = useState<(string | number)[]>(
       task.assignees?.map(a => a.user.id) || []
     );
     const [selectedProject, setSelectedProject] = useState<string | number | null>(
       task.projectId || null
     );
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const formRef = React.useRef<HTMLFormElement>(null);
+
+    // Sync state when not editing (in case of background updates)
+    React.useEffect(() => {
+        if (!isEditing) {
+            setSelectedAssignees(task.assignees?.map(a => a.user.id) || []);
+            setSelectedProject(task.projectId || null);
+        }
+    }, [task, isEditing]);
 
     const displayAssignees = React.useMemo(() => {
         if (task.assignees && task.assignees.length > 0) return task.assignees.map(a => a.user);
@@ -41,9 +59,12 @@ export default function TaskCard({
         return users.filter(u => task.assigneeIds?.includes(u.id));
     }, [task.assignees, task.assigneeIds, users]);
 
-    const handleUpdateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const formData = new FormData(e.currentTarget);
+    const handleUpdateSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
+      if (e) e.preventDefault();
+      
+      // Get form data from ref
+      if (!formRef.current) return;
+      const formData = new FormData(formRef.current);
       
       // Manually append state values to FormData
       if (selectedAssignees.length > 0) {
@@ -58,15 +79,37 @@ export default function TaskCard({
         formData.append('projectId', '');
       }
       
-      await updateTask(formData);
-      setIsEditing(false);
+      setIsUpdating(true);
+      try {
+        const result = await updateTask(formData);
+        if (result?.success) {
+            toast.success("Task updated successfully");
+            onCancel();
+        } else {
+            toast.error(result?.error || "Failed to update task");
+        }
+      } catch (error) {
+        toast.error("An unexpected error occurred");
+        console.error(error);
+      } finally {
+        setIsUpdating(false);
+      }
+    };
+
+    const handleSubmitClick = async () => {
+      await handleUpdateSubmit();
     };
 
     const handleStatusToggle = async () => {
       const formData = new FormData();
       formData.append("id", task.id.toString());
       formData.append("status", task.status === "completed" ? "in_progress" : "completed");
-      await updateTask(formData);
+      const result = await updateTask(formData);
+      if (result?.success) {
+        toast.success(`Task marked as ${task.status === "completed" ? "in progress" : "completed"}`);
+      } else {
+        toast.error(result?.error || "Failed to update status");
+      }
     };
 
     const rowClasses = "border-b border-white/5";
@@ -75,6 +118,7 @@ export default function TaskCard({
       <tr className={rowClasses}>
         <td className="px-4 py-2 text-xs font-medium text-white whitespace-nowrap">
           <form
+            ref={formRef}
             id={`update-${task.id}`}
             onSubmit={handleUpdateSubmit}
             method="post"
@@ -86,7 +130,8 @@ export default function TaskCard({
               type="text"
               name="name"
               defaultValue={task.name}
-              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs transition-all"
+              disabled={isUpdating}
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs transition-all disabled:opacity-50"
             />
           </td>
           <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
@@ -95,7 +140,8 @@ export default function TaskCard({
               type="text"
               name="description"
               defaultValue={task.description || ''}
-              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs transition-all"
+              disabled={isUpdating}
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs transition-all disabled:opacity-50"
             />
           </td>
           <td className="px-4 py-2 text-[10px] text-zinc-400 whitespace-nowrap">
@@ -104,7 +150,8 @@ export default function TaskCard({
               type="date"
               name="dueDate"
               defaultValue={task.dueDate?.split('T')[0]}
-              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert transition-all"
+              disabled={isUpdating}
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert transition-all disabled:opacity-50"
             />
           </td>
           <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
@@ -112,7 +159,8 @@ export default function TaskCard({
               form={`update-${task.id}`}
               name="priority"
               defaultValue={task.priority}
-              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white text-xs appearance-none cursor-pointer transition-all"
+              disabled={isUpdating}
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white text-xs appearance-none cursor-pointer transition-all disabled:opacity-50"
             >
               <option value="low" className="bg-zinc-900">Low</option>
               <option value="medium" className="bg-zinc-900">Medium</option>
@@ -147,7 +195,8 @@ export default function TaskCard({
               form={`update-${task.id}`}
               name="status"
               defaultValue={task.status}
-              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white text-xs appearance-none cursor-pointer transition-all"
+              disabled={isUpdating}
+              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white text-xs appearance-none cursor-pointer transition-all disabled:opacity-50"
             >
               <option value="task" className="bg-zinc-900">To Do</option>
               <option value="in_progress" className="bg-zinc-900">In Progress</option>
@@ -156,12 +205,21 @@ export default function TaskCard({
           </td>
           <td className="px-4 py-2 text-xs font-medium text-right whitespace-nowrap">
             <div className="flex items-center justify-end space-x-2">
-                <button form={`update-${task.id}`} type="submit" className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors">
-                <FiCheck className="w-3 h-3" />
+                <button
+                    type="button"
+                    onClick={handleSubmitClick}
+                    disabled={isUpdating}
+                    className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors disabled:opacity-50 min-w-[30px] flex items-center justify-center"
+                >
+                    {isUpdating ? (
+                      <div className="h-3.5 w-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <FiCheck className="w-4 h-4" />
+                    )}
                 </button>
                 <button
                 type="button"
-                onClick={() => setIsEditing(false)}
+                onClick={onCancel}
                 className="p-1.5 bg-white/5 text-zinc-400 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
                 >
                 <FiX className="w-3 h-3" />
@@ -237,23 +295,42 @@ export default function TaskCard({
           <div className="flex items-center justify-end space-x-1">
             <button
                 type="button"
-                onClick={() => setIsEditing(true)}
-                className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                title="Edit"
+                onClick={onEdit}
+                disabled={task.id < 0}
+                className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                title={task.id < 0 ? "Saving..." : "Edit"}
             >
                 <FiEdit2 className="w-3.5 h-3.5" />
             </button>
             <form
                 onSubmit={async (e) => {
                 e.preventDefault();
-                const fd = new FormData(e.currentTarget);
-                await deleteTask(fd);
+                if (!confirm('Are you sure you want to delete this task?')) return;
+                
+                try {
+                    const fd = new FormData(e.currentTarget);
+                    const result = await deleteTask(fd);
+                    if (result?.success) {
+                        toast.success("Task deleted successfully");
+                    } else {
+                        toast.error(result?.error || "Failed to delete task");
+                    }
+                } catch (error) {
+                    toast.error("An unexpected error occurred");
+                } finally {
+                    setIsDeleting(false);
+                }
                 }}
                 style={{ display: 'inline' }}
             >
                 <input type="hidden" name="id" value={task.id} />
-                <button type="submit" className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all" title="Delete">
-                <FiTrash2 className="w-3.5 h-3.5" />
+                <button 
+                  type="submit" 
+                  disabled={task.id < 0 || isDeleting}
+                  className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed" 
+                  title={task.id < 0 ? "Saving..." : "Delete"}
+                >
+                    {isDeleting ? <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-red-400"></div> : <FiTrash2 className="w-3.5 h-3.5" />}
                 </button>
             </form>
           </div>

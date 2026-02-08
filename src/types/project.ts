@@ -8,7 +8,7 @@ export type Project = {
     description: string | null;
     status: "planning" | "in_progress" | "completed" | "on_hold";
     priority: "low" | "medium" | "high";
-    tags: string | null; // JSON string array
+    tags: string[]; // JSON string array in DB, parsed array in app
 
     ownerId: string | null;
     // managerId: string | null; // Deprecated
@@ -39,7 +39,7 @@ export function parseProjectFormData(formData: FormData): Partial<Project> {
         description: data.description as string,
         status: data.status as Project['status'],
         priority: data.priority as Project['priority'],
-        tags: data.tags as string,
+        tags: data.tags ? (data.tags as string).split(',').map(t => t.trim()).filter(t => t !== '') : [],
         
         ownerId: data.ownerId as string,
         clientId: data.clientId as string,

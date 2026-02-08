@@ -135,14 +135,17 @@ export async function updateClient(formData: FormData) {
         });
 
         if (!response.ok) {
-            console.error("Failed to update client:", await response.text());
-            return;
+            const errorText = await response.text();
+            console.error("Failed to update client:", errorText);
+            return { success: false, error: "Failed to update client" };
         }
 
         revalidatePath('/clients');
         revalidateTag('clients', 'max');
+        return { success: true };
     } catch (error) {
         console.error("Error updating client:", error);
+        return { success: false, error: "Failed to update client" };
     }
 }
 
@@ -150,11 +153,11 @@ export async function deleteClient(formData: FormData) {
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) {
-        return;
+        return { success: false, error: "Unauthorized" };
     }
 
     const id = formData.get('id');
-    if (!id) return;
+    if (!id) return { success: false, error: "Missing client ID" };
 
     try {
         const response = await fetch(`${API_BASE_URL}/clients/${id}`, {
@@ -167,13 +170,16 @@ export async function deleteClient(formData: FormData) {
         });
 
         if (!response.ok) {
-            console.error("Failed to delete client:", await response.text());
-            return;
+            const errorText = await response.text();
+            console.error("Failed to delete client:", errorText);
+            return { success: false, error: "Failed to delete client" };
         }
 
         revalidatePath('/clients');
         revalidateTag('clients', 'max');
+        return { success: true };
     } catch (error) {
         console.error("Error deleting client:", error);
+        return { success: false, error: "Failed to delete client" };
     }
 }

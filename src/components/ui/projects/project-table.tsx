@@ -12,6 +12,7 @@ import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import TaskCard from '@/components/ui/tasks/task-card';
 import { FiChevronRight, FiChevronDown, FiPlus, FiPieChart } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 interface ProjectTableProps {
   projects: Project[];
@@ -72,9 +73,12 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
       if (result?.error) {
         throw new Error(result.error);
       }
+      toast.success('Project updated successfully');
       setEditingId(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to update project');
+      const msg = err.message || 'Failed to update project';
+      toast.error(msg);
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -97,9 +101,12 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
       if (result?.error) {
         throw new Error(result.error);
       }
+      toast.success('Project created successfully');
       setIsAdding(false);
     } catch (err: any) {
-      setError(err.message || 'Failed to create project');
+      const msg = err.message || 'Failed to create project';
+      toast.error(msg);
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -308,7 +315,7 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                                   title="Save"
                                 >
                                   {isSubmitting ? (
-                                    <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
                                   ) : (
                                     <FiCheck className="w-4 h-4" />
                                   )}
@@ -454,8 +461,20 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                              
                              if (!formData.get('status')) formData.set('status', 'task');
                              
-                             await createTask(formData);
-                             setAddingTaskId(null);
+                             setIsSubmitting(true);
+                             try {
+                               const result = await createTask(formData);
+                               if (result?.success) {
+                                 toast.success('Task created successfully');
+                                 setAddingTaskId(null);
+                               } else {
+                                 toast.error(result?.error || 'Failed to create task');
+                               }
+                             } catch (err) {
+                               toast.error('An unexpected error occurred');
+                             } finally {
+                               setIsSubmitting(false);
+                             }
                            }}
                            className="space-y-4"
                            >
@@ -498,9 +517,17 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                                  />
                                </div>
                                <div className="flex gap-2">
-                                 <button type="submit" className="px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all font-medium text-sm flex items-center gap-2 border border-emerald-500/20">
-                                   <FiCheck className="w-4 h-4" />
-                                   <span>Create</span>
+                                 <button 
+                                   type="submit" 
+                                   disabled={isSubmitting}
+                                   className="px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all font-medium text-sm flex items-center gap-2 border border-emerald-500/20 disabled:opacity-50"
+                                 >
+                                   {isSubmitting ? (
+                                     <div className="h-3.5 w-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+                                   ) : (
+                                     <FiCheck className="w-4 h-4" />
+                                   )}
+                                   <span>{isSubmitting ? 'Creating...' : 'Create'}</span>
                                  </button>
                                  <button type="button" onClick={() => setAddingTaskId(null)} className="px-3 py-2 rounded-lg bg-white/5 text-zinc-400 hover:text-white transition-all text-sm border border-white/5">
                                    <FiX className="w-4 h-4" />
@@ -655,7 +682,7 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                                title="Save"
                              >
                                {isSubmitting ? (
-                                 <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                                 <div className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
                                ) : (
                                  <FiCheck className="w-4 h-4" />
                                )}

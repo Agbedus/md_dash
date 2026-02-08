@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useRef, useEffect, useCallback, useOptimistic } from 'react';
+import { useState, useTransition, useRef, useEffect, useCallback, useOptimistic, useMemo } from 'react';
 import { FiCheck, FiX, FiPlus, FiGrid, FiList, FiSearch, FiFilter } from 'react-icons/fi';
 import { createTask, updateTask, deleteTask, getTasks } from '@/app/tasks/actions';
 import { statusMapping, priorityMapping } from "@/types/task";
@@ -9,6 +9,7 @@ import TaskCard from './task-card';
 import KanbanBoard from './kanban-board';
 import { TaskSummarySection } from './task-summary';
 import { UserLeaderboard } from './user-leaderboard';
+import toast from 'react-hot-toast';
 
 type ViewMode = 'table' | 'kanban';
 
@@ -39,10 +40,12 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     const [isPending, startTransition] = useTransition();
     const [savingCreate, setSavingCreate] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [isDirty, setIsDirty] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filterPriority, setFilterPriority] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
+    const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
     
     // Optimistic UI
     const [optimisticTasks, addOptimisticTask] = useOptimistic(
@@ -60,6 +63,20 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
             }
         }
     );
+
+    // Filtered tasks for visual grouping and search
+    const filteredTasks = useMemo(() => {
+        return optimisticTasks.filter(task => {
+            const matchesSearch = !searchQuery || 
+                task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+            
+            const matchesPriority = !filterPriority || task.priority === filterPriority;
+            const matchesStatus = !filterStatus || task.status === filterStatus;
+            
+            return matchesSearch && matchesPriority && matchesStatus;
+        });
+    }, [optimisticTasks, searchQuery, filterPriority, filterStatus]);
 
     // New task state
     const [newAssignees, setNewAssignees] = useState<(string | number)[]>([]);
@@ -80,8 +97,10 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     }, [searchQuery, filterPriority, filterStatus, hydrateTasks, projectId]);
 
     useEffect(() => {
+        // Only trigger server fetch on initial load or projectId change.
+        // Client-side filtering handles search/priority/status for a more instant feel.
         loadTasks();
-    }, [loadTasks]);
+    }, [projectId]); // Removed loadTasks from deps to prevent re-fetching on every state change (search/filter)
 
     useEffect(() => {
         if (isAddingTask && newNameRef.current) {
@@ -116,17 +135,29 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
+        startTransition(() => {
         addOptimisticTask({ type: 'add', task: newTask });
+        });
 
         setErrorMsg(null);
         setSavingCreate(true);
+        // Don't close form yet - wait for success
         try {
-            await createTask(formData);
+            const result = await createTask(formData);
+            if (result && result.error) {
+                setErrorMsg(result.error);
+                 // We don't have an easy way to revert optimistic update here without reloading, 
+                 // but loadTasks() below will eventually fix it or user sees error.
+            } else {
+                 toast.success('Task created successfully');
+                 setIsAddingTask(false);
+                 setIsDirty(false);
+                 // Reset form state
+                 setNewAssignees([]);
+                 setNewProject(null);
+                 if (newNameRef.current) newNameRef.current.value = '';
+            }
             loadTasks();
-            setIsAddingTask(false);
-            // Reset form state
-            setNewAssignees([]);
-            setNewProject(null);
         } catch (err) {
             console.error(err);
             setErrorMsg('Could not save the new task. Please try again.');
@@ -163,16 +194,27 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                     try { return idsJson ? JSON.parse(idsJson) : existingTask.assigneeIds; } catch { return existingTask.assigneeIds; }
                 })(),
              };
-             addOptimisticTask({ type: 'update', task: updatedTask });
+             startTransition(() => {
+                 addOptimisticTask({ type: 'update', task: updatedTask });
+             });
         }
 
         setErrorMsg(null);
         try {
-            await updateTask(formData);
+            const result = await updateTask(formData);
+            if (result && result.error) {
+                setErrorMsg(result.error);
+                return { success: false, error: result.error };
+            } else {
+                setEditingTaskId(null);
+            }
             loadTasks();
+            return { success: true };
         } catch (err) {
             console.error(err);
-            setErrorMsg('Could not update the task. Please try again.');
+            const msg = 'Could not update the task. Please try again.';
+            setErrorMsg(msg);
+            return { success: false, error: msg };
         }
     };
 
@@ -180,16 +222,25 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
         const id = Number(formData.get('id'));
         const task = allTasks.find(t => t.id === id);
         if (task) {
-            addOptimisticTask({ type: 'delete', task });
+            startTransition(() => {
+                addOptimisticTask({ type: 'delete', task });
+            });
         }
         
         setErrorMsg(null);
         try {
-            await deleteTask(formData);
+            const result = await deleteTask(formData);
+            if (result && result.error) {
+                setErrorMsg(result.error);
+                return { success: false, error: result.error };
+            }
             loadTasks();
+            return { success: true };
         } catch (err) {
             console.error(err);
-            setErrorMsg('Could not delete the task. Please try again.');
+            const msg = 'Could not delete the task. Please try again.';
+            setErrorMsg(msg);
+            return { success: false, error: msg };
         }
     };
 
@@ -200,9 +251,9 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                 <p className="text-zinc-400 text-lg">Manage team work and track progress.</p>
             </div>
 
-            <TaskSummarySection tasks={optimisticTasks} />
+            <TaskSummarySection tasks={filteredTasks} />
             
-            <UserLeaderboard tasks={optimisticTasks} users={users} />
+            <UserLeaderboard tasks={filteredTasks} users={users} />
 
             <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10 overflow-x-auto pb-2 scrollbar-hide">
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
@@ -269,7 +320,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
 
             {viewMode === 'kanban' ? (
                 <KanbanBoard
-                    tasks={optimisticTasks}
+                    tasks={filteredTasks}
                     users={users}
                     projects={projects}
                     updateTask={handleUpdate}
@@ -293,7 +344,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {optimisticTasks.map((task) => (
+                                {filteredTasks.map((task) => (
                                     <TaskCard
                                         key={task.id}
                                         task={task}
@@ -301,6 +352,9 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                         projects={projects}
                                         updateTask={handleUpdate}
                                         deleteTask={handleDelete}
+                                        isEditing={editingTaskId === task.id}
+                                        onEdit={() => setEditingTaskId(task.id)}
+                                        onCancel={() => setEditingTaskId(null)}
                                     />
                                 ))}
                                 {isAddingTask && (
@@ -326,6 +380,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                     name="name"
                                                     placeholder="Task name"
                                                     className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
+                                                    onChange={() => setIsDirty(true)}
                                                     required
                                                 />
                                             </form>
@@ -337,6 +392,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 placeholder="Description"
                                                 form="create-task-form"
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
+                                                onChange={() => setIsDirty(true)}
                                             />
                                         </td>
                                         <td className="px-4 py-2">
@@ -345,6 +401,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 name="dueDate"
                                                 form="create-task-form"
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert transition-all"
+                                                onChange={() => setIsDirty(true)}
                                             />
                                         </td>
                                         <td className="px-4 py-2">
@@ -353,6 +410,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 form="create-task-form"
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
                                                 required
+                                                onChange={() => setIsDirty(true)}
                                             >
                                                 <option value="low" className="bg-zinc-900">Low</option>
                                                 <option value="medium" className="bg-zinc-900">Medium</option>
@@ -363,7 +421,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                             <Combobox
                                                 options={users.map(u => ({ value: u.id, label: u.fullName || u.email, subLabel: u.email }))}
                                                 value={newAssignees}
-                                                onChange={(val) => setNewAssignees(val as (string | number)[])}
+                                                onChange={(val) => { setNewAssignees(val as (string | number)[]); setIsDirty(true); }}
                                                 multiple
                                                 placeholder="Assign..."
                                                 searchPlaceholder="Search users..."
@@ -374,7 +432,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                             <Combobox
                                                 options={projects.map(p => ({ value: p.id, label: p.name, subLabel: p.key || undefined }))}
                                                 value={newProject || ''}
-                                                onChange={(val) => setNewProject(val as string | number | null)}
+                                                onChange={(val) => { setNewProject(val as string | number | null); setIsDirty(true); }}
                                                 placeholder="Project..."
                                                 searchPlaceholder="Search projects..."
                                                 className="w-full"
@@ -400,11 +458,26 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                     disabled={isPending || savingCreate}
                                                     className="inline-flex items-center p-1.5 border border-transparent rounded-lg text-white bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-all"
                                                 >
-                                                    <FiCheck className="h-3 w-3" />
+                                                    {savingCreate ? (
+                                                        <div className="h-3.5 w-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+                                                    ) : (
+                                                        <FiCheck className="h-3.5 w-3.5" />
+                                                    )}
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setIsAddingTask(false)}
+                                                    onClick={() => {
+                                                        if (isDirty) {
+                                                            if (confirm('You have unsaved changes. Are you sure you want to cancel?')) {
+                                                                setIsAddingTask(false);
+                                                                setIsDirty(false);
+                                                                setNewAssignees([]);
+                                                                setNewProject(null);
+                                                            }
+                                                        } else {
+                                                            setIsAddingTask(false);
+                                                        }
+                                                    }}
                                                     disabled={savingCreate}
                                                     className="inline-flex items-center p-1.5 border border-white/10 rounded-lg text-zinc-400 bg-white/5 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 disabled:opacity-50 transition-all"
                                                 >
@@ -420,13 +493,22 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                     {!isAddingTask && (
                         <div className="p-4 border-t border-white/5">
                             <button
-                                onClick={() => setIsAddingTask(true)}
+                                onClick={() => {
+                                    if (isAddingTask && isDirty) {
+                                         if (confirm('You have unsaved changes. Are you sure you want to close the form?')) {
+                                             setIsAddingTask(!isAddingTask);
+                                             setIsDirty(false);
+                                         }
+                                    } else {
+                                        setIsAddingTask(!isAddingTask);
+                                    }
+                                }}
                                 className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm text-zinc-400 hover:text-white transition-all duration-200 group"
                             >
                                 <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
                                     <FiPlus className="w-4 h-4" />
                                 </div>
-                                <span>New Task</span>
+                                <span>{isAddingTask ? 'Cancel' : 'New Task'}</span>
                             </button>
                         </div>
                     )}
