@@ -10,6 +10,8 @@ import KanbanBoard from './kanban-board';
 import { TaskSummarySection } from './task-summary';
 import { UserLeaderboard } from './user-leaderboard';
 import toast from 'react-hot-toast';
+import { CustomDatePicker } from '@/components/ui/inputs/custom-date-picker';
+import { format } from 'date-fns';
 
 type ViewMode = 'table' | 'kanban';
 
@@ -81,6 +83,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     // New task state
     const [newAssignees, setNewAssignees] = useState<(string | number)[]>([]);
     const [newProject, setNewProject] = useState<string | number | null>(projectId || null);
+    const [newDueDate, setNewDueDate] = useState<Date | null>(null);
 
     const newNameRef = useRef<HTMLInputElement | null>(null);
 
@@ -371,8 +374,15 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 if (newProject) {
                                                     formData.append('projectId', newProject.toString());
                                                 }
+                                                if (newDueDate) {
+                                                    formData.append('dueDate', format(newDueDate, 'yyyy-MM-dd'));
+                                                }
 
                                                 await handleCreate(formData);
+                                                setNewDueDate(null);
+                                                setNewAssignees([]);
+                                                // Reset other states if needed or rely on form reset
+                                                if (newNameRef.current) newNameRef.current.value = "";
                                             }}>
                                                 <input
                                                     ref={newNameRef}
@@ -396,12 +406,14 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                             />
                                         </td>
                                         <td className="px-4 py-2">
-                                            <input
-                                                type="date"
-                                                name="dueDate"
-                                                form="create-task-form"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert transition-all"
-                                                onChange={() => setIsDirty(true)}
+                                            <CustomDatePicker
+                                                value={newDueDate}
+                                                onChange={(date) => {
+                                                    setNewDueDate(date);
+                                                    setIsDirty(true);
+                                                }}
+                                                placeholder="Due date"
+                                                className="w-full"
                                             />
                                         </td>
                                         <td className="px-4 py-2">

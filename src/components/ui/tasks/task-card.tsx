@@ -6,6 +6,7 @@ import { FiCheck, FiX, FiEdit2, FiTrash2 } from "react-icons/fi";
 import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import { format } from 'date-fns';
 import { Combobox } from "@/components/ui/combobox";
+import { CustomDatePicker } from "@/components/ui/inputs/custom-date-picker";
 
 import { User } from "@/types/user";
 import { Project } from "@/types/project";
@@ -41,6 +42,9 @@ export default function TaskCard({
     const [selectedProject, setSelectedProject] = useState<string | number | null>(
       task.projectId || null
     );
+    const [dueDate, setDueDate] = useState<Date | null>(
+        task.dueDate ? new Date(task.dueDate) : null
+    );
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const formRef = React.useRef<HTMLFormElement>(null);
@@ -50,6 +54,7 @@ export default function TaskCard({
         if (!isEditing) {
             setSelectedAssignees(task.assignees?.map(a => a.user.id) || []);
             setSelectedProject(task.projectId || null);
+            setDueDate(task.dueDate ? new Date(task.dueDate) : null);
         }
     }, [task, isEditing]);
 
@@ -144,14 +149,15 @@ export default function TaskCard({
               className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs transition-all disabled:opacity-50"
             />
           </td>
-          <td className="px-4 py-2 text-[10px] text-zinc-400 whitespace-nowrap">
-            <input
-              form={`update-${task.id}`}
-              type="date"
-              name="dueDate"
-              defaultValue={task.dueDate?.split('T')[0]}
-              disabled={isUpdating}
-              className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert transition-all disabled:opacity-50"
+          <td className="px-4 py-2 text-[10px] text-zinc-400 whitespace-nowrap min-w-[120px]">
+            <CustomDatePicker
+                value={dueDate}
+                onChange={setDueDate}
+                name="dueDate"
+                form={`update-${task.id}`}
+                className="w-full"
+                placeholder="Due date"
+                disabled={isUpdating}
             />
           </td>
           <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">

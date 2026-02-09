@@ -1,111 +1,116 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import toast from "react-hot-toast";
+import React, { useState } from 'react';
+import { createTask } from '@/app/tasks/actions';
+import { CustomDatePicker } from '@/components/ui/inputs/custom-date-picker';
+import { format } from 'date-fns';
+import toast from 'react-hot-toast';
 
-interface Task {
-  id?: string;
-  name: string;
-  description: string;
-  dueDate: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'task' | 'in_progress' | 'completed';
-}
-
-interface TaskFormProps {
-  onSubmit: (task: Omit<Task, 'id'>) => Promise<void> | void;
-  task?: Partial<Task>;
-  onCancel?: () => void;
-}
-
-export function TaskForm({ onSubmit, task, onCancel }: TaskFormProps) {
-  const [name, setName] = useState(task?.name || "");
-  const [description, setDescription] = useState(task?.description || "");
-  const [dueDate, setDueDate] = useState(task?.dueDate || "");
-  const [priority, setPriority] = useState(task?.priority || "medium");
-  const [status, setStatus] = useState(task?.status || "task");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function TaskForm({ onSuccess }: { onSuccess: () => void }) {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [priority, setPriority] = useState('medium');
+  const [status, setStatus] = useState('task');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('description', description);
+    if (dueDate) {
+      formData.append('dueDate', format(dueDate, 'yyyy-MM-dd'));
+    }
+    formData.append('priority', priority);
+    formData.append('status', status);
+
     try {
-      await onSubmit({ name, description, dueDate, priority, status });
-      toast.success(`Task ${task ? 'updated' : 'created'} successfully!`);
-      if (!task) {
-        setName("");
-        setDescription("");
-        setDueDate("");
-        setPriority("medium");
-      }
-    } catch {
-      toast.error(`Failed to ${task ? 'update' : 'create'} task.`);
+      await createTask(formData);
+      toast.success('Task created successfully!');
+      setName('');
+      setDescription('');
+      setDueDate(null);
+      setPriority('medium');
+      setStatus('task');
+      onSuccess();
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      toast.error('Failed to create task.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg mb-4">
-      <div className="grid grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium mb-1 dark:text-gray-300">Task Name</label>
         <input
           type="text"
-          placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="p-2 border border-slate-700 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           required
+          className="w-full p-2 border border-slate-700 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none"
         />
-        <input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          className="p-2 border border-slate-700 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1 dark:text-gray-300">Description</label>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full p-2 border border-slate-700 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none"
+          rows={3}
         />
-        <select
-          value={priority}
-          onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
-          className="p-2 border border-slate-700 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-        >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1 dark:text-gray-300">Due Date</label>
+          <CustomDatePicker
+            value={dueDate}
+            onChange={setDueDate}
+            className="w-full"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1 dark:text-gray-300">Priority</label>
+          <select
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+            className="w-full p-2 border border-slate-700 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none h-[42px]"
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1 dark:text-gray-300">Status</label>
         <select
           value={status}
-          onChange={(e) => setStatus(e.target.value as 'task' | 'in_progress' | 'completed')}
-          className="p-2 border border-slate-700 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          onChange={(e) => setStatus(e.target.value)}
+          className="w-full p-2 border border-slate-700 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none h-[42px]"
         >
           <option value="task">To Do</option>
           <option value="in_progress">In Progress</option>
           <option value="completed">Completed</option>
         </select>
       </div>
-      <textarea
-        placeholder="Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        className="p-2 border border-slate-700 rounded w-full mt-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-      />
-      <div className="flex justify-end space-x-2 mt-4">
-        {onCancel && (
-          <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-500 text-white rounded">
-            Cancel
-          </button>
-        )}
-        <button 
-          type="submit" 
-          disabled={isSubmitting}
-          className="px-4 py-2 bg-blue-500 text-white rounded flex items-center gap-2 disabled:opacity-50"
-        >
-          {isSubmitting ? (
-            <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            task ? "Update Task" : "Add Task"
-          )}
-          {isSubmitting && <span>{task ? "Updating..." : "Adding..."}</span>}
-        </button>
-      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded transition-colors disabled:opacity-50"
+      >
+        {loading ? 'Creating...' : 'Create Task'}
+      </button>
     </form>
   );
 }

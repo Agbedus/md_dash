@@ -5,6 +5,8 @@ import { Project } from '@/types/project';
 import { User } from '@/types/user';
 import { Client } from '@/types/client';
 import { Combobox } from "@/components/ui/combobox";
+import { CustomDatePicker } from "@/components/ui/inputs/custom-date-picker";
+import { CustomNumberInput } from "@/components/ui/inputs/custom-number-input";
 
 interface ProjectFormFieldsProps {
   defaultValues?: Partial<Project>;
@@ -19,6 +21,11 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
   const [selectedClient, setSelectedClient] = useState<string | number | null>(
     defaultValues?.clientId || null
   );
+  
+  const [startDate, setStartDate] = useState<Date | null>(defaultValues?.startDate ? new Date(defaultValues.startDate) : null);
+  const [endDate, setEndDate] = useState<Date | null>(defaultValues?.endDate ? new Date(defaultValues.endDate) : null);
+  const [budget, setBudget] = useState<number | ''>(defaultValues?.budget || '');
+  const [spent, setSpent] = useState<number | ''>(defaultValues?.spent || '');
 
   return (
     <div className="space-y-6">
@@ -135,12 +142,12 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
             <label htmlFor="startDate" className="block text-sm font-medium text-zinc-400 mb-1">
               Start Date
             </label>
-            <input
-              type="date"
+            <CustomDatePicker
+              value={startDate}
+              onChange={setStartDate}
               name="startDate"
-              id="startDate"
-              defaultValue={defaultValues?.startDate || ''}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono"
+              className="w-full"
+              placeholder="Select start date"
             />
           </div>
 
@@ -148,12 +155,13 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
             <label htmlFor="endDate" className="block text-sm font-medium text-zinc-400 mb-1">
               End Date
             </label>
-            <input
-              type="date"
+            <CustomDatePicker
+              value={endDate}
+              onChange={setEndDate}
               name="endDate"
-              id="endDate"
-              defaultValue={defaultValues?.endDate || ''}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono"
+              className="w-full"
+              placeholder="Select end date"
+              minDate={startDate || undefined}
             />
           </div>
         </div>
@@ -168,13 +176,13 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
             <label htmlFor="budget" className="block text-sm font-medium text-zinc-400 mb-1">
               Budget
             </label>
-            <input
-              type="number"
-              name="budget"
-              id="budget"
-              defaultValue={defaultValues?.budget || ''}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-              placeholder="0"
+            <CustomNumberInput
+                value={budget}
+                onChange={setBudget}
+                name="budget"
+                className="w-full"
+                placeholder="0"
+                min={0}
             />
           </div>
 
@@ -182,13 +190,13 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
             <label htmlFor="spent" className="block text-sm font-medium text-zinc-400 mb-1">
               Spent
             </label>
-            <input
-              type="number"
-              name="spent"
-              id="spent"
-              defaultValue={defaultValues?.spent || 0}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-              placeholder="0"
+            <CustomNumberInput
+                value={spent}
+                onChange={setSpent}
+                name="spent"
+                className="w-full"
+                placeholder="0"
+                min={0}
             />
           </div>
 

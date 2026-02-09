@@ -4,6 +4,9 @@ import { FiBell, FiX, FiCheck, FiClock, FiCalendar, FiMapPin, FiPlus } from "rea
 import { createEvent } from "@/app/calendar/actions";
 import type { CalendarEvent, EventReminder } from "@/types/calendar";
 import { Tooltip } from "@/components/ui/Tooltip";
+import { CustomDatePicker } from "@/components/ui/inputs/custom-date-picker";
+import { CustomNumberInput } from "@/components/ui/inputs/custom-number-input";
+import { format } from "date-fns";
 
 interface EventModalProps {
   open: boolean;
@@ -235,24 +238,31 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1 flex items-center gap-1.5">
                     <FiClock className="text-purple-400" /> Start
                     </label>
-                    <input
-                    type={startInputType}
-                    value={start}
-                    onChange={(e)=>setStart(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
-                    required
+                    <CustomDatePicker
+                        value={start}
+                        onChange={(date) => {
+                            if (date) {
+                                setStart(allDay ? format(date, "yyyy-MM-dd") : format(date, "yyyy-MM-dd'T'HH:mm"));
+                            }
+                        }}
+                        enableTime={!allDay}
+                        className="w-full"
                     />
                 </div>
                 <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1 flex items-center gap-1.5">
                     <FiClock className="text-purple-400" /> End
                     </label>
-                    <input
-                    type={endInputType}
-                    value={end}
-                    onChange={(e)=>setEnd(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
-                    required
+                    <CustomDatePicker
+                        value={end}
+                        onChange={(date) => {
+                            if (date) {
+                                setEnd(allDay ? format(date, "yyyy-MM-dd") : format(date, "yyyy-MM-dd'T'HH:mm"));
+                            }
+                        }}
+                        enableTime={!allDay}
+                        className="w-full"
+                        minDate={start ? new Date(start) : undefined}
                     />
                 </div>
                 </div>
@@ -425,34 +435,31 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                     <div className="flex flex-wrap items-end gap-2 p-3 bg-white/5 border border-white/5 rounded-lg">
                         <div className="flex-1 min-w-[50px]">
                         <label className="block text-[8px] uppercase font-bold tracking-widest text-slate-500 mb-1 ml-0.5">Days</label>
-                        <input
-                            type="number"
-                            min="0"
+                        <CustomNumberInput
                             value={rDays}
-                            onChange={(e) => setRDays(parseInt(e.target.value) || 0)}
-                            className="w-full bg-slate-950/40 border border-white/10 rounded px-2 py-1 text-[10px] text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                            onChange={(val) => setRDays(Number(val) || 0)}
+                            min={0}
+                            className="bg-zinc-950/40"
                         />
                         </div>
                         <div className="flex-1 min-w-[50px]">
                         <label className="block text-[8px] uppercase font-bold tracking-widest text-slate-500 mb-1 ml-0.5">Hrs</label>
-                        <input
-                            type="number"
-                            min="0"
-                            max="23"
+                        <CustomNumberInput
                             value={rHours}
-                            onChange={(e) => setRHours(parseInt(e.target.value) || 0)}
-                            className="w-full bg-slate-950/40 border border-white/10 rounded px-2 py-1 text-[10px] text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                            onChange={(val) => setRHours(Number(val) || 0)}
+                            min={0}
+                            max={23}
+                            className="bg-zinc-950/40"
                         />
                         </div>
                         <div className="flex-1 min-w-[50px]">
                         <label className="block text-[8px] uppercase font-bold tracking-widest text-slate-500 mb-1 ml-0.5">Mins</label>
-                        <input
-                            type="number"
-                            min="0"
-                            max="59"
+                        <CustomNumberInput
                             value={rMinutes}
-                            onChange={(e) => setRMinutes(parseInt(e.target.value) || 0)}
-                            className="w-full bg-slate-950/40 border border-white/10 rounded px-2 py-1 text-[10px] text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                            onChange={(val) => setRMinutes(Number(val) || 0)}
+                            min={0}
+                            max={59}
+                            className="bg-zinc-950/40"
                         />
                         </div>
                         <button

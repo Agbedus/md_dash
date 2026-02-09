@@ -6,6 +6,8 @@ import { User } from '@/types/user';
 import { Client } from '@/types/client';
 import { FiEdit2, FiTrash2, FiClock, FiCheck, FiX, FiDollarSign } from 'react-icons/fi';
 import { format } from 'date-fns';
+import { CustomDatePicker } from '@/components/ui/inputs/custom-date-picker';
+import { CustomNumberInput } from '@/components/ui/inputs/custom-number-input';
 import { createProject, updateProject, deleteProject } from '@/app/projects/actions';
 import { updateTask, deleteTask, createTask } from '@/app/tasks/actions';
 import UserAvatarGroup from '@/components/ui/user-avatar-group';
@@ -24,6 +26,12 @@ interface ProjectTableProps {
 export function ProjectTable({ projects, users, clients, onSelectProject }: ProjectTableProps) {
   const router = useRouter();
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [editValues, setEditValues] = useState<{
+    startDate: Date | null;
+    endDate: Date | null;
+    budget: number | '';
+  }>({ startDate: null, endDate: null, budget: '' });
+
   const [isAdding, setIsAdding] = useState(false);
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
   const [addingTaskId, setAddingTaskId] = useState<number | null>(null);
@@ -43,6 +51,11 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
 
   const startEditing = (project: Project) => {
     setEditingId(project.id);
+    setEditValues({
+      startDate: project.startDate ? new Date(project.startDate) : null,
+      endDate: project.endDate ? new Date(project.endDate) : null,
+      budget: project.budget ?? ''
+    });
   };
 
   const cancelEditing = () => {
@@ -282,28 +295,32 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                               </select>
                             </td>
                             <td className="px-4 py-2 w-[110px]">
-                              <input
-                                type="date"
+                              <CustomDatePicker
+                                value={editValues.startDate}
+                                onChange={(date) => setEditValues(prev => ({ ...prev, startDate: date }))}
                                 name="startDate"
-                                defaultValue={project.startDate || ''}
-                                className="w-full bg-zinc-900/50 border border-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                                className="w-full"
+                                placeholder="Start"
                               />
                             </td>
                             <td className="px-4 py-2 w-[110px]">
-                              <input
-                                type="date"
+                              <CustomDatePicker
+                                value={editValues.endDate}
+                                onChange={(date) => setEditValues(prev => ({ ...prev, endDate: date }))}
                                 name="endDate"
-                                defaultValue={project.endDate || ''}
-                                className="w-full bg-zinc-900/50 border border-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                                className="w-full"
+                                placeholder="End"
+                                minDate={editValues.startDate || undefined}
                               />
                             </td>
                             <td className="px-4 py-2 w-[140px]">
-                              <input
-                                type="number"
+                              <CustomNumberInput
+                                value={editValues.budget}
+                                onChange={(val) => setEditValues(prev => ({ ...prev, budget: val }))}
                                 name="budget"
-                                defaultValue={project.budget || ''}
-                                className="w-full bg-zinc-900/50 border border-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                                className="w-full"
                                 placeholder="0"
+                                min={0}
                               />
                             </td>
                             <td className="px-4 py-2 w-[80px]">
