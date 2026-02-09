@@ -32,6 +32,14 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
     budget: number | '';
   }>({ startDate: null, endDate: null, budget: '' });
 
+  const [newProjectValues, setNewProjectValues] = useState<{
+    startDate: Date | null;
+    endDate: Date | null;
+    budget: number | '';
+  }>({ startDate: null, endDate: null, budget: '' });
+
+  const [newTaskDueDate, setNewTaskDueDate] = useState<Date | null>(null);
+
   const [isAdding, setIsAdding] = useState(false);
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
   const [addingTaskId, setAddingTaskId] = useState<number | null>(null);
@@ -114,8 +122,12 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
       if (result?.error) {
         throw new Error(result.error);
       }
+      if (result?.error) {
+        throw new Error(result.error);
+      }
       toast.success('Project created successfully');
       setIsAdding(false);
+      setNewProjectValues({ startDate: null, endDate: null, budget: '' });
     } catch (err: any) {
       const msg = err.message || 'Failed to create project';
       toast.error(msg);
@@ -482,9 +494,10 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                              try {
                                const result = await createTask(formData);
                                if (result?.success) {
-                                 toast.success('Task created successfully');
-                                 setAddingTaskId(null);
-                               } else {
+                                  toast.success('Task created successfully');
+                                  setAddingTaskId(null);
+                                  setNewTaskDueDate(null);
+                                } else {
                                  toast.error(result?.error || 'Failed to create task');
                                }
                              } catch (err) {
@@ -517,10 +530,12 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                                  </select>
                                </div>
                                <div>
-                                 <input 
-                                   type="date" 
-                                   name="dueDate" 
-                                   className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50 [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:invert"
+                                 <CustomDatePicker
+                                   value={newTaskDueDate}
+                                   onChange={setNewTaskDueDate}
+                                   name="dueDate"
+                                   placeholder="Due Date"
+                                   className="w-full"
                                  />
                                </div>
                              </div>
@@ -669,25 +684,32 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                           </select>
                         </td>
                         <td className="px-4 py-2 w-[110px]">
-                          <input
-                            type="date"
+                          <CustomDatePicker
+                            value={newProjectValues.startDate}
+                            onChange={(date) => setNewProjectValues(prev => ({ ...prev, startDate: date }))}
                             name="startDate"
-                            className="w-full bg-zinc-900/50 border border-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                            className="w-full"
+                            placeholder="Start"
                           />
                         </td>
                         <td className="px-4 py-2 w-[110px]">
-                          <input
-                            type="date"
+                          <CustomDatePicker
+                            value={newProjectValues.endDate}
+                            onChange={(date) => setNewProjectValues(prev => ({ ...prev, endDate: date }))}
                             name="endDate"
-                            className="w-full bg-zinc-900/50 border border-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+                            className="w-full"
+                            placeholder="End"
+                            minDate={newProjectValues.startDate || undefined}
                           />
                         </td>
                         <td className="px-4 py-2 w-[140px]">
-                          <input
-                            type="number"
+                          <CustomNumberInput
+                            value={newProjectValues.budget}
+                            onChange={(val) => setNewProjectValues(prev => ({ ...prev, budget: val }))}
                             name="budget"
+                            className="w-full"
                             placeholder="0"
-                            className="w-full bg-zinc-900/50 border border-white/10 rounded px-2 py-1 text-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50 placeholder:text-zinc-600"
+                            min={0}
                           />
                         </td>
                         <td className="px-4 py-2 w-[80px]">
