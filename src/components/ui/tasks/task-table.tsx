@@ -48,6 +48,7 @@ export default function TaskTable({ tasks, updateTask, deleteTask }: TaskTablePr
                     <tr>
                         <th className="px-6 py-3 text-xs font-medium text-slate-300 uppercase tracking-wider">Task</th>
                         <th className="px-6 py-3 text-xs font-medium text-slate-300 uppercase tracking-wider">Description</th>
+                        <th className="px-6 py-3 text-xs font-medium text-slate-300 uppercase tracking-wider">Owner</th>
                         <th className="px-6 py-3 text-xs font-medium text-slate-300 uppercase tracking-wider">Status</th>
                         <th className="px-6 py-3 text-xs font-medium text-slate-300 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -83,6 +84,20 @@ export default function TaskTable({ tasks, updateTask, deleteTask }: TaskTablePr
                                 <>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{task.name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">{task.description}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                                        {task.owner ? (
+                                            <div className="flex items-center gap-2">
+                                                {task.owner.avatarUrl ? (
+                                                    <img src={task.owner.avatarUrl} alt={task.owner.fullName || ''} className="w-5 h-5 rounded-full" />
+                                                ) : (
+                                                    <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white">
+                                                        {(task.owner.fullName || task.owner.email || '?')[0].toUpperCase()}
+                                                    </div>
+                                                )}
+                                                <span className="text-xs">{task.owner.fullName || task.owner.email}</span>
+                                            </div>
+                                        ) : <span className="text-xs text-slate-500">-</span>}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${task.status === 'completed' ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300'}`}>
                                             {task.status}

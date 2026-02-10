@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useRef, useEffect, useCallback, useOptimistic, useMemo } from 'react';
-import { FiCheck, FiX, FiPlus, FiGrid, FiList, FiSearch, FiFilter } from 'react-icons/fi';
+import { FiCheck, FiX, FiPlus, FiGrid, FiList, FiSearch, FiFilter, FiUser } from 'react-icons/fi';
 import { createTask, updateTask, deleteTask, getTasks } from '@/app/tasks/actions';
 import { statusMapping, priorityMapping } from "@/types/task";
 import type { Task } from "@/types/task";
@@ -20,7 +20,7 @@ import { Project } from "@/types/project";
 
 import { Combobox } from "@/components/ui/combobox";
 
-export default function TasksPageClient({ allTasks: initialTasks, users, projects, projectId }: { allTasks: Task[], users: User[], projects: Project[], projectId?: number }) {
+export default function TasksPageClient({ allTasks: initialTasks, users, projects, projectId, currentUserId }: { allTasks: Task[], users: User[], projects: Project[], projectId?: number, currentUserId?: string }) {
     const hydrateTasks = useCallback((tasks: Task[]) => {
         return tasks.map(task => {
             if (task.assignees && task.assignees.length > 0) return task;
@@ -33,12 +33,13 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                     .map(user => ({ user }))
             };
         });
-    }, [users]);
+    }, [users]); 
 
     const [allTasks, setAllTasks] = useState<Task[]>(hydrateTasks(initialTasks));
-    // ... rest of state
     const [viewMode, setViewMode] = useState<ViewMode>('table');
     const [isAddingTask, setIsAddingTask] = useState(false);
+    const [filterMyTasks, setFilterMyTasks] = useState(false);
+
     const [isPending, startTransition] = useTransition();
     const [savingCreate, setSavingCreate] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -76,9 +77,18 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
             const matchesPriority = !filterPriority || task.priority === filterPriority;
             const matchesStatus = !filterStatus || task.status === filterStatus;
             
-            return matchesSearch && matchesPriority && matchesStatus;
+            const matchesMyTasks = !filterMyTasks || (
+                currentUserId && (
+                    task.userId == currentUserId || 
+                    task.owner?.id == currentUserId ||
+                    task.assigneeIds?.some(id => String(id) === String(currentUserId)) ||
+                    task.assignees?.some(a => String(a.user.id) === String(currentUserId))
+                )
+            );
+
+            return matchesSearch && matchesPriority && matchesStatus && matchesMyTasks;
         });
-    }, [optimisticTasks, searchQuery, filterPriority, filterStatus]);
+    }, [optimisticTasks, searchQuery, filterPriority, filterStatus, filterMyTasks, currentUserId]);
 
     // New task state
     const [newAssignees, setNewAssignees] = useState<(string | number)[]>([]);
@@ -294,6 +304,19 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                             </select>
                         </div>
                     </div>
+                    {currentUserId && (
+                        <button
+                            onClick={() => setFilterMyTasks(!filterMyTasks)}
+                            className={`flex items-center gap-2 px-4 h-11 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider ${
+                                filterMyTasks 
+                                    ? 'bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border-[var(--pastel-indigo)]/20 shadow-sm' 
+                                    : 'bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10 hover:text-white'
+                            }`}
+                        >
+                            <FiUser className="w-4 h-4" />
+                            <span>My Tasks</span>
+                        </button>
+                    )}
                 </div>
                 
                 <div className="flex items-center space-x-1 bg-white/5 p-1 h-11 rounded-xl border border-white/10">
@@ -339,6 +362,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                     <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Name</th>
                                     <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Description</th>
                                     <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Due Date</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Owner</th>
                                     <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Priority</th>
                                     <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Assignee</th>
                                     <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Project</th>
@@ -415,6 +439,9 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 placeholder="Due date"
                                                 className="w-full"
                                             />
+                                        </td>
+                                        <td className="px-4 py-2">
+                                            {/* Owner column empty in creation row */}
                                         </td>
                                         <td className="px-4 py-2">
                                             <select

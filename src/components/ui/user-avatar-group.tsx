@@ -16,7 +16,7 @@ interface UserLike {
 interface UserAvatarGroupProps {
     users: UserLike[];
     limit?: number;
-    size?: 'sm' | 'md' | 'lg';
+    size?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
 export default function UserAvatarGroup({ users, limit = 3, size = 'md' }: UserAvatarGroupProps) {
@@ -40,6 +40,7 @@ export default function UserAvatarGroup({ users, limit = 3, size = 'md' }: UserA
     };
 
     const sizeClasses = {
+        xs: 'h-6 w-6 text-[10px]',
         sm: 'h-8 w-8 text-[10px]',
         md: 'h-10 w-10 text-xs',
         lg: 'h-12 w-12 text-sm',

@@ -7,3 +7,4 @@ export const TasksChart = dynamic(() => import('../../components/charts/tasks-ch
 export const WorkloadChart = dynamic(() => import('../../components/charts/workload-chart'), { ssr: false });
 export const TimeAllocationChart = dynamic(() => import('../../components/charts/time-allocation-chart'), { ssr: false });
 export const ProjectProgressChart = dynamic(() => import('../../components/charts/project-progress-chart'), { ssr: false });
+export const ActivityHeatmap = dynamic(() => import('../../components/charts/activity-heatmap'), { ssr: false });

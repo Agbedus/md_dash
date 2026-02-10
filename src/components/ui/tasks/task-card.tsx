@@ -161,6 +161,21 @@ export default function TaskCard({
             />
           </td>
           <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
+              {/* Owner cannot be changed during edit, just display it */}
+             {task.owner ? (
+                <div className="flex items-center gap-2">
+                     {task.owner.avatarUrl ? (
+                        <img src={task.owner.avatarUrl} alt={task.owner.fullName || ''} className="w-5 h-5 rounded-full" />
+                    ) : (
+                        <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white">
+                            {(task.owner.fullName || task.owner.email || '?')[0].toUpperCase()}
+                        </div>
+                    )}
+                    <span className="text-xs">{task.owner.fullName || task.owner.email}</span>
+                </div>
+            ) : <span className="text-xs text-zinc-600">-</span>}
+          </td>
+          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
             <select
               form={`update-${task.id}`}
               name="priority"
@@ -255,6 +270,20 @@ export default function TaskCard({
         <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
           {task.dueDate ? format(new Date(task.dueDate as string), "MMM dd, yyyy") : <span className="text-zinc-600">-</span>}
         </td>
+        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
+            {task.owner ? (
+                <div className="flex items-center gap-2">
+                     {task.owner.avatarUrl ? (
+                        <img src={task.owner.avatarUrl} alt={task.owner.fullName || ''} className="w-5 h-5 rounded-full" />
+                    ) : (
+                        <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white">
+                            {(task.owner.fullName || task.owner.email || '?')[0].toUpperCase()}
+                        </div>
+                    )}
+                    <span className="text-xs">{task.owner.fullName || task.owner.email}</span>
+                </div>
+            ) : <span className="text-xs text-zinc-600">-</span>}
+        </td>
         <td className="px-6 py-4 text-xs whitespace-nowrap">
           <span
             className={`px-3 py-1 inline-flex text-[10px] font-bold rounded-lg border uppercase tracking-wider ${
@@ -270,7 +299,7 @@ export default function TaskCard({
         </td>
         <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
             {displayAssignees.length > 0 ? (
-                <UserAvatarGroup users={displayAssignees} size="sm" limit={3} />
+                <UserAvatarGroup users={displayAssignees} size="xs" limit={3} />
             ) : (
                 <span className="text-zinc-600 italic">Unassigned</span>
             )}

@@ -7,10 +7,12 @@ import {
   getTasksOverviewData, 
   getWorkloadData, 
   getKeyTasks, 
-  getRecentNotes 
+  getRecentNotes,
+  getActivityData
 } from '@/app/lib/dashboard-actions';
 import ProfileStats from '@/components/profile/profile-stats';
 import ProfileCharts from '@/components/profile/profile-charts';
+import { ActivityHeatmap } from '@/components/ui/client-charts';
 import React from 'react';
 
 export default async function ProfilePage() {
@@ -28,14 +30,16 @@ export default async function ProfilePage() {
     tasksOverviewData,
     workloadData,
     keyTasks,
-    recentNotes
+    recentNotes,
+    activityData
   ] = await Promise.all([
     getSummaryStats(),
     getProductivityData('7d'),
     getTasksOverviewData(),
     getWorkloadData(),
     getKeyTasks(),
-    getRecentNotes()
+    getRecentNotes(),
+    getActivityData()
   ]);
 
   return (
@@ -121,6 +125,15 @@ export default async function ProfilePage() {
                     </div>
                     <div className="w-2 h-2 rounded-full bg-zinc-700" />
                 </div>
+            </div>
+
+            {/* Activity Heatmap Card */}
+            <div className="glass p-6 rounded-3xl border border-white/10 bg-zinc-900/50 space-y-4 overflow-hidden">
+                <div className="flex justify-between items-center mb-1">
+                    <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] bg-emerald-500/10 px-2 py-0.5 rounded">Activity Engine</h4>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">History</span>
+                </div>
+                <ActivityHeatmap data={activityData} variant="compact" />
             </div>
         </div>
 

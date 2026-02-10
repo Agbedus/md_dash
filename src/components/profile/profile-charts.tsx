@@ -9,7 +9,7 @@ interface ProfileChartsProps {
 const ProfileCharts: React.FC<ProfileChartsProps> = ({ 
   productivityData, 
   tasksOverviewData, 
-  workloadData 
+  workloadData
 }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

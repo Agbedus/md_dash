@@ -424,3 +424,60 @@ export async function getAIPriorities() {
     }
 }
 
+
+export async function getActivityData() {
+  const [tasks, notes] = await Promise.all([
+    getTasks(undefined, undefined, undefined, undefined, 2000),
+    getNotes(2000)
+  ]);
+
+  const activityMap = new Map<string, number>();
+  const now = new Date();
+  
+  // Last 365 days
+  const startDate = subDays(now, 364);
+  
+  // Helper to increment count for a date string
+  const addActivity = (dateStr: string | undefined | null) => {
+    if (!dateStr) return;
+    const date = format(new Date(dateStr), 'yyyy-MM-dd');
+    activityMap.set(date, (activityMap.get(date) || 0) + 1);
+  };
+
+  // Process tasks
+  tasks.forEach(t => {
+    addActivity(t.createdAt);
+    if (t.status === 'completed') {
+      addActivity(t.updatedAt);
+    }
+  });
+
+  // Process notes
+  notes.forEach(n => {
+    addActivity(n.created_at);
+    addActivity(n.updated_at);
+  });
+
+  // Generate full series for the last 365 days
+  const data = [];
+  for (let i = 0; i <= 364; i++) {
+    const d = subDays(now, 364 - i);
+    const dateStr = format(d, 'yyyy-MM-dd');
+    const count = activityMap.get(dateStr) || 0;
+    
+    // Level 0-4 based on count
+    let level = 0;
+    if (count > 0) level = 1;
+    if (count > 3) level = 2;
+    if (count > 6) level = 3;
+    if (count > 10) level = 4;
+
+    data.push({
+      date: dateStr,
+      count,
+      level
+    });
+  }
+
+  return data;
+}

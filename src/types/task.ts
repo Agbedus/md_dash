@@ -13,6 +13,8 @@ export type Task = {
     assignees?: { user: User }[]; // For display
     assigneeIds?: string[]; // For form handling
     projectId?: number | null;
+    userId?: string | null;
+    owner?: User;
 };
 
 export type TaskFormData = Omit<Task, 'id' | 'createdAt' | 'updatedAt'>;

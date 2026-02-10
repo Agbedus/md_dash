@@ -32,6 +32,7 @@ interface ApiTask {
         task_id: number;
         user_id: string | number;
     }>;
+    user_id?: string; 
 }
 
 export async function getTasks(query?: string, priority?: string, status?: string, projectId?: number, limit?: number, skip?: number): Promise<Task[]> {
@@ -52,15 +53,19 @@ export async function getTasks(query?: string, priority?: string, status?: strin
         if (limit) queryParams.append('limit', limit.toString());
         if (skip) queryParams.append('skip', skip.toString());
 
-        const response = await fetch(`${API_BASE_URL}/tasks?${queryParams.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                // @ts-expect-error accessToken is not in default session type
-                'Authorization': `Bearer ${session.user.accessToken}`
-            },
-            next: { tags: ['tasks', 'projects'], revalidate: 60 }
-        });
+        const [response, users] = await Promise.all([
+            fetch(`${API_BASE_URL}/tasks?${queryParams.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // @ts-expect-error accessToken is not in default session type
+                    'Authorization': `Bearer ${session.user.accessToken}`
+                },
+                next: { tags: ['tasks', 'projects'], revalidate: 60 }
+            }),
+            import('@/app/users/actions').then(mod => mod.getUsers())
+        ]);
+
 
         if (!response.ok) {
             console.error("Failed to fetch tasks:", await response.text());
@@ -70,24 +75,29 @@ export async function getTasks(query?: string, priority?: string, status?: strin
         const apiTasks: ApiTask[] = await response.json();
         
         // Map API snake_case to Frontend camelCase
-        let tasks: Task[] = apiTasks.map(t => ({
-            id: t.id,
-            name: t.name,
-            description: t.description,
-            status: t.status as Task['status'],
-            priority: t.priority as Task['priority'],
-            dueDate: t.due_date,
-            createdAt: t.created_at,
-            updatedAt: t.updated_at,
-            projectId: t.project_id,
-            assignees: [], // Will be hydrated on client
-            assigneeIds: (() => {
-                if (t.assignee_ids && t.assignee_ids.length > 0) return t.assignee_ids;
-                if (t.task_assignees && t.task_assignees.length > 0) return t.task_assignees.map(a => String(a.user_id));
-                if (t.assignees && t.assignees.length > 0) return t.assignees.map(a => String(a.id));
-                return [];
-            })(),
-        }));
+        let tasks: Task[] = apiTasks.map(t => {
+            const owner = users.find((u: any) => u.id === t.user_id);
+            return {
+                id: t.id,
+                name: t.name,
+                description: t.description,
+                status: t.status as Task['status'],
+                priority: t.priority as Task['priority'],
+                dueDate: t.due_date,
+                createdAt: t.created_at,
+                updatedAt: t.updated_at,
+                projectId: t.project_id,
+                assignees: [], // Will be hydrated on client
+                assigneeIds: (() => {
+                    if (t.assignee_ids && t.assignee_ids.length > 0) return t.assignee_ids;
+                    if (t.task_assignees && t.task_assignees.length > 0) return t.task_assignees.map(a => String(a.user_id));
+                    if (t.assignees && t.assignees.length > 0) return t.assignees.map(a => String(a.id));
+                    return [];
+                })(),
+                userId: t.user_id,
+                owner: owner ? owner : undefined
+            };
+        });
 
         return tasks;
     } catch (error) {
@@ -110,6 +120,7 @@ export async function createTask(formData: FormData) {
         priority: formData.get('priority'),
         due_date: formData.get('dueDate'),
         project_id: formData.get('projectId') ? Number(formData.get('projectId')) : null,
+        user_id: session.user?.id,
     };
     
     // Handle assignees if passed as JSON string

@@ -191,7 +191,7 @@ Base path: `/api/v1/users`
 #### List All Users
 
 - **GET** `/api/v1/users`
-- **Auth Required:** Admin only
+- **Auth Required:** Admin or Manager
 - **Query Params:** `skip` (default: 0), `limit` (default: 100)
 - **Expected Response Payload:**
   ```json
@@ -510,7 +510,7 @@ Tasks support multi-user assignment through the `assignees` field.
 - **Auth Required:** Yes
 - **Query Params:** `skip`, `limit`, `project_id?`
 - **Returns:** Array of `TaskReadWithAssignees` objects
-- **Permissions:** All authenticated users can view all tasks
+- **Permissions:** Admins see all. Users see tasks they created, are assigned to, or belong to their projects.
 
 **Example Response:**
 
@@ -524,6 +524,7 @@ Tasks support multi-user assignment through the `assignees` field.
     "priority": "high",
     "status": "in_progress",
     "project_id": 1,
+    "user_id": "creator-uuid",
     "created_at": "2025-12-22T12:00:00.000Z",
     "updated_at": "2025-12-22T13:00:00.000Z",
     "task_assignees": [
@@ -541,6 +542,7 @@ Tasks support multi-user assignment through the `assignees` field.
 - `priority`: `"low"`, `"medium"`, `"high"`
 - `status`: Customizable per workflow (e.g., `"task"`, `"in_progress"`, `"completed"`, `"waiting"`)
 - `task_assignees`: Array of objects containing `task_id` and `user_id`
+- `user_id`: UUID of the task creator
 
 #### Get Task
 
@@ -563,7 +565,8 @@ Tasks support multi-user assignment through the `assignees` field.
         "task_id": 1,
         "user_id": "user-uuid-1"
       }
-    ]
+    ],
+    "user_id": "creator-uuid"
   }
   ```
 
@@ -584,6 +587,7 @@ Tasks support multi-user assignment through the `assignees` field.
   }
   ```
 - **Returns:** `TaskReadWithAssignees` object
+- **Note:** `user_id` is automatically set to the current user.
 
 #### Update Task
 
@@ -968,15 +972,15 @@ These endpoints are restricted to Administrators and Super Administrators.
 
 ### Resource Permissions Summary
 
-| Resource      | View           | Create    | Update                  | Delete           |
-| ------------- | -------------- | --------- | ----------------------- | ---------------- |
-| **Users**     | Self or Admin  | Admin     | Self (limited) or Admin | Admin (not self) |
-| **Clients**   | All users      | All users | Admin                   | Admin            |
-| **Projects**  | Owner or Admin | All users | Owner or Admin          | Owner or Admin   |
-| **Tasks**     | All users      | All users | All users               | All users        |
-| **Notes**     | Owner or Admin | All users | Owner or Admin          | Owner or Admin   |
-| **Events**    | All users      | All users | Creator or Admin        | Creator or Admin |
-| **Decisions** | Owner or Admin | All users | Owner or Admin          | Owner or Admin   |
+| Resource      | View                    | Create    | Update                  | Delete           |
+| ------------- | ----------------------- | --------- | ----------------------- | ---------------- |
+| **Users**     | Self, Admin, or Manager | Admin     | Self (limited) or Admin | Admin (not self) |
+| **Clients**   | All users               | All users | Admin                   | Admin            |
+| **Projects**  | Owner or Admin          | All users | Owner or Admin          | Owner or Admin   |
+| **Tasks**     | Own/Shared or Admin     | All users | Admin/Manager           | Super Admin      |
+| **Notes**     | Owner or Admin          | All users | Owner or Admin          | Owner or Admin   |
+| **Events**    | All users               | All users | Creator or Admin        | Creator or Admin |
+| **Decisions** | Owner or Admin          | All users | Owner or Admin          | Owner or Admin   |
 
 ---
 
