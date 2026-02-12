@@ -358,17 +358,17 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                 <button 
                                     onClick={() => setShowUserDropdown(!showUserDropdown)} 
                                     disabled={isSharing}
-                                    className={`transition-colors ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white'}`}
+                                    className={`p-2 rounded-xl transition-all ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
                                     title="Add User"
                                 >
                                     <FiUserPlus size={16} />
                                 </button>
                                 {showUserDropdown && availableUsers.length > 0 && (
-                                    <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800 rounded-lg shadow-xl p-2 border border-slate-700 z-50">
+                                    <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 rounded-2xl shadow-2xl p-2 border border-white/10 z-50">
                                         <select
                                             value={selectedUser}
                                             onChange={(e) => setSelectedUser(e.target.value)}
-                                            className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white mb-2 focus:outline-none focus:border-purple-500"
+                                            className="w-full bg-zinc-950 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-white mb-2 focus:outline-none focus:border-emerald-500/50"
                                         >
                                             <option value="">Select user...</option>
                                             {availableUsers.map(u => (
@@ -380,17 +380,17 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                         <button
                                             onClick={handleAddUser}
                                             disabled={!selectedUser}
-                                            className="w-full bg-purple-600 text-white text-xs py-1 rounded hover:bg-purple-500 disabled:opacity-50"
+                                            className="w-full bg-emerald-600 text-white text-xs py-1.5 rounded-xl hover:bg-emerald-500 disabled:opacity-50 font-bold"
                                         >
                                             Add
                                         </button>
                                     </div>
                                 )}
                             </div>
-                            <button onClick={() => onEdit?.(note)} className="text-zinc-400 hover:text-white transition-colors"><FiEdit2 size={16} /></button>
+                            <button onClick={() => onEdit?.(note)} className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all"><FiEdit2 size={16} /></button>
                             <form onSubmit={async (e) => { e.preventDefault(); const fd = new FormData(); fd.append('id', note.id.toString()); await onNoteDelete(fd); }} style={{ display: 'inline' }}>
                                 <input type="hidden" name="id" value={note.id} />
-                                <button type="submit" className="text-zinc-400 hover:text-red-500 transition-colors"><FiTrash2 size={16} /></button>
+                                <button type="submit" className="p-2 rounded-xl text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-all"><FiTrash2 size={16} /></button>
                             </form>
                         </div>
                     </div>

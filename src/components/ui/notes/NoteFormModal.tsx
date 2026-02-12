@@ -133,35 +133,38 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
     };
 
     return (
-        // positioned bottom-right; wrapper prevents background pointer events while modal handles its own
-        <div className={`${visibilityClass} fixed z-50 right-6 bottom-6 pointer-events-none`} aria-hidden={!isOpen}>
-            <div className="pointer-events-auto bg-slate-900 rounded-lg shadow-xl w-full max-w-xl max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-                <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col h-full max-h-[80vh]">
-                    <div className="px-4 py-1.5 flex items-center justify-between border-b border-slate-800 bg-slate-900/50">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} aria-hidden={!isOpen}>
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md transition-opacity duration-300" onClick={onClose} />
+            
+            {/* Modal Body */}
+            <div className={`relative w-full max-w-4xl max-h-[90vh] bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden border border-white/10 transition-all duration-300 transform ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`} onClick={e => e.stopPropagation()}>
+                <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col h-full max-h-[90vh]">
+                    <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 bg-white/5">
                         {/* Group 1: Selections */}
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-3">
                             <select
                                 name="priority"
                                 id="priority"
                                 value={priority || 'low'}
                                 onChange={(e) => setPriority(e.target.value as Note['priority'])}
-                                className="h-7 bg-slate-800 border border-slate-700 rounded-md px-1.5 py-0 text-[9px] uppercase font-bold tracking-wider text-white focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer hover:bg-slate-700 transition-colors"
+                                className="h-9 bg-white/5 border border-white/10 rounded-xl px-3 text-[10px] uppercase font-bold tracking-wider text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer hover:bg-white/10 transition-all"
                                 required
                             >
-                                <option value="low">Low</option>
-                                <option value="medium">Med</option>
-                                <option value="high">High</option>
+                                <option value="low">Low Priority</option>
+                                <option value="medium">Medium Priority</option>
+                                <option value="high">High Priority</option>
                             </select>
                             <select
                                 name="type"
                                 id="type"
                                 value={typeVal}
                                 onChange={(e) => setTypeVal(e.target.value as Note['type'])}
-                                className="h-7 bg-slate-800 border border-slate-700 rounded-md px-1.5 py-0 text-[9px] uppercase font-bold tracking-wider text-white focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer hover:bg-slate-700 transition-colors"
+                                className="h-9 bg-white/5 border border-white/10 rounded-xl px-3 text-[10px] uppercase font-bold tracking-wider text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer hover:bg-white/10 transition-all"
                                 required
                             >
                                 {noteTypes.map(type => (
-                                    <option key={type} value={type}>{type.length > 5 ? type.slice(0, 4) + '.' : type}</option>
+                                    <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
                                 ))}
                             </select>
                             <select
@@ -169,9 +172,9 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                                 id="task_id"
                                 value={taskId}
                                 onChange={(e) => setTaskId(e.target.value)}
-                                className="h-7 bg-slate-800 border border-slate-700 rounded-md px-1.5 py-0 text-[9px] uppercase font-bold tracking-wider text-white focus:outline-none focus:ring-1 focus:ring-purple-500 max-w-[100px] cursor-pointer hover:bg-slate-700 transition-colors"
+                                className="h-9 bg-white/5 border border-white/10 rounded-xl px-3 text-[10px] uppercase font-bold tracking-wider text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 max-w-[150px] cursor-pointer hover:bg-white/10 transition-all"
                             >
-                                <option value="">No Task</option>
+                                <option value="">No Task Associated</option>
                                 {tasks?.map(task => (
                                     <option key={task.id} value={task.id}>{task.name}</option>
                                 ))}
@@ -179,56 +182,57 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                         </div>
 
                         {/* Group 2: Status */}
-                        <div className="flex items-center gap-1 p-0.5 bg-slate-800/50 rounded-lg border border-white/5 h-7">
+                        <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-xl border border-white/5 h-9">
                             <button
                                 type="button"
                                 onClick={() => setIsPinned(!isPinned)}
-                                className={`h-full px-2 rounded-md transition-all ${isPinned ? 'text-blue-400 bg-blue-400/10' : 'text-slate-500 hover:text-slate-300'}`}
+                                className={`h-full px-3 rounded-lg transition-all ${isPinned ? 'text-blue-400 bg-blue-400/10' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
                                 title="Pin note"
                             >
-                                <FiMapPin size={12} className={isPinned ? 'fill-current' : ''} />
+                                <FiMapPin size={14} className={isPinned ? 'fill-current' : ''} />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setIsFavorite(!isFavorite)}
-                                className={`h-full px-2 rounded-md transition-all ${isFavorite ? 'text-yellow-400 bg-yellow-400/10' : 'text-slate-500 hover:text-slate-300'}`}
+                                className={`h-full px-3 rounded-lg transition-all ${isFavorite ? 'text-yellow-400 bg-yellow-400/10' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
                                 title="Favorite note"
                             >
-                                <FiStar size={12} className={isFavorite ? 'fill-current' : ''} />
+                                <FiStar size={14} className={isFavorite ? 'fill-current' : ''} />
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setIsArchived(!isArchived)}
-                                className={`h-full px-2 rounded-md transition-all ${isArchived ? 'text-zinc-400 bg-zinc-400/10' : 'text-slate-500 hover:text-slate-300'}`}
+                                className={`h-full px-3 rounded-lg transition-all ${isArchived ? 'text-zinc-400 bg-zinc-400/20' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
                                 title="Archive note"
                             >
-                                <FiArchive size={12} className={isArchived ? 'fill-current' : ''} />
+                                <FiArchive size={14} className={isArchived ? 'fill-current' : ''} />
                             </button>
                         </div>
 
                         {/* Group 3: Actions */}
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-3">
                             <button
                                 type="button"
                                 onClick={onClose}
                                 disabled={isSaving}
-                                className="h-7 w-7 rounded-md text-slate-400 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50 flex items-center justify-center"
+                                className="h-9 w-9 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 flex items-center justify-center border border-white/5"
                                 title="Cancel"
                             >
-                                <FiX size={16} />
+                                <FiX size={18} />
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSaving}
-                                className="h-7 px-3 rounded-md text-slate-900 bg-emerald-400 hover:bg-emerald-500 transition-colors disabled:opacity-50 flex items-center justify-center shadow-lg shadow-emerald-500/20"
+                                className="h-9 px-5 rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 transition-all disabled:opacity-50 flex items-center justify-center shadow-lg shadow-emerald-500/20 font-bold text-xs uppercase tracking-widest gap-2"
                                 title={initialNote ? 'Update Note' : 'Save Note'}
                             >
-                                <FiCheck size={16} />
+                                <FiCheck size={18} />
+                                <span>{initialNote ? 'Update' : 'Save'}</span>
                             </button>
                         </div>
                     </div>
 
-                    <div className="p-6 flex-grow">
+                    <div className="p-8 flex-grow overflow-y-auto notes-scroll">
                         <input
                             ref={titleRef}
                             type="text"
@@ -237,20 +241,21 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                             placeholder="Note Title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="text-3xl font-bold w-full bg-transparent pb-4 text-white focus:outline-none"
+                            className="text-4xl font-black w-full bg-transparent pb-6 text-white focus:outline-none placeholder:text-zinc-800 tracking-tight"
                             required
                         />
-                        <input
-                            type="text"
-                            name="tags"
-                            id="tags"
-                            placeholder="Add tags (comma separated)..."
-                            value={tags}
-                            onChange={(e) => setTags(e.target.value)}
-                            className="text-sm w-full bg-transparent pb-4 text-zinc-400 focus:outline-none italic"
-                        />
-                        <div ref={editorContainerRef} id="quill-editor" className="min-h-[14rem]" />
-                        {/* id hidden field will be set when editing an existing note via initialNote */}
+                        <div className="flex items-center gap-3 mb-8">
+                             <input
+                                type="text"
+                                name="tags"
+                                id="tags"
+                                placeholder="Add labels (travel, important, research)..."
+                                value={tags}
+                                onChange={(e) => setTags(e.target.value)}
+                                className="text-sm flex-1 bg-white/5 border border-white/5 py-2 px-4 rounded-xl text-zinc-400 focus:outline-none focus:bg-white/10 transition-all placeholder:text-zinc-600"
+                            />
+                        </div>
+                        <div ref={editorContainerRef} id="quill-editor" className="min-h-[25rem]" />
                         <input type="hidden" name="content" value="" />
                         <input type="hidden" name="id" value={noteId} />
                         <input type="hidden" name="is_pinned" value={isPinned ? '1' : '0'} />
@@ -260,7 +265,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                      </div>
 
 
-                    <div id="toolbar-container" className="p-2 border-t border-slate-800">
+                    <div id="toolbar-container" className="px-6 py-4 border-t border-white/5 bg-white/5 flex flex-wrap gap-2">
                         <span className="ql-formats">
                             <button className="ql-bold"></button>
                             <button className="ql-italic"></button>
@@ -291,36 +296,84 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                             <select className="ql-color"></select>
                             <select className="ql-background"></select>
                         </span>
-                        <span className="ql-formats">
-                            <button className="ql-clean"></button>
-                        </span>
                     </div>
                  </form>
              </div>
 
              <style jsx global>{`
-                /* Remove dark overlay and make the modal float over content */
-                /* Keep Quill toolbar styling consistent and light */
                 .ql-snow { border: none !important; }
                 .ql-toolbar { border: none !important; background: transparent; }
-                .ql-container { color: #CBD5E1; }
-                .ql-editor.ql-blank::before { color: #64748B; font-style: normal; }
-                .ql-snow .ql-stroke { stroke: #94A3B8; }
-                .ql-snow .ql-fill { fill: #94A3B8; }
-                .ql-snow .ql-picker-label { color: #94A3B8; }
+                .ql-container { color: #A1A1AA; font-family: inherit; font-size: 1.1rem; }
+                .ql-editor.ql-blank::before { color: #27272A; font-style: normal; opacity: 1; }
+                .ql-snow .ql-stroke { stroke: #52525B; }
+                .ql-snow .ql-fill { fill: #52525B; }
+                .ql-snow .ql-picker-label { color: #52525B; }
 
-                /* Make editor visually blend into the modal (no inner borders) */
                 .ql-container.ql-snow { border: none; background: transparent; }
-                .ql-editor { background: transparent; color: #E6EEF6; min-height: 14rem; }
+                .ql-editor { background: transparent; color: #E4E4E7; min-height: 25rem; line-height: 1.8; }
 
-                /* Toolbar buttons color */
+                .ql-snow .ql-toolbar button:hover .ql-stroke,
+                .ql-snow.ql-toolbar button:hover .ql-stroke { stroke: #10B981 !important; }
+                
+                .ql-snow .ql-toolbar button.ql-active .ql-stroke { stroke: #10B981 !important; }
+                .ql-snow .ql-toolbar button.ql-active .ql-fill { fill: #10B981 !important; }
+
                 .ql-snow .ql-toolbar button,
                 .ql-snow .ql-toolbar .ql-picker-label,
                 .ql-snow .ql-toolbar .ql-picker-item {
-                    color: rgba(255,255,255,0.92);
+                    color: #52525B;
                 }
-                .ql-snow .ql-toolbar .ql-stroke { stroke: rgba(255,255,255,0.92) !important; }
-                .ql-snow .ql-toolbar .ql-fill { fill: rgba(255,255,255,0.92) !important; }
+                .ql-snow .ql-toolbar .ql-stroke { stroke: #52525B !important; }
+                .ql-snow .ql-toolbar .ql-fill { fill: #52525B !important; }
+
+                /* Dropdown/Picker refinements */
+                .ql-snow .ql-picker-options {
+                    display: none !important;
+                    background-color: #18181B !important; /* zinc-900 */
+                    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                    border-radius: 12px !important;
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4) !important;
+                    padding: 8px !important;
+                    bottom: 100% !important;
+                    top: auto !important;
+                    margin-bottom: 8px !important;
+                }
+
+                .ql-snow .ql-picker.ql-expanded .ql-picker-options {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 2px !important;
+                }
+
+                .ql-snow .ql-color-picker.ql-expanded .ql-picker-options {
+                    display: grid !important;
+                }
+
+                .ql-snow .ql-picker-item {
+                    border-radius: 6px !important;
+                    padding: 4px 8px !important;
+                    transition: all 0.2s !important;
+                }
+
+                .ql-snow .ql-picker-item:hover {
+                    background-color: rgba(255, 255, 255, 0.05) !important;
+                    color: #10B981 !important; /* emerald-500 */
+                }
+
+                .ql-snow .ql-color-picker .ql-picker-options {
+                    width: 160px !important; 
+                    grid-template-columns: repeat(7, 1fr) !important;
+                    gap: 3px !important;
+                    overflow: hidden !important;
+                }
+
+                .ql-snow .ql-color-picker .ql-picker-item {
+                    width: 16px !important;
+                    height: 16px !important;
+                    padding: 0 !important;
+                    border-radius: 4px !important;
+                    margin: 2px !important;
+                }
             `}</style>
          </div>
      );

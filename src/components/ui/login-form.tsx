@@ -1,11 +1,19 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { authenticate } from '@/app/lib/actions';
-import { FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLoader } from 'react-icons/fi';
+import { FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLoader, FiEye, FiEyeOff } from 'react-icons/fi';
+import toast from 'react-hot-toast';
 
 export default function LoginForm() {
   const [errorMessage, dispatch, isPending] = useActionState(authenticate, undefined);
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage);
+    }
+  }, [errorMessage]);
 
   return (
     <form action={dispatch} className="space-y-4">
@@ -18,7 +26,7 @@ export default function LoginForm() {
             <FiMail className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
             id="email"
             type="email"
             name="email"
@@ -36,14 +44,21 @@ export default function LoginForm() {
             <FiLock className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+            className="block w-full pl-10 pr-10 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder="••••••••"
             required
             minLength={6}
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-500 hover:text-white transition-colors focus:outline-none"
+          >
+            {showPassword ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4" />}
+          </button>
         </div>
       </div>
       <div className="flex items-center justify-between">
@@ -52,9 +67,9 @@ export default function LoginForm() {
             id="remember-me"
             name="remember-me"
             type="checkbox"
-            className="h-4 w-4 rounded border-white/10 bg-white/5 text-emerald-500 focus:ring-emerald-500/50 focus:ring-offset-0"
+            className="h-4 w-4 rounded border-white/10 bg-white/5 text-emerald-500 focus:ring-emerald-500/50 focus:ring-offset-0 cursor-pointer"
           />
-          <label htmlFor="remember-me" className="ml-2 block text-sm text-zinc-400">
+          <label htmlFor="remember-me" className="ml-2 block text-sm text-zinc-400 cursor-pointer hover:text-emerald-300 transition-colors">
             Remember me
           </label>
         </div>
@@ -64,30 +79,20 @@ export default function LoginForm() {
           </a>
         </div>
       </div>
-      <div
-        className="flex h-8 items-end space-x-1"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {errorMessage && (
-          <>
-            <FiAlertCircle className="h-5 w-5 text-red-500" />
-            <p className="text-sm text-red-500">{errorMessage}</p>
-          </>
-        )}
-      </div>
+      
       <button
-        className="w-full flex justify-center items-center py-3 px-4 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover-scale"
+        className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm font-bold text-zinc-400 hover:text-zinc-100 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
         aria-disabled={isPending}
         disabled={isPending}
       >
-        {isPending ? (
-          <FiLoader className="animate-spin h-5 w-5" />
-        ) : (
-          <>
-            Sign in <FiArrowRight className="ml-2 h-4 w-4" />
-          </>
-        )}
+        <div className="p-2.5 rounded-xl bg-white/5 group-hover:bg-emerald-500/10 transition-colors flex items-center justify-center shrink-0">
+          {isPending ? (
+            <FiLoader className="animate-spin h-5 w-5 text-emerald-400" />
+          ) : (
+            <FiArrowRight className="h-5 w-5 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+          )}
+        </div>
+        <span className="uppercase tracking-widest">{isPending ? 'Authenticating...' : 'Sign in'}</span>
       </button>
     </form>
   );

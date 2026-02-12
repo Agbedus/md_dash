@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 };
 
 import { auth } from "@/auth";
+import { Toaster } from 'react-hot-toast';
 
 export default async function RootLayout({
   children,
@@ -35,12 +36,26 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <DashboardLayout 
-          sidebar={<Sidebar user={session?.user} />}
-          topnav={<TopNav user={session?.user} />}
-        >
-          {children}
-        </DashboardLayout>
+        {session ? (
+          <DashboardLayout 
+            sidebar={<Sidebar user={session?.user} />}
+            topnav={<TopNav user={session?.user} />}
+            user={session?.user}
+          >
+            {children}
+          </DashboardLayout>
+        ) : (
+          <div className="min-h-screen bg-zinc-950">
+            {children}
+          </div>
+        )}
+        <Toaster position="bottom-right" toastOptions={{
+          style: {
+            background: '#18181b',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.1)',
+          },
+        }} />
       </body>
     </html>
   );

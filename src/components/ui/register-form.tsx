@@ -1,12 +1,24 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { register } from '@/app/lib/actions';
-import { FiUser, FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLoader } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLoader, FiEye, FiEyeOff } from 'react-icons/fi';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function RegisterForm() {
   const [errorMessage, dispatch, isPending] = useActionState(register, undefined);
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (errorMessage) {
+      if (errorMessage === "User created successfully") {
+        toast.success(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
+    }
+  }, [errorMessage]);
 
   return (
     <form action={dispatch} className="space-y-4">
@@ -19,7 +31,7 @@ export default function RegisterForm() {
             <FiUser className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
             id="fullName"
             type="text"
             name="fullName"
@@ -38,7 +50,7 @@ export default function RegisterForm() {
             <FiMail className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
             id="email"
             type="email"
             name="email"
@@ -56,42 +68,37 @@ export default function RegisterForm() {
             <FiLock className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+            className="block w-full pl-10 pr-10 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder="••••••••"
             required
             minLength={6}
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-500 hover:text-white transition-colors focus:outline-none"
+          >
+            {showPassword ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4" />}
+          </button>
         </div>
       </div>
 
-
-      <div
-        className="flex h-8 items-end space-x-1"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {errorMessage && (
-          <>
-            <FiAlertCircle className="h-5 w-5 text-emerald-500" />
-            <p className="text-sm text-emerald-500">{errorMessage}</p>
-          </>
-        )}
-      </div>
       <button
-        className="w-full flex justify-center items-center py-3 px-4 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover-scale"
+        className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm font-bold text-zinc-400 hover:text-zinc-100 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
         aria-disabled={isPending}
         disabled={isPending}
       >
-        {isPending ? (
-          <FiLoader className="animate-spin h-5 w-5" />
-        ) : (
-          <>
-            Create Account <FiArrowRight className="ml-2 h-4 w-4" />
-          </>
-        )}
+        <div className="p-2.5 rounded-xl bg-white/5 group-hover:bg-emerald-500/10 transition-colors flex items-center justify-center shrink-0">
+          {isPending ? (
+            <FiLoader className="animate-spin h-5 w-5 text-emerald-400" />
+          ) : (
+            <FiArrowRight className="h-5 w-5 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+          )}
+        </div>
+        <span className="uppercase tracking-widest">{isPending ? 'Creating account...' : 'Create Account'}</span>
       </button>
       <div className="text-center text-sm text-zinc-400 mt-4">
         Already have an account?{' '}

@@ -5,7 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { logout } from '@/app/lib/actions';
 import { useDashboard } from './dashboard-layout';
-import { FiBell, FiSearch, FiUser, FiSettings, FiLogOut, FiPlus, FiHelpCircle, FiMessageSquare, FiMenu, FiX, FiCheck } from 'react-icons/fi';
+import { FiBell, FiSearch, FiUser, FiSettings, FiLogOut, FiPlus, FiHelpCircle, FiMessageSquare, FiMenu, FiX, FiCheck, FiInfo, FiAlertCircle } from 'react-icons/fi';
+import { useNotifications } from './notifications/notification-provider';
+import { formatDistanceToNow } from 'date-fns';
 
 interface TopNavProps {
   user?: {
@@ -21,6 +23,7 @@ const TopNav = ({ user }: TopNavProps) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { isMobileExpanded, setIsMobileExpanded } = useDashboard();
 
   useEffect(() => {
@@ -64,39 +67,81 @@ const TopNav = ({ user }: TopNavProps) => {
             className="relative p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/5 border border-white/10 rounded-xl hover:border-white/20 group hover-scale"
           >
             <FiBell className="text-xl group-hover:text-[var(--pastel-yellow)] transition-colors" />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#09090b]"></span>
+            {unreadCount > 0 && (
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-[#09090b] animate-pulse"></span>
+            )}
           </button>
 
           {isNotificationsOpen && (
             <div className="absolute right-0 mt-2 w-80 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50">
               <div className="px-4 py-3 border-b border-white/5 flex justify-between items-center">
                 <p className="text-sm font-medium text-white">Notifications</p>
-                <span className="text-xs text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full">3 New</span>
+                {unreadCount > 0 && (
+                  <span className="text-xs text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full">{unreadCount} New</span>
+                )}
               </div>
               
               <div className="max-h-[300px] overflow-y-auto">
-                {[1, 2, 3].map((_, i) => (
-                  <div key={i} className="px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer border-b border-white/5 last:border-0">
-                    <div className="flex gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 flex-shrink-0 border border-blue-500/20">
-                        <FiBell size={14} />
-                      </div>
-                      <div>
-                        <p className="text-sm text-zinc-300 line-clamp-2">
-                          New project &quot;Dashboard Redesign&quot; has been assigned to you.
-                        </p>
-                        <p className="text-xs text-zinc-500 mt-1">2 hours ago</p>
+                {notifications.length > 0 ? (
+                  notifications.map((notification) => (
+                    <div 
+                      key={notification.id} 
+                      onClick={() => !notification.is_read && markAsRead(notification.id)}
+                      className={`px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer border-b border-white/5 last:border-0 ${!notification.is_read ? 'bg-white/[0.02]' : ''}`}
+                    >
+                      <div className="flex gap-3">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border ${
+                          notification.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                          notification.type === 'error' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                          notification.type === 'warning' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                          'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                        }`}>
+                          {notification.type === 'success' ? <FiCheck size={14} /> :
+                           notification.type === 'error' ? <FiX size={14} /> :
+                           notification.type === 'warning' ? <FiAlertCircle size={14} /> :
+                           <FiBell size={14} />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm line-clamp-2 ${!notification.is_read ? 'text-white font-medium' : 'text-zinc-400'}`}>
+                            {notification.message}
+                          </p>
+                          <p className="text-[10px] text-zinc-500 mt-1">
+                            {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                          </p>
+                        </div>
+                        {!notification.is_read && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5"></div>
+                        )}
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-8 text-center">
+                    <FiBell className="mx-auto text-zinc-600 mb-2 opacity-20" size={24} />
+                    <p className="text-xs text-zinc-500">No notifications yet</p>
                   </div>
-                ))}
+                )}
               </div>
 
-              <div className="p-2 border-t border-white/5">
-                <button className="w-full py-2 text-xs text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
-                  Mark all as read
-                </button>
-              </div>
+              {notifications.length > 0 && (
+                <div className="p-2 border-t border-white/5 flex gap-2">
+                  {unreadCount > 0 && (
+                    <button 
+                      onClick={() => markAllAsRead()}
+                      className="flex-1 py-2 text-xs text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/10"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                  <Link 
+                    href="/notifications"
+                    onClick={() => setIsNotificationsOpen(false)}
+                    className="flex-1 py-2 text-xs text-center bg-white/5 text-zinc-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors border border-white/10"
+                  >
+                    View all
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -168,13 +213,15 @@ const TopNav = ({ user }: TopNavProps) => {
                     
                     <div className="border-t border-white/5 my-2"></div>
                     
-                    <button 
-                        onClick={() => logout()}
-                        className="flex w-full items-center px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors group"
-                    >
-                        <FiLogOut className="mr-3 group-hover:translate-x-0.5 transition-transform" />
-                        Sign Out
-                    </button>
+                    <form action={logout}>
+                        <button 
+                            type="submit"
+                            className="flex w-full items-center px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors group"
+                        >
+                            <FiLogOut className="mr-3 group-hover:translate-x-0.5 transition-transform" />
+                            Sign Out
+                        </button>
+                    </form>
                 </div>
             )}
           </div>
