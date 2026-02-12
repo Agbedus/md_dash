@@ -47,7 +47,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
     if (!user?.accessToken) return;
 
     try {
-      const baseUrl = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+      const baseUrl = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000" || "https://fast-dash-b1e5.onrender.com/";
       const res = await fetch(`${baseUrl}/api/v1/users`, {
         headers: {
           'Authorization': `Bearer ${user.accessToken}`,
@@ -77,7 +77,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
     if (!user?.accessToken) return;
 
     try {
-      const baseUrl = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+      const baseUrl = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000" || "https://fast-dash-b1e5.onrender.com/";
       const res = await fetch(`${baseUrl}/api/v1/notifications`, {
         headers: {
           'Authorization': `Bearer ${user.accessToken}`,
@@ -130,7 +130,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
     fetchUsers();
     fetchNotifications();
 
-    const baseUrl = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+    const baseUrl = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000" || "https://fast-dash-b1e5.onrender.com/";
     const wsBaseUrl = baseUrl.replace(/^http/, 'ws');
     const wsUrl = `${wsBaseUrl}/api/v1/notifications/ws/${user.id}`;
     
