@@ -19,16 +19,13 @@ import {
   FiMaximize2,
   FiChevronRight,
   FiShare2,
-  FiTag,
-  FiCalendar,
-  FiTarget,
-  FiArrowUpRight
+  FiTag
 } from 'react-icons/fi';
 import Image from 'next/image';
 import { Portal } from '@/components/ui/portal';
 import { formatDistanceToNow } from 'date-fns';
 
-type Category = 'all' | 'tasks' | 'notes' | 'projects' | 'system' | 'events' | 'decisions';
+type Category = 'all' | 'tasks' | 'notes' | 'projects' | 'system';
 
 interface TabItem {
   id: Category;
@@ -40,9 +37,7 @@ const tabs: TabItem[] = [
   { id: 'all', label: 'All', icon: FiInbox },
   { id: 'tasks', label: 'Tasks', icon: FiCheckCircle },
   { id: 'notes', label: 'Notes', icon: FiFileText },
-  { id: 'events', label: 'Events', icon: FiCalendar },
   { id: 'projects', label: 'Projects', icon: FiLayers },
-  { id: 'decisions', label: 'Decisions', icon: FiTarget },
   { id: 'system', label: 'System', icon: FiCpu },
 ];
 
@@ -145,9 +140,7 @@ export default function NotificationsPage() {
       if (activeTab === 'tasks') return n.resource_type === 'task' || n.title.toLowerCase().includes('task');
       if (activeTab === 'notes') return n.resource_type === 'note' || n.title.toLowerCase().includes('note');
       if (activeTab === 'projects') return n.resource_type === 'project' || n.title.toLowerCase().includes('project');
-      if (activeTab === 'events') return n.resource_type === 'event' || n.title.toLowerCase().includes('event');
-      if (activeTab === 'decisions') return n.resource_type === 'decision' || n.title.toLowerCase().includes('decision');
-      if (activeTab === 'system') return n.resource_type === 'system' || (!n.resource_type && !n.title.toLowerCase().match(/task|note|project|event|decision/));
+      if (activeTab === 'system') return n.resource_type === 'system' || (!n.resource_type && !n.title.toLowerCase().match(/task|note|project/));
       
       return true;
     }).map(n => ({
@@ -248,49 +241,18 @@ export default function NotificationsPage() {
                   }`}
                 >
                   <div className="flex gap-4">
-                    <div className="relative">
-                      <SenderAvatar user={n.sender} size="sm" />
-                      {n.resource_type && (
-                        <div className={`absolute -right-1 -bottom-1 h-3.5 w-3.5 rounded-full border border-zinc-900 flex items-center justify-center text-[8px] shadow-lg ${
-                          n.resource_type === 'task' ? 'bg-emerald-500 text-zinc-950' :
-                          n.resource_type === 'note' ? 'bg-blue-500 text-white' :
-                          n.resource_type === 'project' ? 'bg-amber-500 text-zinc-950' :
-                          n.resource_type === 'event' ? 'bg-indigo-500 text-white' :
-                          n.resource_type === 'decision' ? 'bg-rose-500 text-white' :
-                          'bg-zinc-500 text-white'
-                        }`}>
-                          {n.resource_type === 'task' && <FiCheck size={8} />}
-                          {n.resource_type === 'note' && <FiFileText size={8} />}
-                          {n.resource_type === 'project' && <FiLayers size={8} />}
-                          {n.resource_type === 'event' && <FiCalendar size={8} />}
-                          {n.resource_type === 'decision' && <FiTarget size={8} />}
-                          {n.resource_type === 'system' && <FiCpu size={8} />}
-                        </div>
-                      )}
-                    </div>
+                    <SenderAvatar user={n.sender} size="sm" />
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex justify-between items-start">
                         <div className="flex flex-col min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className={`text-xs font-bold truncate ${selectedId === n.id ? 'text-emerald-400' : 'text-white'}`}>
-                              {n.title}
-                            </p>
-                            {n.resource_id && (
-                              <FiArrowUpRight className="text-zinc-600 w-3 h-3 group-hover:text-emerald-500 transition-colors" />
-                            )}
-                          </div>
+                          <p className={`text-xs font-bold truncate ${selectedId === n.id ? 'text-emerald-400' : 'text-white'}`}>
+                            {n.title}
+                          </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             {n.resource_type && (
-                                <span className={`px-1 py-0 rounded border text-[8px] font-black uppercase tracking-widest ${
-                                  n.resource_type === 'task' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                  n.resource_type === 'note' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                  n.resource_type === 'project' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                  n.resource_type === 'event' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
-                                  n.resource_type === 'decision' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
-                                  'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
-                                }`}>
-                                  {n.resource_type}
-                                </span>
+                              <span className="px-1 py-0 rounded bg-white/5 border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-500">
+                                {n.resource_type}
+                              </span>
                             )}
                             <span className="text-[9px] text-zinc-600 font-medium truncate">
                               {n.message}
@@ -344,8 +306,6 @@ export default function NotificationsPage() {
                             selectedNotification.resource_type === 'task' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
                             selectedNotification.resource_type === 'note' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                             selectedNotification.resource_type === 'project' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                            selectedNotification.resource_type === 'event' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
-                            selectedNotification.resource_type === 'decision' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
                             'bg-violet-500/10 text-violet-400 border-violet-500/20'
                           }`}>
                             {selectedNotification.resource_type}
@@ -425,23 +385,9 @@ export default function NotificationsPage() {
                     <button className="px-6 py-2.5 rounded-xl bg-emerald-500 text-zinc-950 font-black text-[11px] uppercase tracking-[0.15em] hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
                       Process Notification
                     </button>
-                    {selectedNotification.resource_id && (
-                      <button 
-                        onClick={() => {
-                          const path = {
-                            task: `/tasks?id=${selectedNotification.resource_id}`,
-                            project: `/projects/${selectedNotification.resource_id}`,
-                            note: `/notes?id=${selectedNotification.resource_id}`,
-                            event: `/calendar?id=${selectedNotification.resource_id}`,
-                            decision: `/decisions?id=${selectedNotification.resource_id}`,
-                          }[selectedNotification.resource_type as string] || '#';
-                          window.location.href = path;
-                        }}
-                        className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-black text-[11px] uppercase tracking-[0.15em] hover:bg-white/10 transition-all active:scale-95 flex items-center gap-2"
-                      >
-                        Context View <FiArrowUpRight />
-                      </button>
-                    )}
+                    <button className="px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-black text-[11px] uppercase tracking-[0.15em] hover:bg-white/10 transition-all active:scale-95">
+                      Context View
+                    </button>
                   </div>
                   <div className="flex items-center gap-2 text-[10px] text-zinc-600 font-black uppercase tracking-widest">
                     <FiTag className="text-zinc-500" /> System, Critical, Dash
