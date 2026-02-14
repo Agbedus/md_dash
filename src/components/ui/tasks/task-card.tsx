@@ -25,7 +25,7 @@ interface TaskCardProps {
     onCancel?: () => void;
 }
 
-export default function TaskCard({ 
+const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({ 
     task, 
     users = [], 
     projects = [], 
@@ -35,7 +35,7 @@ export default function TaskCard({
     isEditing = false,
     onEdit = () => {},
     onCancel = () => {}
-}: TaskCardProps) {
+}, ref) => {
     const [selectedAssignees, setSelectedAssignees] = useState<(string | number)[]>(
       task.assignees?.map(a => a.user.id) || []
     );
@@ -120,7 +120,7 @@ export default function TaskCard({
     const rowClasses = "border-b border-white/5";
 
     return isEditing ? (
-      <tr className={rowClasses}>
+      <tr className={rowClasses} ref={ref}>
         <td className="px-4 py-2 text-xs font-medium text-white whitespace-nowrap">
           <form
             ref={formRef}
@@ -249,7 +249,7 @@ export default function TaskCard({
           </td>
         </tr>
     ) : (
-      <tr className={`${rowClasses} hover:bg-white/5 transition-colors group items-center`}>
+      <tr className={`${rowClasses} hover:bg-white/5 transition-colors group items-center`} ref={ref}>
         <td className="px-6 py-4 text-xs font-medium text-white whitespace-nowrap flex items-center">
           <div className="relative flex items-center shrink-0">
             <input
@@ -372,4 +372,6 @@ export default function TaskCard({
         </td>
       </tr>
     );
-}
+});
+
+export default TaskCard;

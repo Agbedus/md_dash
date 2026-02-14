@@ -37,6 +37,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
 
     const [allTasks, setAllTasks] = useState<Task[]>(hydrateTasks(initialTasks));
     const [viewMode, setViewMode] = useState<ViewMode>('table');
+    const [tableTab, setTableTab] = useState<'active' | 'completed'>('active');
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [filterMyTasks, setFilterMyTasks] = useState(false);
 
@@ -50,6 +51,12 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     const [filterStatus, setFilterStatus] = useState('');
     const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
     
+    // Pagination state
+    const [hasMore, setHasMore] = useState(initialTasks.length === 50);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [skip, setSkip] = useState(initialTasks.length);
+    const LIMIT = 50;
+
     // Optimistic UI
     const [optimisticTasks, addOptimisticTask] = useOptimistic(
         allTasks,
@@ -69,7 +76,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
 
     // Filtered tasks for visual grouping and search
     const filteredTasks = useMemo(() => {
-        return optimisticTasks.filter(task => {
+        const tasks = optimisticTasks.filter(task => {
             const matchesSearch = !searchQuery || 
                 task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
@@ -88,7 +95,15 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
 
             return matchesSearch && matchesPriority && matchesStatus && matchesMyTasks;
         });
-    }, [optimisticTasks, searchQuery, filterPriority, filterStatus, filterMyTasks, currentUserId]);
+
+        if (viewMode === 'kanban') return tasks;
+
+        // In table view, filter by active/completed status based on tab
+        return tasks.filter(task => {
+            if (tableTab === 'completed') return task.status === 'completed';
+            return task.status !== 'completed';
+        });
+    }, [optimisticTasks, searchQuery, filterPriority, filterStatus, filterMyTasks, currentUserId, viewMode, tableTab]);
 
     // New task state
     const [newAssignees, setNewAssignees] = useState<(string | number)[]>([]);
@@ -96,12 +111,18 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     const [newDueDate, setNewDueDate] = useState<Date | null>(null);
 
     const newNameRef = useRef<HTMLInputElement | null>(null);
-
-    const loadTasks = useCallback(() => {
+    const loadTasks = useCallback((customSkip = 0, append = false) => {
         startTransition(async () => {
             try {
-                const tasks = await getTasks(searchQuery, filterPriority, filterStatus, projectId);
-                setAllTasks(hydrateTasks(tasks));
+                const tasks = await getTasks(searchQuery, filterPriority, filterStatus, projectId, LIMIT, customSkip);
+                const hydrated = hydrateTasks(tasks);
+                if (append) {
+                    setAllTasks(prev => [...prev, ...hydrated]);
+                } else {
+                    setAllTasks(hydrated);
+                }
+                setHasMore(tasks.length === LIMIT);
+                setSkip(customSkip + tasks.length);
             } catch (err) {
                 console.error(err);
                 setErrorMsg('Could not load tasks. Please try again.');
@@ -109,11 +130,39 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
         });
     }, [searchQuery, filterPriority, filterStatus, hydrateTasks, projectId]);
 
+    const loadMoreTasks = useCallback(async () => {
+        if (isLoadingMore || !hasMore) return;
+        setIsLoadingMore(true);
+        try {
+            const tasks = await getTasks(searchQuery, filterPriority, filterStatus, projectId, LIMIT, skip);
+            const hydrated = hydrateTasks(tasks);
+            setAllTasks(prev => [...prev, ...hydrated]);
+            setHasMore(tasks.length === LIMIT);
+            setSkip(prev => prev + tasks.length);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    }, [isLoadingMore, hasMore, searchQuery, filterPriority, filterStatus, projectId, skip, hydrateTasks]);
+
+    // Intersection observer for infinite scroll
+    const observer = useRef<IntersectionObserver | null>(null);
+    const lastTaskElementRef = useCallback((node: any) => {
+        if (isLoadingMore || viewMode === 'kanban') return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                loadMoreTasks();
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [isLoadingMore, hasMore, viewMode, loadMoreTasks]);
+
     useEffect(() => {
         // Only trigger server fetch on initial load or projectId change.
-        // Client-side filtering handles search/priority/status for a more instant feel.
         loadTasks();
-    }, [projectId]); // Removed loadTasks from deps to prevent re-fetching on every state change (search/filter)
+    }, [projectId, loadTasks]);
 
     useEffect(() => {
         if (isAddingTask && newNameRef.current) {
@@ -149,7 +198,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
             updatedAt: new Date().toISOString()
         };
         startTransition(() => {
-        addOptimisticTask({ type: 'add', task: newTask });
+            addOptimisticTask({ type: 'add', task: newTask });
         });
 
         setErrorMsg(null);
@@ -167,7 +216,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                  setIsDirty(false);
                  // Reset form state
                  setNewAssignees([]);
-                 setNewProject(null);
+                 setNewProject(projectId || null);
                  if (newNameRef.current) newNameRef.current.value = '';
             }
             loadTasks();
@@ -258,15 +307,15 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     };
 
     return (
-        <div className="px-4 py-8 max-w-[1600px] mx-auto">
+        <div className="px-4 py-8 max-w-[1600px] mx-auto min-h-screen">
             <div className="mb-10">
                 <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Tasks</h1>
                 <p className="text-zinc-400 text-lg">Manage team work and track progress.</p>
             </div>
 
-            <TaskSummarySection tasks={filteredTasks} />
+            <TaskSummarySection tasks={optimisticTasks} />
             
-            <UserLeaderboard tasks={filteredTasks} users={users} />
+            <UserLeaderboard tasks={optimisticTasks} users={users} />
 
             <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10 overflow-x-auto pb-2 scrollbar-hide">
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
@@ -353,204 +402,228 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                     deleteTask={handleDelete}
                 />
             ) : (
-                <div className="glass rounded-2xl overflow-hidden flex flex-col">
-                    <div className="overflow-x-auto">
-                        <table className="w-full border-collapse">
-                            <caption className="sr-only">Tasks table</caption>
-                            <thead>
-                                <tr className="border-b border-white/5 bg-white/5">
-                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Name</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Description</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Due Date</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Owner</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Priority</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Assignee</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Project</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Status</th>
-                                    <th scope="col" className="px-6 py-4 text-right text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {filteredTasks.map((task) => (
-                                    <TaskCard
-                                        key={task.id}
-                                        task={task}
-                                        users={users}
-                                        projects={projects}
-                                        updateTask={handleUpdate}
-                                        deleteTask={handleDelete}
-                                        isEditing={editingTaskId === task.id}
-                                        onEdit={() => setEditingTaskId(task.id)}
-                                        onCancel={() => setEditingTaskId(null)}
-                                    />
-                                ))}
-                                {isAddingTask && (
-                                    <tr className="bg-white/5 animate-in fade-in slide-in-from-top-2 duration-200">
-                                        <td className="px-4 py-2">
-                                            <form id="create-task-form" onSubmit={async (e) => {
-                                                e.preventDefault();
-                                                const formData = new FormData(e.currentTarget);
-                                                
-                                                // Manually append state values to FormData since inputs are outside form or detached
-                                                if (newAssignees.length > 0) {
-                                                    formData.append('assigneeIds', JSON.stringify(newAssignees));
-                                                }
-                                                if (newProject) {
-                                                    formData.append('projectId', newProject.toString());
-                                                }
-                                                if (newDueDate) {
-                                                    formData.append('dueDate', format(newDueDate, 'yyyy-MM-dd'));
-                                                }
+                <div className="flex flex-col gap-6">
+                    <div className="flex items-center gap-1 bg-white/5 p-1 w-fit rounded-xl border border-white/10">
+                        <button
+                            onClick={() => setTableTab('active')}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${tableTab === 'active' ? 'bg-emerald-500 text-zinc-950 shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        >
+                            Active
+                        </button>
+                        <button
+                            onClick={() => setTableTab('completed')}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${tableTab === 'completed' ? 'bg-emerald-500 text-zinc-950 shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        >
+                            Completed
+                        </button>
+                    </div>
 
-                                                await handleCreate(formData);
-                                                setNewDueDate(null);
-                                                setNewAssignees([]);
-                                                // Reset other states if needed or rely on form reset
-                                                if (newNameRef.current) newNameRef.current.value = "";
-                                            }}>
+                    <div className="glass rounded-2xl overflow-hidden flex flex-col">
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse">
+                                <caption className="sr-only">Tasks table</caption>
+                                <thead>
+                                    <tr className="border-b border-white/5 bg-white/5 text-left">
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Name</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Description</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Due Date</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Owner</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Priority</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Assignee</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Project</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Status</th>
+                                        <th scope="col" className="px-6 py-4 text-right text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {filteredTasks.map((task, index) => (
+                                        <TaskCard
+                                            key={task.id}
+                                            task={task}
+                                            users={users}
+                                            projects={projects}
+                                            updateTask={handleUpdate}
+                                            deleteTask={handleDelete}
+                                            isEditing={editingTaskId === task.id}
+                                            onEdit={() => setEditingTaskId(task.id)}
+                                            onCancel={() => setEditingTaskId(null)}
+                                            ref={index === filteredTasks.length - 1 ? lastTaskElementRef : null}
+                                        />
+                                    ))}
+                                    {isAddingTask && (
+                                        <tr className="bg-white/5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            <td className="px-4 py-2">
+                                                <form id="create-task-form" onSubmit={async (e) => {
+                                                    e.preventDefault();
+                                                    const formData = new FormData(e.currentTarget);
+                                                    
+                                                    // Manually append state values to FormData since inputs are outside form or detached
+                                                    if (newAssignees.length > 0) {
+                                                        formData.append('assigneeIds', JSON.stringify(newAssignees));
+                                                    }
+                                                    if (newProject) {
+                                                        formData.append('projectId', newProject.toString());
+                                                    }
+                                                    if (newDueDate) {
+                                                        formData.append('dueDate', format(newDueDate, 'yyyy-MM-dd'));
+                                                    }
+
+                                                    await handleCreate(formData);
+                                                    setNewDueDate(null);
+                                                    setNewAssignees([]);
+                                                    // Reset other states if needed or rely on form reset
+                                                    if (newNameRef.current) newNameRef.current.value = "";
+                                                }}>
+                                                    <input
+                                                        ref={newNameRef}
+                                                        type="text"
+                                                        name="name"
+                                                        placeholder="Task name"
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
+                                                        onChange={() => setIsDirty(true)}
+                                                        required
+                                                    />
+                                                </form>
+                                            </td>
+                                            <td className="px-4 py-2">
                                                 <input
-                                                    ref={newNameRef}
                                                     type="text"
-                                                    name="name"
-                                                    placeholder="Task name"
+                                                    name="description"
+                                                    placeholder="Description"
+                                                    form="create-task-form"
                                                     className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
                                                     onChange={() => setIsDirty(true)}
-                                                    required
                                                 />
-                                            </form>
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            <input
-                                                type="text"
-                                                name="description"
-                                                placeholder="Description"
-                                                form="create-task-form"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
-                                                onChange={() => setIsDirty(true)}
-                                            />
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            <CustomDatePicker
-                                                value={newDueDate}
-                                                onChange={(date) => {
-                                                    setNewDueDate(date);
-                                                    setIsDirty(true);
-                                                }}
-                                                placeholder="Due date"
-                                                className="w-full"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            {/* Owner column empty in creation row */}
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            <select
-                                                name="priority"
-                                                form="create-task-form"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
-                                                required
-                                                onChange={() => setIsDirty(true)}
-                                            >
-                                                <option value="low" className="bg-zinc-900">Low</option>
-                                                <option value="medium" className="bg-zinc-900">Medium</option>
-                                                <option value="high" className="bg-zinc-900">High</option>
-                                            </select>
-                                        </td>
-                                        <td className="px-4 py-2 min-w-[200px]">
-                                            <Combobox
-                                                options={users.map(u => ({ value: u.id, label: u.fullName || u.email, subLabel: u.email }))}
-                                                value={newAssignees}
-                                                onChange={(val) => { setNewAssignees(val as (string | number)[]); setIsDirty(true); }}
-                                                multiple
-                                                placeholder="Assign..."
-                                                searchPlaceholder="Search users..."
-                                                className="w-full"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-2 min-w-[150px]">
-                                            <Combobox
-                                                options={projects.map(p => ({ value: p.id, label: p.name, subLabel: p.key || undefined }))}
-                                                value={newProject || ''}
-                                                onChange={(val) => { setNewProject(val as string | number | null); setIsDirty(true); }}
-                                                placeholder="Project..."
-                                                searchPlaceholder="Search projects..."
-                                                className="w-full"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            <select
-                                                name="status"
-                                                form="create-task-form"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
-                                                required
-                                            >
-                                                {Object.entries(statusMapping).map(([key, value]) => (
-                                                    <option key={key} value={key} className="bg-zinc-900">{value}</option>
-                                                ))}
-                                            </select>
-                                        </td>
-                                        <td className="px-4 py-2 text-right text-xs font-medium">
-                                            <div className="flex items-center justify-end space-x-2">
-                                                <button
-                                                    type="submit"
-                                                    form="create-task-form"
-                                                    disabled={isPending || savingCreate}
-                                                    className="inline-flex items-center p-1.5 border border-transparent rounded-lg text-white bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-all"
-                                                >
-                                                    {savingCreate ? (
-                                                        <div className="h-3.5 w-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
-                                                    ) : (
-                                                        <FiCheck className="h-3.5 w-3.5" />
-                                                    )}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        if (isDirty) {
-                                                            if (confirm('You have unsaved changes. Are you sure you want to cancel?')) {
-                                                                setIsAddingTask(false);
-                                                                setIsDirty(false);
-                                                                setNewAssignees([]);
-                                                                setNewProject(null);
-                                                            }
-                                                        } else {
-                                                            setIsAddingTask(false);
-                                                        }
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <CustomDatePicker
+                                                    value={newDueDate}
+                                                    onChange={(date) => {
+                                                        setNewDueDate(date);
+                                                        setIsDirty(true);
                                                     }}
-                                                    disabled={savingCreate}
-                                                    className="inline-flex items-center p-1.5 border border-white/10 rounded-lg text-zinc-400 bg-white/5 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 disabled:opacity-50 transition-all"
+                                                    placeholder="Due date"
+                                                    className="w-full"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                {/* Owner column empty in creation row */}
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <select
+                                                    name="priority"
+                                                    form="create-task-form"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
+                                                    required
+                                                    onChange={() => setIsDirty(true)}
                                                 >
-                                                    <FiX className="h-3 w-3" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                    {!isAddingTask && (
-                        <div className="p-4 border-t border-white/5">
-                            <button
-                                onClick={() => {
-                                    if (isAddingTask && isDirty) {
-                                         if (confirm('You have unsaved changes. Are you sure you want to close the form?')) {
-                                             setIsAddingTask(!isAddingTask);
-                                             setIsDirty(false);
-                                         }
-                                    } else {
-                                        setIsAddingTask(!isAddingTask);
-                                    }
-                                }}
-                                className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm text-zinc-400 hover:text-white transition-all duration-200 group"
-                            >
-                                <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
-                                    <FiPlus className="w-4 h-4" />
-                                </div>
-                                <span>{isAddingTask ? 'Cancel' : 'New Task'}</span>
-                            </button>
+                                                    <option value="low" className="bg-zinc-900">Low</option>
+                                                    <option value="medium" className="bg-zinc-900">Medium</option>
+                                                    <option value="high" className="bg-zinc-900">High</option>
+                                                </select>
+                                            </td>
+                                            <td className="px-4 py-2 min-w-[200px]">
+                                                <Combobox
+                                                    options={users.map(u => ({ value: u.id, label: u.fullName || u.email, subLabel: u.email }))}
+                                                    value={newAssignees}
+                                                    onChange={(val) => { setNewAssignees(val as (string | number)[]); setIsDirty(true); }}
+                                                    multiple
+                                                    placeholder="Assign..."
+                                                    searchPlaceholder="Search users..."
+                                                    className="w-full"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-2 min-w-[150px]">
+                                                <Combobox
+                                                    options={projects.map(p => ({ value: p.id, label: p.name, subLabel: p.key || undefined }))}
+                                                    value={newProject || ''}
+                                                    onChange={(val) => { setNewProject(val as string | number | null); setIsDirty(true); }}
+                                                    placeholder="Project..."
+                                                    searchPlaceholder="Search projects..."
+                                                    className="w-full"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <select
+                                                    name="status"
+                                                    form="create-task-form"
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
+                                                    required
+                                                >
+                                                    {Object.entries(statusMapping).map(([key, value]) => (
+                                                        <option key={key} value={key} className="bg-zinc-900">{value}</option>
+                                                    ))}
+                                                </select>
+                                            </td>
+                                            <td className="px-4 py-2 text-right text-xs font-medium">
+                                                <div className="flex items-center justify-end space-x-2">
+                                                    <button
+                                                        type="submit"
+                                                        form="create-task-form"
+                                                        disabled={isPending || savingCreate}
+                                                        className="inline-flex items-center p-1.5 border border-transparent rounded-lg text-white bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition-all"
+                                                    >
+                                                        {savingCreate ? (
+                                                            <div className="h-3.5 w-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+                                                        ) : (
+                                                            <FiCheck className="h-3.5 w-3.5" />
+                                                        )}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (isDirty) {
+                                                                if (confirm('You have unsaved changes. Are you sure you want to cancel?')) {
+                                                                    setIsAddingTask(false);
+                                                                    setIsDirty(false);
+                                                                    setNewAssignees([]);
+                                                                    setNewProject(null);
+                                                                }
+                                                            } else {
+                                                                setIsAddingTask(false);
+                                                            }
+                                                        }}
+                                                        disabled={savingCreate}
+                                                        className="inline-flex items-center p-1.5 border border-white/10 rounded-lg text-zinc-400 bg-white/5 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 disabled:opacity-50 transition-all"
+                                                    >
+                                                        <FiX className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
-                    )}
+                        {isLoadingMore && (
+                            <div className="p-4 flex items-center justify-center border-t border-white/5 bg-white/5">
+                                <div className="h-5 w-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                                <span className="ml-3 text-xs text-zinc-400 font-bold uppercase tracking-widest">Hydrating data stream...</span>
+                            </div>
+                        )}
+                        {!isAddingTask && (
+                            <div className="p-4 border-t border-white/5 bg-zinc-900/10">
+                                <button
+                                    onClick={() => {
+                                        if (isAddingTask && isDirty) {
+                                             if (confirm('You have unsaved changes. Are you sure you want to close the form?')) {
+                                                 setIsAddingTask(!isAddingTask);
+                                                 setIsDirty(false);
+                                             }
+                                        } else {
+                                            setIsAddingTask(!isAddingTask);
+                                        }
+                                    }}
+                                    className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm text-zinc-400 hover:text-white transition-all duration-200 group"
+                                >
+                                    <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
+                                        <FiPlus className="w-4 h-4" />
+                                    </div>
+                                    <span>{isAddingTask ? 'Cancel' : 'New Task'}</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         </div>
