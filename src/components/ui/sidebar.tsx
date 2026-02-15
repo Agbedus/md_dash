@@ -128,7 +128,7 @@ const Sidebar = ({ user }: SidebarProps) => {
 
   return (
     <div
-      className={`glass border-r border-white/5 transition-all duration-300 flex flex-col h-full ${widthClass}`}
+      className={`glass border-r border-white/5 transition-all duration-300 hidden md:flex flex-col h-full ${widthClass}`}
     >
       {/* ---------- Header ---------- */}
       <div className={headerClass}>

@@ -43,8 +43,8 @@ export default async function ProfilePage() {
   ]);
 
   return (
-    <div className="px-4 py-8 max-w-[1600px] mx-auto min-h-screen space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+    <div className="px-4 py-6 md:py-8 max-w-[1600px] mx-auto min-h-screen space-y-6 md:space-y-8 pb-20">
+      <div className="hidden lg:flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
         <div>
           <h1 className="text-4xl font-bold text-white tracking-tight">My Profile</h1>
           <p className="text-zinc-400 mt-1">Manage your account and view your performance metrics.</p>
@@ -56,12 +56,12 @@ export default async function ProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: User Info Card */}
-        <div className="lg:col-span-4 space-y-6 sticky top-8">
-            <div className="glass p-8 rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-xl flex flex-col items-center text-center">
+        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-8">
+            <div className="glass p-5 lg:p-8 rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-xl flex flex-col items-center text-center">
                 {/* Avatar Section */}
-                <div className="relative mb-6">
+                <div className="relative mb-4 lg:mb-6">
                     {user.image ? (
-                    <div className="relative w-40 h-40">
+                    <div className="relative w-32 h-32 lg:w-40 lg:h-40">
                         <Image 
                             src={user.image} 
                             alt={user.name || 'User'} 
@@ -70,19 +70,19 @@ export default async function ProfilePage() {
                         />
                     </div>
                     ) : (
-                    <div className="w-40 h-40 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-5xl font-bold shadow-2xl border-4 border-white/10">
+                    <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-4xl lg:text-5xl font-bold shadow-2xl border-4 border-white/10">
                         {(user.name || user.email || '?').charAt(0).toUpperCase()}
                     </div>
                     )}
                     <div className="absolute bottom-2 right-2 p-2 rounded-full bg-emerald-500 border-4 border-zinc-900 shadow-xl" />
                 </div>
 
-                <h2 className="text-3xl font-bold text-white mb-1">{user.name || 'User'}</h2>
-                <p className="text-zinc-400 font-medium mb-6 flex items-center gap-2">
+                <h2 className="text-2xl lg:text-3xl font-bold text-white mb-1">{user.name || 'User'}</h2>
+                <p className="text-zinc-400 text-sm font-medium mb-4 lg:mb-6 flex items-center gap-2">
                     <FiMail className="w-4 h-4" /> {user.email}
                 </p>
 
-                <div className="w-full space-y-4 pt-6 border-t border-white/5">
+                <div className="w-full space-y-3 lg:space-y-4 pt-4 lg:pt-6 border-t border-white/5">
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-zinc-500 flex items-center gap-2"><FiShield className="w-4 h-4" /> Roles</span>
                         <div className="flex gap-1">
@@ -103,7 +103,7 @@ export default async function ProfilePage() {
                     </div>
                 </div>
 
-                <button className="w-full mt-8 py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-95">
+                <button className="w-full mt-6 lg:mt-8 py-2.5 lg:py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-95 text-sm lg:text-base">
                     Edit Profile Details
                 </button>
             </div>
@@ -138,10 +138,10 @@ export default async function ProfilePage() {
         </div>
 
         {/* Right Column: Metrics & Content */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="lg:col-span-8 space-y-6 lg:space-y-8">
             {/* Personalized Statistics */}
-            <section className="space-y-4">
-                <h3 className="text-xl font-bold text-white px-2 flex items-center gap-2">
+            <section className="hidden lg:block space-y-4">
+                <h3 className="text-lg lg:text-xl font-bold text-white px-2 flex items-center gap-2">
                     <FiActivity className="text-emerald-400" /> Performance Overview
                 </h3>
                 <ProfileStats stats={{
@@ -154,7 +154,7 @@ export default async function ProfilePage() {
             </section>
 
             {/* Analytics & Charts */}
-            <section className="space-y-4">
+            <section className="hidden lg:block space-y-4">
                 <h3 className="text-xl font-bold text-white px-2 flex items-center gap-2">
                     <FiZap className="text-amber-400" /> Productivity Metrics
                 </h3>
@@ -168,12 +168,12 @@ export default async function ProfilePage() {
             {/* Activity Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* High Priority Tasks */}
-                <section className="space-y-4">
+                <section className="space-y-3 lg:space-y-4">
                 <div className="flex justify-between items-center px-2">
-                    <h3 className="text-lg font-bold text-white">Critical Focus</h3>
-                    <span className="text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] bg-rose-500/10 px-2 py-0.5 rounded">High Priority</span>
+                    <h3 className="text-base lg:text-lg font-bold text-white">Critical Focus</h3>
+                    <span className="text-[9px] lg:text-[10px] font-black text-rose-400 uppercase tracking-[0.2em] bg-rose-500/10 px-2 py-0.5 rounded">High Priority</span>
                 </div>
-                <div className="glass p-5 rounded-3xl border border-white/10 bg-zinc-900/50 space-y-3">
+                <div className="glass p-4 lg:p-5 rounded-3xl border border-white/10 bg-zinc-900/50 space-y-3">
                     {keyTasks.length > 0 ? (
                     keyTasks.map((task: any, i: number) => (
                         <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/[0.08] transition-all group cursor-pointer border-l-4 border-l-rose-500/50">
@@ -201,12 +201,12 @@ export default async function ProfilePage() {
                 </section>
 
                 {/* Recent Notes */}
-                <section className="space-y-4">
+                <section className="space-y-3 lg:space-y-4">
                 <div className="flex justify-between items-center px-2">
-                    <h3 className="text-lg font-bold text-white">Personal Knowledge</h3>
-                    <span className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] bg-blue-500/10 px-2 py-0.5 rounded">Captures</span>
+                    <h3 className="text-base lg:text-lg font-bold text-white">Knowledge</h3>
+                    <span className="text-[9px] lg:text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] bg-blue-500/10 px-2 py-0.5 rounded">Captures</span>
                 </div>
-                <div className="glass p-5 rounded-3xl border border-white/10 bg-zinc-900/50 space-y-3">
+                <div className="glass p-4 lg:p-5 rounded-3xl border border-white/10 bg-zinc-900/50 space-y-3">
                     {recentNotes.length > 0 ? (
                     recentNotes.map((note: any, i: number) => (
                         <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/[0.08] transition-all group cursor-pointer border-l-4 border-l-blue-500/50">

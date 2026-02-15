@@ -1,13 +1,28 @@
-import React from 'react';
+"use client";
 
-interface SkeletonProps {
-  className?: string;
-}
+import { motion } from "framer-motion";
 
-export function Skeleton({ className }: SkeletonProps) {
+interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export function Skeleton({ className, ...props }: SkeletonProps) {
   return (
     <div 
-      className={`bg-white/5 rounded-lg animate-pulse ${className}`}
-    />
+      className={`relative overflow-hidden bg-white/5 rounded-lg ${className}`}
+      {...props}
+    >
+      <motion.div
+        className="absolute inset-0"
+        initial={{ translateX: "-100%" }}
+        animate={{ translateX: "100%" }}
+        transition={{
+          repeat: Infinity,
+          duration: 1.5,
+          ease: "linear",
+        }}
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
+        }}
+      />
+    </div>
   );
 }

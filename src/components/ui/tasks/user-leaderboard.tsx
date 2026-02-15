@@ -50,23 +50,23 @@ export function UserLeaderboard({ tasks, users }: UserLeaderboardProps) {
         <FiTrendingUp className="text-[var(--pastel-indigo)]" />
         <h3 className="text-sm font-bold text-white uppercase tracking-widest">Top Performers</h3>
       </div>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-nowrap overflow-x-auto gap-3 pb-2 scrollbar-hide">
         {userPerformance.map((user, i) => (
           <div 
             key={user.id} 
-            className={`flex items-center gap-5 px-6 py-4 rounded-2xl border transition-all duration-300 hover:bg-white/5 group ${getAwardBg(i)}`}
+            className={`flex items-center gap-3 px-3 py-2 lg:px-6 lg:py-4 rounded-xl lg:rounded-2xl border transition-all duration-300 hover:bg-white/5 group flex-shrink-0 min-w-[140px] lg:min-w-0 ${getAwardBg(i)}`}
           >
             <div className="relative">
               {user.avatarUrl ? (
                 <Image 
                   src={user.avatarUrl} 
                   alt={user.fullName || user.email} 
-                  width={48} 
-                  height={48} 
-                  className="rounded-xl border-2 border-white/10 group-hover:border-white/20 transition-colors"
+                  width={32} 
+                  height={32} 
+                  className="rounded-lg lg:rounded-xl border-2 border-white/10 group-hover:border-white/20 transition-colors w-8 h-8 lg:w-12 lg:h-12"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/20">
+                <div className="w-8 h-8 lg:w-12 lg:h-12 rounded-lg lg:rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/20 text-xs lg:text-base">
                   {(user.fullName || user.email).charAt(0).toUpperCase()}
                 </div>
               )}
@@ -75,9 +75,9 @@ export function UserLeaderboard({ tasks, users }: UserLeaderboardProps) {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-white uppercase tracking-tight">{user.fullName || user.email.split('@')[0]}</p>
-              <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-widest mt-0.5">
-                <span className="text-white font-bold">{user.completedCount}</span> Tasks Done
+              <p className="text-[10px] lg:text-xs font-bold text-white uppercase tracking-tight truncate max-w-[80px] lg:max-w-none">{user.fullName || user.email.split('@')[0]}</p>
+              <p className="text-[9px] lg:text-[10px] text-zinc-500 font-medium uppercase tracking-widest mt-0.5 whitespace-nowrap">
+                <span className="text-white font-bold">{user.completedCount}</span> Tasks
               </p>
             </div>
           </div>

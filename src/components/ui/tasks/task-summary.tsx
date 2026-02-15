@@ -28,24 +28,24 @@ export function TaskSummarySection({ tasks }: TaskSummarySectionProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="flex overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-4 gap-3 lg:gap-6 mb-4 lg:mb-8">
       {stats.map((stat, i) => (
-        <div key={i} className="glass p-6 rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-300 flex items-center justify-between group">
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/10 flex-shrink-0`}>
-              <stat.icon className="text-xl" />
+        <div key={i} className="glass p-3 lg:p-6 rounded-xl lg:rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-300 flex flex-col justify-between group min-w-[120px] lg:min-w-0 flex-shrink-0">
+          <div className="flex items-center gap-2 lg:gap-4 mb-2 lg:mb-0">
+            <div className={`p-1.5 lg:p-3 rounded-lg lg:rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/10 flex-shrink-0`}>
+              <stat.icon className="text-sm lg:text-xl" />
             </div>
             <div>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{stat.label}</p>
+                <p className="text-[9px] lg:text-[10px] text-zinc-500 font-bold uppercase tracking-widest truncate">{stat.label}</p>
                 {stat.sub && (
-                    <p className="text-[9px] font-bold text-zinc-400 mt-0.5 uppercase tracking-tight">
+                    <p className="text-[8px] lg:text-[9px] font-bold text-zinc-400 mt-0.5 uppercase tracking-tight truncate">
                         {stat.sub}
                     </p>
                 )}
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-4xl font-black text-white leading-none tracking-tight">{stat.value}</p>
+          <div className="text-left lg:text-right">
+            <p className="text-xl lg:text-4xl font-black text-white leading-none tracking-tight">{stat.value}</p>
           </div>
         </div>
       ))}

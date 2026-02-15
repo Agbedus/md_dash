@@ -1,5 +1,7 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 import React, { useState } from "react";
 import { Task } from "@/types/task";
 import { FiCheck, FiX, FiEdit2, FiTrash2 } from "react-icons/fi";
@@ -119,8 +121,22 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
 
     const rowClasses = "border-b border-white/5";
 
+    const variants = {
+       initial: { opacity: 0, y: 10 },
+       animate: { opacity: 1, y: 0 },
+       exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
+       hover: { scale: 1.002, backgroundColor: "rgba(255, 255, 255, 0.03)" }
+    };
+
     return isEditing ? (
-      <tr className={rowClasses} ref={ref}>
+      <motion.tr 
+        layout
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className={rowClasses} 
+        ref={ref}
+      >
         <td className="px-4 py-2 text-xs font-medium text-white whitespace-nowrap">
           <form
             ref={formRef}
@@ -247,9 +263,18 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                 </button>
             </div>
           </td>
-        </tr>
+        </motion.tr>
     ) : (
-      <tr className={`${rowClasses} hover:bg-white/5 transition-colors group items-center`} ref={ref}>
+      <motion.tr 
+        layout
+        variants={variants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        whileHover="hover"
+        className={`${rowClasses} transition-colors group items-center`} 
+        ref={ref}
+      >
         <td className="px-6 py-4 text-xs font-medium text-white whitespace-nowrap flex items-center">
           <div className="relative flex items-center shrink-0">
             <input
@@ -264,13 +289,13 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
             {task.name}
           </span>
         </td>
-        <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap max-w-[300px] truncate">
+        <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap max-w-[300px] truncate hidden lg:table-cell">
           {task.description || <span className="text-zinc-600 italic">No description</span>}
         </td>
         <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
           {task.dueDate ? format(new Date(task.dueDate as string), "MMM dd, yyyy") : <span className="text-zinc-600">-</span>}
         </td>
-        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
+        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap hidden md:table-cell">
             {task.owner ? (
                 <div className="flex items-center gap-2">
                      {task.owner.avatarUrl ? (
@@ -284,7 +309,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                 </div>
             ) : <span className="text-xs text-zinc-600">-</span>}
         </td>
-        <td className="px-6 py-4 text-xs whitespace-nowrap">
+        <td className="px-6 py-4 text-xs whitespace-nowrap hidden sm:table-cell">
           <span
             className={`px-3 py-1 inline-flex text-[10px] font-bold rounded-lg border uppercase tracking-wider ${
               task.priority === 'high'
@@ -297,14 +322,14 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
             {task.priority}
           </span>
         </td>
-        <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
+        <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap hidden lg:table-cell">
             {displayAssignees.length > 0 ? (
                 <UserAvatarGroup users={displayAssignees} size="xs" limit={3} />
             ) : (
                 <span className="text-zinc-600 italic">Unassigned</span>
             )}
         </td>
-        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
+        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap hidden md:table-cell">
             {task.projectId ? (
                 <span className="text-[var(--pastel-indigo)] font-bold uppercase tracking-tight text-[10px] bg-[var(--pastel-indigo)]/5 px-2 py-0.5 rounded-md border border-[var(--pastel-indigo)]/10">
                     {projects.find(p => p.id === task.projectId)?.name}
@@ -370,7 +395,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
             </form>
           </div>
         </td>
-      </tr>
+      </motion.tr>
     );
 });
 

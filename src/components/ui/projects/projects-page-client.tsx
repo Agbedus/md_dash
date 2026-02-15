@@ -126,7 +126,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
   return (
     <div className="px-4 py-8 max-w-[1600px] mx-auto min-h-screen">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-10">
+      <div className="hidden lg:flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-10">
         <div>
           <h1 className="text-4xl font-black text-white mb-2 tracking-tight uppercase">Strategic Portfolio</h1>
           <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Global project coordination & intelligence hub.</p>
@@ -142,13 +142,24 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
         </div>
       </div>
 
+      <div className="md:hidden flex items-center justify-between mb-6">
+          <h1 className="text-xl font-bold text-white uppercase tracking-tight">Projects</h1>
+           <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 h-9 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-white transition-all"
+          >
+            <FiPlus className="w-3.5 h-3.5" />
+            <span>New</span>
+          </button>
+      </div>
+
       {/* Portfolio Intelligence Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="flex overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-12">
           <PortfolioStatCard 
             icon={FiActivity} 
             label="Active Maneuvers" 
             value={optimisticProjects.filter(p => p.status === 'in_progress').length.toString()} 
-            subValue={`${optimisticProjects.length} Total Projects`}
+            subValue={`${optimisticProjects.length} Total`}
             color="indigo"
           />
           <PortfolioStatCard 
@@ -166,19 +177,19 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
             icon={FiCheckSquare} 
             label="Mission Success" 
             value={optimisticProjects.filter(p => p.status === 'completed').length.toString()} 
-            subValue="Completed Assets"
+            subValue="Completed"
             color="amber"
           />
           <PortfolioStatCard 
             icon={FiTrendingUp} 
             label="Tactical Velocity" 
             value={`${(optimisticProjects.filter(p => p.status === 'completed').length / (optimisticProjects.length || 1) * 10).toFixed(1)}x`} 
-            subValue="Portfolio Output Index"
+            subValue="Output Index"
             color="rose"
           />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+      <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Status Distribution Intelligence */}
           <div className="lg:col-span-2 glass rounded-2xl p-6 border border-white/5 bg-zinc-900/10">
               <div className="flex items-center justify-between mb-6">
@@ -238,50 +249,51 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
       </div>
 
       {/* Standardized Toolbar */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10 overflow-x-auto pb-2 scrollbar-hide">
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-          <div className="relative flex-1 min-w-[280px] lg:w-96 hidden md:block group">
-            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--pastel-indigo)] transition-colors"/>
+      <div className="flex items-center justify-between gap-4 mb-6 lg:mb-10 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex items-center gap-2 lg:gap-4 w-full lg:w-auto">
+          <div className="relative flex-1 min-w-[140px] max-w-sm group">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5"/>
             <input
               type="text"
-              placeholder="Search projects..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:bg-white/10 focus:border-white/20 text-white placeholder:text-zinc-600 transition-all text-sm"
+              className="w-full h-9 lg:h-11 pl-8 pr-4 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:bg-white/10 focus:border-white/20 text-white placeholder:text-zinc-600 transition-all text-xs lg:text-sm"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <FiFilter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none z-10 w-3.5 h-3.5" />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-11 w-44 bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 focus:outline-none focus:bg-white/10 focus:border-white/20 text-zinc-400 cursor-pointer hover:bg-white/10 transition-all text-[11px] appearance-none font-bold uppercase tracking-wider"
-              >
-                <option value="all" className="bg-zinc-900">All Status</option>
-                <option value="planning" className="bg-zinc-900">Planning</option>
-                <option value="in_progress" className="bg-zinc-900">In Progress</option>
-                <option value="completed" className="bg-zinc-900">Completed</option>
-                <option value="on_hold" className="bg-zinc-900">On Hold</option>
-              </select>
-            </div>
+          
+          <div className="relative group flex-shrink-0">
+             <div className="h-9 lg:h-11 w-9 lg:w-44 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden">
+                <FiFilter className="text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5 lg:absolute lg:left-3.5 lg:top-1/2 lg:-translate-y-1/2 lg:z-10" />
+                <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="absolute inset-0 opacity-0 lg:opacity-100 lg:static lg:bg-transparent lg:border-none lg:pl-10 lg:pr-4 lg:w-full lg:h-full text-zinc-400 cursor-pointer lg:text-[11px] lg:font-bold lg:uppercase lg:tracking-wider appearance-none"
+                >
+                    <option value="all" className="bg-zinc-900">All Status</option>
+                    <option value="planning" className="bg-zinc-900">Planning</option>
+                    <option value="in_progress" className="bg-zinc-900">In Progress</option>
+                    <option value="completed" className="bg-zinc-900">Completed</option>
+                    <option value="on_hold" className="bg-zinc-900">On Hold</option>
+                </select>
+             </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10 h-11">
+        <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10 h-9 lg:h-11 flex-shrink-0 ml-auto">
           <button
             onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'list' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
             title="Table view"
           >
-            <FiList className="w-5 h-5"/>
+            <FiList className="w-4 h-4 lg:w-5 lg:h-5"/>
           </button>
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
             title="Grid view"
           >
-            <FiGrid className="w-5 h-5"/>
+            <FiGrid className="w-4 h-4 lg:w-5 lg:h-5"/>
           </button>
         </div>
       </div>
@@ -413,17 +425,17 @@ function PortfolioStatCard({ icon: Icon, color, label, value, subValue }: { icon
     };
 
     return (
-        <div className="glass rounded-2xl p-5 border border-white/5 bg-zinc-900/10 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500">
-            <div className="flex flex-col gap-4 relative z-10">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-500 relative group-hover:shadow-[0_0_15px_rgba(0,0,0,0.2)] ${colors[color]}`}>
-                    <div className="absolute inset-0 rounded-xl bg-current opacity-10 blur-sm group-hover:opacity-20 transition-opacity" />
-                    <Icon className="w-4 h-4 relative z-10" />
+        <div className="glass rounded-xl lg:rounded-2xl p-3 lg:p-5 border border-white/5 bg-zinc-900/10 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500 flex-shrink-0 min-w-[140px] lg:min-w-0">
+            <div className="flex flex-col gap-2 lg:gap-4 relative z-10">
+                <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl flex items-center justify-center border transition-all duration-500 relative group-hover:shadow-[0_0_15px_rgba(0,0,0,0.2)] ${colors[color]}`}>
+                    <div className="absolute inset-0 rounded-lg lg:rounded-xl bg-current opacity-10 blur-sm group-hover:opacity-20 transition-opacity" />
+                    <Icon className="w-3.5 h-3.5 lg:w-4 lg:h-4 relative z-10" />
                 </div>
                 <div>
-                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">{label}</p>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-xl font-black text-white uppercase tracking-tight">{value}</span>
-                        <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">{subValue}</span>
+                    <p className="text-[9px] lg:text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-0.5 lg:mb-1 truncate">{label}</p>
+                    <div className="flex flex-col lg:flex-row lg:items-baseline gap-0.5 lg:gap-2">
+                        <span className="text-lg lg:text-xl font-black text-white uppercase tracking-tight">{value}</span>
+                        <span className="text-[8px] lg:text-[9px] font-bold text-zinc-600 uppercase tracking-widest truncate">{subValue}</span>
                     </div>
                 </div>
             </div>

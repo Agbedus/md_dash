@@ -16,11 +16,11 @@ const ProjectProgressChart = ({ data }: { data: Array<{ name: string; progress: 
         <YAxis 
           dataKey="name" 
           type="category" 
-          width={100} 
+          width={80} 
           axisLine={false} 
           tickLine={false}
           stroke="#94a3b8"
-          fontSize={10}
+          fontSize={9}
         />
         <Tooltip
           cursor={{ fill: 'transparent' }}

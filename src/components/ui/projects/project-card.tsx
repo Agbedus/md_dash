@@ -66,24 +66,24 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
   };
 
   return (
-    <div className="group relative bg-zinc-900/30 hover:bg-zinc-900/50 border border-white/5 hover:border-white/10 rounded-2xl p-5 transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-1">
-      <div className="flex justify-between items-start mb-3">
+    <div className="group relative bg-zinc-900/30 hover:bg-zinc-900/50 border border-white/5 hover:border-white/10 rounded-xl lg:rounded-2xl p-4 lg:p-5 transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-1">
+      <div className="flex justify-between items-start mb-2 lg:mb-3">
         <div className="flex items-center gap-2">
-          <div className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${statusColors[project.status]}`}>
+          <div className={`px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-lg text-[10px] lg:text-xs font-medium border ${statusColors[project.status]}`}>
             {statusMapping[project.status]}
           </div>
           {project.key && (
-            <div className="px-2 py-1 rounded-lg text-xs font-mono text-zinc-500 bg-white/5 border border-white/5">
+            <div className="px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-lg text-[10px] lg:text-xs font-mono text-zinc-500 bg-white/5 border border-white/5">
               {project.key}
             </div>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 lg:gap-3">
           {(() => {
             const total = project.tasks?.length || 0;
             const completed = project.tasks?.filter(t => t.status === 'completed').length || 0;
             const percentage = total > 0 ? (completed / total) * 100 : 0;
-            return <CircularProgress percentage={percentage} size={36} />;
+            return <CircularProgress percentage={percentage} size={32} />;
           })()}
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
@@ -128,9 +128,9 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold text-white mb-2 line-clamp-1">{project.name}</h3>
+      <h3 className="text-base lg:text-lg font-semibold text-white mb-1 lg:mb-2 line-clamp-1">{project.name}</h3>
       
-      <p className="text-zinc-400 text-sm mb-3 line-clamp-2 min-h-[2.5rem]">
+      <p className="text-zinc-400 text-xs lg:text-sm mb-3 line-clamp-2 min-h-[2rem] lg:min-h-[2.5rem]">
         {project.description || "No description provided."}
       </p>
 
@@ -142,7 +142,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
             if (!project.tags || !Array.isArray(project.tags)) return null;
             
             return project.tags.slice(0, 3).map((tag: string, idx: number) => (
-              <span key={idx} className="px-2 py-0.5 rounded-md text-[10px] bg-white/5 text-zinc-400 border border-white/5">
+              <span key={idx} className="px-1.5 py-0.5 rounded-md text-[9px] lg:text-[10px] bg-white/5 text-zinc-400 border border-white/5">
                 {tag}
               </span>
             ));

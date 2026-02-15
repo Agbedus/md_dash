@@ -2,6 +2,8 @@
 
 import React, { useState, createContext, useContext } from 'react';
 import { NotificationProvider } from './notifications/notification-provider';
+import { MobileNav } from './mobile-nav';
+import { CommandMenu } from './command-menu';
 
 interface DashboardContextType {
   isMobileExpanded: boolean;
@@ -33,6 +35,7 @@ export default function DashboardLayout({
 }) {
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
 
   return (
     <DashboardContext.Provider value={{ 
@@ -55,10 +58,12 @@ export default function DashboardLayout({
             `}
           >
             {topnav}
-            <div className="flex-1 overflow-y-auto w-full">
+            <div className="flex-1 overflow-y-auto w-full pb-20 md:pb-0">
               {children}
             </div>
           </div>
+          <MobileNav setIsCommandOpen={setIsCommandOpen} />
+          <CommandMenu open={isCommandOpen} setOpen={setIsCommandOpen} />
         </div>
       </NotificationProvider>
     </DashboardContext.Provider>

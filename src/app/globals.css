@@ -24,17 +24,17 @@
   --foreground: #fafafa; /* Zinc 50 */
 
   /* Brighter Pastel Highlights (Level 300) */
-  --pastel-blue: #67e8f9;    /* Cyan 300 */
-  --pastel-purple: #c4b5fd;  /* Violet 300 */
-  --pastel-indigo: #a5b4fc;  /* Indigo 300 */
+  --pastel-blue: #67e8f9; /* Cyan 300 */
+  --pastel-purple: #c4b5fd; /* Violet 300 */
+  --pastel-indigo: #a5b4fc; /* Indigo 300 */
   --pastel-emerald: #6ee7b7; /* Emerald 300 */
-  --pastel-rose: #fda4af;     /* Rose 300 */
-  --pastel-amber: #fcd34d;    /* Amber 300 */
-  --pastel-orange: #fb923c;   /* Orange 400ish */
-  --pastel-pink: #f472b6;     /* Pink 400ish */
-  --pastel-teal: #2dd4bf;     /* Teal 400ish */
-  --pastel-lime: #a3e635;     /* Lime 400ish */
-  --pastel-cyan: #22d3ee;     /* Cyan 400ish */
+  --pastel-rose: #fda4af; /* Rose 300 */
+  --pastel-amber: #fcd34d; /* Amber 300 */
+  --pastel-orange: #fb923c; /* Orange 400ish */
+  --pastel-pink: #f472b6; /* Pink 400ish */
+  --pastel-teal: #2dd4bf; /* Teal 400ish */
+  --pastel-lime: #a3e635; /* Lime 400ish */
+  --pastel-cyan: #22d3ee; /* Cyan 400ish */
 
   /* Custom glassmorphism variables */
   --glass-border: rgba(255, 255, 255, 0.08);
@@ -124,10 +124,14 @@ body,
   .pulse-soft {
     animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 @keyframes pulse-soft {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }

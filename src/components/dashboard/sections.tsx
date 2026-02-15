@@ -73,24 +73,27 @@ export async function SummaryStatsSection() {
     ];
 
     return (
-        <div className="col-span-1 lg:col-span-12 grid grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+        <div className="col-span-1 lg:col-span-12 grid grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-6 mb-6 lg:mb-10">
             {statCards.map((stat, i) => (
-                <div key={i} className="glass p-6 rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-300 flex flex-col justify-between h-36 group">
+                <div 
+                    key={i} 
+                    className={`glass p-2.5 lg:p-6 rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-300 flex flex-col justify-between h-20 lg:h-36 group ${i === 0 ? 'col-span-2 lg:col-span-1' : 'col-span-1'}`}
+                >
                     <div className="flex justify-between items-start">
-                        <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/10`}>
-                            <stat.icon className="text-xl" />
+                        <div className={`p-1.5 lg:p-3 rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/10`}>
+                            <stat.icon className="text-sm lg:text-xl" />
                         </div>
                         {stat.users ? (
                             <AvatarGroup users={stat.users} total={stat.value} />
                         ) : (
-                            <div className={`text-[10px] font-bold ${stat.color} bg-white/5 px-2 py-0.5 rounded-full`}>
+                            <div className={`text-[9px] lg:text-[10px] font-bold ${stat.color} bg-white/5 px-1.5 lg:px-2 py-0.5 rounded-full`}>
                                 +{Math.floor(Math.random() * 20)}%
                             </div>
                         )}
                     </div>
-                    <div className="mt-4">
-                        <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">{stat.label}</p>
-                        <p className="text-3xl font-bold text-white mt-1 leading-none">{stat.value}</p>
+                    <div className="mt-1 lg:mt-4">
+                        <p className="text-[9px] lg:text-xs text-zinc-500 font-medium uppercase tracking-wider">{stat.label}</p>
+                        <p className="text-lg lg:text-3xl font-bold text-white leading-none">{stat.value}</p>
                     </div>
                 </div>
             ))}
@@ -101,9 +104,9 @@ export async function SummaryStatsSection() {
 export async function ProductivitySection({ range }: { range?: string }) {
   const data = await getProductivityData(range);
   return (
-    <div className="col-span-1 lg:col-span-6 h-96 glass p-6 rounded-2xl flex flex-col group overflow-hidden relative border border-white/5 hover:border-white/20 transition-all duration-300">
-      <div className="flex justify-between items-center mb-6 shrink-0">
-        <h2 className="text-xl font-bold text-white tracking-tight">
+    <div className="col-span-1 lg:col-span-6 h-80 lg:h-96 glass p-4 lg:p-6 rounded-2xl flex flex-col group overflow-hidden relative border border-white/5 hover:border-white/20 transition-all duration-300">
+      <div className="flex justify-between items-center mb-4 lg:mb-6 shrink-0">
+        <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
           Productivity Trend
         </h2>
         <RangeFilter />
@@ -122,8 +125,8 @@ export async function StatsOverviewSection() {
   ]);
 
   return (
-    <div className="col-span-1 lg:col-span-3 h-96 glass p-6 rounded-2xl flex flex-col overflow-hidden relative border border-white/5 hover:border-white/20 transition-all duration-300">
-      <h2 className="text-xl font-bold text-white mb-6 tracking-tight">
+    <div className="col-span-1 lg:col-span-3 h-80 lg:h-96 glass p-4 lg:p-6 rounded-2xl flex flex-col overflow-hidden relative border border-white/5 hover:border-white/20 transition-all duration-300">
+      <h2 className="text-lg lg:text-xl font-bold text-white mb-4 lg:mb-6 tracking-tight">
         Overview
       </h2>
       <div className="flex-1 min-h-0 space-y-6 overflow-y-auto pr-1 custom-scrollbar">
@@ -189,8 +192,8 @@ export async function StatsOverviewSection() {
 export async function WorkloadSection() {
   const data = await getWorkloadData();
   return (
-    <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col h-96">
-      <h2 className="text-xl font-bold text-white tracking-tight mb-4 shrink-0">
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col h-80 lg:h-96">
+      <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight mb-3 lg:mb-4 shrink-0">
         Workload
       </h2>
       <div className="flex-1 w-full min-h-0">
@@ -203,8 +206,8 @@ export async function WorkloadSection() {
 export async function TimeAllocationSection() {
   const data = await getTimeAllocationData();
   return (
-    <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-96">
-      <h2 className="text-xl font-bold text-white tracking-tight mb-4 shrink-0">
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+      <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight mb-3 lg:mb-4 shrink-0">
         Time Allocation
       </h2>
       <div className="flex-1 w-full min-h-0">
@@ -218,9 +221,9 @@ export async function KeyTasksSection() {
   const keyTasks = await getKeyTasks();
 
   return (
-    <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow h-96 flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-white tracking-tight">
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow h-80 lg:h-96 flex flex-col">
+      <div className="flex justify-between items-center mb-4 lg:mb-6">
+        <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
           Key Tasks
         </h2>
         <button className="text-zinc-400 hover:text-white transition-colors hover-scale">
@@ -279,9 +282,9 @@ export async function PrioritiesSection() {
   const priorities = await getAIPriorities();
 
   return (
-    <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col h-96">
-      <div className="flex justify-between items-center mb-6 shrink-0">
-        <h2 className="text-xl font-bold text-white tracking-tight">
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col h-80 lg:h-96">
+      <div className="flex justify-between items-center mb-4 lg:mb-6 shrink-0">
+        <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
           Today's Priorities
         </h2>
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
@@ -335,9 +338,9 @@ export async function RecentNotesSection() {
   const recentNotes = await getRecentNotes();
 
   return (
-    <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-6 hover-glow h-96 flex flex-col">
-      <div className="flex justify-between items-center mb-6 shrink-0">
-        <h2 className="text-xl font-bold text-white tracking-tight">
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-6 hover-glow h-80 lg:h-96 flex flex-col">
+      <div className="flex justify-between items-center mb-4 lg:mb-6 shrink-0">
+        <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
           Recent Notes
         </h2>
         <button className="p-2 rounded-lg bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all hover-scale">
@@ -388,8 +391,8 @@ export async function RecentNotesSection() {
 export async function ProjectProgressSection() {
   const data = await getProjectProgressData();
   return (
-    <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-5 hover-glow flex flex-col h-96">
-      <h2 className="text-xl font-bold text-white tracking-tight mb-4 shrink-0">
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-5 hover-glow flex flex-col h-80 lg:h-96">
+      <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight mb-3 lg:mb-4 shrink-0">
         Project Progress
       </h2>
       <div className="flex-1 w-full min-h-0">
@@ -402,11 +405,11 @@ export async function ProjectProgressSection() {
 // Static sections (no async data needed, but good to have as components)
 export function FocusModeSection() {
   return (
-    <div className="glass p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col justify-center items-center text-center relative overflow-hidden group h-96">
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col justify-center items-center text-center relative overflow-hidden group h-80 lg:h-96">
       <div className="p-4 rounded-full bg-white/5 mb-4 border border-white/10 relative z-10">
         <FiClock className="text-3xl text-[var(--pastel-indigo)]" />
       </div>
-      <h2 className="text-xl font-bold text-white mb-2 relative z-10">
+      <h2 className="text-lg lg:text-xl font-bold text-white mb-2 relative z-10">
         Focus Mode
       </h2>
       <p className="text-sm text-zinc-400 mb-6 relative z-10">

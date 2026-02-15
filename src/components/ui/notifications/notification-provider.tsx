@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
+import useSWR, { useSWRConfig } from 'swr';
+import { fetcher } from '@/lib/api';
 
 export interface Notification {
   id: string;
@@ -36,28 +38,18 @@ export const useNotifications = () => {
   return context;
 };
 
+
+
 export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: any }> = ({ children, user }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const { mutate } = useSWRConfig();
+  
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fast-dash-b1e5.onrender.com" || "http://127.0.0.1:8000";
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
-
-  const fetchUsers = useCallback(async () => {
-    if (!user?.accessToken) return;
-
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fast-dash-b1e5.onrender.com" || "http://127.0.0.1:8000";
-      const res = await fetch(`${baseUrl}/api/v1/users`, {
-        headers: {
-          'Authorization': `Bearer ${user.accessToken}`,
-        },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        // Map to consistent User type (same as src/app/users/actions.ts)
-        const mappedUsers = data.map((u: any) => ({
+  // SWR for Users
+  const { data: users = [] } = useSWR(
+    user?.accessToken ? [`${baseUrl}/api/v1/users`, user.accessToken] : null,
+    ([url, token]: [string, string]) => fetcher(url, token).then(data => data.map((u: any) => ({
           id: u.id,
           name: u.full_name,
           email: u.email,
@@ -65,39 +57,27 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
           fullName: u.full_name,
           roles: u.roles || [],
           avatarUrl: u.avatar_url,
-        }));
-        setUsers(mappedUsers);
-      }
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-    }
-  }, [user?.accessToken]);
+    })))
+  );
 
-  const fetchNotifications = useCallback(async () => {
-    if (!user?.accessToken) return;
+  // SWR for Notifications
+  const { data: notifications = [], mutate: mutateNotifications } = useSWR<Notification[]>(
+    user?.accessToken ? [`${baseUrl}/api/v1/notifications`, user.accessToken] : null,
+    ([url, token]: [string, string]) => fetcher(url, token)
+  );
 
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fast-dash-b1e5.onrender.com" || "http://127.0.0.1:8000";
-      const res = await fetch(`${baseUrl}/api/v1/notifications`, {
-        headers: {
-          'Authorization': `Bearer ${user.accessToken}`,
-        },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error);
-    }
-  }, [user?.accessToken]);
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   const markAsRead = async (id: string) => {
     if (!user?.accessToken) return;
 
+    // Optimistic update
+    mutateNotifications(
+        (currentNotifications = []) => currentNotifications.map(n => n.id === id ? { ...n, is_read: true } : n),
+        false
+    );
+
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fast-dash-b1e5.onrender.com" || "http://127.0.0.1:8000";
       const res = await fetch(`${baseUrl}/api/v1/notifications/${id}/read`, {
         method: 'PUT',
         headers: {
@@ -105,38 +85,43 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
         },
       });
 
-      if (res.ok) {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
-      }
+      if (!res.ok) throw new Error('Failed to mark read');
+      // Revalidate to be sure
+      mutateNotifications();
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
+      // Rollback
+      mutateNotifications();
     }
   };
 
   const markAllAsRead = async () => {
-    // Current API doesn't have mark-all-as-read, so we'll mark them individually for now
-    // or we can just update local state if we want to be optimistic
     const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
-    await Promise.all(unreadIds.map(markAsRead));
+    
+    // Optimistic update
+    mutateNotifications(
+        (currentNotifications = []) => currentNotifications.map(n => ({ ...n, is_read: true })),
+        false
+    );
+
+    await Promise.all(unreadIds.map(id => 
+        fetch(`${baseUrl}/api/v1/notifications/${id}/read`, {
+             method: 'PUT',
+             headers: { 'Authorization': `Bearer ${user.accessToken}` }
+        })
+    ));
+    mutateNotifications();
   };
 
   useEffect(() => {
     if (!user?.id || !user?.accessToken) {
       setIsConnected(false);
-      setNotifications([]);
       return;
     }
 
-    fetchUsers();
-    fetchNotifications();
-
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fast-dash-b1e5.onrender.com" || "http://127.0.0.1:8000";
     const wsBaseUrl = baseUrl.replace(/^http/, 'ws');
     const wsUrl = `${wsBaseUrl}/api/v1/notifications/ws/${user.id}`;
     
-    // In a real app, you might want to pass the token in query params if the WS endpoint requires it
-    // wsUrl += `?token=${user.accessToken}`;
-
     const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
@@ -147,7 +132,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
     socket.onmessage = (event) => {
       try {
         const notification: Notification = JSON.parse(event.data);
-        setNotifications(prev => [notification, ...prev]);
+        
+        // Update cache with new notification
+        mutateNotifications((currentNotifications = []) => [notification, ...currentNotifications], false);
         
         // Show a toast for the new notification
         toast(notification.title, {
@@ -165,7 +152,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
     };
 
     socket.onerror = (err) => {
-      // Only log errors if we're still supposed to be connected
       if (user?.id) {
         console.error('Notification WebSocket error:', err);
       }
@@ -175,7 +161,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
     return () => {
       socket.close();
     };
-  }, [user?.id, user?.accessToken, fetchNotifications]);
+  }, [user?.id, user?.accessToken, baseUrl, mutateNotifications]);
 
   return (
     <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, isConnected, user, users }}>
