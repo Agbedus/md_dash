@@ -19,7 +19,7 @@ type TaskRow = {
   description: string | null;
   dueDate: string | null;
   priority: "low" | "medium" | "high";
-  status: "task" | "in_progress" | "completed";
+  status: "TODO" | "IN_PROGRESS" | "QA" | "REVIEW" | "DONE";
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -104,7 +104,7 @@ export default function Calendar({ initialDate, initialView = "month", events = 
           // place at 09:00 local for visibility
           const start = new Date(due.getFullYear(), due.getMonth(), due.getDate(), 9, 0, 0, 0);
           const statusMap: UICalendarEvent["taskStatus"] =
-            t.status === "in_progress" ? "in_progress" : t.status === "completed" ? "completed" : "task";
+            t.status === "IN_PROGRESS" ? "in_progress" : t.status === "DONE" ? "completed" : "task";
           const color =
             statusMap === "completed" ? "bg-emerald-400" : statusMap === "in_progress" ? "bg-amber-400" : "bg-sky-400";
           return {

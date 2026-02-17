@@ -99,7 +99,7 @@ export default function TaskTable({ tasks, updateTask, deleteTask }: TaskTablePr
                                         ) : <span className="text-xs text-slate-500">-</span>}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${task.status === 'completed' ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300'}`}>
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${task.status === 'DONE' ? 'bg-green-900 text-green-300' : 'bg-yellow-900 text-yellow-300'}`}>
                                             {task.status}
                                         </span>
                                     </td>

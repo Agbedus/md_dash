@@ -24,6 +24,9 @@ export function createOptimisticTask(formData: FormData, users: User[]): Task {
             const idsJson = formData.get('assigneeIds') as string;
             try { return idsJson ? JSON.parse(idsJson) : []; } catch { return []; }
         })(),
+        qa_required: false,
+        review_required: false,
+        depends_on_id: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     };

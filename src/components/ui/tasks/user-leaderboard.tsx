@@ -15,7 +15,7 @@ export function UserLeaderboard({ tasks, users }: UserLeaderboardProps) {
   // Calculate completed tasks per user
   const userPerformance = users.map(user => {
     const completedCount = tasks.filter(task => 
-      (task.status === 'completed') && 
+      (task.status === 'DONE') &&
       (task.assigneeIds?.includes(user.id) || task.assignees?.some(a => a.user.id === user.id))
     ).length;
     

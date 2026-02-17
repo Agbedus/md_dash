@@ -81,7 +81,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
         <div className="flex items-center gap-2 lg:gap-3">
           {(() => {
             const total = project.tasks?.length || 0;
-            const completed = project.tasks?.filter(t => t.status === 'completed').length || 0;
+            const completed = project.tasks?.filter(t => t.status === 'DONE').length || 0;
             const percentage = total > 0 ? (completed / total) * 100 : 0;
             return <CircularProgress percentage={percentage} size={32} />;
           })()}

@@ -42,7 +42,7 @@ export default function ProjectDashboardClient({
     const client = clients.find(c => c.id === project.clientId);
     const owner = users.find(u => u.id === project.ownerId);
 
-    const completedTasks = tasks.filter(t => t.status === 'completed').length;
+    const completedTasks = tasks.filter(t => t.status === 'DONE').length;
     const taskProgress = tasks.length > 0 ? (completedTasks / tasks.length) * 100 : 0;
     
     const budgetProgress = project.budget && project.budget > 0 
@@ -222,9 +222,9 @@ export default function ProjectDashboardClient({
                                                                     </td>
                                                                     <td className="px-6 py-3">
                                                                         <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border ${
-                                                                            task.status === 'completed' 
+                                                                            task.status === 'DONE' 
                                                                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                                                                                : task.status === 'in_progress'
+                                                                                : task.status === 'IN_PROGRESS'
                                                                                 ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
                                                                                 : 'bg-zinc-800 text-zinc-500 border-white/5'
                                                                         }`}>
@@ -247,7 +247,7 @@ export default function ProjectDashboardClient({
                                                     Activity Intel
                                                 </h3>
                                                 <div className="space-y-4">
-                                                    {tasks.filter(t => t.status === 'completed').slice(0, 3).map(t => (
+                                                    {tasks.filter(t => t.status === 'DONE').slice(0, 3).map(t => (
                                                         <ActivityItem key={t.id} user={users[0]} action="completed task" target={t.name} time="2h ago" />
                                                     ))}
                                                     <ActivityItem user={users[1] || users[0]} action="posted briefing" target="Alpha Protocol Update" time="4h ago" />

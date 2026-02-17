@@ -10,10 +10,10 @@ export default function TaskWidget({ task }: TaskWidgetProps) {
   let statusColor = "text-zinc-400";
   let statusBg = "bg-zinc-400/10";
   
-  if (task.status === "in_progress") {
+  if (task.status === "IN_PROGRESS") {
     statusColor = "text-blue-400";
     statusBg = "bg-blue-400/10";
-  } else if (task.status === "completed") {
+  } else if (task.status === "DONE") {
     statusColor = "text-emerald-400";
     statusBg = "bg-emerald-400/10";
   } else {

@@ -52,8 +52,10 @@ function Column({ col, items, users, projects, columns, onMove, onDelete, highli
       <div className="flex items-center justify-between mb-6 px-1">
         <div className="flex items-center gap-3">
           <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${
-            col === 'completed' ? 'bg-[var(--pastel-emerald)] shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 
-            col === 'in_progress' ? 'bg-[var(--pastel-blue)] shadow-[0_0_10px_rgba(59,130,246,0.3)]' : 
+            col === 'DONE' ? 'bg-[var(--pastel-emerald)] shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 
+            col === 'IN_PROGRESS' ? 'bg-[var(--pastel-blue)] shadow-[0_0_10px_rgba(59,130,246,0.3)]' : 
+            col === 'QA' ? 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.3)]' :
+            col === 'REVIEW' ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]' :
             'bg-zinc-500'
           }`} />
           <h3 className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">
@@ -196,21 +198,24 @@ export default function KanbanBoard({ tasks = [], users, projects, updateTask, d
 
   return (
     <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {columns.map((col) => (
-          <Column
-            key={col}
-            col={col}
-            items={grouped[col] ?? []}
-            users={users}
-            projects={projects}
-            columns={columns}
-            onMove={moveTo}
-            onDelete={handleDelete}
-            highlightedIds={highlightedIds}
-            flash={flashCol === col}
-          />
-        ))}
+      <div className="overflow-x-auto pb-4">
+        <div className="flex gap-4 min-w-max">
+          {columns.map((col) => (
+            <div key={col} className="w-[400px] flex-shrink-0">
+              <Column
+                col={col}
+                items={grouped[col] ?? []}
+                users={users}
+                projects={projects}
+                columns={columns}
+                onMove={moveTo}
+                onDelete={handleDelete}
+                highlightedIds={highlightedIds}
+                flash={flashCol === col}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </DndContext>
   );

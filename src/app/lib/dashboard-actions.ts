@@ -27,7 +27,7 @@ export async function getSummaryStats() {
     const startOfCurrentWeek = startOfWeek(now);
 
     const upcomingEvents = events.filter(e => new Date(e.start) >= now);
-    const completedTasks = tasks.filter(t => t.status === 'completed');
+    const completedTasks = tasks.filter(t => t.status === 'DONE');
     const recentNotes = notes.filter(n => n.updated_at && new Date(n.updated_at) >= startOfCurrentWeek);
 
     return {
@@ -45,7 +45,7 @@ export async function getSummaryStats() {
 
 export const getProductivityData = cache(async function(range: string = '7d') {
   // Fetch completed tasks.
-  const tasks = await getTasks(undefined, undefined, 'completed', undefined, 1000);
+  const tasks = await getTasks(undefined, undefined, 'DONE', undefined, 1000);
   
   const now = new Date();
   const oneDay = 24 * 60 * 60 * 1000;
@@ -127,14 +127,14 @@ export async function getTasksOverviewData() {
     const endOfLastWeek = endOfWeek(subWeeks(now, 1));
 
     const counts = {
-      todo: tasks.filter(t => t.status === 'task').length,
-      inProgress: tasks.filter(t => t.status === 'in_progress').length,
-      completed: tasks.filter(t => t.status === 'completed').length
+      todo: tasks.filter(t => t.status === 'TODO').length,
+      inProgress: tasks.filter(t => t.status === 'IN_PROGRESS').length,
+      completed: tasks.filter(t => t.status === 'DONE').length
     };
 
     const previousCounts = {
-      todo: tasks.filter(t => t.status === 'task' && t.createdAt && new Date(t.createdAt) < startOfCurrentWeek).length,
-      inProgress: tasks.filter(t => t.status === 'in_progress' && t.updatedAt && new Date(t.updatedAt) < startOfCurrentWeek).length,
+      todo: tasks.filter(t => t.status === 'TODO' && t.createdAt && new Date(t.createdAt) < startOfCurrentWeek).length,
+      inProgress: tasks.filter(t => t.status === 'IN_PROGRESS' && t.updatedAt && new Date(t.updatedAt) < startOfCurrentWeek).length,
       completed: tasks.filter(t => {
           if (!t.updatedAt) return false;
           const updatedDate = new Date(t.updatedAt);
@@ -205,10 +205,10 @@ export async function getTimeAllocationData() {
 
 export async function getKeyTasks() {
     // Only show high priority tasks that are in progress (never completed)
-    const allTasks = await getTasks(undefined, 'high', 'in_progress', undefined, 20);
+    const allTasks = await getTasks(undefined, 'high', 'IN_PROGRESS', undefined, 20);
     
     // Explicitly filter for in_progress only (in case API doesn't filter correctly)
-    const tasks = allTasks.filter(t => t.status === 'in_progress');
+    const tasks = allTasks.filter(t => t.status === 'IN_PROGRESS');
     
     const sorted = tasks.sort((a, b) => {
         if (!a.dueDate) return 1;
@@ -285,7 +285,7 @@ export async function getProjectProgressData() {
     return activeProjects.map(p => {
         const projectTasks = tasks.filter(t => t.projectId === p.id);
         const total = projectTasks.length;
-        const completed = projectTasks.filter(t => t.status === 'completed').length;
+        const completed = projectTasks.filter(t => t.status === 'DONE').length;
         const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
         
         return {
@@ -314,7 +314,7 @@ export async function getAggregatedDashboardData() {
         getTasksOverviewData(),
         getWorkloadData(),
         getTimeAllocationData(),
-        getTasks(undefined, 'high', 'in_progress', undefined, 20), // Fetch more key tasks for context
+        getTasks(undefined, 'high', 'IN_PROGRESS', undefined, 20), // Fetch more key tasks for context
         getRecentDecisions(),
         getNotes(10), // Fetch more notes
         getEvents(),
@@ -447,7 +447,7 @@ export async function getActivityData() {
   // Process tasks
   tasks.forEach(t => {
     addActivity(t.createdAt);
-    if (t.status === 'completed') {
+    if (t.status === 'DONE') {
       addActivity(t.updatedAt);
     }
   });

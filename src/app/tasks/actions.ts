@@ -15,6 +15,9 @@ interface ApiTask {
     status: string;
     priority: string;
     due_date: string | null;
+    qa_required: boolean;
+    review_required: boolean;
+    depends_on_id: number | null;
     created_at: string;
     updated_at: string;
     project_id: number | null;
@@ -32,7 +35,9 @@ interface ApiTask {
         task_id: number;
         user_id: string | number;
     }>;
-    user_id?: string; 
+    user_id?: string;
+    time_logs?: any[];
+    total_hours?: number;
 }
 
 export async function getTasks(query?: string, priority?: string, status?: string, projectId?: number, limit?: number, skip?: number): Promise<Task[]> {
@@ -84,6 +89,9 @@ export async function getTasks(query?: string, priority?: string, status?: strin
                 status: t.status as Task['status'],
                 priority: t.priority as Task['priority'],
                 dueDate: t.due_date,
+                qa_required: t.qa_required,
+                review_required: t.review_required,
+                depends_on_id: t.depends_on_id,
                 createdAt: t.created_at,
                 updatedAt: t.updated_at,
                 projectId: t.project_id,
@@ -95,7 +103,9 @@ export async function getTasks(query?: string, priority?: string, status?: strin
                     return [];
                 })(),
                 userId: t.user_id,
-                owner: owner ? owner : undefined
+                owner: owner ? owner : undefined,
+                timeLogs: t.time_logs,
+                totalHours: t.total_hours
             };
         });
 
@@ -116,9 +126,12 @@ export async function createTask(formData: FormData) {
     const rawData: Record<string, unknown> = {
         name: formData.get('name'),
         description: formData.get('description'),
-        status: formData.get('status'),
-        priority: formData.get('priority'),
+        status: formData.get('status') || 'TODO',
+        priority: formData.get('priority') || 'medium',
         due_date: formData.get('dueDate'),
+        qa_required: formData.get('qa_required') === 'true',
+        review_required: formData.get('review_required') === 'true',
+        depends_on_id: formData.get('depends_on_id') ? Number(formData.get('depends_on_id')) : null,
         project_id: formData.get('projectId') ? Number(formData.get('projectId')) : null,
         user_id: session.user?.id,
     };
@@ -175,11 +188,15 @@ export async function updateTask(formData: FormData) {
 
     // Build payload dynamically based on what's in formData
     const rawData: Record<string, unknown> = {};
-    const name = formData.get('name'); if (name) rawData.name = name;
+    const name = formData.get('name'); if (name !== null) rawData.name = name;
     const description = formData.get('description'); if (description !== null) rawData.description = description;
-    const status = formData.get('status'); if (status) rawData.status = status;
-    const priority = formData.get('priority'); if (priority) rawData.priority = priority;
-    const dueDate = formData.get('dueDate'); if (dueDate) rawData.due_date = dueDate;
+    const status = formData.get('status'); if (status !== null) rawData.status = status;
+    const priority = formData.get('priority'); if (priority !== null) rawData.priority = priority;
+    const dueDate = formData.get('dueDate'); if (dueDate !== null) rawData.due_date = dueDate;
+    const qa_required = formData.get('qa_required'); if (qa_required !== null) rawData.qa_required = qa_required === 'true';
+    const review_required = formData.get('review_required'); if (review_required !== null) rawData.review_required = review_required === 'true';
+    const depends_on_id = formData.get('depends_on_id'); if (depends_on_id !== null) rawData.depends_on_id = depends_on_id ? Number(depends_on_id) : null;
+    
     const projectId = formData.get('projectId'); 
     if (projectId !== null && projectId !== "") {
         rawData.project_id = Number(projectId);
@@ -290,5 +307,115 @@ export async function updateTaskStatus(taskId: number, status: string) {
     } catch (error) {
         console.error("Error updating task status:", error);
         return { success: false, error: "Failed to update task status" };
+    }
+}
+
+export async function startTaskTimer(taskId: number) {
+    const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) return { error: "Unauthorized" };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/${taskId}/timer/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // @ts-expect-error accessToken is not in default session type
+                'Authorization': `Bearer ${session.user.accessToken}`
+            }
+        });
+
+        if (!response.ok) return { error: await response.text() };
+        
+        revalidatePath('/tasks');
+        return { success: true, data: await response.json() };
+    } catch (error) {
+        return { error: "Timer start failed" };
+    }
+}
+
+export async function pauseTaskTimer(taskId: number) {
+    const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) return { error: "Unauthorized" };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/${taskId}/timer/pause`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // @ts-expect-error accessToken is not in default session type
+                'Authorization': `Bearer ${session.user.accessToken}`
+            }
+        });
+
+        if (!response.ok) return { error: await response.text() };
+        
+        revalidatePath('/tasks');
+        return { success: true, data: await response.json() };
+    } catch (error) {
+        return { error: "Timer pause failed" };
+    }
+}
+
+export async function stopTaskTimer(taskId: number) {
+    const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) return { error: "Unauthorized" };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tasks/${taskId}/timer/stop`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // @ts-expect-error accessToken is not in default session type
+                'Authorization': `Bearer ${session.user.accessToken}`
+            }
+        });
+
+        if (!response.ok) return { error: await response.text() };
+        
+        revalidatePath('/tasks');
+        return { success: true, data: await response.json() };
+    } catch (error) {
+        return { error: "Timer stop failed" };
+    }
+}
+export async function batchUpdateTaskStatus(taskIds: number[], status: string) {
+    const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+        const results = await Promise.all(
+            taskIds.map(id =>
+                fetch(`${API_BASE_URL}/tasks/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // @ts-expect-error accessToken is not in default session type
+                        'Authorization': `Bearer ${session.user.accessToken}`
+                    },
+                    body: JSON.stringify({ status })
+                })
+            )
+        );
+
+        const allOk = results.every(res => res.ok);
+        
+        revalidatePath('/tasks');
+        revalidateTag('tasks', 'max');
+        revalidateTag('projects', 'max');
+
+        if (allOk) {
+            return { success: true };
+        } else {
+            return { success: false, error: "Some tasks failed to update" };
+        }
+    } catch (error) {
+        console.error("Error in batch update:", error);
+        return { success: false, error: "Batch update failed" };
     }
 }

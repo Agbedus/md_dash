@@ -37,7 +37,7 @@ export function ProjectDetails({ project, users, clients, notes, projects, onClo
     const spent = project.spent || 0;
     const budgetProgress = totalBudget > 0 ? (spent / totalBudget) * 100 : 0;
 
-    const completedTasks = projectTasks.filter(t => t.status === 'completed').length;
+    const completedTasks = projectTasks.filter(t => t.status === 'DONE').length;
     const taskProgress = projectTasks.length > 0 ? (completedTasks / projectTasks.length) * 100 : 0;
 
     return (

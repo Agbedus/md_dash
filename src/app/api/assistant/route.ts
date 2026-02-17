@@ -320,7 +320,7 @@ async function executeTool(name: string, args: any) {
       ]);
       return {
         totalTasks: tasks.length,
-        completedTasks: tasks.filter(t => t.status === 'completed').length,
+        completedTasks: tasks.filter(t => t.status === 'DONE').length,
         totalNotes: notes.length,
         totalProjects: projects.length
       };
@@ -380,9 +380,9 @@ async function executeTool(name: string, args: any) {
         getProjects()
       ]);
       
-      const completedTasks = tasks.filter(t => t.status === 'completed').length;
-      const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
-      const pendingTasks = tasks.filter(t => t.status === 'task').length;
+      const completedTasks = tasks.filter(t => t.status === 'DONE').length;
+      const inProgressTasks = tasks.filter(t => t.status === 'IN_PROGRESS').length;
+      const pendingTasks = tasks.filter(t => t.status === 'TODO').length;
       
       return {
         widget: "stats",

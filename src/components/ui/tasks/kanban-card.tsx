@@ -37,7 +37,7 @@ export default function KanbanCard({ task, users, projects, columns, onMove, onD
 
   const getStatusStyles = (status: Task["status"]) => {
     switch(status) {
-      case 'completed': 
+      case 'DONE': 
         return {
           stripe: 'bg-[var(--pastel-emerald)]',
           tint: 'bg-[var(--pastel-emerald)]/[0.03]',
@@ -45,13 +45,29 @@ export default function KanbanCard({ task, users, projects, columns, onMove, onD
           ring: 'group-hover:ring-[var(--pastel-emerald)]/20',
           gradient: 'from-[var(--pastel-emerald)]/10 to-transparent'
         };
-      case 'in_progress': 
+      case 'IN_PROGRESS': 
         return {
           stripe: 'bg-[var(--pastel-blue)]',
           tint: 'bg-[var(--pastel-blue)]/[0.03]',
           glow: 'group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]',
           ring: 'group-hover:ring-[var(--pastel-blue)]/20',
           gradient: 'from-[var(--pastel-blue)]/10 to-transparent'
+        };
+      case 'QA':
+        return {
+          stripe: 'bg-purple-500',
+          tint: 'bg-purple-500/[0.03]',
+          glow: 'group-hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]',
+          ring: 'group-hover:ring-purple-500/20',
+          gradient: 'from-purple-500/10 to-transparent'
+        };
+      case 'REVIEW':
+        return {
+          stripe: 'bg-blue-500',
+          tint: 'bg-blue-500/[0.03]',
+          glow: 'group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]',
+          ring: 'group-hover:ring-blue-500/20',
+          gradient: 'from-blue-500/10 to-transparent'
         };
       default: 
         return {
@@ -86,7 +102,7 @@ export default function KanbanCard({ task, users, projects, columns, onMove, onD
       <div className="p-5 pl-6">
         <div className="flex items-start justify-between gap-3 mb-2.5">
           <div className="flex-1 min-w-0">
-            <h4 className={`text-lg font-bold tracking-tight leading-tight text-white/90 group-hover:text-white transition-colors ${task.status === 'completed' ? 'line-through opacity-40' : ''}`}>
+            <h4 className={`text-lg font-bold tracking-tight leading-tight text-white/90 group-hover:text-white transition-colors ${task.status === 'DONE' ? 'line-through opacity-40' : ''}`}>
               {task.name}
             </h4>
           </div>
@@ -122,6 +138,18 @@ export default function KanbanCard({ task, users, projects, columns, onMove, onD
           >
             {task.priority}
           </span>
+          {task.qa_required && (
+            <span className="px-2.5 py-1 inline-flex text-[9px] font-bold rounded-lg border uppercase tracking-wider bg-purple-500/10 text-purple-400 border-purple-500/20">QA</span>
+          )}
+          {task.review_required && (
+            <span className="px-2.5 py-1 inline-flex text-[9px] font-bold rounded-lg border uppercase tracking-wider bg-blue-500/10 text-blue-400 border-blue-500/20">REVIEW</span>
+          )}
+          {task.depends_on_id && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-400 text-[9px] font-black uppercase tracking-widest">
+              <FiClock className="w-3 h-3" />
+              <span>Blocker: #{task.depends_on_id}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between pt-4 border-t border-white/5">
@@ -146,38 +174,74 @@ export default function KanbanCard({ task, users, projects, columns, onMove, onD
             )}
             
             <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 ml-1">
-              {task.status === 'task' && (
+              {task.status === 'TODO' && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); void onMove(task, 'in_progress'); }}
+                  onClick={(e) => { e.stopPropagation(); void onMove(task, 'IN_PROGRESS'); }}
                   className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                   title="Move to In Progress"
                 >
                   <FiChevronRight className="h-4 w-4" />
                 </button>
               )}
-              {task.status === 'in_progress' && (
+              {task.status === 'IN_PROGRESS' && (
                 <>
                   <button
-                    onClick={(e) => { e.stopPropagation(); void onMove(task, 'task'); }}
+                    onClick={(e) => { e.stopPropagation(); void onMove(task, 'TODO'); }}
                     className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                     title="Move to To Do"
                   >
                     <FiChevronLeft className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); void onMove(task, 'completed'); }}
+                    onClick={(e) => { e.stopPropagation(); void onMove(task, task.qa_required ? 'QA' : task.review_required ? 'REVIEW' : 'DONE'); }}
                     className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
-                    title="Move to Completed"
+                    title={`Move to ${task.qa_required ? 'QA' : task.review_required ? 'Review' : 'Done'}`}
                   >
                     <FiChevronRight className="h-4 w-4" />
                   </button>
                 </>
               )}
-              {task.status === 'completed' && (
+              {task.status === 'QA' && (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); void onMove(task, 'IN_PROGRESS'); }}
+                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    title="Move to In Progress"
+                  >
+                    <FiChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); void onMove(task, task.review_required ? 'REVIEW' : 'DONE'); }}
+                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    title={`Move to ${task.review_required ? 'Review' : 'Done'}`}
+                  >
+                    <FiChevronRight className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+              {task.status === 'REVIEW' && (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); void onMove(task, task.qa_required ? 'QA' : 'IN_PROGRESS'); }}
+                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    title={`Move to ${task.qa_required ? 'QA' : 'In Progress'}`}
+                  >
+                    <FiChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); void onMove(task, 'DONE'); }}
+                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    title="Move to Done"
+                  >
+                    <FiChevronRight className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+              {task.status === 'DONE' && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); void onMove(task, 'in_progress'); }}
+                  onClick={(e) => { e.stopPropagation(); void onMove(task, task.review_required ? 'REVIEW' : task.qa_required ? 'QA' : 'IN_PROGRESS'); }}
                   className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
-                  title="Move to In Progress"
+                  title={`Move to ${task.review_required ? 'Review' : task.qa_required ? 'QA' : 'In Progress'}`}
                 >
                   <FiChevronLeft className="h-4 w-4" />
                 </button>

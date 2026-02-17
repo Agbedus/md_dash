@@ -109,7 +109,7 @@ export default function UserAvatarGroup({ users, limit = 3, size = 'md' }: UserA
             )}
 
             {remaining > 0 && (
-                <div className={`relative inline-block ${sizeClasses[size]} rounded-full ring-2 ring-zinc-900 bg-zinc-800 flex items-center justify-center font-medium text-zinc-400`}>
+                <div className={`relative ${sizeClasses[size]} rounded-full ring-2 ring-zinc-900 bg-zinc-800 flex items-center justify-center font-medium text-zinc-400 leading-none`}>
                     +{remaining}
                 </div>
             )}

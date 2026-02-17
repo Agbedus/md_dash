@@ -160,7 +160,7 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
 
   const calculateCompletion = (project: Project) => {
     if (!project.tasks || project.tasks.length === 0) return 0;
-    const completed = project.tasks.filter(t => t.status === 'completed').length;
+    const completed = project.tasks.filter(t => t.status === 'DONE').length;
     return (completed / project.tasks.length) * 100;
   };
 

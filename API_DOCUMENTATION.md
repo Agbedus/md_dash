@@ -510,7 +510,7 @@ Tasks support multi-user assignment through the `assignees` field.
 - **GET** `/api/v1/tasks`
 - **Auth Required:** Yes
 - **Query Params:** `skip`, `limit`, `project_id?`
-- **Returns:** Array of `TaskReadWithAssignees` objects
+- **Returns:** Array of `TaskReadWithTimeLogs` objects
 - **Permissions:** Admins see all. Users see tasks they created, are assigned to, or belong to their projects.
 
 **Example Response:**
@@ -541,8 +541,13 @@ Tasks support multi-user assignment through the `assignees` field.
 **Field Reference:**
 
 - `priority`: `"low"`, `"medium"`, `"high"`
-- `status`: Customizable per workflow (e.g., `"task"`, `"in_progress"`, `"completed"`, `"waiting"`)
+- `status`: `"TODO"`, `"IN_PROGRESS"`, `"QA"`, `"REVIEW"`, `"DONE"`
+- `qa_required`: Boolean (default: `false`)
+- `review_required`: Boolean (default: `false`)
+- `depends_on_id`: ID of the task this task depends on
 - `task_assignees`: Array of objects containing `task_id` and `user_id`
+- `time_logs`: Array of `TaskTimeLog` objects
+- `total_hours`: Calculated total hours spent on task
 - `user_id`: UUID of the task creator
 
 #### Get Task
@@ -557,8 +562,11 @@ Tasks support multi-user assignment through the `assignees` field.
     "description": "Create high-fidelity mockup",
     "due_date": "2025-01-30",
     "priority": "high",
-    "status": "in_progress",
+    "status": "IN_PROGRESS",
     "project_id": 1,
+    "qa_required": false,
+    "review_required": false,
+    "depends_on_id": null,
     "created_at": "2025-12-22T12:00:00.000Z",
     "updated_at": "2025-12-22T13:00:00.000Z",
     "task_assignees": [
@@ -567,6 +575,8 @@ Tasks support multi-user assignment through the `assignees` field.
         "user_id": "user-uuid-1"
       }
     ],
+    "time_logs": [],
+    "total_hours": 0.0,
     "user_id": "creator-uuid"
   }
   ```
@@ -582,12 +592,12 @@ Tasks support multi-user assignment through the `assignees` field.
     "description": "Create JWT authentication endpoints",
     "due_date": "2025-02-01",
     "priority": "high",
-    "status": "task",
+    "status": "TODO",
     "project_id": 1,
     "assignees": ["user-uuid-1", "user-uuid-2"]
   }
   ```
-- **Returns:** `TaskReadWithAssignees` object
+- **Returns:** `TaskReadWithTimeLogs` object
 - **Note:** `user_id` is automatically set to the current user.
 
 #### Update Task
@@ -597,11 +607,11 @@ Tasks support multi-user assignment through the `assignees` field.
 - **Expected Payload:**
   ```json
   {
-    "status": "in_progress",
+    "status": "IN_PROGRESS",
     "assignees": ["user-uuid-3"]
   }
   ```
-- **Returns:** Updated `TaskReadWithAssignees` object
+- **Returns:** Updated `TaskReadWithTimeLogs` object
 
 **Note:** Setting `assignees` to `[]` removes all assignees. Omitting `assignees` leaves them unchanged.
 
@@ -610,6 +620,27 @@ Tasks support multi-user assignment through the `assignees` field.
 - **DELETE** `/api/v1/tasks/{task_id}`
 - **Auth Required:** Yes
 - **Returns:** `{ status: "success", detail: "Task deleted" }`
+
+#### Start Timer
+
+- **POST** `/api/v1/tasks/{task_id}/timer/start`
+- **Auth Required:** Yes
+- **Description:** Starts a new time tracking session. Automatically pauses other active sessions for the user.
+- **Returns:** `TaskTimeLog` object
+
+#### Pause Timer
+
+- **POST** `/api/v1/tasks/{task_id}/timer/pause`
+- **Auth Required:** Yes
+- **Description:** Pauses (ends) the current active session.
+- **Returns:** `TaskTimeLog` object
+
+#### Stop Timer
+
+- **POST** `/api/v1/tasks/{task_id}/timer/stop`
+- **Auth Required:** Yes
+- **Description:** Stops (ends) the current active session.
+- **Returns:** `TaskTimeLog` object
 
 ---
 

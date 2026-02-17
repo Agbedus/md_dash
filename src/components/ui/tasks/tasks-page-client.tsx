@@ -24,7 +24,7 @@ import { Project } from "@/types/project";
 import { Combobox } from "@/components/ui/combobox";
 
 export default function TasksPageClient({ allTasks: initialTasks, users, projects, projectId, currentUserId }: { allTasks: Task[], users: User[], projects: Project[], projectId?: number, currentUserId?: string }) {
-    const [tableTab, setTableTab] = useState<'active' | 'completed'>('active');
+    const [tableTab, setTableTab] = useState<'active' | 'done'>('active');
     const [viewMode, setViewMode] = useState<ViewMode>('table');
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [filterMyTasks, setFilterMyTasks] = useState(false);
@@ -99,10 +99,10 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
 
         if (viewMode === 'kanban') return tasks;
 
-        // In table view, filter by active/completed status based on tab
+        // In table view, filter by active/done status based on tab
         return tasks.filter(task => {
-            if (tableTab === 'completed') return task.status === 'completed';
-            return task.status !== 'completed';
+            if (tableTab === 'done') return task.status === 'DONE';
+            return task.status !== 'DONE';
         });
     }, [optimisticTasks, searchQuery, filterPriority, filterStatus, filterMyTasks, currentUserId, viewMode, tableTab]);
 
@@ -110,6 +110,9 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     const [newAssignees, setNewAssignees] = useState<(string | number)[]>([]);
     const [newProject, setNewProject] = useState<string | number | null>(projectId || null);
     const [newDueDate, setNewDueDate] = useState<Date | null>(null);
+    const [newQARequired, setNewQARequired] = useState(false);
+    const [newReviewRequired, setNewReviewRequired] = useState(false);
+    const [newDependsOn, setNewDependsOn] = useState<number | null>(null);
     const newNameRef = useRef<HTMLInputElement | null>(null);
 
     // Infinite Scroll Handler
@@ -155,6 +158,9 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                  // Reset form state
                  setNewAssignees([]);
                  setNewProject(projectId || null);
+                 setNewQARequired(false);
+                 setNewReviewRequired(false);
+                 setNewDependsOn(null);
                  if (newNameRef.current) newNameRef.current.value = '';
             }
             mutate();
@@ -247,12 +253,12 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                     </div>
                     
                     <div className="relative group flex-shrink-0">
-                         <div className="h-9 lg:h-11 w-9 lg:w-36 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden">
+                         <div className="h-9 lg:h-11 w-9 lg:w-36 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden focus-within:outline-none focus-within:bg-white/10 focus-within:border-white/20 transition-all">
                             <FiFilter className="text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5 lg:absolute lg:left-3 lg:top-1/2 lg:-translate-y-1/2 lg:z-10" />
                             <select
                                 value={filterPriority}
                                 onChange={(e) => setFilterPriority(e.target.value)}
-                                className="absolute inset-0 opacity-0 lg:opacity-100 lg:static lg:bg-transparent lg:border-none lg:pl-8 lg:pr-4 lg:w-full lg:h-full text-zinc-400 cursor-pointer lg:text-[11px] lg:font-bold lg:uppercase lg:tracking-wider appearance-none"
+                                className="absolute inset-0 opacity-0 lg:opacity-100 lg:static lg:bg-transparent lg:border-none lg:pl-8 lg:pr-4 lg:w-full lg:h-full text-zinc-400 cursor-pointer lg:text-[11px] lg:font-bold lg:uppercase lg:tracking-wider appearance-none focus:outline-none"
                             >
                                 <option value="" className="bg-zinc-900">Priority</option>
                                 {Object.entries(priorityMapping).map(([key, value]) => <option key={key} value={key} className="bg-zinc-900">{value}</option>)}
@@ -261,12 +267,12 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                     </div>
 
                      <div className="relative group flex-shrink-0">
-                         <div className="h-9 lg:h-11 w-9 lg:w-36 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden">
+                         <div className="h-9 lg:h-11 w-9 lg:w-36 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden focus-within:outline-none focus-within:bg-white/10 focus-within:border-white/20 transition-all">
                             <FiFilter className="text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5 lg:absolute lg:left-3 lg:top-1/2 lg:-translate-y-1/2 lg:z-10" />
                             <select
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
-                                className="absolute inset-0 opacity-0 lg:opacity-100 lg:static lg:bg-transparent lg:border-none lg:pl-8 lg:pr-4 lg:w-full lg:h-full text-zinc-400 cursor-pointer lg:text-[11px] lg:font-bold lg:uppercase lg:tracking-wider appearance-none"
+                                className="absolute inset-0 opacity-0 lg:opacity-100 lg:static lg:bg-transparent lg:border-none lg:pl-8 lg:pr-4 lg:w-full lg:h-full text-zinc-400 cursor-pointer lg:text-[11px] lg:font-bold lg:uppercase lg:tracking-wider appearance-none focus:outline-none"
                             >
                                 <option value="" className="bg-zinc-900">Status</option>
                                 {Object.entries(statusMapping).map(([key, value]) => <option key={key} value={key} className="bg-zinc-900">{value}</option>)}
@@ -317,10 +323,10 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                 Active
                             </button>
                         <button
-                            onClick={() => setTableTab('completed')}
-                            className={`px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg text-[10px] lg:text-xs font-bold uppercase tracking-wider transition-all ${tableTab === 'completed' ? 'bg-emerald-500 text-zinc-950 shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            onClick={() => setTableTab('done')}
+                            className={`px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg text-[10px] lg:text-xs font-bold uppercase tracking-wider transition-all ${tableTab === 'done' ? 'bg-emerald-500 text-zinc-950 shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
                         >
-                            Completed
+                            Done
                         </button>
                     </div>
                 </div>
@@ -331,15 +337,17 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                 <caption className="sr-only">Tasks table</caption>
                                 <thead>
                                     <tr className="border-b border-white/5 bg-white/5 text-left">
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Name</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap sticky left-0 z-20 bg-zinc-950/90 backdrop-blur-md border-r border-white/5">Name</th>
                                         <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden lg:table-cell">Description</th>
                                         <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Due Date</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">QA/Review</th>
+                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Depends On</th>
                                         <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden md:table-cell">Owner</th>
                                         <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden sm:table-cell">Priority</th>
                                         <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden lg:table-cell">Assignee</th>
                                         <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden md:table-cell">Project</th>
                                         <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Status</th>
-                                        <th scope="col" className="px-6 py-4 text-right text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Actions</th>
+                                        <th scope="col" className="px-6 py-4 text-right text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap sticky right-0 z-20 bg-zinc-950/90 backdrop-blur-md border-l border-white/5">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
@@ -365,7 +373,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                                                 className="bg-white/5"
                                             >
-                                                <td className="px-4 py-2">
+                                                <td className="px-4 py-2 sticky left-0 z-10 bg-zinc-950/90 backdrop-blur-md border-r border-white/5">
                                                     <form id="create-task-form" onSubmit={async (e) => {
                                                         e.preventDefault();
                                                         const formData = new FormData(e.currentTarget);
@@ -379,6 +387,11 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                         }
                                                         if (newDueDate) {
                                                             formData.append('dueDate', format(newDueDate, 'yyyy-MM-dd'));
+                                                        }
+                                                        formData.append('qa_required', newQARequired.toString());
+                                                        formData.append('review_required', newReviewRequired.toString());
+                                                        if (newDependsOn) {
+                                                            formData.append('depends_on_id', newDependsOn.toString());
                                                         }
 
                                                         await handleCreate(formData);
@@ -398,17 +411,17 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                         />
                                                     </form>
                                                 </td>
-                                                <td className="px-4 py-2">
+                                                <td className="px-4 py-2 bg-white/5">
                                                     <input
                                                         type="text"
                                                         name="description"
                                                         placeholder="Description"
                                                         form="create-task-form"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
+                                                        className="w-full bg-white/10 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
                                                         onChange={() => setIsDirty(true)}
                                                     />
                                                 </td>
-                                                <td className="px-4 py-2">
+                                                <td className="px-4 py-2 bg-white/5">
                                                     <CustomDatePicker
                                                         value={newDueDate}
                                                         onChange={(date) => {
@@ -419,8 +432,42 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                         className="w-full"
                                                     />
                                                 </td>
-                                                <td className="px-4 py-2">
-                                                    {/* Owner column empty in creation row */}
+                                                <td className="px-4 py-2 bg-white/5">
+                                                    <div className="flex items-center gap-4">
+                                                        <label className="flex items-center gap-2 cursor-pointer group">
+                                                            <div className="relative flex items-center">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={newQARequired}
+                                                                    onChange={(e) => { setNewQARequired(e.target.checked); setIsDirty(true); }}
+                                                                    className="peer h-4 w-4 appearance-none rounded border border-white/20 bg-white/5 checked:bg-purple-500/40 checked:border-purple-400 transition-all"
+                                                                />
+                                                                <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-purple-400 opacity-0 peer-checked:opacity-100 transition-opacity" />
+                                                            </div>
+                                                            <span className="text-[10px] font-bold text-zinc-500 group-hover:text-purple-400 transition-colors uppercase tracking-widest">QA</span>
+                                                        </label>
+                                                        <label className="flex items-center gap-2 cursor-pointer group">
+                                                            <div className="relative flex items-center">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={newReviewRequired}
+                                                                    onChange={(e) => { setNewReviewRequired(e.target.checked); setIsDirty(true); }}
+                                                                    className="peer h-4 w-4 appearance-none rounded border border-white/20 bg-white/5 checked:bg-blue-500/40 checked:border-blue-400 transition-all"
+                                                                />
+                                                                <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-blue-400 opacity-0 peer-checked:opacity-100 transition-opacity" />
+                                                            </div>
+                                                            <span className="text-[10px] font-bold text-zinc-500 group-hover:text-blue-400 transition-colors uppercase tracking-widest">Review</span>
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-2 bg-white/5">
+                                                    <Combobox
+                                                        options={optimisticTasks.filter(t => t.id > 0).map(t => ({ value: t.id, label: t.name }))}
+                                                        value={newDependsOn || ''}
+                                                        onChange={(val) => { setNewDependsOn(val as number | null); setIsDirty(true); }}
+                                                        placeholder="Depends on..."
+                                                        className="w-full"
+                                                    />
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <select
@@ -468,7 +515,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                         ))}
                                                     </select>
                                                 </td>
-                                                <td className="px-4 py-2 text-right text-xs font-medium">
+                                                <td className="px-4 py-2 text-right text-xs font-medium sticky right-0 z-10 bg-zinc-950/90 backdrop-blur-md border-l border-white/5">
                                                     <div className="flex items-center justify-end space-x-2">
                                                         <button
                                                             type="submit"
