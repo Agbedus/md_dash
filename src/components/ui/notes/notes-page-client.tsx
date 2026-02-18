@@ -233,7 +233,7 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
     }, [optimisticNotes, filterType, searchQuery]);
 
     return (
-        <div className="flex flex-col h-screen p-4 md:p-8 max-w-7xl mx-auto text-white">
+        <div className="flex flex-col h-screen px-4 py-8 max-w-[1600px] mx-auto text-white">
             {/* Non-scrolling Header */}
             <div>
                 {/* Page Header */}

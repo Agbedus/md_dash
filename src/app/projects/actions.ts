@@ -236,7 +236,7 @@ export async function updateProject(formData: FormData) {
         const val = formData.get(formKey);
         if (val !== null) {
             if (formKey === 'isArchived') {
-                rawData[apiKey] = Number(val);
+                rawData[apiKey] = val === "" ? 0 : Number(val);
             } else if (val === "") {
                 rawData[apiKey] = null;
             } else {

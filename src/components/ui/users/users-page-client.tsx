@@ -16,7 +16,7 @@ interface UsersPageClientProps {
   };
 }
 
-const AVAILABLE_ROLES = ['staff', 'supervisor', 'project_manager', 'manager', 'super_admin'];
+const AVAILABLE_ROLES = ['user', 'client', 'staff', 'manager', 'super_admin'];
 
 export default function UsersPageClient({ initialUsers, currentUser }: UsersPageClientProps) {
   const [allUsers, setAllUsers] = useState<User[]>(initialUsers);

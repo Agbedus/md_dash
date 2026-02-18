@@ -17,21 +17,21 @@ export type Task = {
     id: number;
     name: string;
     description: string | null;
-    dueDate: string | null;
+    dueDate: string | null; // API: due_date
     priority: TaskPriority;
     status: TaskStatus;
     qa_required: boolean;
     review_required: boolean;
     depends_on_id: number | null;
-    createdAt?: string | null;
-    updatedAt?: string | null;
+    createdAt?: string | null; // API: created_at
+    updatedAt?: string | null; // API: updated_at
     assignees?: { user: User }[];
     assigneeIds?: string[];
-    projectId?: number | null;
-    userId?: string | null;
+    projectId?: number | null; // API: project_id
+    userId?: string | null; // API: user_id
     owner?: User;
     timeLogs?: TaskTimeLog[];
-    totalHours?: number;
+    totalHours?: number; // API: total_hours
 };
 
 export type TaskFormData = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'timeLogs' | 'totalHours'>;
@@ -40,15 +40,15 @@ export function parseTaskFormData(formData: FormData): Partial<Task> {
     const data = Object.fromEntries(formData);
     return {
         name: data.name as string,
-        description: data.description as string,
-        dueDate: data.dueDate as string,
-        priority: data.priority as TaskPriority,
-        status: data.status as TaskStatus,
+        description: data.description as string || null,
+        dueDate: (data.dueDate || data.due_date) as string || null,
+        priority: (data.priority || 'medium') as TaskPriority,
+        status: (data.status || 'TODO') as TaskStatus,
         qa_required: data.qa_required === "true",
         review_required: data.review_required === "true",
         depends_on_id: data.depends_on_id ? Number(data.depends_on_id) : null,
         assigneeIds: data.assigneeIds ? JSON.parse(data.assigneeIds as string) : [],
-        projectId: data.projectId ? Number(data.projectId) : null,
+        projectId: (data.projectId || data.project_id) ? Number(data.projectId || data.project_id) : null,
     };
 }
 

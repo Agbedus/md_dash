@@ -170,7 +170,7 @@ const Sidebar = ({ user }: SidebarProps) => {
         <nav className="space-y-2">
           {toolMenuItems.map(renderMenuItem)}
 
-          {user?.roles?.some((r) => ["admin", "super_admin"].includes(r)) && (
+          {user?.roles?.some((r) => ["manager", "super_admin"].includes(r)) && (
             <>
               {renderMenuItem({ href: "/users", icon: FiUsers, label: "Users", color: "text-teal-400" })}
               {renderMenuItem({ href: "/clients", icon: FiUsers, label: "Clients", color: "text-violet-400" })}

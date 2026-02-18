@@ -32,8 +32,9 @@ export function parseUserFormData(formData: FormData): Partial<User> {
 }
 
 export const roleMapping: { [key: string]: string } = {
-    admin: "Admin",
-    pm: "Project Manager",
-    developer: "Developer",
-    member: "Member",
+    user: "User",
+    client: "Client",
+    staff: "Staff",
+    manager: "Manager",
+    super_admin: "Super Admin",
 };

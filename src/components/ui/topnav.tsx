@@ -98,38 +98,45 @@ const TopNav = ({ user }: TopNavProps) => {
                 
                 <div className="max-h-[300px] overflow-y-auto">
                   {notifications.length > 0 ? (
-                    notifications.map((notification) => (
-                      <div 
-                        key={notification.id} 
-                        onClick={() => !notification.is_read && markAsRead(notification.id)}
-                        className={`px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer border-b border-white/5 last:border-0 ${!notification.is_read ? 'bg-white/[0.02]' : ''}`}
-                      >
-                        <div className="flex gap-3">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border ${
-                            notification.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                            notification.type === 'error' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                            notification.type === 'warning' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                            'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                          }`}>
-                            {notification.type === 'success' ? <FiCheck size={14} /> :
-                             notification.type === 'error' ? <FiX size={14} /> :
-                             notification.type === 'warning' ? <FiAlertCircle size={14} /> :
-                             <FiBell size={14} />}
+                    (() => {
+                      const unread = notifications.filter(n => !n.is_read);
+                      const displayNotifications = unread.length > 0 
+                        ? unread 
+                        : notifications.filter(n => n.is_read).slice(0, 7);
+                        
+                      return displayNotifications.map((notification) => (
+                        <div 
+                          key={notification.id} 
+                          onClick={() => !notification.is_read && markAsRead(notification.id)}
+                          className={`px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer border-b border-white/5 last:border-0 ${!notification.is_read ? 'bg-white/[0.02]' : ''}`}
+                        >
+                          <div className="flex gap-3">
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border ${
+                              notification.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                              notification.type === 'error' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                              notification.type === 'warning' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                              'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                            }`}>
+                              {notification.type === 'success' ? <FiCheck size={14} /> :
+                               notification.type === 'error' ? <FiX size={14} /> :
+                               notification.type === 'warning' ? <FiAlertCircle size={14} /> :
+                               <FiBell size={14} />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm line-clamp-2 ${!notification.is_read ? 'text-white font-medium' : 'text-zinc-400'}`}>
+                                {notification.message}
+                              </p>
+                              <p className="text-[10px] text-zinc-500 mt-1">
+                                {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                              </p>
+                            </div>
+                            {!notification.is_read && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5"></div>
+                            )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className={`text-sm line-clamp-2 ${!notification.is_read ? 'text-white font-medium' : 'text-zinc-400'}`}>
-                              {notification.message}
-                            </p>
-                            <p className="text-[10px] text-zinc-500 mt-1">
-                              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                            </p>
-                          </div>
-                          {!notification.is_read && (
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5"></div>
-                          )}
                         </div>
-                      </div>
-                    ))
+                      ));
+                    })()
                   ) : (
                     <div className="px-4 py-8 text-center">
                       <FiBell className="mx-auto text-zinc-600 mb-2 opacity-20" size={24} />

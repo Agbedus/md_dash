@@ -17,7 +17,7 @@ export interface CalendarEvent {
   // Accept either ISO string (from server) or Date (runtime)
   start: string | Date;
   end: string | Date;
-  allDay: boolean;
+  allDay: boolean | number; // API: all_day (0 or 1)
   location?: string;
   organizer?: string;
   attendees?: string[]; // emails

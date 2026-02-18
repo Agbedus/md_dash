@@ -1,12 +1,12 @@
 'use client';
-// Force rebuild for hydration
 
 import React, { useState, useOptimistic, useTransition } from 'react';
 import { getClients } from '@/app/clients/actions';
 import { Client } from '@/types/client';
-import { FiPlus, FiSearch, FiX, FiCheck, FiEdit2, FiTrash2, FiMail, FiGlobe, FiUser } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiX, FiCheck, FiEdit2, FiTrash2, FiMail, FiGlobe, FiUser, FiGrid, FiList } from 'react-icons/fi';
 import { createClient, updateClient, deleteClient } from '@/app/clients/actions';
 import ClientCard from './client-card';
+import ClientTable from './client-table';
 import toast from 'react-hot-toast';
 
 interface ClientsPageClientProps {
@@ -15,6 +15,7 @@ interface ClientsPageClientProps {
 
 export default function ClientsPageClient({ initialClients }: ClientsPageClientProps) {
   const [allClients, setAllClients] = useState<Client[]>(initialClients);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,7 +69,6 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
         });
       } else {
         toast.error(result?.error || "Failed to create client");
-        // Revert UI if needed by refreshing from source
         const clients = await getClients();
         setAllClients(clients);
       }
@@ -92,7 +92,6 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
       pending: true,
     };
 
-    // UI Feedback
     addOptimisticClient({ type: 'update', client: updatedClient });
     setEditingClient(null);
 
@@ -162,7 +161,6 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
         </button>
       </div>
 
-      {/* Strategic Search */}
       <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10 overflow-x-auto pb-2 scrollbar-hide">
         <div className="relative w-full lg:w-96 group">
           <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--pastel-indigo)] transition-colors"/>
@@ -174,26 +172,50 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
             className="w-full h-11 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:bg-white/10 focus:border-white/20 text-white placeholder:text-zinc-600 transition-all text-sm"
           />
         </div>
+
+        <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10 h-11 flex-shrink-0">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            title="Grid view"
+          >
+            <FiGrid className="w-5 h-5"/>
+          </button>
+          <button
+            onClick={() => setViewMode('table')}
+            className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            title="Table view"
+          >
+            <FiList className="w-5 h-5"/>
+          </button>
+        </div>
       </div>
 
-      {/* Clients Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredClients.map((client) => (
-          <ClientCard 
-            key={client.id} 
-            client={client} 
-            onEdit={setEditingClient} 
-            onDelete={handleDelete}
-            isPending={(client as any).pending}
-          />
-        ))}
-        {filteredClients.length === 0 && (
-          <div className="col-span-full py-20 text-center glass rounded-3xl">
-            <FiUser className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-            <p className="text-zinc-500 font-medium">No clients found matching your search.</p>
-          </div>
-        )}
-      </div>
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredClients.map((client) => (
+            <ClientCard 
+              key={client.id} 
+              client={client} 
+              onEdit={setEditingClient} 
+              onDelete={handleDelete}
+              isPending={(client as any).pending}
+            />
+          ))}
+          {filteredClients.length === 0 && (
+            <div className="col-span-full py-20 text-center glass rounded-3xl">
+              <FiUser className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
+              <p className="text-zinc-500 font-medium">No clients found matching your search.</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <ClientTable 
+          clients={filteredClients} 
+          onEdit={setEditingClient} 
+          onDelete={handleDelete} 
+        />
+      )}
 
       {/* Create Modal */}
       {isCreateModalOpen && (

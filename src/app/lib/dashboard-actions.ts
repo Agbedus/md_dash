@@ -30,6 +30,20 @@ export async function getSummaryStats() {
     const completedTasks = tasks.filter(t => t.status === 'DONE');
     const recentNotes = notes.filter(n => n.updated_at && new Date(n.updated_at) >= startOfCurrentWeek);
 
+    // Calculate 7-day trends for Sparklines
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = subDays(now, 6 - i);
+        return format(date, 'yyyy-MM-dd');
+    });
+
+    const getTrendData = (items: any[], dateField: string) => {
+        return last7Days.map(day => 
+            items.filter(item => 
+                item[dateField] && format(new Date(item[dateField]), 'yyyy-MM-dd') === day
+            ).length
+        );
+    };
+
     return {
         totalTasks: tasks.length,
         completedTasks: completedTasks.length,
@@ -39,7 +53,14 @@ export async function getSummaryStats() {
         pendingTasks: tasks.length - completedTasks.length,
         totalUsers: users.length,
         totalProjects: projects.length,
-        users: users.slice(0, 3).map((u: any) => ({ name: u.name, image: u.image }))
+        users: users.slice(0, 3).map((u: any) => ({ name: u.name, image: u.image })),
+        trends: {
+            tasks: getTrendData(tasks, 'createdAt'),
+            completions: getTrendData(completedTasks, 'updatedAt'),
+            events: getTrendData(events, 'start'),
+            notes: getTrendData(notes, 'created_at'),
+            users: getTrendData(users, 'created_at') // Assuming createdAt exists on user or fallback to dummy
+        }
     };
 }
 

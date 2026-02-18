@@ -8,25 +8,24 @@ export type Project = {
     description: string | null;
     status: "planning" | "in_progress" | "completed" | "on_hold";
     priority: "low" | "medium" | "high";
-    tags: string[]; // JSON string array in DB, parsed array in app
+    tags: string[]; // API: JSON string "tags"
 
-    ownerId: string | null;
-    // managerId: string | null; // Deprecated
-    managers?: { user: User }[]; // For display
+    ownerId: string | null; // API: owner_id
+    managers?: { user: User }[]; 
     tasks?: Task[];
-    clientId: string | null;
+    clientId: string | null; // API: client_id
 
-    startDate: string | null;
-    endDate: string | null;
+    startDate: string | null; // API: start_date
+    endDate: string | null; // API: end_date
 
     budget: number | null;
     spent: number | null;
     currency: string | null;
-    billingType: "time_and_materials" | "fixed_price" | "non_billable" | null;
+    billingType: "time_and_materials" | "fixed_price" | "non_billable" | null; // API: billing_type
 
-    isArchived: number | null; // 0 or 1
-    createdAt?: string | null;
-    updatedAt?: string | null;
+    isArchived: number | null; // API: is_archived (0 or 1)
+    createdAt?: string | null; // API: created_at
+    updatedAt?: string | null; // API: updated_at
 };
 
 export type ProjectFormData = Omit<Project, 'id' | 'createdAt' | 'updatedAt'>;

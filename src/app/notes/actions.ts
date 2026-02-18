@@ -246,7 +246,10 @@ export async function updateNote(formData: FormData) {
   if (formData.has('is_favorite')) payload.is_favorite = formData.get('is_favorite') === '1' ? 1 : 0;
   if (formData.has('cover_image')) payload.cover_image = formData.get('cover_image');
   if (formData.has('tags')) payload.tags = formData.get('tags') || '';
-  if (formData.has('task_id')) payload.task_id = formData.get('task_id') ? Number(formData.get('task_id')) : null;
+  if (formData.has('task_id')) {
+    const taskId = formData.get('task_id');
+    payload.task_id = taskId === "" || taskId === null ? null : Number(taskId);
+  }
   if (formData.has('shared_with')) {
     try {
       const sw = formData.get('shared_with') as string;

@@ -1,58 +1,77 @@
 # Fast Dash API Documentation
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Base URL:** `/api/v1`
+
+## Changelog
+
+### 2026-02-18
+
+- Synchronized web view submit handlers with API notification triggers.
+- Verified and updated model field documentation for Tasks, Projects, Notes, and Events.
+- Refined permission model documentation to match implemented route guards (e.g., restricted task updates to `MANAGER|SUPER_ADMIN`).
+
+### 2026-02-17
+
+- Consolidated duplicated documentation into a single canonical document.
+- Normalized endpoint coverage against implemented FastAPI routes.
+- Added missing endpoint documentation for `PATCH /api/v1/user-admin/{user_id}`.
+- Updated role model wording to match code (`USER`, `CLIENT`, `STAFF`, `MANAGER`, `SUPER_ADMIN`).
+- Corrected auth and permission descriptions to match current route guards.
+- Clarified current WebSocket notification auth caveat without changing route behavior.
+- Rebuilt permission summary and common-pattern guidance to match implementation.
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Authentication](#authentication)
-3. [Error Handling](#error-handling)
-4. [Endpoints](#endpoints)
-   - [Authentication](#authentication-endpoints)
-   - [Users](#users-endpoints)
-   - [Clients](#clients-endpoints)
-   - [Projects](#projects-endpoints)
-   - [Tasks](#tasks-endpoints)
-   - [Notes](#notes-endpoints)
-   - [Events](#events-endpoints)
-   - [Decisions](#decisions-endpoints)
-   - [Notifications](#notifications-endpoints)
-5. [Permission Model](#permission-model)
-6. [Common Patterns](#common-patterns)
+1. Overview
+2. Authentication
+3. Error Handling
+4. Endpoints
+   - System
+   - Authentication
+   - Users
+   - Clients
+   - Projects
+   - Tasks
+   - Notes
+   - Events
+   - Decisions
+   - Notifications
+   - Admin
+5. Permission Model
+6. Common Patterns
+7. Interactive API Docs
 
 ---
 
 ## Overview
 
-Fast Dash is a project management API built with FastAPI. It provides comprehensive endpoints for managing users, clients, projects, tasks, notes, events, and decisions.
+Fast Dash is a project management API built with FastAPI.
 
-### Key Features
+Key points:
 
-- **JWT Authentication** with optional cookie-based auth for browsers
-- **Role-based access control** (USER, CLIENT, STAFF, MANAGER, ADMIN, SUPER_ADMIN)
-- **Resource ownership** and sharing mechanisms
-- **RESTful API** design with standard CRUD operations
-- **Automatic API documentation** at `/docs` (Swagger UI) and `/redoc`
+- JWT auth via bearer token and cookie fallback
+- Role-based authorization using `USER`, `CLIENT`, `STAFF`, `MANAGER`, `SUPER_ADMIN`
+- Ownership and sharing behavior for selected resources
+- REST endpoints under `/api/v1`
 
 ---
 
 ## Authentication
 
-### Authentication Methods
+### Supported auth modes
 
-The API supports two authentication methods:
+1. Bearer token in `Authorization: Bearer <token>`
+2. HTTP-only cookie (`access_token`) for browser sessions
 
-1. **Bearer Token** (for API clients): Include `Authorization: Bearer {token}` header
-2. **HTTP-only Cookie** (for browsers): Automatically set after login
+`get_current_user` checks bearer token first, then cookie.
 
-### Registration
+### Register
 
-**POST** `/api/v1/auth/register`
+- **POST** `/api/v1/auth/register`
+- **Auth Required:** No
 
-Register a new user account.
-
-**Request Body:**
+Payload:
 
 ```json
 {
@@ -62,998 +81,543 @@ Register a new user account.
 }
 ```
 
-**Response:** `201 Created`
-
-```json
-{
-  "id": "uuid-string",
-  "email": "user@example.com",
-  "full_name": "John Doe",
-  "roles": ["user"],
-  "created_at": "2025-12-22T12:00:00.000Z"
-}
-```
+Returns: created `User` object.
 
 ### Login
 
-**POST** `/api/v1/auth/login`
+- **POST** `/api/v1/auth/login`
+- **Auth Required:** No
+- **Content Type:** form-data (`OAuth2PasswordRequestForm`)
 
-Authenticate and receive an access token.
-
-**Request Body (form-data):**
+Form fields:
 
 ```
 username=user@example.com
 password=securepassword123
 ```
 
-**Response:** `200 OK`
+Returns:
 
 ```json
 {
-  "access_token": "eyJhbGci...",
+  "access_token": "<jwt>",
   "token_type": "bearer"
 }
 ```
 
-**Note:** The access_token is also set as an HTTP-only cookie named `access_token`.
+Also sets cookie:
+
+- name: `access_token`
+- value format: `Bearer <jwt>`
+- `httponly=true`
+- `samesite=lax`
 
 ### Logout
 
-**GET** `/api/v1/auth/logout`
+- **GET** `/api/v1/auth/logout`
+- **Auth Required:** No
 
-Clear the authentication cookie and redirect to login page.
+Behavior:
 
-**Response:** `307 Temporary Redirect` to `/login`
+- deletes `access_token` cookie
+- redirects to `/login`
 
 ---
 
 ## Error Handling
 
-### Standard Error Response
+Standard error body:
 
 ```json
 {
-  "detail": "Error message describing what went wrong"
+  "detail": "Error message"
 }
 ```
 
-### Common HTTP Status Codes
+Common status codes:
 
-| Code | Meaning               | Description                   |
-| ---- | --------------------- | ----------------------------- |
-| 200  | OK                    | Request successful            |
-| 201  | Created               | Resource created successfully |
-| 400  | Bad Request           | Invalid request data          |
-| 401  | Unauthorized          | Authentication required       |
-| 403  | Forbidden             | Insufficient permissions      |
-| 404  | Not Found             | Resource doesn't exist        |
-| 422  | Unprocessable Entity  | Validation error              |
-| 500  | Internal Server Error | Server error                  |
-
----
-
-### System Endpoints
-
-#### Health Check
-
-- **GET** `/api/v1/health`
-- **Auth Required:** No
-- **Expected Response Payload:**
-  ```json
-  {
-    "status": "ok"
-  }
-  ```
+- `200` OK
+- `201` Created
+- `400` Bad Request
+- `401` Unauthorized
+- `403` Forbidden
+- `404` Not Found
+- `422` Validation Error
+- `500` Internal Server Error
 
 ---
 
 ## Endpoints
 
-### Authentication Endpoints
+## System Endpoints
 
-#### Register User
+### Health Check
 
-- **POST** `/api/v1/auth/register`
+- **GET** `/api/v1/health`
 - **Auth Required:** No
-- **Expected Payload:**
-  ```json
-  {
-    "email": "user@example.com",
-    "password": "securepassword123",
-    "full_name": "John Doe"
-  }
-  ```
-- **Returns:** User object
 
-#### Login
-
-- **POST** `/api/v1/auth/login`
-- **Auth Required:** No
-- **Expected Payload (form-data):**
-  ```
-  username=user@example.com
-  password=securepassword123
-  ```
-- **Returns:** `{ access_token, token_type }`
-
-#### Logout
-
-- **GET** `/api/v1/auth/logout`
-- **Auth Required:** No (but clears cookies)
-- **Returns:** Redirect to `/login`
-
----
-
-### Users Endpoints
-
-Base path: `/api/v1/users`
-
-#### List All Users
-
-- **GET** `/api/v1/users`
-- **Auth Required:** Admin or Manager
-- **Query Params:** `skip` (default: 0), `limit` (default: 100)
-- **Expected Response Payload:**
-  ```json
-  [
-    {
-      "id": "uuid-1",
-      "email": "user1@example.com",
-      "full_name": "User One",
-      "roles": ["staff"],
-      "created_at": "2025-01-01T00:00:00.000Z"
-    }
-  ]
-  ```
-
-#### Create User
-
-- **POST** `/api/v1/users`
-- **Auth Required:** Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "email": "newuser@example.com",
-    "password": "securepassword123",
-    "full_name": "New User",
-    "roles": ["staff"],
-    "avatar_url": "https://example.com/avatar.jpg"
-  }
-  ```
-- **Returns:** User object
-
-#### Get Current User
-
-- **GET** `/api/v1/users/me`
-- **Auth Required:** Yes
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": "current-user-uuid",
-    "email": "me@example.com",
-    "full_name": "My Name",
-    "roles": ["user"],
-    "created_at": "2025-12-23T10:00:00.000Z"
-  }
-  ```
-
-#### Update Current User
-
-- **PUT** `/api/v1/users/me`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "full_name": "Updated Name",
-    "password": "newsecurepassword123",
-    "avatar_url": "https://example.com/new-avatar.jpg"
-  }
-  ```
-- **Returns:** Updated user profile
-
-**Example Request:**
+Returns:
 
 ```json
 {
-  "full_name": "Jane Smith",
+  "status": "ok"
+}
+```
+
+---
+
+## Authentication Endpoints
+
+### Register User
+
+- **POST** `/api/v1/auth/register`
+
+### Login
+
+- **POST** `/api/v1/auth/login`
+
+### Logout
+
+- **GET** `/api/v1/auth/logout`
+
+---
+
+## Users Endpoints
+
+Base path: `/api/v1/users`
+
+### List Users
+
+- **GET** `/api/v1/users`
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
+- Query params: `skip`, `limit`
+
+### Create User
+
+- **POST** `/api/v1/users`
+- **Auth Required:** `SUPER_ADMIN`
+
+Payload shape (`UserCreate`):
+
+```json
+{
+  "email": "newuser@example.com",
+  "password": "securepassword123",
+  "full_name": "New User",
+  "roles": ["staff"],
   "avatar_url": "https://example.com/avatar.jpg"
 }
 ```
 
-#### Get User by ID
+### Get Current User
+
+- **GET** `/api/v1/users/me`
+- **Auth Required:** Any authenticated user
+
+### Update Current User
+
+- **PUT** `/api/v1/users/me`
+- **Auth Required:** Any authenticated user
+
+Updatable fields (`UserUpdate`):
+
+- `email`
+- `password`
+- `full_name`
+- `roles`
+- `image`
+- `avatar_url`
+- `emailVerified`
+
+### Get User by ID
 
 - **GET** `/api/v1/users/{user_id}`
-- **Auth Required:** Yes (own profile) or Admin
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": "user-uuid",
-    "email": "user@example.com",
-    "full_name": "John Doe",
-    "roles": ["user"],
-    "created_at": "2025-12-23T10:00:00.000Z"
-  }
-  ```
+- **Auth Required:** self OR (`MANAGER`/`SUPER_ADMIN`)
 
-#### Update User
+### Update User by ID
 
 - **PUT** `/api/v1/users/{user_id}`
-- **Auth Required:** Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "email": "updated@example.com",
-    "full_name": "Updated Name",
-    "roles": ["admin"]
-  }
-  ```
-- **Returns:** Updated user object
+- **Auth Required:** `SUPER_ADMIN`
 
-#### Delete User
+### Delete User
 
 - **DELETE** `/api/v1/users/{user_id}`
-- **Auth Required:** Admin only
-- **Returns:** Deleted user object
-- **Note:** Cannot delete yourself
+- **Auth Required:** `SUPER_ADMIN`
+- Note: cannot delete yourself
 
 ---
 
-### Clients Endpoints
+## Clients Endpoints
 
 Base path: `/api/v1/clients`
 
-Clients are shared resources representing companies or organizations.
-
-#### List Clients
+### List Clients
 
 - **GET** `/api/v1/clients`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Client objects
-- **Permissions:** All authenticated users can view
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
 
-**Example Response:**
-
-```json
-[
-  {
-    "id": "uuid",
-    "company_name": "Acme Corporation",
-    "contact_person_name": "John Smith",
-    "contact_email": "john@acme.com",
-    "website_url": "https://acme.com",
-    "created_at": "2025-01-01T00:00:00.000Z"
-  }
-]
-```
-
-#### Get Client
+### Get Client
 
 - **GET** `/api/v1/clients/{client_id}`
-- **Auth Required:** Yes
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": "uuid",
-    "company_name": "Acme Corporation",
-    "contact_person_name": "John Smith",
-    "contact_email": "john@acme.com",
-    "website_url": "https://acme.com",
-    "created_at": "2025-01-01T00:00:00.000Z"
-  }
-  ```
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
 
-#### Create Client
+### Create Client
 
 - **POST** `/api/v1/clients`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "company_name": "New Client Ltd",
-    "contact_person_name": "Jane Doe",
-    "contact_email": "jane@example.com",
-    "website_url": "https://example.com"
-  }
-  ```
-- **Returns:** Client object
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
 
-#### Update Client
+### Update Client
 
 - **PATCH** `/api/v1/clients/{client_id}`
-- **Auth Required:** Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "company_name": "Updated Company Name",
-    "contact_person_name": "New Contact"
-  }
-  ```
-- **Returns:** Updated client object
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
 
-#### Delete Client
+### Delete Client
 
 - **DELETE** `/api/v1/clients/{client_id}`
-- **Auth Required:** Admin only
-- **Returns:** `{ status: "success", detail: "Client deleted" }`
+- **Auth Required:** `SUPER_ADMIN`
 
 ---
 
-### Projects Endpoints
+## Projects Endpoints
 
 Base path: `/api/v1/projects`
 
-Projects have ownership controls. Users can only see/modify their own projects unless they are admins.
-
-#### List Projects
+### List Projects
 
 - **GET** `/api/v1/projects`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Project objects
-- **Permissions:** Admins see all, users see only their own
+- **Auth Required:** Any authenticated user
+- Behavior:
+  - `SUPER_ADMIN` and `MANAGER`: all projects
+  - others: only projects where `owner_id == current_user.id`
 
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Website Redesign",
-    "key": "PROJ-001",
-    "description": "Complete redesign of company website",
-    "status": "in_progress",
-    "priority": "high",
-    "owner_id": "user-uuid",
-    "client_id": "client-uuid",
-    "start_date": "2025-01-01",
-    "end_date": "2025-03-31",
-    "budget": 50000,
-    "spent": 15000,
-    "currency": "USD",
-    "billing_type": "billable",
-    "is_archived": 0,
-    "created_at": "2025-01-01T00:00:00.000Z",
-    "updated_at": "2025-01-15T10:30:00.000Z"
-  }
-]
-```
-
-**Field Reference:**
-
-- `status`: `"planning"`, `"in_progress"`, `"completed"`, `"on_hold"`
-- `priority`: `"low"`, `"medium"`, `"high"`
-- `billing_type`: `"billable"`, `"non_billable"`
-- `budget` / `spent`: Amounts in smallest currency unit (cents for USD)
-
-#### Get Project
+### Get Project
 
 - **GET** `/api/v1/projects/{project_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "name": "Website Redesign",
-    "key": "PROJ-001",
-    "description": "Complete redesign",
-    "status": "in_progress",
-    "priority": "high",
-    "owner_id": "user-uuid",
-    "client_id": "client-uuid",
-    "start_date": "2025-01-01",
-    "end_date": "2025-03-31",
-    "budget": 50000,
-    "spent": 15000,
-    "currency": "USD",
-    "billing_type": "billable",
-    "is_archived": 0,
-    "created_at": "2025-01-01T00:00:00.000Z",
-    "updated_at": "2025-01-15T10:30:00.000Z"
-  }
-  ```
+- **Auth Required:** Any authenticated user
+- Behavior:
+  - `SUPER_ADMIN` and `MANAGER`: any project
+  - others: own project only
 
-#### Create Project
+### Create Project
 
 - **POST** `/api/v1/projects`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "name": "Mobile App Development",
-    "key": "PROJ-002",
-    "description": "Build iOS and Android apps",
-    "status": "planning",
-    "priority": "high",
-    "client_id": "client-uuid",
-    "start_date": "2025-02-01",
-    "end_date": "2025-06-30",
-    "budget": 100000,
-    "currency": "USD",
-    "billing_type": "billable"
-  }
-  ```
-- **Returns:** Created project object
-- **Note:** `owner_id` defaults to current user if not provided
+- **Auth Required:** Any authenticated user
+- Note: `owner_id` defaults to current user if omitted
 
-#### Update Project
+### Update Project
 
 - **PATCH** `/api/v1/projects/{project_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Payload:**
-  ```json
-  {
-    "status": "completed",
-    "spent": 20000,
-    "is_archived": 0
-  }
-  ```
-- **Returns:** Updated project object
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
 
-#### Delete Project
+### Delete Project
 
 - **DELETE** `/api/v1/projects/{project_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Returns:** `{ status: "success", detail: "Project deleted" }`
+- **Auth Required:** `SUPER_ADMIN`
 
 ---
 
-### Tasks Endpoints
+## Tasks Endpoints
 
 Base path: `/api/v1/tasks`
 
-Tasks support multi-user assignment through the `assignees` field.
-
-#### List Tasks
+### List Tasks
 
 - **GET** `/api/v1/tasks`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`, `project_id?`
-- **Returns:** Array of `TaskReadWithTimeLogs` objects
-- **Permissions:** Admins see all. Users see tasks they created, are assigned to, or belong to their projects.
+- **Auth Required:** Any authenticated user
+- Query params: `skip`, `limit`, `project_id`
+- Behavior:
+  - `SUPER_ADMIN` and `MANAGER`: all tasks
+  - others: tasks they created, tasks assigned to them, or tasks in projects they own
 
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Design homepage mockup",
-    "description": "Create high-fidelity mockup for new homepage",
-    "due_date": "2025-01-30",
-    "priority": "high",
-    "status": "in_progress",
-    "project_id": 1,
-    "user_id": "creator-uuid",
-    "created_at": "2025-12-22T12:00:00.000Z",
-    "updated_at": "2025-12-22T13:00:00.000Z",
-    "task_assignees": [
-      {
-        "task_id": 1,
-        "user_id": "user-uuid-1"
-      }
-    ]
-  }
-]
-```
-
-**Field Reference:**
-
-- `priority`: `"low"`, `"medium"`, `"high"`
-- `status`: `"TODO"`, `"IN_PROGRESS"`, `"QA"`, `"REVIEW"`, `"DONE"`
-- `qa_required`: Boolean (default: `false`)
-- `review_required`: Boolean (default: `false`)
-- `depends_on_id`: ID of the task this task depends on
-- `task_assignees`: Array of objects containing `task_id` and `user_id`
-- `time_logs`: Array of `TaskTimeLog` objects
-- `total_hours`: Calculated total hours spent on task
-- `user_id`: UUID of the task creator
-
-#### Get Task
+### Get Task
 
 - **GET** `/api/v1/tasks/{task_id}`
-- **Auth Required:** Yes
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "name": "Design homepage mockup",
-    "description": "Create high-fidelity mockup",
-    "due_date": "2025-01-30",
-    "priority": "high",
-    "status": "IN_PROGRESS",
-    "project_id": 1,
-    "qa_required": false,
-    "review_required": false,
-    "depends_on_id": null,
-    "created_at": "2025-12-22T12:00:00.000Z",
-    "updated_at": "2025-12-22T13:00:00.000Z",
-    "task_assignees": [
-      {
-        "task_id": 1,
-        "user_id": "user-uuid-1"
-      }
-    ],
-    "time_logs": [],
-    "total_hours": 0.0,
-    "user_id": "creator-uuid"
-  }
-  ```
+- **Auth Required:** Any authenticated user
+- Behavior follows same visibility model as list
 
-#### Create Task
+### Create Task
 
 - **POST** `/api/v1/tasks`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "name": "Implement login API",
-    "description": "Create JWT authentication endpoints",
-    "due_date": "2025-02-01",
-    "priority": "high",
-    "status": "TODO",
-    "project_id": 1,
-    "assignees": ["user-uuid-1", "user-uuid-2"]
-  }
-  ```
-- **Returns:** `TaskReadWithTimeLogs` object
-- **Note:** `user_id` is automatically set to the current user.
+- **Auth Required:** Any authenticated user
+- Payload is dynamic dict.
+- Supported assignment field:
+  - `assignees`: array of user IDs
+- Note: `user_id` is forced to current user.
 
-#### Update Task
+### Update Task
 
 - **PATCH** `/api/v1/tasks/{task_id}`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "status": "IN_PROGRESS",
-    "assignees": ["user-uuid-3"]
-  }
-  ```
-- **Returns:** Updated `TaskReadWithTimeLogs` object
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
+- `assignees` behavior:
+  - provide `[]` to clear all
+  - omit to leave unchanged
 
-**Note:** Setting `assignees` to `[]` removes all assignees. Omitting `assignees` leaves them unchanged.
-
-#### Delete Task
+### Delete Task
 
 - **DELETE** `/api/v1/tasks/{task_id}`
-- **Auth Required:** Yes
-- **Returns:** `{ status: "success", detail: "Task deleted" }`
+- **Auth Required:** `SUPER_ADMIN`
 
-#### Start Timer
+### Start Timer
 
 - **POST** `/api/v1/tasks/{task_id}/timer/start`
-- **Auth Required:** Yes
-- **Description:** Starts a new time tracking session. Automatically pauses other active sessions for the user.
-- **Returns:** `TaskTimeLog` object
+- **Auth Required:** Any authenticated user
+- Closes other active sessions for current user first.
 
-#### Pause Timer
+### Pause Timer
 
 - **POST** `/api/v1/tasks/{task_id}/timer/pause`
-- **Auth Required:** Yes
-- **Description:** Pauses (ends) the current active session.
-- **Returns:** `TaskTimeLog` object
+- **Auth Required:** Any authenticated user
 
-#### Stop Timer
+### Stop Timer
 
 - **POST** `/api/v1/tasks/{task_id}/timer/stop`
-- **Auth Required:** Yes
-- **Description:** Stops (ends) the current active session.
-- **Returns:** `TaskTimeLog` object
+- **Auth Required:** Any authenticated user
+
+Task status enum:
+
+- `TODO`
+- `IN_PROGRESS`
+- `QA`
+- `REVIEW`
+- `DONE`
 
 ---
 
-### Notes Endpoints
+## Notes Endpoints
 
 Base path: `/api/v1/notes`
 
-Notes support ownership and sharing with other users.
-
-#### List Notes
+### List Notes
 
 - **GET** `/api/v1/notes`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`, `task_id?`
-- **Returns:** Array of Note objects
-- **Permissions:** Admins see all, users see only their own
+- **Auth Required:** Any authenticated user
+- Query params: `skip`, `limit`, `task_id`
+- Behavior:
+  - `SUPER_ADMIN` and `MANAGER`: all notes
+  - others: own notes OR notes shared with them
 
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "title": "Meeting Notes - Jan 15",
-    "content": "Discussed project timeline and deliverables...",
-    "type": "note",
-    "tags": "[\"meeting\", \"important\"]",
-    "is_pinned": 1,
-    "is_archived": 0,
-    "is_favorite": 0,
-    "user_id": "owner-uuid",
-    "task_id": null,
-    "created_at": "2025-01-15T00:00:00.000Z",
-    "updated_at": "2025-01-15T10:00:00.000Z"
-  }
-]
-```
-
-**Field Reference:**
-
-- `type`: `"note"`, `"checklist"`, `"todo"`, `"journal"`
-- `tags`: JSON string array (e.g., `'["tag1", "tag2"]'`)
-- `is_pinned`, `is_archived`, `is_favorite`: 0 or 1 (boolean flags)
-
-#### Get Note
+### Get Note
 
 - **GET** `/api/v1/notes/{note_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "title": "Meeting Notes - Jan 15",
-    "content": "Discussed project timeline...",
-    "type": "note",
-    "tags": "[\"meeting\", \"important\"]",
-    "is_pinned": 1,
-    "is_archived": 0,
-    "is_favorite": 0,
-    "user_id": "owner-uuid",
-    "task_id": null,
-    "created_at": "2025-01-15T00:00:00.000Z",
-    "updated_at": "2025-01-15T10:00:00.000Z"
-  }
-  ```
+- **Auth Required:** Any authenticated user
+- Behavior:
+  - `SUPER_ADMIN` and `MANAGER`: any note
+  - others: own note OR note shared with them
 
-#### Create Note
+### Create Note
 
 - **POST** `/api/v1/notes`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "title": "Project Ideas",
-    "content": "Brainstorming session results...",
-    "type": "note",
-    "tags": "[\"brainstorm\", \"ideas\"]",
-    "is_pinned": 1,
-    "shared_with": ["user-uuid-1", "user-uuid-2"]
-  }
-  ```
-- **Returns:** Created note object
+- **Auth Required:** Any authenticated user
+- Payload is dynamic dict.
+- Supported sharing field:
+  - `shared_with`: array of user IDs
+- Note: `user_id` defaults to current user.
 
-#### Update Note
+### Update Note
 
 - **PATCH** `/api/v1/notes/{note_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Payload:**
-  ```json
-  {
-    "content": "Updated content...",
-    "is_pinned": 0,
-    "shared_with": ["user-uuid-3"]
-  }
-  ```
-- **Returns:** Updated note object
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
 
-#### Delete Note
+### Delete Note
 
 - **DELETE** `/api/v1/notes/{note_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Returns:** `{ status: "success", detail: "Note deleted" }`
+- **Auth Required:** `SUPER_ADMIN`
 
 ---
 
-### Events Endpoints
+## Events Endpoints
 
 Base path: `/api/v1/events`
 
-Events are shared calendar resources. All users can view, but only creators or admins can modify.
-
-#### List Events
+### List Events
 
 - **GET** `/api/v1/events`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Event objects
-- **Permissions:** All users can view
+- **Auth Required:** Any authenticated user
+- Behavior:
+  - `SUPER_ADMIN` and `MANAGER`: all events
+  - others: own events only (`event.user_id == current_user.id`)
 
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "title": "Team Standup",
-    "description": "Daily standup meeting",
-    "start": "2025-01-22T09:00:00Z",
-    "end": "2025-01-22T09:30:00Z",
-    "all_day": 0,
-    "location": "Zoom",
-    "organizer": "manager@example.com",
-    "attendees": "[\"user1@example.com\", \"user2@example.com\"]",
-    "status": "confirmed",
-    "privacy": "public",
-    "color": "#6366f1",
-    "user_id": "creator-uuid",
-    "created_at": "2025-01-20T10:00:00Z",
-    "updated_at": "2025-01-20T10:00:00Z"
-  }
-]
-```
-
-**Field Reference:** (Note: `status`, `privacy`, and `recurrence` are case-insensitive)
-
-- `start` / `end`: ISO 8601 datetime strings (required)
-- `all_day`: 0 (time-specific) or 1 (all-day event)
-- `status`: `"tentative"`, `"confirmed"`, `"cancelled"`
-- `privacy`: `"public"`, `"private"`, `"confidential"`
-- `attendees`: JSON array of email strings (e.g., `["user1@example.com", "user2@example.com"]`)
-- `recurrence`: `"none"`, `"daily"`, `"weekly"`, `"monthly"`, `"yearly"`
-- `reminders`: JSON array of EventReminder objects `{ days, hours, minutes }`
-- `color`: HEX color string (e.g., `"#6366f1"`)
-- `user_id`: UUID of the event creator
-- `created_at` / `updated_at`: ISO 8601 timestamp strings
-
-#### Get Event
+### Get Event
 
 - **GET** `/api/v1/events/{event_id}`
-- **Auth Required:** Yes
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "title": "Team Standup",
-    "description": "Daily standup meeting",
-    "start": "2025-01-22T09:00:00Z",
-    "end": "2025-01-22T09:30:00Z",
-    "all_day": 0,
-    "location": "Zoom",
-    "organizer": "manager@example.com",
-    "attendees": ["user1@example.com", "user2@example.com"],
-    "status": "confirmed",
-    "privacy": "public",
-    "recurrence": "none",
-    "reminders": [{ "days": 0, "hours": 0, "minutes": 15 }],
-    "color": "#6366f1",
-    "user_id": "creator-uuid",
-    "created_at": "2025-01-20T10:00:00Z",
-    "updated_at": "2025-01-20T10:00:00Z"
-  }
-  ```
+- **Auth Required:** Any authenticated user
+- Visibility follows list behavior.
 
-#### Create Event
+### Create Event
 
 - **POST** `/api/v1/events`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "title": "Client Meeting",
-    "description": "Quarterly business review",
-    "start": "2025-01-25T14:00:00Z",
-    "end": "2025-01-25T15:30:00Z",
-    "location": "Conference Room A",
-    "attendees": ["client@acme.com", "sales@example.com"],
-    "status": "confirmed",
-    "privacy": "private",
-    "recurrence": "none",
-    "reminders": [{ "days": 1, "hours": 0, "minutes": 0 }],
-    "color": "#f43f5e"
-  }
-  ```
-- **Returns:** Created event object
+- **Auth Required:** Any authenticated user
+- Request schema: `EventCreate`
+- Note: `user_id` defaults to current user.
 
-#### Update Event
+### Update Event
 
 - **PATCH** `/api/v1/events/{event_id}`
-- **Auth Required:** Yes (creator) or Admin
-- **Expected Payload:**
-  ```json
-  {
-    "title": "Updated Meeting Title",
-    "status": "cancelled"
-  }
-  ```
-- **Returns:** Updated event object
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
+- Request schema: `EventUpdate`
 
-#### Delete Event
+### Delete Event
 
 - **DELETE** `/api/v1/events/{event_id}`
-- **Auth Required:** Yes (creator) or Admin
-- **Returns:** `{ status: "success", detail: "Event deleted" }`
+- **Auth Required:** `SUPER_ADMIN`
+
+Event enum values:
+
+- status: `tentative`, `confirmed`, `cancelled`
+- privacy: `public`, `private`, `confidential`
+- recurrence: `none`, `daily`, `weekly`, `monthly`, `yearly`
 
 ---
 
-### Decisions Endpoints
+## Decisions Endpoints
 
 Base path: `/api/v1/decisions`
 
-Decisions have ownership. Users can only see/modify their own unless they are admins.
-
-#### List Decisions
+### List Decisions
 
 - **GET** `/api/v1/decisions`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Decision objects
-- **Permissions:** Admins see all, users see only their own
+- **Auth Required:** Any authenticated user
+- Behavior:
+  - `SUPER_ADMIN` and `MANAGER`: all decisions
+  - others: own decisions only
 
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Choose tech stack for new project",
-    "due_date": "2025-01-31",
-    "user_id": "owner-uuid"
-  }
-]
-```
-
-#### Get Decision
+### Get Decision
 
 - **GET** `/api/v1/decisions/{decision_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "name": "Choose tech stack",
-    "due_date": "2025-01-31",
-    "user_id": "owner-uuid"
-  }
-  ```
+- **Auth Required:** Any authenticated user
+- Behavior follows list visibility.
 
-#### Create Decision
+### Create Decision
 
 - **POST** `/api/v1/decisions`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "name": "Decide on cloud provider",
-    "due_date": "2025-02-15"
-  }
-  ```
-- **Returns:** Created decision object
-- **Note:** `user_id` defaults to current user if not provided
+- **Auth Required:** Any authenticated user
+- Note: `user_id` defaults to current user.
 
-#### Update Decision
+### Update Decision
 
 - **PATCH** `/api/v1/decisions/{decision_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Payload:**
-  ```json
-  {
-    "name": "Decide on AWS vs Azure",
-    "due_date": "2025-02-28"
-  }
-  ```
-- **Returns:** Updated decision object
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
 
-#### Delete Decision
+### Delete Decision
 
 - **DELETE** `/api/v1/decisions/{decision_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Returns:** `{ status: "success", detail: "Decision deleted" }`
+- **Auth Required:** `SUPER_ADMIN`
 
 ---
 
-### Notifications Endpoints
+## Notifications Endpoints
 
 Base path: `/api/v1/notifications`
 
-Notifications provide real-time alerts and a persistent history of events for users.
-
-#### Real-time WebSocket
+### Real-time WebSocket
 
 - **WS** `/api/v1/notifications/ws/{user_id}`
-- **Auth Required:** Yes (via token in query string or browser session)
-- **Protocol:** JSON
-- **Permissions:** Users can only connect to their own specific WebSocket stream.
+- **Current Implementation Note:** endpoint currently does not enforce token/session auth in handler.
+- Recommended production behavior: enforce authenticated identity and user-id match.
 
-**Message Payload Format:**
+### WebSocket/Notifications Access
+
+Current access behavior:
+
+- WebSocket endpoint accepts connections by `user_id` path param and does not currently verify token/session in-handler.
+- `GET /api/v1/notifications` returns notifications only for `current_user.id`.
+- `PUT /api/v1/notifications/{notification_id}/read` allows only the notification recipient.
+
+Current notification delivery patterns (from service usage):
+
+- **New user registration:** sent to `SUPER_ADMIN` users.
+- **User login:** sent to `SUPER_ADMIN` users.
+- **Project create/update:** sent to `MANAGER` and `SUPER_ADMIN` users.
+- **Task create/update:** sent to `MANAGER` and `SUPER_ADMIN` users.
+- **Task assigned/assignment updated:** sent to assigned users.
+- **Note create/update:** sent to `MANAGER` and `SUPER_ADMIN` users.
+- **Note shared/sharing updated:** sent to shared users.
+- **Event create/update:** sent to `MANAGER` and `SUPER_ADMIN` users.
+
+Access matrix (current implementation):
+
+| Action                                   | Super Admin                                 | Manager                                     | Staff                                       | Client/User                                 |
+| ---------------------------------------- | ------------------------------------------- | ------------------------------------------- | ------------------------------------------- | ------------------------------------------- |
+| Connect WS `/notifications/ws/{user_id}` | Allowed (no enforced auth check in handler) | Allowed (no enforced auth check in handler) | Allowed (no enforced auth check in handler) | Allowed (no enforced auth check in handler) |
+| List own notifications                   | Yes                                         | Yes                                         | Yes                                         | Yes                                         |
+| Mark own notification read               | Yes                                         | Yes                                         | Yes                                         | Yes                                         |
+| Read others' notifications               | No                                          | No                                          | No                                          | No                                          |
+
+Message shape:
 
 ```json
 {
   "id": "uuid-string",
   "title": "Task Assigned",
-  "message": "You have been assigned to 'Implement Login API'",
+  "message": "You have been assigned",
   "type": "info",
+  "resource_type": "task",
+  "resource_id": "123",
   "is_read": false,
   "created_at": "2026-02-12T10:00:00Z"
 }
 ```
 
-#### List Notifications
+### List Notifications
 
 - **GET** `/api/v1/notifications`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Notification objects belonging to the current user.
+- **Auth Required:** Any authenticated user
+- Query params: `skip`, `limit`
+- Returns only current user's notifications.
 
-**Example Response:**
-
-```json
-[
-  {
-    "id": "uuid",
-    "recipient_id": "user-uuid",
-    "sender_id": null,
-    "title": "Project Update",
-    "message": "The budget for 'Website Redesign' was updated.",
-    "type": "success",
-    "is_read": false,
-    "created_at": "2026-02-12T01:27:20Z"
-  }
-]
-```
-
-#### Mark as Read
+### Mark Notification as Read
 
 - **PUT** `/api/v1/notifications/{notification_id}/read`
-- **Auth Required:** Yes (recipient only)
-- **Returns:** The updated Notification object.
-
-# Fast Dash API Documentation
-
-**Version:** 1.0.0  
-**Base URL:** `/api/v1`
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Authentication](#authentication)
-3. [Error Handling](#error-handling)
-4. [Endpoints](#endpoints)
-   - [Authentication](#authentication-endpoints)
-   - [Users](#users-endpoints)
-   - [Clients](#clients-endpoints)
-   - [Projects](#projects-endpoints)
-   - [Tasks](#tasks-endpoints)
-   - [Notes](#notes-endpoints)
-   - [Events](#events-endpoints)
-   - [Decisions](#decisions-endpoints)
-   - [Notifications](#notifications-endpoints)
-5. [Permission Model](#permission-model)
-6. [Common Patterns](#common-patterns)
+- **Auth Required:** Any authenticated user (recipient only)
 
 ---
 
-## Overview
+## Admin Endpoints
 
-Fast Dash is a project management API built with FastAPI. It provides comprehensive endpoints for managing users, clients, projects, tasks, notes, events, and decisions.
+### Legacy User Admin
 
-### Key Features
+Base path: `/api/v1/user-admin`
 
-- **JWT Authentication** with optional cookie-based auth for browsers
-- **Role-based access control** (USER, CLIENT, STAFF, MANAGER, ADMIN, SUPER_ADMIN)
-- **Resource ownership** and sharing mechanisms
-- **RESTful API** design with standard CRUD operations
-- **Automatic API documentation** at `/docs` (Swagger UI) and `/redoc`
+#### Create User (legacy)
+
+- **POST** `/api/v1/user-admin/create`
+- **Auth Required:** `SUPER_ADMIN`
+
+#### Update User (legacy)
+
+- **PATCH** `/api/v1/user-admin/{user_id}`
+- **Auth Required:** `SUPER_ADMIN`
+
+### Generic Admin DB
+
+Base path: `/api/v1/admin-db`
+
+#### Generic Table Update
+
+- **PATCH** `/api/v1/admin-db/tables/{table_name}/{pk_column}/{pk_value}`
+- **Auth Required:** `SUPER_ADMIN`
+
+#### Generic Table Create
+
+- **POST** `/api/v1/admin-db/tables/{table_name}`
+- **Auth Required:** `SUPER_ADMIN`
+
+#### Generic Table Delete
+
+- **DELETE** `/api/v1/admin-db/tables/{table_name}/{pk_column}/{pk_value}`
+- **Auth Required:** `SUPER_ADMIN`
 
 ---
 
-## Authentication
+## Frontend Payload Contracts
 
-### Authentication Methods
+This section is frontend-focused and lists concrete request/response payloads for commonly used endpoints.
 
-The API supports two authentication methods:
+### Auth payload contracts
 
-1. **Bearer Token** (for API clients): Include `Authorization: Bearer {token}` header
-2. **HTTP-only Cookie** (for browsers): Automatically set after login
+#### `POST /api/v1/auth/register`
 
-### Registration
-
-**POST** `/api/v1/auth/register`
-
-Register a new user account.
-
-**Request Body:**
+Request JSON:
 
 ```json
 {
@@ -1063,7 +627,7 @@ Register a new user account.
 }
 ```
 
-**Response:** `201 Created`
+Response 200/201 (User object):
 
 ```json
 {
@@ -1071,1004 +635,518 @@ Register a new user account.
   "email": "user@example.com",
   "full_name": "John Doe",
   "roles": ["user"],
-  "created_at": "2025-12-22T12:00:00.000Z"
+  "avatar_url": null,
+  "image": null,
+  "emailVerified": null,
+  "created_at": "2026-02-17T02:00:00Z"
 }
 ```
 
-### Login
+#### `POST /api/v1/auth/login`
 
-**POST** `/api/v1/auth/login`
-
-Authenticate and receive an access token.
-
-**Request Body (form-data):**
+Request form-data:
 
 ```
 username=user@example.com
 password=securepassword123
 ```
 
-**Response:** `200 OK`
+Response JSON:
 
 ```json
 {
-  "access_token": "eyJhbGci...",
+  "access_token": "<jwt>",
   "token_type": "bearer"
 }
 ```
 
-**Note:** The access_token is also set as an HTTP-only cookie named `access_token`.
+### Users payload contracts
 
-### Logout
+#### `POST /api/v1/users`
 
-**GET** `/api/v1/auth/logout`
-
-Clear the authentication cookie and redirect to login page.
-
-**Response:** `307 Temporary Redirect` to `/login`
-
----
-
-## Error Handling
-
-### Standard Error Response
+Request JSON (`UserCreate`):
 
 ```json
 {
-  "detail": "Error message describing what went wrong"
+  "email": "newuser@example.com",
+  "password": "securepassword123",
+  "full_name": "New User",
+  "roles": ["staff"],
+  "avatar_url": "https://example.com/avatar.jpg",
+  "image": null,
+  "emailVerified": null
 }
 ```
 
-### Common HTTP Status Codes
-
-| Code | Meaning               | Description                   |
-| ---- | --------------------- | ----------------------------- |
-| 200  | OK                    | Request successful            |
-| 201  | Created               | Resource created successfully |
-| 400  | Bad Request           | Invalid request data          |
-| 401  | Unauthorized          | Authentication required       |
-| 403  | Forbidden             | Insufficient permissions      |
-| 404  | Not Found             | Resource doesn't exist        |
-| 422  | Unprocessable Entity  | Validation error              |
-| 500  | Internal Server Error | Server error                  |
-
----
-
-### System Endpoints
-
-#### Health Check
-
-- **GET** `/api/v1/health`
-- **Auth Required:** No
-- **Expected Response Payload:**
-  ```json
-  {
-    "status": "ok"
-  }
-  ```
-
----
-
-## Endpoints
-
-### Authentication Endpoints
-
-#### Register User
-
-- **POST** `/api/v1/auth/register`
-- **Auth Required:** No
-- **Expected Payload:**
-  ```json
-  {
-    "email": "user@example.com",
-    "password": "securepassword123",
-    "full_name": "John Doe"
-  }
-  ```
-- **Returns:** User object
-
-#### Login
-
-- **POST** `/api/v1/auth/login`
-- **Auth Required:** No
-- **Expected Payload (form-data):**
-  ```
-  username=user@example.com
-  password=securepassword123
-  ```
-- **Returns:** `{ access_token, token_type }`
-
-#### Logout
-
-- **GET** `/api/v1/auth/logout`
-- **Auth Required:** No (but clears cookies)
-- **Returns:** Redirect to `/login`
-
----
-
-### Users Endpoints
-
-Base path: `/api/v1/users`
-
-#### List All Users
-
-- **GET** `/api/v1/users`
-- **Auth Required:** Admin or Manager
-- **Query Params:** `skip` (default: 0), `limit` (default: 100)
-- **Expected Response Payload:**
-  ```json
-  [
-    {
-      "id": "uuid-1",
-      "email": "user1@example.com",
-      "full_name": "User One",
-      "roles": ["staff"],
-      "created_at": "2025-01-01T00:00:00.000Z"
-    }
-  ]
-  ```
-
-#### Create User
-
-- **POST** `/api/v1/users`
-- **Auth Required:** Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "email": "newuser@example.com",
-    "password": "securepassword123",
-    "full_name": "New User",
-    "roles": ["staff"],
-    "avatar_url": "https://example.com/avatar.jpg"
-  }
-  ```
-- **Returns:** User object
-
-#### Get Current User
-
-- **GET** `/api/v1/users/me`
-- **Auth Required:** Yes
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": "current-user-uuid",
-    "email": "me@example.com",
-    "full_name": "My Name",
-    "roles": ["user"],
-    "created_at": "2025-12-23T10:00:00.000Z"
-  }
-  ```
-
-#### Update Current User
-
-- **PUT** `/api/v1/users/me`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "full_name": "Updated Name",
-    "password": "newsecurepassword123",
-    "avatar_url": "https://example.com/new-avatar.jpg"
-  }
-  ```
-- **Returns:** Updated user profile
-
-**Example Request:**
-
-```json
-{
-  "full_name": "Jane Smith",
-  "avatar_url": "https://example.com/avatar.jpg"
-}
-```
-
-#### Get User by ID
-
-- **GET** `/api/v1/users/{user_id}`
-- **Auth Required:** Yes (own profile) or Admin
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": "user-uuid",
-    "email": "user@example.com",
-    "full_name": "John Doe",
-    "roles": ["user"],
-    "created_at": "2025-12-23T10:00:00.000Z"
-  }
-  ```
-
-#### Update User
-
-- **PUT** `/api/v1/users/{user_id}`
-- **Auth Required:** Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "email": "updated@example.com",
-    "full_name": "Updated Name",
-    "roles": ["admin"]
-  }
-  ```
-- **Returns:** Updated user object
-
-#### Delete User
-
-- **DELETE** `/api/v1/users/{user_id}`
-- **Auth Required:** Admin only
-- **Returns:** Deleted user object
-- **Note:** Cannot delete yourself
-
----
-
-### Clients Endpoints
-
-Base path: `/api/v1/clients`
-
-Clients are shared resources representing companies or organizations.
-
-#### List Clients
-
-- **GET** `/api/v1/clients`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Client objects
-- **Permissions:** All authenticated users can view
-
-**Example Response:**
-
-```json
-[
-  {
-    "id": "uuid",
-    "company_name": "Acme Corporation",
-    "contact_person_name": "John Smith",
-    "contact_email": "john@acme.com",
-    "website_url": "https://acme.com",
-    "created_at": "2025-01-01T00:00:00.000Z"
-  }
-]
-```
-
-#### Get Client
-
-- **GET** `/api/v1/clients/{client_id}`
-- **Auth Required:** Yes
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": "uuid",
-    "company_name": "Acme Corporation",
-    "contact_person_name": "John Smith",
-    "contact_email": "john@acme.com",
-    "website_url": "https://acme.com",
-    "created_at": "2025-01-01T00:00:00.000Z"
-  }
-  ```
-
-#### Create Client
-
-- **POST** `/api/v1/clients`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "company_name": "New Client Ltd",
-    "contact_person_name": "Jane Doe",
-    "contact_email": "jane@example.com",
-    "website_url": "https://example.com"
-  }
-  ```
-- **Returns:** Client object
-
-#### Update Client
-
-- **PATCH** `/api/v1/clients/{client_id}`
-- **Auth Required:** Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "company_name": "Updated Company Name",
-    "contact_person_name": "New Contact"
-  }
-  ```
-- **Returns:** Updated client object
-
-#### Delete Client
-
-- **DELETE** `/api/v1/clients/{client_id}`
-- **Auth Required:** Admin only
-- **Returns:** `{ status: "success", detail: "Client deleted" }`
-
----
-
-### Projects Endpoints
-
-Base path: `/api/v1/projects`
-
-Projects have ownership controls. Users can only see/modify their own projects unless they are admins.
-
-#### List Projects
-
-- **GET** `/api/v1/projects`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Project objects
-- **Permissions:** Admins see all, users see only their own
-
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Website Redesign",
-    "key": "PROJ-001",
-    "description": "Complete redesign of company website",
-    "status": "in_progress",
-    "priority": "high",
-    "owner_id": "user-uuid",
-    "client_id": "client-uuid",
-    "start_date": "2025-01-01",
-    "end_date": "2025-03-31",
-    "budget": 50000,
-    "spent": 15000,
-    "currency": "USD",
-    "billing_type": "billable",
-    "is_archived": 0,
-    "created_at": "2025-01-01T00:00:00.000Z",
-    "updated_at": "2025-01-15T10:30:00.000Z"
-  }
-]
-```
-
-**Field Reference:**
-
-- `status`: `"planning"`, `"in_progress"`, `"completed"`, `"on_hold"`
-- `priority`: `"low"`, `"medium"`, `"high"`
-- `billing_type`: `"billable"`, `"non_billable"`
-- `budget` / `spent`: Amounts in smallest currency unit (cents for USD)
-
-#### Get Project
-
-- **GET** `/api/v1/projects/{project_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "name": "Website Redesign",
-    "key": "PROJ-001",
-    "description": "Complete redesign",
-    "status": "in_progress",
-    "priority": "high",
-    "owner_id": "user-uuid",
-    "client_id": "client-uuid",
-    "start_date": "2025-01-01",
-    "end_date": "2025-03-31",
-    "budget": 50000,
-    "spent": 15000,
-    "currency": "USD",
-    "billing_type": "billable",
-    "is_archived": 0,
-    "created_at": "2025-01-01T00:00:00.000Z",
-    "updated_at": "2025-01-15T10:30:00.000Z"
-  }
-  ```
-
-#### Create Project
-
-- **POST** `/api/v1/projects`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "name": "Mobile App Development",
-    "key": "PROJ-002",
-    "description": "Build iOS and Android apps",
-    "status": "planning",
-    "priority": "high",
-    "client_id": "client-uuid",
-    "start_date": "2025-02-01",
-    "end_date": "2025-06-30",
-    "budget": 100000,
-    "currency": "USD",
-    "billing_type": "billable"
-  }
-  ```
-- **Returns:** Created project object
-- **Note:** `owner_id` defaults to current user if not provided
-
-#### Update Project
-
-- **PATCH** `/api/v1/projects/{project_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Payload:**
-  ```json
-  {
-    "status": "completed",
-    "spent": 20000,
-    "is_archived": 0
-  }
-  ```
-- **Returns:** Updated project object
-
-#### Delete Project
-
-- **DELETE** `/api/v1/projects/{project_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Returns:** `{ status: "success", detail: "Project deleted" }`
-
----
-
-### Tasks Endpoints
-
-Base path: `/api/v1/tasks`
-
-Tasks support multi-user assignment through the `assignees` field.
-
-#### List Tasks
-
-- **GET** `/api/v1/tasks`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`, `project_id?`
-- **Returns:** Array of `TaskReadWithAssignees` objects
-- **Permissions:** Admins see all. Users see tasks they created, are assigned to, or belong to their projects.
-
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Design homepage mockup",
-    "description": "Create high-fidelity mockup for new homepage",
-    "due_date": "2025-01-30",
-    "priority": "high",
-    "status": "in_progress",
-    "project_id": 1,
-    "user_id": "creator-uuid",
-    "created_at": "2025-12-22T12:00:00.000Z",
-    "updated_at": "2025-12-22T13:00:00.000Z",
-    "task_assignees": [
-      {
-        "task_id": 1,
-        "user_id": "user-uuid-1"
-      }
-    ]
-  }
-]
-```
-
-**Field Reference:**
-
-- `priority`: `"low"`, `"medium"`, `"high"`
-- `status`: Customizable per workflow (e.g., `"task"`, `"in_progress"`, `"completed"`, `"waiting"`)
-- `task_assignees`: Array of objects containing `task_id` and `user_id`
-- `user_id`: UUID of the task creator
-
-#### Get Task
-
-- **GET** `/api/v1/tasks/{task_id}`
-- **Auth Required:** Yes
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "name": "Design homepage mockup",
-    "description": "Create high-fidelity mockup",
-    "due_date": "2025-01-30",
-    "priority": "high",
-    "status": "in_progress",
-    "project_id": 1,
-    "created_at": "2025-12-22T12:00:00.000Z",
-    "updated_at": "2025-12-22T13:00:00.000Z",
-    "task_assignees": [
-      {
-        "task_id": 1,
-        "user_id": "user-uuid-1"
-      }
-    ],
-    "user_id": "creator-uuid"
-  }
-  ```
-
-#### Create Task
-
-- **POST** `/api/v1/tasks`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "name": "Implement login API",
-    "description": "Create JWT authentication endpoints",
-    "due_date": "2025-02-01",
-    "priority": "high",
-    "status": "task",
-    "project_id": 1,
-    "assignees": ["user-uuid-1", "user-uuid-2"]
-  }
-  ```
-- **Returns:** `TaskReadWithAssignees` object
-- **Note:** `user_id` is automatically set to the current user.
-
-#### Update Task
-
-- **PATCH** `/api/v1/tasks/{task_id}`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "status": "in_progress",
-    "assignees": ["user-uuid-3"]
-  }
-  ```
-- **Returns:** Updated `TaskReadWithAssignees` object
-
-**Note:** Setting `assignees` to `[]` removes all assignees. Omitting `assignees` leaves them unchanged.
-
-#### Delete Task
-
-- **DELETE** `/api/v1/tasks/{task_id}`
-- **Auth Required:** Yes
-- **Returns:** `{ status: "success", detail: "Task deleted" }`
-
----
-
-### Notes Endpoints
-
-Base path: `/api/v1/notes`
-
-Notes support ownership and sharing with other users.
-
-#### List Notes
-
-- **GET** `/api/v1/notes`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`, `task_id?`
-- **Returns:** Array of Note objects
-- **Permissions:** Admins see all, users see only their own
-
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "title": "Meeting Notes - Jan 15",
-    "content": "Discussed project timeline and deliverables...",
-    "type": "note",
-    "tags": "[\"meeting\", \"important\"]",
-    "is_pinned": 1,
-    "is_archived": 0,
-    "is_favorite": 0,
-    "user_id": "owner-uuid",
-    "task_id": null,
-    "created_at": "2025-01-15T00:00:00.000Z",
-    "updated_at": "2025-01-15T10:00:00.000Z"
-  }
-]
-```
-
-**Field Reference:**
-
-- `type`: `"note"`, `"checklist"`, `"todo"`, `"journal"`
-- `tags`: JSON string array (e.g., `'["tag1", "tag2"]'`)
-- `is_pinned`, `is_archived`, `is_favorite`: 0 or 1 (boolean flags)
-
-#### Get Note
-
-- **GET** `/api/v1/notes/{note_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "title": "Meeting Notes - Jan 15",
-    "content": "Discussed project timeline...",
-    "type": "note",
-    "tags": "[\"meeting\", \"important\"]",
-    "is_pinned": 1,
-    "is_archived": 0,
-    "is_favorite": 0,
-    "user_id": "owner-uuid",
-    "task_id": null,
-    "created_at": "2025-01-15T00:00:00.000Z",
-    "updated_at": "2025-01-15T10:00:00.000Z"
-  }
-  ```
-
-#### Create Note
-
-- **POST** `/api/v1/notes`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "title": "Project Ideas",
-    "content": "Brainstorming session results...",
-    "type": "note",
-    "tags": "[\"brainstorm\", \"ideas\"]",
-    "is_pinned": 1,
-    "shared_with": ["user-uuid-1", "user-uuid-2"]
-  }
-  ```
-- **Returns:** Created note object
-
-#### Update Note
-
-- **PATCH** `/api/v1/notes/{note_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Payload:**
-  ```json
-  {
-    "content": "Updated content...",
-    "is_pinned": 0,
-    "shared_with": ["user-uuid-3"]
-  }
-  ```
-- **Returns:** Updated note object
-
-#### Delete Note
-
-- **DELETE** `/api/v1/notes/{note_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Returns:** `{ status: "success", detail: "Note deleted" }`
-
----
-
-### Events Endpoints
-
-Base path: `/api/v1/events`
-
-Events are shared calendar resources. All users can view, but only creators or admins can modify.
-
-#### List Events
-
-- **GET** `/api/v1/events`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Event objects
-- **Permissions:** All users can view
-
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "title": "Team Standup",
-    "description": "Daily standup meeting",
-    "start": "2025-01-22T09:00:00Z",
-    "end": "2025-01-22T09:30:00Z",
-    "all_day": 0,
-    "location": "Zoom",
-    "organizer": "manager@example.com",
-    "attendees": "[\"user1@example.com\", \"user2@example.com\"]",
-    "status": "confirmed",
-    "privacy": "public",
-    "color": "#6366f1",
-    "user_id": "creator-uuid",
-    "created_at": "2025-01-20T10:00:00Z",
-    "updated_at": "2025-01-20T10:00:00Z"
-  }
-]
-```
-
-**Field Reference:** (Note: `status`, `privacy`, and `recurrence` are case-insensitive)
-
-- `start` / `end`: ISO 8601 datetime strings (required)
-- `all_day`: 0 (time-specific) or 1 (all-day event)
-- `status`: `"tentative"`, `"confirmed"`, `"cancelled"`
-- `privacy`: `"public"`, `"private"`, `"confidential"`
-- `attendees`: JSON array of email strings (e.g., `["user1@example.com", "user2@example.com"]`)
-- `recurrence`: `"none"`, `"daily"`, `"weekly"`, `"monthly"`, `"yearly"`
-- `reminders`: JSON array of EventReminder objects `{ days, hours, minutes }`
-- `color`: HEX color string (e.g., `"#6366f1"`)
-- `user_id`: UUID of the event creator
-- `created_at` / `updated_at`: ISO 8601 timestamp strings
-
-#### Get Event
-
-- **GET** `/api/v1/events/{event_id}`
-- **Auth Required:** Yes
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "title": "Team Standup",
-    "description": "Daily standup meeting",
-    "start": "2025-01-22T09:00:00Z",
-    "end": "2025-01-22T09:30:00Z",
-    "all_day": 0,
-    "location": "Zoom",
-    "organizer": "manager@example.com",
-    "attendees": ["user1@example.com", "user2@example.com"],
-    "status": "confirmed",
-    "privacy": "public",
-    "recurrence": "none",
-    "reminders": [{ "days": 0, "hours": 0, "minutes": 15 }],
-    "color": "#6366f1",
-    "user_id": "creator-uuid",
-    "created_at": "2025-01-20T10:00:00Z",
-    "updated_at": "2025-01-20T10:00:00Z"
-  }
-  ```
-
-#### Create Event
-
-- **POST** `/api/v1/events`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "title": "Client Meeting",
-    "description": "Quarterly business review",
-    "start": "2025-01-25T14:00:00Z",
-    "end": "2025-01-25T15:30:00Z",
-    "location": "Conference Room A",
-    "attendees": ["client@acme.com", "sales@example.com"],
-    "status": "confirmed",
-    "privacy": "private",
-    "recurrence": "none",
-    "reminders": [{ "days": 1, "hours": 0, "minutes": 0 }],
-    "color": "#f43f5e"
-  }
-  ```
-- **Returns:** Created event object
-
-#### Update Event
-
-- **PATCH** `/api/v1/events/{event_id}`
-- **Auth Required:** Yes (creator) or Admin
-- **Expected Payload:**
-  ```json
-  {
-    "title": "Updated Meeting Title",
-    "status": "cancelled"
-  }
-  ```
-- **Returns:** Updated event object
-
-#### Delete Event
-
-- **DELETE** `/api/v1/events/{event_id}`
-- **Auth Required:** Yes (creator) or Admin
-- **Returns:** `{ status: "success", detail: "Event deleted" }`
-
----
-
-### Decisions Endpoints
-
-Base path: `/api/v1/decisions`
-
-Decisions have ownership. Users can only see/modify their own unless they are admins.
-
-#### List Decisions
-
-- **GET** `/api/v1/decisions`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Decision objects
-- **Permissions:** Admins see all, users see only their own
-
-**Example Response:**
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Choose tech stack for new project",
-    "due_date": "2025-01-31",
-    "user_id": "owner-uuid"
-  }
-]
-```
-
-#### Get Decision
-
-- **GET** `/api/v1/decisions/{decision_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Response Payload:**
-  ```json
-  {
-    "id": 1,
-    "name": "Choose tech stack",
-    "due_date": "2025-01-31",
-    "user_id": "owner-uuid"
-  }
-  ```
-
-#### Create Decision
-
-- **POST** `/api/v1/decisions`
-- **Auth Required:** Yes
-- **Expected Payload:**
-  ```json
-  {
-    "name": "Decide on cloud provider",
-    "due_date": "2025-02-15"
-  }
-  ```
-- **Returns:** Created decision object
-- **Note:** `user_id` defaults to current user if not provided
-
-#### Update Decision
-
-- **PATCH** `/api/v1/decisions/{decision_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Expected Payload:**
-  ```json
-  {
-    "name": "Decide on AWS vs Azure",
-    "due_date": "2025-02-28"
-  }
-  ```
-- **Returns:** Updated decision object
-
-#### Delete Decision
-
-- **DELETE** `/api/v1/decisions/{decision_id}`
-- **Auth Required:** Yes (owner) or Admin
-- **Returns:** `{ status: "success", detail: "Decision deleted" }`
-
----
-
-### Notifications Endpoints
-
-Base path: `/api/v1/notifications`
-
-Notifications provide real-time alerts and a persistent history of events for users.
-
-#### Real-time WebSocket
-
-- **WS** `/api/v1/notifications/ws/{user_id}`
-- **Auth Required:** Yes (via token in query string or browser session)
-- **Protocol:** JSON
-- **Permissions:** Users can only connect to their own specific WebSocket stream.
-
-**Message Payload Format:**
+Response JSON (`UserRead`):
 
 ```json
 {
   "id": "uuid-string",
-  "title": "Task Assigned",
-  "message": "You have been assigned to 'Implement Login API'",
-  "type": "info",
-  "resource_type": "task",
-  "resource_id": "task-uuid",
-  "is_read": false,
-  "created_at": "2026-02-12T10:00:00Z"
+  "email": "newuser@example.com",
+  "full_name": "New User",
+  "roles": ["staff"],
+  "avatar_url": "https://example.com/avatar.jpg",
+  "image": null,
+  "emailVerified": null,
+  "created_at": "2026-02-17T02:00:00Z"
 }
 ```
 
-#### List Notifications
+#### `PUT /api/v1/users/me` and `PUT /api/v1/users/{user_id}`
 
-- **GET** `/api/v1/notifications`
-- **Auth Required:** Yes
-- **Query Params:** `skip`, `limit`
-- **Returns:** Array of Notification objects belonging to the current user.
+Request JSON (`UserUpdate`, partial allowed):
 
-**Example Response:**
+```json
+{
+  "full_name": "Updated Name",
+  "password": "new-password",
+  "avatar_url": "https://example.com/new-avatar.jpg"
+}
+```
+
+Response JSON: same `UserRead` shape above.
+
+### Clients payload contracts
+
+#### `POST /api/v1/clients`
+
+Request JSON:
+
+```json
+{
+  "company_name": "Acme Corp",
+  "contact_person_name": "Jane Doe",
+  "contact_email": "jane@acme.com",
+  "website_url": "https://acme.com"
+}
+```
+
+Response JSON:
+
+```json
+{
+  "id": "uuid-string",
+  "company_name": "Acme Corp",
+  "contact_person_name": "Jane Doe",
+  "contact_email": "jane@acme.com",
+  "website_url": "https://acme.com",
+  "created_at": "2026-02-17T02:00:00Z"
+}
+```
+
+#### `PATCH /api/v1/clients/{client_id}`
+
+Request JSON (partial):
+
+```json
+{
+  "company_name": "Acme Corporation",
+  "contact_person_name": "John Doe"
+}
+```
+
+Response JSON: updated Client object (same shape as above).
+
+### Projects payload contracts
+
+#### `POST /api/v1/projects`
+
+Request JSON:
+
+```json
+{
+  "name": "Website Redesign",
+  "key": "PROJ-001",
+  "description": "Landing page redesign",
+  "status": "planning",
+  "priority": "high",
+  "tags": "[\"frontend\", \"priority\"]",
+  "client_id": "client-uuid",
+  "start_date": "2026-02-20",
+  "end_date": "2026-05-20",
+  "budget": 50000,
+  "spent": 0,
+  "currency": "USD",
+  "billing_type": "non_billable",
+  "is_archived": 0
+}
+```
+
+Response JSON: Project object with `id`, `created_at`, `updated_at`.
+
+#### `PATCH /api/v1/projects/{project_id}`
+
+Request JSON (partial):
+
+```json
+{
+  "status": "in_progress",
+  "spent": 12000,
+  "priority": "medium"
+}
+```
+
+Response JSON: updated Project object.
+
+### Tasks payload contracts
+
+#### `POST /api/v1/tasks`
+
+Request JSON (dynamic dict):
+
+```json
+{
+  "name": "Implement auth UI",
+  "description": "Build login and register screens",
+  "due_date": "2026-03-01",
+  "priority": "high",
+  "status": "TODO",
+  "qa_required": false,
+  "review_required": true,
+  "depends_on_id": null,
+  "project_id": 1,
+  "assignees": ["user-uuid-1", "user-uuid-2"]
+}
+```
+
+Response JSON (`TaskReadWithTimeLogs`):
+
+```json
+{
+  "id": 12,
+  "name": "Implement auth UI",
+  "description": "Build login and register screens",
+  "due_date": "2026-03-01",
+  "priority": "high",
+  "status": "TODO",
+  "qa_required": false,
+  "review_required": true,
+  "depends_on_id": null,
+  "project_id": 1,
+  "user_id": "creator-uuid",
+  "created_at": "2026-02-17T02:00:00Z",
+  "updated_at": "2026-02-17T02:00:00Z",
+  "task_assignees": [
+    { "task_id": 12, "user_id": "user-uuid-1" },
+    { "task_id": 12, "user_id": "user-uuid-2" }
+  ],
+  "time_logs": [],
+  "total_hours": 0.0
+}
+```
+
+#### `PATCH /api/v1/tasks/{task_id}`
+
+Request JSON (partial):
+
+```json
+{
+  "status": "IN_PROGRESS",
+  "assignees": ["user-uuid-3"]
+}
+```
+
+Response JSON: updated `TaskReadWithTimeLogs` object.
+
+#### Timer endpoints
+
+- `POST /api/v1/tasks/{task_id}/timer/start`
+- `POST /api/v1/tasks/{task_id}/timer/pause`
+- `POST /api/v1/tasks/{task_id}/timer/stop`
+
+Response JSON (`TaskTimeLog`):
+
+```json
+{
+  "id": 101,
+  "task_id": 12,
+  "user_id": "user-uuid-1",
+  "start_time": "2026-02-17T02:10:00Z",
+  "end_time": "2026-02-17T02:35:00Z",
+  "is_break": false
+}
+```
+
+### Notes payload contracts
+
+#### `POST /api/v1/notes`
+
+Request JSON (dynamic dict):
+
+```json
+{
+  "title": "Sprint Notes",
+  "content": "Decisions and action items",
+  "type": "note",
+  "tags": ["sprint", "meeting"],
+  "is_pinned": 1,
+  "is_archived": 0,
+  "is_favorite": 0,
+  "task_id": 12,
+  "shared_with": ["user-uuid-2", "user-uuid-3"]
+}
+```
+
+Response JSON (`NoteReadWithShared`):
+
+```json
+{
+  "id": 55,
+  "title": "Sprint Notes",
+  "content": "Decisions and action items",
+  "type": "note",
+  "tags": "[\"sprint\", \"meeting\"]",
+  "is_pinned": 1,
+  "is_archived": 0,
+  "is_favorite": 0,
+  "user_id": "owner-uuid",
+  "task_id": 12,
+  "created_at": "2026-02-17T02:00:00Z",
+  "updated_at": "2026-02-17T02:00:00Z",
+  "shared_with": [
+    {
+      "id": "user-uuid-2",
+      "email": "u2@example.com",
+      "full_name": "User Two",
+      "roles": ["staff"],
+      "created_at": "2026-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+#### `PATCH /api/v1/notes/{note_id}`
+
+Request JSON (partial):
+
+```json
+{
+  "content": "Updated content",
+  "shared_with": []
+}
+```
+
+Response JSON: updated `NoteReadWithShared` object.
+
+### Events payload contracts
+
+#### `POST /api/v1/events`
+
+Request JSON (`EventCreate`):
+
+```json
+{
+  "title": "Sprint Planning",
+  "description": "Planning meeting",
+  "start": "2026-02-20T10:00:00Z",
+  "end": "2026-02-20T11:00:00Z",
+  "all_day": false,
+  "location": "Zoom",
+  "organizer": "lead@example.com",
+  "attendees": ["user1@example.com", "user2@example.com"],
+  "status": "confirmed",
+  "privacy": "private",
+  "recurrence": "none",
+  "reminders": [{ "days": 0, "hours": 0, "minutes": 30 }],
+  "color": "#22c55e"
+}
+```
+
+Response JSON (`EventRead`):
+
+```json
+{
+  "id": 8,
+  "title": "Sprint Planning",
+  "description": "Planning meeting",
+  "start": "2026-02-20T10:00:00Z",
+  "end": "2026-02-20T11:00:00Z",
+  "all_day": 0,
+  "location": "Zoom",
+  "organizer": "lead@example.com",
+  "attendees": ["user1@example.com", "user2@example.com"],
+  "status": "confirmed",
+  "privacy": "private",
+  "recurrence": "none",
+  "reminders": [{ "days": 0, "hours": 0, "minutes": 30 }],
+  "color": "#22c55e",
+  "user_id": "creator-uuid",
+  "created_at": "2026-02-17T02:00:00Z",
+  "updated_at": "2026-02-17T02:00:00Z"
+}
+```
+
+#### `PATCH /api/v1/events/{event_id}`
+
+Request JSON (`EventUpdate`, partial):
+
+```json
+{
+  "title": "Sprint Planning (Updated)",
+  "status": "cancelled"
+}
+```
+
+Response JSON: updated `EventRead` object.
+
+### Decisions payload contracts
+
+#### `POST /api/v1/decisions`
+
+Request JSON:
+
+```json
+{
+  "name": "Choose hosting provider",
+  "due_date": "2026-03-10"
+}
+```
+
+Response JSON:
+
+```json
+{
+  "id": 21,
+  "name": "Choose hosting provider",
+  "due_date": "2026-03-10",
+  "user_id": "owner-uuid"
+}
+```
+
+#### `PATCH /api/v1/decisions/{decision_id}`
+
+Request JSON (partial):
+
+```json
+{
+  "name": "Choose AWS region",
+  "due_date": "2026-03-12"
+}
+```
+
+Response JSON: updated Decision object.
+
+### Notifications payload contracts
+
+#### `GET /api/v1/notifications`
+
+Response JSON:
 
 ```json
 [
   {
-    "id": "uuid",
+    "id": "uuid-string",
     "recipient_id": "user-uuid",
-    "sender_id": null,
-    "title": "Project Update",
-    "message": "The budget for 'Website Redesign' was updated.",
-    "type": "success",
-    "resource_type": "project",
-    "resource_id": "project-uuid",
+    "sender_id": "user-uuid-or-null",
+    "title": "Task Assigned",
+    "message": "You have been assigned to task 'Implement auth UI'",
+    "type": "info",
     "is_read": false,
-    "created_at": "2026-02-12T01:27:20Z"
+    "created_at": "2026-02-17T02:00:00Z"
   }
 ]
 ```
 
-#### Mark as Read
+#### `PUT /api/v1/notifications/{notification_id}/read`
 
-- **PUT** `/api/v1/notifications/{notification_id}/read`
-- **Auth Required:** Yes (recipient only)
-- **Returns:** The updated Notification object.
+Request body: none.
 
-### 2. Notification Matrix (Who gets what)
+Response JSON (`NotificationRead`):
 
-| Event                        | Super Admin | Admin/Manager |  Staff   | Client/User |
-| :--------------------------- | :---------: | :-----------: | :------: | :---------: |
-| **New User Signup**          |  Receives   |       -       |    -     |      -      |
-| **User Login**               |  Receives   |       -       |    -     |      -      |
-| **Task: Created/Updated**    |  Receives   |   Receives    |    -     |      -      |
-| **Task: Assigned to You**    |  Receives   |   Receives    | Receives |  Receives   |
-| **Note: Created/Updated**    |  Receives   |   Receives    |    -     |      -      |
-| **Note: Shared with You**    |  Receives   |   Receives    | Receives |  Receives   |
-| **Project: Created/Updated** |  Receives   |   Receives    |    -     |      -      |
-| **Event: Created/Updated**   |  Receives   |   Receives    |    -     |      -      |
+```json
+{
+  "id": "uuid-string",
+  "recipient_id": "user-uuid",
+  "sender_id": null,
+  "title": "Task Assigned",
+  "message": "You have been assigned to task 'Implement auth UI'",
+  "type": "info",
+  "is_read": true,
+  "created_at": "2026-02-17T02:00:00Z"
+}
+```
 
----
+### Admin payload contracts
 
-> [!NOTE]
-> **Super Admins** and **Managers** act as observers for all operational changes. **Staff** and **Clients** receive targeted "Actionable" notifications only when directly involved.
+#### `POST /api/v1/user-admin/create`
 
----
+Request JSON: same as `POST /api/v1/users` (`UserCreate`).
+Response JSON: `UserRead` object.
 
-> [!IMPORTANT]
-> This matrix will be implemented across all API endpoints once validated.
+#### `PATCH /api/v1/user-admin/{user_id}`
 
----
+Request JSON: same as `UserUpdate` partial.
+Response JSON: `UserRead` object.
 
-### Admin Endpoints
+#### `PATCH /api/v1/admin-db/tables/{table_name}/{pk_column}/{pk_value}`
 
-These endpoints are restricted to Administrators and Super Administrators.
+Request JSON:
 
-#### Legacy Create User
+```json
+{
+  "column_name_1": "new_value",
+  "column_name_2": 123
+}
+```
 
-- **POST** `/api/v1/user-admin/create`
-- **Auth Required:** Admin only
-- **Expected Payload:** Same as **POST** `/api/v1/users`
-- **Returns:** User object
+Response JSON:
 
-#### Generic Table Update
+```json
+{
+  "status": "success",
+  "rows_affected": 1
+}
+```
 
-- **PATCH** `/api/v1/admin-db/tables/{table_name}/{pk_column}/{pk_value}`
-- **Auth Required:** Super Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "column_name_1": "new_value",
-    "column_name_2": 123
-  }
-  ```
-- **Returns:** `{ status: "success", rows_affected: 1 }`
+#### `POST /api/v1/admin-db/tables/{table_name}`
 
-#### Generic Table Create
+Request JSON: dynamic table fields.
+Response JSON:
 
-- **POST** `/api/v1/admin-db/tables/{table_name}`
-- **Auth Required:** Super Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "id": "optional-uuid",
-    "column_name_1": "value1",
-    "column_name_2": "value2"
-  }
-  ```
-- **Returns:** `{ status: "success", detail: "Record created" }`
+```json
+{
+  "status": "success",
+  "detail": "Record created"
+}
+```
 
-#### Generic Table Delete
+#### `DELETE /api/v1/admin-db/tables/{table_name}/{pk_column}/{pk_value}`
 
-- **DELETE** `/api/v1/admin-db/tables/{table_name}/{pk_column}/{pk_value}`
-- **Auth Required:** Super Admin only
-- **Returns:** `{ status: "success", detail: "Record deleted" }`
+Request body: none.
+Response JSON:
+
+```json
+{
+  "status": "success",
+  "detail": "Record deleted"
+}
+```
 
 ---
 
 ## Permission Model
 
-### User Roles
+### Roles (current code)
 
-| Role          | Access Level                                     |
-| ------------- | ------------------------------------------------ |
-| `USER`        | Basic user, minimal permissions                  |
-| `CLIENT`      | External client with limited access              |
-| `STAFF`       | Internal staff member (default for new users)    |
-| `MANAGER`     | Project manager with elevated permissions        |
-| `ADMIN`       | Administrator with full access to most resources |
-| `SUPER_ADMIN` | Super administrator with complete system access  |
+- `USER`
+- `CLIENT`
+- `STAFF`
+- `MANAGER`
+- `SUPER_ADMIN`
 
-### Resource Permissions Summary
+### Effective access summary
 
-| Resource          | View                    | Create    | Update                  | Delete           |
-| ----------------- | ----------------------- | --------- | ----------------------- | ---------------- |
-| **Users**         | Self, Admin, or Manager | Admin     | Self (limited) or Admin | Admin (not self) |
-| **Clients**       | All users               | All users | Admin                   | Admin            |
-| **Projects**      | Owner or Admin          | All users | Owner or Admin          | Owner or Admin   |
-| **Tasks**         | Own/Shared or Admin     | All users | Admin/Manager           | Super Admin      |
-| **Notes**         | Owner or Admin          | All users | Owner or Admin          | Owner or Admin   |
-| **Events**        | All users               | All users | Creator or Admin        | Creator or Admin |
-| **Decisions**     | Owner or Admin          | All users | Owner or Admin          | Owner or Admin   |
-| **Notifications** | Recipient or Admin      | System    | Recipient (mark read)   | Admin            |
+| Resource      | View                                       | Create               | Update                       | Delete      |
+| ------------- | ------------------------------------------ | -------------------- | ---------------------------- | ----------- |
+| Users         | Self, Manager, Super Admin                 | Super Admin          | Self (`/me`) or Super Admin  | Super Admin |
+| Clients       | Manager, Super Admin                       | Manager, Super Admin | Manager, Super Admin         | Super Admin |
+| Projects      | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |
+| Tasks         | Any auth (scoped by role/owner/assignment) | Any auth             | Manager, Super Admin         | Super Admin |
+| Notes         | Any auth (scoped by role/owner/share)      | Any auth             | Manager, Super Admin         | Super Admin |
+| Events        | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |
+| Decisions     | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |
+| Notifications | Recipient only                             | System/service       | Recipient only (`mark read`) | Not exposed |
 
 ---
 
@@ -2076,308 +1154,59 @@ These endpoints are restricted to Administrators and Super Administrators.
 
 ### Pagination
 
-Most list endpoints support pagination via query parameters:
+List endpoints typically support:
 
-```
-GET /api/v1/projects?skip=20&limit=10
-```
-
-- `skip`: Number of records to skip (default: 0)
-- `limit`: Maximum records to return (default: 100)
+- `skip` (default `0`)
+- `limit` (default `100`)
 
 ### Filtering
 
-Some endpoints support filtering:
+Supported filters include:
 
-```
-GET /api/v1/tasks?project_id=1
-GET /api/v1/notes?task_id=5
-```
+- `GET /api/v1/tasks?project_id=<id>`
+- `GET /api/v1/notes?task_id=<id>`
 
-### Partial Updates
+### Partial updates
 
-Use PATCH for partial updates. Only include fields you want to change:
+PATCH endpoints expect only changed fields.
 
-```json
-PATCH /api/v1/projects/1
-{
-  "status": "completed"
-}
-```
+### Multi-user fields
 
-### Multi-User Assignment/Sharing
+- Tasks: `assignees` (array of user IDs)
+- Notes: `shared_with` (array of user IDs)
 
-Tasks and Notes support assigning/sharing with multiple users:
+Behavior:
 
-**Tasks** use `assignees` array:
+- send `[]` to clear associations
+- omit field to keep existing associations
 
-```json
-{
-  "assignees": ["user-uuid-1", "user-uuid-2"]
-}
-```
-
-**Notes** use `shared_with` array:
-
-```json
-{
-  "shared_with": ["user-uuid-1", "user-uuid-2"]
-}
-```
-
-- Pass an array to set/replace assignees/shares
-- Pass `[]` to remove all assignees/shares
-- Omit the field to leave unchanged
-
-### JSON String Arrays
-
-Some fields store JSON arrays as strings:
+### JSON string array fields (storage-level)
 
 - `Project.tags`
 - `Event.attendees`
 - `Event.reminders`
 - `Note.tags`
 
-**Format:** `'["item1", "item2", "item3"]'`
+API may accept list input for some endpoints (`EventCreate/EventUpdate`, note/task dynamic payload handlers), then serialize internally.
 
-**Example:**
+### Date/time formats
 
-```json
-{
-  "tags": "[\"urgent\", \"backend\", \"api\"]"
-}
-```
+- Dates: `YYYY-MM-DD`
+- Datetimes: ISO 8601 strings
 
-### Date Formats
+### Currency
 
-- **Dates:** ISO 8601 format `YYYY-MM-DD` (e.g., `"2025-01-31"`)
-- **Datetimes:** ISO 8601 format `YYYY-MM-DDTHH:MM:SSZ` (e.g., `"2025-01-22T14:30:00Z"`)
-
-### Currency Amounts
-
-Budget and spent amounts are in the smallest currency unit:
-
-- USD: cents (e.g., `$500.00` = `50000` cents)
-- EUR: cents (e.g., `€250.50` = `25050` cents)
+Budget/spent are stored as smallest currency unit (for example cents).
 
 ---
 
-## Interactive API Documentation
+## Interactive API Docs
 
-FastAPI provides automatic interactive documentation:
-
-- **Swagger UI:** `http://your-domain.com/docs`
-- **ReDoc:** `http://your-domain.com/redoc`
-
-These interfaces allow you to:
-
-- View all endpoints
-- See request/response schemas
-- Test endpoints directly from the browser
-- Authenticate and make real API calls
+- Swagger UI: `/docs`
+- ReDoc: `/redoc`
 
 ---
 
-## Getting Help
+## Notes
 
-For additional support or questions:
-
-1. Check the interactive docs at `/docs`
-2. Review this documentation
-3. Contact the backend team
-
-**API Version:** 1.0.0  
-**Last Updated:** February 12, 2026
-
----
-
-### Admin Endpoints
-
-These endpoints are restricted to Administrators and Super Administrators.
-
-#### Legacy Create User
-
-- **POST** `/api/v1/user-admin/create`
-- **Auth Required:** Admin only
-- **Expected Payload:** Same as **POST** `/api/v1/users`
-- **Returns:** User object
-
-#### Generic Table Update
-
-- **PATCH** `/api/v1/admin-db/tables/{table_name}/{pk_column}/{pk_value}`
-- **Auth Required:** Super Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "column_name_1": "new_value",
-    "column_name_2": 123
-  }
-  ```
-- **Returns:** `{ status: "success", rows_affected: 1 }`
-
-#### Generic Table Create
-
-- **POST** `/api/v1/admin-db/tables/{table_name}`
-- **Auth Required:** Super Admin only
-- **Expected Payload:**
-  ```json
-  {
-    "id": "optional-uuid",
-    "column_name_1": "value1",
-    "column_name_2": "value2"
-  }
-  ```
-- **Returns:** `{ status: "success", detail: "Record created" }`
-
-#### Generic Table Delete
-
-- **DELETE** `/api/v1/admin-db/tables/{table_name}/{pk_column}/{pk_value}`
-- **Auth Required:** Super Admin only
-- **Returns:** `{ status: "success", detail: "Record deleted" }`
-
----
-
-## Permission Model
-
-### User Roles
-
-| Role          | Access Level                                     |
-| ------------- | ------------------------------------------------ |
-| `USER`        | Basic user, minimal permissions                  |
-| `CLIENT`      | External client with limited access              |
-| `STAFF`       | Internal staff member (default for new users)    |
-| `MANAGER`     | Project manager with elevated permissions        |
-| `ADMIN`       | Administrator with full access to most resources |
-| `SUPER_ADMIN` | Super administrator with complete system access  |
-
-### Resource Permissions Summary
-
-| Resource          | View                    | Create    | Update                  | Delete           |
-| ----------------- | ----------------------- | --------- | ----------------------- | ---------------- |
-| **Users**         | Self, Admin, or Manager | Admin     | Self (limited) or Admin | Admin (not self) |
-| **Clients**       | All users               | All users | Admin                   | Admin            |
-| **Projects**      | Owner or Admin          | All users | Owner or Admin          | Owner or Admin   |
-| **Tasks**         | Own/Shared or Admin     | All users | Admin/Manager           | Super Admin      |
-| **Notes**         | Owner or Admin          | All users | Owner or Admin          | Owner or Admin   |
-| **Events**        | All users               | All users | Creator or Admin        | Creator or Admin |
-| **Decisions**     | Owner or Admin          | All users | Owner or Admin          | Owner or Admin   |
-| **Notifications** | Recipient or Admin      | System    | Recipient (mark read)   | Admin            |
-
----
-
-## Common Patterns
-
-### Pagination
-
-Most list endpoints support pagination via query parameters:
-
-```
-GET /api/v1/projects?skip=20&limit=10
-```
-
-- `skip`: Number of records to skip (default: 0)
-- `limit`: Maximum records to return (default: 100)
-
-### Filtering
-
-Some endpoints support filtering:
-
-```
-GET /api/v1/tasks?project_id=1
-GET /api/v1/notes?task_id=5
-```
-
-### Partial Updates
-
-Use PATCH for partial updates. Only include fields you want to change:
-
-```json
-PATCH /api/v1/projects/1
-{
-  "status": "completed"
-}
-```
-
-### Multi-User Assignment/Sharing
-
-Tasks and Notes support assigning/sharing with multiple users:
-
-**Tasks** use `assignees` array:
-
-```json
-{
-  "assignees": ["user-uuid-1", "user-uuid-2"]
-}
-```
-
-**Notes** use `shared_with` array:
-
-```json
-{
-  "shared_with": ["user-uuid-1", "user-uuid-2"]
-}
-```
-
-- Pass an array to set/replace assignees/shares
-- Pass `[]` to remove all assignees/shares
-- Omit the field to leave unchanged
-
-### JSON String Arrays
-
-Some fields store JSON arrays as strings:
-
-- `Project.tags`
-- `Event.attendees`
-- `Event.reminders`
-- `Note.tags`
-
-**Format:** `'["item1", "item2", "item3"]'`
-
-**Example:**
-
-```json
-{
-  "tags": "[\"urgent\", \"backend\", \"api\"]"
-}
-```
-
-### Date Formats
-
-- **Dates:** ISO 8601 format `YYYY-MM-DD` (e.g., `"2025-01-31"`)
-- **Datetimes:** ISO 8601 format `YYYY-MM-DDTHH:MM:SSZ` (e.g., `"2025-01-22T14:30:00Z"`)
-
-### Currency Amounts
-
-Budget and spent amounts are in the smallest currency unit:
-
-- USD: cents (e.g., `$500.00` = `50000` cents)
-- EUR: cents (e.g., `€250.50` = `25050` cents)
-
----
-
-## Interactive API Documentation
-
-FastAPI provides automatic interactive documentation:
-
-- **Swagger UI:** `http://your-domain.com/docs`
-- **ReDoc:** `http://your-domain.com/redoc`
-
-These interfaces allow you to:
-
-- View all endpoints
-- See request/response schemas
-- Test endpoints directly from the browser
-- Authenticate and make real API calls
-
----
-
-## Getting Help
-
-For additional support or questions:
-
-1. Check the interactive docs at `/docs`
-2. Review this documentation
-3. Contact the backend team
-
-**API Version:** 1.0.0  
-**Last Updated:** February 12, 2026
+This documentation reflects current route and guard behavior in code and does not alter route design.

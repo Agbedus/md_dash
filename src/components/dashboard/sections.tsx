@@ -20,6 +20,7 @@ import {
   TimeAllocationChart,
   ProjectProgressChart,
 } from "@/components/ui/client-charts";
+import { Sparkline } from "@/components/ui/sparkline";
 import {
   FiMoreHorizontal,
   FiZap,
@@ -65,11 +66,11 @@ export async function SummaryStatsSection() {
     const stats = await getSummaryStats();
     
     const statCards = [
-        { label: 'Total Users', value: stats.totalUsers, icon: FiUsers, color: 'text-[var(--pastel-blue)]', bg: 'bg-[var(--pastel-blue)]/10', users: stats.users },
-        { label: 'Total Tasks', value: stats.totalTasks, icon: FiCheckSquare, color: 'text-[var(--pastel-purple)]', bg: 'bg-[var(--pastel-purple)]/10' },
-        { label: 'Completed', value: stats.completedTasks, icon: FiCheckCircle, color: 'text-[var(--pastel-emerald)]', bg: 'bg-[var(--pastel-emerald)]/10' },
-        { label: 'Upcoming Events', value: stats.upcomingEvents, icon: FiCalendar, color: 'text-[var(--pastel-rose)]', bg: 'bg-[var(--pastel-rose)]/10' },
-        { label: 'Recent Notes', value: stats.recentNotesCount, icon: FiFileText, color: 'text-[var(--pastel-amber)]', bg: 'bg-[var(--pastel-amber)]/10' },
+        { label: 'Total Users', value: stats.totalUsers, icon: FiUsers, color: 'text-[var(--pastel-blue)]', bg: 'bg-[var(--pastel-blue)]/10', users: stats.users, trend: stats.trends.users },
+        { label: 'Total Tasks', value: stats.totalTasks, icon: FiCheckSquare, color: 'text-[var(--pastel-purple)]', bg: 'bg-[var(--pastel-purple)]/10', trend: stats.trends.tasks },
+        { label: 'Completed', value: stats.completedTasks, icon: FiCheckCircle, color: 'text-[var(--pastel-emerald)]', bg: 'bg-[var(--pastel-emerald)]/10', trend: stats.trends.completions },
+        { label: 'Upcoming Events', value: stats.upcomingEvents, icon: FiCalendar, color: 'text-[var(--pastel-rose)]', bg: 'bg-[var(--pastel-rose)]/10', trend: stats.trends.events },
+        { label: 'Recent Notes', value: stats.recentNotesCount, icon: FiFileText, color: 'text-[var(--pastel-amber)]', bg: 'bg-[var(--pastel-amber)]/10', trend: stats.trends.notes },
     ];
 
     return (
@@ -77,7 +78,7 @@ export async function SummaryStatsSection() {
             {statCards.map((stat, i) => (
                 <div 
                     key={i} 
-                    className={`glass p-2.5 lg:p-6 rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-300 flex flex-col justify-between h-20 lg:h-36 group ${i === 0 ? 'col-span-2 lg:col-span-1' : 'col-span-1'}`}
+                    className={`glass p-3 lg:p-6 rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-300 flex flex-col justify-between h-24 lg:h-40 group ${i === 0 ? 'col-span-2 lg:col-span-1' : 'col-span-1'}`}
                 >
                     <div className="flex justify-between items-start">
                         <div className={`p-1.5 lg:p-3 rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/10`}>
@@ -86,14 +87,26 @@ export async function SummaryStatsSection() {
                         {stat.users ? (
                             <AvatarGroup users={stat.users} total={stat.value} />
                         ) : (
-                            <div className={`text-[9px] lg:text-[10px] font-bold ${stat.color} bg-white/5 px-1.5 lg:px-2 py-0.5 rounded-full`}>
-                                +{Math.floor(Math.random() * 20)}%
+                            <div className="h-8 w-20 opacity-60 group-hover:opacity-100 transition-opacity">
+                                <Sparkline 
+                                    data={stat.trend || [0, 0, 0, 0, 0, 0, 0]} 
+                                    color={stat.color.match(/\[(.*?)\]/)?.[1] || "#6366f1"}
+                                    width={80}
+                                    height={32}
+                                />
                             </div>
                         )}
                     </div>
-                    <div className="mt-1 lg:mt-4">
-                        <p className="text-[9px] lg:text-xs text-zinc-500 font-medium uppercase tracking-wider">{stat.label}</p>
-                        <p className="text-lg lg:text-3xl font-bold text-white leading-none">{stat.value}</p>
+                    <div className="mt-2 lg:mt-4">
+                        <p className="text-[9px] lg:text-xs text-zinc-500 font-medium uppercase tracking-wider mb-0.5 lg:mb-1">{stat.label}</p>
+                        <div className="flex items-baseline justify-between">
+                            <p className="text-xl lg:text-3xl font-bold text-white leading-none">{stat.value}</p>
+                            {i !== 0 && (
+                                <div className={`text-[8px] lg:text-[10px] font-bold ${stat.color} bg-white/5 px-1.5 py-0.5 rounded-full`}>
+                                   +{Math.floor(Math.random() * 15)}%
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             ))}

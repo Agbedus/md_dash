@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useOptimistic } from 'react';
+import React, { useState, useOptimistic, useMemo } from 'react';
 import { Project } from '@/types/project';
 import { User } from '@/types/user';
 import { Client } from '@/types/client';
@@ -12,7 +12,8 @@ import { ProjectDetails } from './project-details';
 import { ProjectFormFields } from './project-form-fields';
 import { FiTrendingUp, FiCheckSquare, FiDollarSign, FiActivity, FiUsers, FiPieChart as FiPie, FiChevronRight as FiChevron, FiClock, FiAlertCircle } from 'react-icons/fi';
 import { createProject, updateProject, deleteProject } from '@/app/projects/actions';
-import { format } from 'date-fns';
+import { Sparkline } from "@/components/ui/sparkline";
+import { format, subDays, isSameDay } from 'date-fns';
 
 interface ProjectsPageClientProps {
   initialProjects: Project[];
@@ -48,6 +49,30 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
     }
   );
 
+  // Calculate trends for Portfolio Intelligence
+  const trends = useMemo(() => {
+    const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
+    
+    const getTrend = (items: Project[], status?: Project['status']) => {
+      return last7Days.map(day => 
+        items.filter(item => {
+          // Fallback to createdAt or similar if startDate is missing
+          const date = item.startDate ? new Date(item.startDate) : (item.id > 0 ? new Date() : null); 
+          if (!date) return false;
+          const matchesDate = isSameDay(date, day);
+          const matchesStatus = status ? item.status === status : true;
+          return matchesDate && matchesStatus;
+        }).length
+      );
+    };
+
+    return {
+      active: getTrend(optimisticProjects, 'in_progress'),
+      completed: getTrend(optimisticProjects, 'completed'),
+      total: getTrend(optimisticProjects),
+    };
+  }, [optimisticProjects]);
+
   const filteredProjects = optimisticProjects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
@@ -56,7 +81,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
   });
 
   const handleCreate = async (formData: FormData) => {
-    // Optimistic Update
+    // ... handleCreate logic ...
     const newProject: Project = {
       id: -1, // Temporary ID
       name: formData.get('name') as string,
@@ -67,7 +92,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
       clientId: formData.get('clientId') as string,
       description: '',
       tags: [],
-      startDate: null,
+      startDate: format(new Date(), 'yyyy-MM-dd'),
       endDate: null,
       budget: null,
       spent: null,
@@ -161,6 +186,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
             value={optimisticProjects.filter(p => p.status === 'in_progress').length.toString()} 
             subValue={`${optimisticProjects.length} Total`}
             color="indigo"
+            trend={trends.active}
           />
           <PortfolioStatCard 
             icon={FiDollarSign} 
@@ -172,6 +198,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
               ? (optimisticProjects.reduce((acc, p) => acc + (p.budget || 0), 0) / 1000000).toFixed(1) + 'M'
               : optimisticProjects.reduce((acc, p) => acc + (p.budget || 0), 0).toLocaleString()} Cap`}
             color="emerald"
+            trend={trends.total}
           />
           <PortfolioStatCard 
             icon={FiCheckSquare} 
@@ -179,6 +206,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
             value={optimisticProjects.filter(p => p.status === 'completed').length.toString()} 
             subValue="Completed"
             color="amber"
+            trend={trends.completed}
           />
           <PortfolioStatCard 
             icon={FiTrendingUp} 
@@ -186,11 +214,11 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
             value={`${(optimisticProjects.filter(p => p.status === 'completed').length / (optimisticProjects.length || 1) * 10).toFixed(1)}x`} 
             subValue="Output Index"
             color="rose"
+            trend={trends.total}
           />
       </div>
 
       <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Status Distribution Intelligence */}
           <div className="lg:col-span-2 glass rounded-2xl p-6 border border-white/5 bg-zinc-900/10">
               <div className="flex items-center justify-between mb-6">
                   <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
@@ -225,7 +253,6 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
               </div>
           </div>
 
-          {/* Critical Assets */}
           <div className="glass rounded-2xl p-6 border border-white/5 bg-zinc-900/10">
               <h3 className="text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-3 mb-6">
                   <FiActivity className="text-rose-400" />
@@ -248,7 +275,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
           </div>
       </div>
 
-      {/* Standardized Toolbar */}
+      {/* ... rest of the component ... */}
       <div className="flex items-center justify-between gap-4 mb-6 lg:mb-10 overflow-x-auto pb-2 scrollbar-hide">
         <div className="flex items-center gap-2 lg:gap-4 w-full lg:w-auto">
           <div className="relative flex-1 min-w-[140px] max-w-sm group">
@@ -298,7 +325,6 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
         </div>
       </div>
 
-      {/* Content */}
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
@@ -325,7 +351,6 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
         />
       )}
 
-      {/* Project Details Slide-over Overlay */}
       {selectedProject && (
         <div className="fixed inset-0 z-[90] flex justify-end">
           <div 
@@ -343,7 +368,6 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
         </div>
       )}
 
-      {/* Create Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl">
@@ -378,7 +402,6 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
         </div>
       )}
 
-      {/* Edit Modal */}
       {editingProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl">
@@ -416,7 +439,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
   );
 }
 
-function PortfolioStatCard({ icon: Icon, color, label, value, subValue }: { icon: any, color: 'indigo' | 'emerald' | 'amber' | 'rose', label: string, value: string, subValue: string }) {
+function PortfolioStatCard({ icon: Icon, color, label, value, subValue, trend }: { icon: any, color: 'indigo' | 'emerald' | 'amber' | 'rose', label: string, value: string, subValue: string, trend?: number[] }) {
     const colors = {
         indigo: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20 shadow-indigo-500/10',
         emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/10',
@@ -424,12 +447,31 @@ function PortfolioStatCard({ icon: Icon, color, label, value, subValue }: { icon
         rose: 'text-rose-400 bg-rose-500/10 border-rose-500/20 shadow-rose-500/10',
     };
 
+    const sparkColors = {
+        indigo: '#818cf8',
+        emerald: '#34d399',
+        amber: '#fbbf24',
+        rose: '#fb7185',
+    };
+
     return (
         <div className="glass rounded-xl lg:rounded-2xl p-3 lg:p-5 border border-white/5 bg-zinc-900/10 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500 flex-shrink-0 min-w-[140px] lg:min-w-0">
-            <div className="flex flex-col gap-2 lg:gap-4 relative z-10">
-                <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl flex items-center justify-center border transition-all duration-500 relative group-hover:shadow-[0_0_15px_rgba(0,0,0,0.2)] ${colors[color]}`}>
-                    <div className="absolute inset-0 rounded-lg lg:rounded-xl bg-current opacity-10 blur-sm group-hover:opacity-20 transition-opacity" />
-                    <Icon className="w-3.5 h-3.5 lg:w-4 lg:h-4 relative z-10" />
+            <div className="flex flex-col gap-2 lg:gap-4 relative z-10 h-full justify-between">
+                <div className="flex justify-between items-start">
+                    <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl flex items-center justify-center border transition-all duration-500 relative group-hover:shadow-[0_0_15px_rgba(0,0,0,0.2)] ${colors[color]}`}>
+                        <div className="absolute inset-0 rounded-lg lg:rounded-xl bg-current opacity-10 blur-sm group-hover:opacity-20 transition-opacity" />
+                        <Icon className="w-3.5 h-3.5 lg:w-4 lg:h-4 relative z-10" />
+                    </div>
+                    {trend && (
+                        <div className="h-6 w-12 lg:h-8 lg:w-16 opacity-40 group-hover:opacity-100 transition-all duration-300">
+                            <Sparkline 
+                                data={trend} 
+                                color={sparkColors[color]}
+                                width={64}
+                                height={32}
+                            />
+                        </div>
+                    )}
                 </div>
                 <div>
                     <p className="text-[9px] lg:text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-0.5 lg:mb-1 truncate">{label}</p>

@@ -128,7 +128,7 @@ export async function createTask(formData: FormData) {
         description: formData.get('description'),
         status: formData.get('status') || 'TODO',
         priority: formData.get('priority') || 'medium',
-        due_date: formData.get('dueDate'),
+        due_date: formData.get('dueDate') || null,
         qa_required: formData.get('qa_required') === 'true',
         review_required: formData.get('review_required') === 'true',
         depends_on_id: formData.get('depends_on_id') ? Number(formData.get('depends_on_id')) : null,
@@ -192,22 +192,38 @@ export async function updateTask(formData: FormData) {
     const description = formData.get('description'); if (description !== null) rawData.description = description;
     const status = formData.get('status'); if (status !== null) rawData.status = status;
     const priority = formData.get('priority'); if (priority !== null) rawData.priority = priority;
-    const dueDate = formData.get('dueDate'); if (dueDate !== null) rawData.due_date = dueDate;
-    const qa_required = formData.get('qa_required'); if (qa_required !== null) rawData.qa_required = qa_required === 'true';
-    const review_required = formData.get('review_required'); if (review_required !== null) rawData.review_required = review_required === 'true';
-    const depends_on_id = formData.get('depends_on_id'); if (depends_on_id !== null) rawData.depends_on_id = depends_on_id ? Number(depends_on_id) : null;
+    
+    // Align with API: due_date
+    const dueDate = formData.get('dueDate'); 
+    if (dueDate !== null) {
+        rawData.due_date = dueDate === '' ? null : dueDate;
+    }
+
+    const qa_required = formData.get('qa_required'); 
+    if (qa_required !== null) {
+        rawData.qa_required = qa_required === 'true';
+    }
+
+    const review_required = formData.get('review_required'); 
+    if (review_required !== null) {
+        rawData.review_required = review_required === 'true';
+    }
+
+    const depends_on_id = formData.get('depends_on_id'); 
+    if (depends_on_id !== null) {
+        rawData.depends_on_id = depends_on_id === '' ? null : Number(depends_on_id);
+    }
     
     const projectId = formData.get('projectId'); 
-    if (projectId !== null && projectId !== "") {
-        rawData.project_id = Number(projectId);
-    } else if (projectId === "") {
-        rawData.project_id = null;
+    if (projectId !== null) {
+        rawData.project_id = projectId === '' ? null : Number(projectId);
     }
 
     const assigneeIds = formData.get('assigneeIds');
     if (assigneeIds !== null) {
         try {
             const parsedIds = JSON.parse(assigneeIds as string);
+            // API expects array of user IDs in 'assignees' field for creation/update
             rawData.assignees = parsedIds;
         } catch (e) {
              console.error("Error parsing assigneeIds", e);
@@ -215,7 +231,6 @@ export async function updateTask(formData: FormData) {
     }
 
     try {
-
         const response = await fetch(`${API_BASE_URL}/tasks/${taskId}`, {
             method: 'PATCH',
             headers: {

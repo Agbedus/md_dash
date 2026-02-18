@@ -81,33 +81,37 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
     const handleUpdateSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
       if (e) e.preventDefault();
       
-      // Get form data from ref
-      if (!formRef.current) return;
-      const formData = new FormData(formRef.current);
-      
-      // Manually append state values to FormData
-      if (selectedAssignees.length > 0) {
-        formData.append('assigneeIds', JSON.stringify(selectedAssignees));
-      } else {
-        formData.append('assigneeIds', JSON.stringify([]));
-      }
-
-      if (selectedProject) {
-        formData.append('projectId', selectedProject.toString());
-      } else {
-        formData.append('projectId', '');
-      }
-
-      formData.append('qa_required', qaRequired.toString());
-      formData.append('review_required', reviewRequired.toString());
-      if (dependsOn) {
-        formData.append('depends_on_id', dependsOn.toString());
-      } else {
-        formData.append('depends_on_id', '');
-      }
-      
       setIsUpdating(true);
       try {
+        const formData = new FormData();
+        formData.append("id", task.id.toString());
+        
+        // Gather from inputs that might be outside or inside
+        const form = document.getElementById(`update-${task.id}`) as HTMLFormElement;
+        if (form) {
+            const nameInput = document.querySelector(`input[name="name"][form="update-${task.id}"]`) as HTMLInputElement;
+            const descInput = document.querySelector(`input[name="description"][form="update-${task.id}"]`) as HTMLInputElement;
+            const prioritySelect = document.querySelector(`select[name="priority"][form="update-${task.id}"]`) as HTMLSelectElement;
+            const statusSelect = document.querySelector(`select[name="status"][form="update-${task.id}"]`) as HTMLSelectElement;
+
+            if (nameInput) formData.append('name', nameInput.value);
+            if (descInput) formData.append('description', descInput.value);
+            if (prioritySelect) formData.append('priority', prioritySelect.value);
+            if (statusSelect) formData.append('status', statusSelect.value);
+        }
+        
+        // Gather from state
+        formData.append('assigneeIds', JSON.stringify(selectedAssignees));
+        formData.append('projectId', selectedProject ? selectedProject.toString() : '');
+        formData.append('qa_required', qaRequired.toString());
+        formData.append('review_required', reviewRequired.toString());
+        formData.append('depends_on_id', dependsOn ? dependsOn.toString() : '');
+        if (dueDate) {
+            formData.append('dueDate', format(dueDate, 'yyyy-MM-dd'));
+        } else {
+            formData.append('dueDate', '');
+        }
+        
         const result = await updateTask(formData);
         if (result?.success) {
             toast.success("Task updated successfully");

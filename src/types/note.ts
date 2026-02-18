@@ -8,9 +8,9 @@ export type Note = {
   notebook?: string | null;
   color?: string | null;
 
-  is_pinned: 0 | 1;
-  is_archived: 0 | 1;
-  is_favorite: 0 | 1;
+  is_pinned: 0 | 1; // API: is_pinned (0 or 1)
+  is_archived: 0 | 1; // API: is_archived (0 or 1)
+  is_favorite: 0 | 1; // API: is_favorite (0 or 1)
 
   cover_image?: string | null;
   links?: string | null;        // JSON string array
