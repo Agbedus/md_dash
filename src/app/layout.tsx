@@ -23,6 +23,8 @@ export const metadata: Metadata = {
 
 import { auth } from "@/auth";
 import { Toaster } from 'react-hot-toast';
+import { TaskTimerProvider } from '@/providers/task-timer-provider';
+import { TaskTimerUI } from '@/components/ui/tasks/task-timer-ui';
 
 export default async function RootLayout({
   children,
@@ -36,19 +38,22 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {session ? (
-          <DashboardLayout 
-            sidebar={<Sidebar user={session?.user} />}
-            topnav={<TopNav user={session?.user} />}
-            user={session?.user}
-          >
-            {children}
-          </DashboardLayout>
-        ) : (
-          <div className="min-h-screen bg-zinc-950">
-            {children}
-          </div>
-        )}
+        <TaskTimerProvider>
+          {session ? (
+            <DashboardLayout 
+              sidebar={<Sidebar user={session?.user} />}
+              topnav={<TopNav user={session?.user} />}
+              user={session?.user}
+            >
+              {children}
+            </DashboardLayout>
+          ) : (
+            <div className="min-h-screen bg-zinc-950">
+              {children}
+            </div>
+          )}
+          <TaskTimerUI />
+        </TaskTimerProvider>
         <Toaster position="bottom-right" toastOptions={{
           style: {
             background: '#18181b',

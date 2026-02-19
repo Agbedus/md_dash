@@ -863,8 +863,7 @@ Response JSON (`TaskTimeLog`):
   "task_id": 12,
   "user_id": "user-uuid-1",
   "start_time": "2026-02-17T02:10:00Z",
-  "end_time": "2026-02-17T02:35:00Z",
-  "is_break": false
+  "end_time": "2026-02-17T02:35:00Z"
 }
 ```
 

@@ -17,9 +17,13 @@ import {
   FiLogOut,
   FiBriefcase,
   FiUsers,
+  FiBookOpen,
+  FiInfo,
 } from "react-icons/fi";
 
 import { logout } from "@/app/lib/actions";
+import { AboutModal } from "./about-modal";
+import { useState } from "react";
 
 interface SidebarProps {
   user?: {
@@ -38,6 +42,8 @@ const Sidebar = ({ user }: SidebarProps) => {
     isDesktopCollapsed,
     setIsDesktopCollapsed,
   } = useDashboard();
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const version = "0.1.0";
 
   // Existing expansion logic
   const isExpandedMobile = isMobileExpanded;
@@ -113,6 +119,10 @@ const Sidebar = ({ user }: SidebarProps) => {
     { href: "/settings", icon: FiSettings, label: "Settings", color: "text-indigo-400" },
   ];
 
+  const systemMenuItems = [
+    { href: "/wiki", icon: FiBookOpen, label: "Wiki", color: "text-emerald-400" },
+  ];
+
   const renderMenuItem = (item: any) => (
     <Link
       key={item.href}
@@ -177,6 +187,22 @@ const Sidebar = ({ user }: SidebarProps) => {
             </>
           )}
         </nav>
+
+        <h3
+          className={`px-6 mt-6 text-[10px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
+        >
+          System
+        </h3>
+        <nav className="space-y-2">
+          {systemMenuItems.map(renderMenuItem)}
+          <button
+            onClick={() => setIsAboutOpen(true)}
+            className={`${baseLinkClasses} ${inactiveLinkClasses} ${itemAlignmentClass} ${iconSpacingClass} w-full`}
+          >
+            <FiInfo className={`flex-shrink-0 ${iconSizeClass} text-zinc-400`} />
+            <span className={contentVisibilityClass}>About Platform</span>
+          </button>
+        </nav>
       </div>
 
       {/* ---------- Footer ---------- */}
@@ -214,6 +240,21 @@ const Sidebar = ({ user }: SidebarProps) => {
           <FiLogOut className={iconSizeClass} />
           <span className={contentVisibilityClass}>Sign Out</span>
         </button>
+
+        <div className={`px-6 py-2 flex items-center justify-between ${contentVisibilityClass}`}>
+            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">
+                v{version}
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-widest leading-none">
+                Beta
+            </span>
+        </div>
+
+        <AboutModal 
+            isOpen={isAboutOpen} 
+            onClose={() => setIsAboutOpen(false)} 
+            version={version} 
+        />
       </div>
     </div>
   );

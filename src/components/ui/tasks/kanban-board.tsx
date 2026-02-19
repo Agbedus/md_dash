@@ -19,6 +19,7 @@ import { useDroppable } from "@dnd-kit/core";
 interface KanbanBoardProps {
   tasks?: Task[];
   users: User[];
+  user?: User;
   projects: Project[];
   updateTask: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
   deleteTask: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
@@ -28,6 +29,7 @@ interface ColumnProps {
   col: keyof typeof statusMapping;
   items: Task[];
   users: User[];
+  user?: User;
   projects: Project[];
   columns: Array<keyof typeof statusMapping>;
   onMove: (task: Task, status: Task["status"]) => Promise<void>;
@@ -36,7 +38,7 @@ interface ColumnProps {
   flash: boolean;
 }
 
-function Column({ col, items, users, projects, columns, onMove, onDelete, highlightedIds, flash }: ColumnProps) {
+function Column({ col, items, users, user, projects, columns, onMove, onDelete, highlightedIds, flash }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: col });
   return (
     <div
@@ -83,6 +85,7 @@ function Column({ col, items, users, projects, columns, onMove, onDelete, highli
               <KanbanCard
                 task={task}
                 users={users}
+                user={user}
                 projects={projects}
                 columns={columns}
                 onMove={onMove}
@@ -106,7 +109,7 @@ function Column({ col, items, users, projects, columns, onMove, onDelete, highli
   );
 }
 
-export default function KanbanBoard({ tasks = [], users, projects, updateTask, deleteTask }: KanbanBoardProps) {
+export default function KanbanBoard({ tasks = [], users, user, projects, updateTask, deleteTask }: KanbanBoardProps) {
   const columns = useMemo(() => Object.keys(statusMapping) as Array<keyof typeof statusMapping>, []);
 
   const [grouped, setGrouped] = useState<Record<string, Task[]>>(() => {

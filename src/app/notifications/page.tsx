@@ -178,52 +178,77 @@ export default function NotificationsPage() {
   }, [notifications]);
 
   return (
-    <div className="px-4 py-6 max-w-[1600px] mx-auto min-h-screen">
-      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="px-4 py-8 max-w-[1600px] mx-auto h-[calc(100vh-40px)] flex flex-col overflow-hidden">
+      <div className="mb-4 flex flex-col md:flex-row md:items-end justify-between gap-4 shrink-0 px-1">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-1 tracking-tight flex items-center gap-2">
+          <h1 className="text-lg font-black text-white mb-0.5 tracking-tight flex items-center gap-2 uppercase">
              Notifications
           </h1>
-          <p className="text-zinc-500 text-sm font-medium">Stay updated with team activity and system alerts.</p>
+          <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Mission Intelligence Feed</p>
         </div>
         <div className="flex items-center gap-3">
             {unreadCount > 0 && (
               <button 
                 onClick={markAllAsRead}
-                className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg border border-emerald-500/20 transition-all active:scale-95"
+                className="px-3 py-1.5 text-[8px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg border border-emerald-500/20 transition-all active:scale-95"
               >
-                Mark all as read
+                Flush unread
               </button>
             )}
         </div>
       </div>
 
-      <div className="glass rounded-3xl overflow-hidden border border-white/5 shadow-2xl flex flex-col md:flex-row h-[800px]">
-        {/* Left Pane - List */}
-        <div className="w-full md:w-80 lg:w-96 border-r border-white/5 flex flex-col bg-zinc-900/30">
-          <div className="p-4 border-b border-white/5">
+      <div className="glass rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl flex flex-col md:flex-row flex-1 mb-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        {/* Leftmost Sidebar - Categories */}
+        <div className="w-full md:w-20 lg:w-24 border-r border-white/5 flex md:flex-col bg-zinc-900/50 p-2 gap-2 overflow-x-auto md:overflow-x-hidden no-scrollbar">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 md:flex-none flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300 gap-1.5 group ${
+                activeTab === tab.id 
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                  : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5 border border-transparent hover:border-white/5'
+              }`}
+            >
+              <tab.icon className={`w-5 h-5 group-hover:scale-110 transition-transform ${activeTab === tab.id ? 'fill-current opacity-20' : ''}`} />
+              <span className="text-[8px] font-black uppercase tracking-[0.15em]">{tab.label}</span>
+              {notificationStats[tab.id] > 0 && (
+                <div className={`mt-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-bold ${
+                  activeTab === tab.id ? 'bg-emerald-500 text-zinc-950' : 'bg-zinc-800 text-zinc-500'
+                }`}>
+                  {notificationStats[tab.id]}
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* List Pane */}
+        <div className="w-full md:w-80 lg:w-96 border-r border-white/5 flex flex-col bg-zinc-900/30 shadow-inner">
+          <div className="p-4 border-b border-white/5 bg-white/[0.01]">
             <div className="relative group">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-emerald-500 transition-colors w-3.5 h-3.5" />
               <input 
                 type="text"
-                placeholder="Search..."
+                placeholder="Search resources..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/5 rounded-lg pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:bg-white/5 focus:border-white/10 transition-all placeholder:text-zinc-700"
+                className="w-full bg-zinc-950/50 border border-white/5 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-emerald-500/20 focus:border-emerald-500/30 transition-all placeholder:text-zinc-700 font-medium"
               />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-white/5 no-scrollbar">
+          <div className="flex-1 overflow-y-auto divide-y divide-white/5 no-scrollbar bg-zinc-950/20">
             {filteredNotifications.length > 0 ? (
               filteredNotifications.map((n) => (
                 <div 
                   key={n.id}
                   onClick={() => handleSelect(n.id)}
-                  className={`px-4 py-3.5 cursor-pointer transition-all relative group ${
+                  className={`px-5 py-5 cursor-pointer transition-all relative group ${
                     selectedId === n.id 
-                      ? 'bg-emerald-500/[0.03]' 
-                      : 'hover:bg-white/[0.01]'
+                      ? 'bg-emerald-500/[0.04]' 
+                      : 'hover:bg-white/[0.02]'
                   }`}
                 >
                   <div className="flex gap-3">
@@ -233,22 +258,20 @@ export default function NotificationsPage() {
                         <p className={`text-[11px] font-bold truncate transition-colors ${selectedId === n.id ? 'text-emerald-400' : 'text-zinc-100 group-hover:text-emerald-300'}`}>
                           {n.title}
                         </p>
-                        <span className="text-[9px] text-zinc-600 shrink-0 ml-2 font-black uppercase tracking-tighter">
-                          {formatDistanceToNow(new Date(n.created_at), { addSuffix: false })}
-                        </span>
+                        {!n.is_read && (
+                          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse shrink-0 ml-2 mt-1" />
+                        )}
                       </div>
-                      <p className="text-[10px] text-zinc-500 line-clamp-1 leading-normal font-medium">
+                      <p className="text-[10px] text-zinc-500 line-clamp-2 leading-relaxed font-medium">
                         {n.message}
                       </p>
-                      <div className="flex items-center gap-2">
-                        {!n.is_read && (
-                          <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                        )}
-                        {n.resource_type && (
-                          <span className="text-[8px] font-black uppercase tracking-widest text-zinc-700">
-                             {n.resource_type}
-                          </span>
-                        )}
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-zinc-700">
+                           {n.resource_type || 'General'}
+                        </span>
+                        <span className="text-[9px] text-zinc-600 font-black uppercase tracking-tighter bg-white/5 px-1.5 py-0.5 rounded-md border border-white/5">
+                          {formatDistanceToNow(new Date(n.created_at), { addSuffix: false })}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -256,87 +279,126 @@ export default function NotificationsPage() {
               ))
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center p-12 text-center space-y-4 opacity-50">
-                <FiBell size={32} className="text-zinc-700" />
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600">Inbox is empty</p>
+                <div className="w-16 h-16 rounded-3xl bg-zinc-900 flex items-center justify-center border border-white/5">
+                   <FiBell size={24} className="text-zinc-700" />
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">No transmissions found</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Right Pane - Content */}
-        <div className="hidden md:flex flex-1 flex-col bg-zinc-950/40">
+        <div className="hidden md:flex flex-1 flex-col bg-zinc-950/40 relative">
+          {/* Decorative background grid */}
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
+          
           {selectedNotification ? (
-            <div className="h-full flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="p-6 lg:p-8 border-b border-white/5 bg-white/[0.01]">
-                <div className="flex justify-between items-start gap-4">
+            <div className="h-full flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500 relative z-10">
+               <div className="p-6 lg:p-8 border-b border-white/5 bg-white/[0.01] backdrop-blur-sm">
+                <div className="flex justify-between items-start gap-6">
                   <div className="flex items-center gap-4 min-w-0">
                     <SenderAvatar user={selectedNotification.sender} size="sm" />
                     <div className="space-y-1">
                        <div className="flex items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border transition-all ${
+                        <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-[0.2em] border transition-all ${
                           selectedNotification.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
                           selectedNotification.type === 'error' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
                           selectedNotification.type === 'warning' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                          'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                          'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
                         }`}>
                           {selectedNotification.type}
                         </span>
-                        <span className="text-[9px] text-zinc-600 flex items-center gap-1 font-black uppercase tracking-tight">
-                          <FiClock className="w-3 h-3" />
+                        <div className="h-3 w-[1px] bg-white/10" />
+                        <span className="text-[9px] text-zinc-600 flex items-center gap-1.5 font-black uppercase tracking-widest">
+                          <FiClock className="w-3 h-3 text-indigo-500/30" />
                           {new Date(selectedNotification.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
                         </span>
                       </div>
-                      <h2 className="text-xl lg:text-2xl font-bold text-white tracking-tight leading-tight">
+                      <h2 className="text-2xl lg:text-3xl font-black text-white tracking-tighter leading-tight uppercase">
                         {selectedNotification.title}
                       </h2>
                     </div>
                   </div>
-                  <div className="flex gap-1.5 shrink-0">
-                    <button className="p-2 rounded-lg bg-white/5 border border-white/10 text-zinc-500 hover:text-white hover:bg-white/10 transition-all active:scale-95">
-                      <FiShare2 size={14} />
+                  <div className="flex gap-1.5 shrink-0 pt-1">
+                    <button className="p-2 rounded-xl bg-white/5 border border-white/10 text-zinc-500 hover:text-white hover:bg-white/10 transition-all active:scale-95 group shadow-xl">
+                      <FiShare2 size={14} className="group-hover:rotate-12 transition-transform" />
                     </button>
-                    <button className="p-2 rounded-lg bg-white/5 border border-white/10 text-zinc-500 hover:text-white hover:bg-white/10 transition-all active:scale-95">
-                      <FiMaximize2 size={14} />
+                    <button className="p-2 rounded-xl bg-white/5 border border-white/10 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all active:scale-95 group shadow-xl">
+                      <FiMaximize2 size={14} className="group-hover:scale-110 transition-transform" />
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-8 no-scrollbar">
-                <div className="max-w-2xl">
-                  <p className="text-sm lg:text-base text-zinc-400 leading-relaxed font-medium">
-                    {selectedNotification.message}
+               <div className="flex-1 overflow-y-auto p-6 lg:p-10 space-y-8 no-scrollbar bg-zinc-900/10">
+                <div className="max-w-3xl">
+                  <p className="text-base lg:text-lg text-zinc-400 leading-relaxed font-medium italic">
+                    "{selectedNotification.message}"
                   </p>
+                  
+                  {/* Metadata Matrix */}
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Transaction ID</p>
+                      <p className="text-[11px] font-mono text-zinc-300 truncate">{selectedNotification.id}</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Source Vector</p>
+                      <p className="text-[11px] font-mono text-zinc-300 uppercase tracking-tight">{selectedNotification.resource_type || 'SYSTEM_CORE'}</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Entity ID</p>
+                      <p className="text-[11px] font-mono text-zinc-300 truncate">{selectedNotification.resource_id || 'NULL'}</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Authority</p>
+                      <p className="text-[11px] font-mono text-zinc-300 truncate uppercase">{selectedNotification.sender?.fullName || 'SYSTEM'}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex items-center gap-4">
+                    <div className={`h-1.5 w-1.5 rounded-full ${selectedNotification.is_read ? 'bg-zinc-700' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
+                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">
+                      Transmission Status: {selectedNotification.is_read ? 'VERIFIED' : 'PENDING_ACK'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="p-6 border-t border-white/5 bg-zinc-900/10">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex gap-3 w-full sm:w-auto">
-                    <button className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-emerald-500 text-zinc-950 font-black text-[10px] uppercase tracking-widest hover:bg-emerald-400 transition-all shadow-lg active:scale-95">
-                      Process
-                    </button>
-                    <button className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95">
-                      Dismiss
-                    </button>
+              <div className="p-6 lg:p-8 border-t border-white/5 bg-zinc-900/30 backdrop-blur-md">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="flex flex-col gap-1.5 min-w-0">
+                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest text-center md:text-left">Recipient Designation</p>
+                    <div className="px-4 py-2 rounded-xl bg-white/[0.02] border border-white/5">
+                      <p className="text-[11px] font-mono text-zinc-400 truncate tracking-tight">{selectedNotification.recipient_id}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-[9px] text-zinc-600 font-black uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-                    <FiTag className="text-emerald-500/50" /> {selectedNotification.resource_type || 'General'}
+                  <div className="flex items-center gap-4 bg-zinc-950/50 px-6 py-3 rounded-2xl border border-white/5 shadow-inner">
+                    <div className="flex items-center gap-3">
+                      <FiTag className="text-emerald-500 w-3.5 h-3.5" /> 
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{selectedNotification.resource_type || 'General'}</span>
+                    </div>
+                    <div className="h-4 w-[1px] bg-white/10" />
+                    <div className="flex items-center gap-3">
+                      <FiCheckCircle className="text-indigo-500 w-3.5 h-3.5" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Vector Secure</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-8 animate-in fade-in duration-500">
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-8 animate-in fade-in duration-700">
               <div className="relative">
-                <div className="absolute inset-0 bg-emerald-500/10 blur-[80px] rounded-full animate-pulse" />
-                <div className="relative w-32 h-32 rounded-[3.5rem] bg-zinc-900 border border-white/10 flex items-center justify-center text-zinc-800 shadow-2xl transform hover:rotate-6 transition-transform duration-500">
-                  <FiBell size={56} className="text-zinc-800" />
+                <div className="absolute inset-0 bg-emerald-500/10 blur-[120px] rounded-full animate-pulse" />
+                <div className="relative w-48 h-48 rounded-[4.5rem] bg-zinc-900/80 border border-white/10 flex items-center justify-center text-zinc-800 shadow-2xl backdrop-blur-xl transform hover:scale-105 transition-transform duration-700 border-dashed">
+                  <FiInbox size={72} className="text-zinc-800" />
                 </div>
               </div>
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-white uppercase tracking-wider">Select a Transmission</h3>
-                <p className="text-zinc-500 max-w-sm mx-auto font-medium leading-relaxed">Review incoming data streams from your workspace and connected operations.</p>
+              <div className="space-y-4 max-w-sm">
+                <h3 className="text-3xl font-black text-white uppercase tracking-widest">Awaiting Uplink</h3>
+                <p className="text-zinc-500 font-medium leading-relaxed">System is operational. Select a classified transmission to hydrate tactical details.</p>
               </div>
             </div>
           )}

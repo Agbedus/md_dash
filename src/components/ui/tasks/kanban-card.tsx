@@ -14,20 +14,26 @@ import {
   FiClock,
   FiPlay,
   FiCheckCircle,
-  FiTrash2
+  FiTrash2,
+  FiSquare,
+  FiPause
 } from "react-icons/fi";
 import UserAvatarGroup from "@/components/ui/user-avatar-group";
+import { useTaskTimer } from "@/providers/task-timer-provider";
+import { canUserWorkOnTask } from "@/lib/task-auth";
 
 interface KanbanCardProps {
   task: Task;
   users: User[];
+  user?: User;
   projects: Project[];
   columns: Array<keyof typeof statusMapping>;
   onMove: (task: Task, status: Task["status"]) => Promise<void>;
   onDelete: (task: Task) => Promise<void>;
 }
 
-export default function KanbanCard({ task, users, projects, columns, onMove, onDelete }: KanbanCardProps) {
+export default function KanbanCard({ task, users, user: currentUser, projects, columns, onMove, onDelete }: KanbanCardProps) {
+  const { startTimer, activeTask } = useTaskTimer();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: String(task.id) });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -106,13 +112,28 @@ export default function KanbanCard({ task, users, projects, columns, onMove, onD
               {task.name}
             </h4>
           </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); void onDelete(task); }}
-            className="opacity-0 group-hover:opacity-100 transition-all duration-300 p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl shrink-0"
-            aria-label={`Delete ${task.name}`}
-          >
-            <FiTrash2 className="h-3.5 w-3.5" />
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            {canUserWorkOnTask(currentUser, task) && (
+              <button
+                onClick={(e) => { e.stopPropagation(); startTimer(task); }}
+                className={`transition-all duration-300 p-1.5 rounded-xl ${
+                  activeTask?.id === task.id 
+                    ? 'bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/30' 
+                    : 'opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-500/10'
+                }`}
+                aria-label="Start Focus"
+              >
+                <FiPlay className={`h-3.5 w-3.5 ${activeTask?.id === task.id ? 'fill-current' : ''}`} />
+              </button>
+            )}
+            <button
+              onClick={(e) => { e.stopPropagation(); void onDelete(task); }}
+              className="opacity-0 group-hover:opacity-100 transition-all duration-300 p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl"
+              aria-label={`Delete ${task.name}`}
+            >
+              <FiTrash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
         {task.description && (

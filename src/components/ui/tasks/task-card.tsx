@@ -15,9 +15,12 @@ import { Project } from "@/types/project";
 
 import toast from "react-hot-toast";
 import { startTaskTimer, pauseTaskTimer, stopTaskTimer } from "@/app/tasks/actions";
+import { useTaskTimer } from "@/providers/task-timer-provider";
+import { canUserWorkOnTask } from "@/lib/task-auth";
 
 interface TaskCardProps {
     task: Task;
+    user?: User;
     users?: User[];
     projects?: Project[];
     updateTask?: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
@@ -30,6 +33,7 @@ interface TaskCardProps {
 
 const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({ 
     task, 
+    user: currentUser,
     users = [], 
     projects = [], 
     updateTask = async () => ({ success: true }), 
@@ -39,6 +43,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
     onEdit = () => {},
     onCancel = () => {}
 }, ref) => {
+    const { startTimer, activeTask } = useTaskTimer();
     const [selectedAssignees, setSelectedAssignees] = useState<(string | number)[]>(
       task.assignees?.map(a => a.user.id) || []
     );
@@ -445,6 +450,16 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
         </td>
         <td className="px-4 py-2 text-xs font-medium text-right whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity sticky right-0 z-10 bg-zinc-950/90 backdrop-blur-md border-l border-white/5">
           <div className="flex items-center justify-end space-x-1">
+            {canUserWorkOnTask(currentUser, task) && (
+              <button
+                type="button"
+                onClick={() => startTimer(task)}
+                className={`p-1.5 rounded-lg transition-all ${activeTask?.id === task.id ? 'bg-indigo-500/20 text-indigo-400' : 'text-zinc-500 hover:text-white hover:bg-white/10'}`}
+                title="Work on Mission"
+              >
+                <FiPlay className={`w-3.5 h-3.5 ${activeTask?.id === task.id ? 'fill-current' : ''}`} />
+              </button>
+            )}
             <button
                 type="button"
                 onClick={onEdit}

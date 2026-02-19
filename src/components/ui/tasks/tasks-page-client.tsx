@@ -308,6 +308,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                 <KanbanBoard
                     tasks={filteredTasks}
                     users={users}
+                    user={users.find(u => u.id === currentUserId)}
                     projects={projects}
                     updateTask={handleUpdate}
                     deleteTask={handleDelete}
@@ -356,6 +357,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                             <TaskCard
                                                 key={task.id}
                                                 task={task}
+                                                user={users.find(u => u.id === currentUserId)}
                                                 users={users}
                                                 projects={projects}
                                                 updateTask={handleUpdate}
