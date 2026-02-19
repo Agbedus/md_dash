@@ -76,7 +76,7 @@ export default function EventDetailModal({
       setIsEditing(false); // Start in view mode
       setTitle(event.title);
       setDescription(event.description || "");
-      setAllDay(event.allDay);
+      setAllDay(Boolean(event.allDay));
       
       try {
           const s = new Date(event.start);
