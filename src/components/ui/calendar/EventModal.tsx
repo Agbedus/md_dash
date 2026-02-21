@@ -170,15 +170,15 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
       aria-labelledby="create-event-title"
       onClick={handleBackdropClick}
     >
-      <div className="w-full md:max-w-3xl bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-t-2xl md:rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="w-full md:max-w-3xl bg-slate-950/40 backdrop-blur-2xl border border-white/5 rounded-t-2xl md:rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex-none px-5 py-3 border-b border-white/10 flex items-center justify-between bg-white/5">
+        <div className="flex-none px-5 py-3 border-b border-white/5 flex items-center justify-between bg-white/[0.03]">
           <div id="create-event-title" className="text-slate-100 font-bold tracking-tight text-sm">Create Event</div>
           <Tooltip content="Close">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/[0.06] text-slate-400 hover:text-white transition-colors"
               aria-label="Close"
             >
               <FiX className="h-4 w-4" />
@@ -190,7 +190,7 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
             <form id="create-event-form" onSubmit={handleSubmit} className="space-y-4">
             {/* All-day toggle at top */}
-            <div className="flex items-center justify-between gap-3 p-2 bg-white/5 rounded-lg border border-white/5">
+            <div className="flex items-center justify-between gap-3 p-2 bg-white/[0.03] rounded-lg border border-white/5">
                 <span className="text-xs font-medium text-slate-300 flex items-center gap-2 px-1">
                 <FiCalendar className="text-purple-400" /> Event Timing
                 </span>
@@ -204,14 +204,14 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                 }`}
                 >
                 <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 text-[10px] font-semibold rounded-full transition-all duration-300 ${
+                    className={`inline-flex items-center gap-1 px-3 py-1 text-[11px] font-semibold rounded-full transition-all duration-300 ${
                     allDay ? "bg-purple-600 text-white shadow-sm shadow-purple-900/40" : "bg-transparent text-slate-400"
                     }`}
                 >
                     All day
                 </span>
                 <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 text-[10px] font-semibold rounded-full transition-all duration-300 ${
+                    className={`inline-flex items-center gap-1 px-3 py-1 text-[11px] font-semibold rounded-full transition-all duration-300 ${
                     !allDay ? "bg-slate-700 text-slate-200" : "bg-transparent text-slate-400"
                     }`}
                 >
@@ -223,11 +223,11 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
             {/* Primary fields */}
             <div className="space-y-3">
                 <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Title</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Title</label>
                 <input
                     value={title}
                     onChange={(e)=>setTitle(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all font-medium"
+                    className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all font-medium"
                     placeholder="What's happening?"
                     required
                 />
@@ -235,7 +235,7 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1 flex items-center gap-1.5">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1 flex items-center gap-1.5">
                     <FiClock className="text-purple-400" /> Start
                     </label>
                     <CustomDatePicker
@@ -250,7 +250,7 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                     />
                 </div>
                 <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1 flex items-center gap-1.5">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1 flex items-center gap-1.5">
                     <FiClock className="text-purple-400" /> End
                     </label>
                     <CustomDatePicker
@@ -268,13 +268,13 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                 </div>
 
                 <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1 flex items-center gap-1.5">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1 flex items-center gap-1.5">
                     <FiMapPin className="text-purple-400" /> Location
                 </label>
                 <input
                     value={location}
                     onChange={(e)=>setLocation(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
+                    className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
                     placeholder="Add physical or virtual location"
                 />
                 </div>
@@ -282,39 +282,39 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
 
             {/* Advanced options */}
             <details className="group" open>
-                <summary className="list-none cursor-pointer select-none text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-3 hover:text-slate-200 transition-colors py-2">
-                <span className="flex-1 h-px bg-white/10"></span>
+                <summary className="list-none cursor-pointer select-none text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-3 hover:text-slate-200 transition-colors py-2">
+                <span className="flex-1 h-px bg-white/[0.06]"></span>
                 <div className="flex items-center gap-2 px-2">
                     <FiPlus className="group-open:rotate-45 transition-transform" />
                     Additional Details
                 </div>
-                <span className="flex-1 h-px bg-white/10"></span>
+                <span className="flex-1 h-px bg-white/[0.06]"></span>
                 </summary>
 
                 <div className="mt-3 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Organizer</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Organizer</label>
                     <input
                         value={organizer}
                         onChange={(e)=>setOrganizer(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
                         placeholder="Event creator or host"
                     />
                     </div>
 
                     <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Attendees</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Attendees</label>
                     <input
                         value={attendees}
                         onChange={(e)=>setAttendees(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
                         placeholder="Separate emails with commas"
                     />
                     </div>
 
                     <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Status</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Status</label>
                     <div className="flex flex-wrap gap-1.5">
                         {([
                         { v: "tentative", label: "Tentative" },
@@ -325,10 +325,10 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                             type="button"
                             key={opt.v}
                             onClick={() => setStatus(opt.v)}
-                            className={`px-3 py-1 text-[10px] font-semibold rounded-lg border transition-all duration-200 ${
+                            className={`px-3 py-1 text-[11px] font-semibold rounded-lg border transition-all duration-200 ${
                             status === opt.v
                                 ? "border-purple-500/60 bg-purple-500/20 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.15)]"
-                                : "border-white/5 bg-white/5 text-slate-400 hover:border-white/20 hover:text-slate-200"
+                                : "border-white/5 bg-white/[0.03] text-slate-400 hover:border-white/5 hover:text-slate-200"
                             }`}
                         >
                             {opt.label}
@@ -338,7 +338,7 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                     </div>
 
                     <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Privacy</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Privacy</label>
                     <div className="flex flex-wrap gap-1.5">
                         {([
                         { v: "public", label: "Public", color: "border-emerald-500/50 text-emerald-300 bg-emerald-500/10" },
@@ -349,10 +349,10 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                             type="button"
                             key={opt.v}
                             onClick={() => setPrivacy(opt.v)}
-                            className={`px-3 py-1 text-[10px] font-semibold rounded-lg border transition-all duration-200 ${
+                            className={`px-3 py-1 text-[11px] font-semibold rounded-lg border transition-all duration-200 ${
                             privacy === opt.v
                                 ? `${opt.color} shadow-[0_0_15px_rgba(16,185,129,0.1)]`
-                                : "border-white/5 bg-white/5 text-slate-400 hover:border-white/20 hover:text-slate-200"
+                                : "border-white/5 bg-white/[0.03] text-slate-400 hover:border-white/5 hover:text-slate-200"
                             }`}
                         >
                             {opt.label}
@@ -362,7 +362,7 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                     </div>
 
                     <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Recurrence</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Recurrence</label>
                     <div className="flex flex-wrap gap-1.5">
                         {([
                         { v: "none", label: "None" },
@@ -375,10 +375,10 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                             type="button"
                             key={opt.v}
                             onClick={() => setRecurrence(opt.v)}
-                            className={`px-3 py-1 text-[10px] font-semibold rounded-lg border transition-all duration-200 ${
+                            className={`px-3 py-1 text-[11px] font-semibold rounded-lg border transition-all duration-200 ${
                             recurrence === opt.v
                                 ? "border-purple-500/60 bg-purple-500/20 text-purple-200"
-                                : "border-white/5 bg-white/5 text-slate-400 hover:border-white/20 hover:text-slate-200"
+                                : "border-white/5 bg-white/[0.03] text-slate-400 hover:border-white/5 hover:text-slate-200"
                             }`}
                         >
                             {opt.label}
@@ -388,8 +388,8 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                     </div>
 
                     <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Event Color</label>
-                    <div className="flex flex-wrap gap-2 p-2 bg-white/5 rounded-lg border border-white/5">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Event Color</label>
+                    <div className="flex flex-wrap gap-2 p-2 bg-white/[0.03] rounded-lg border border-white/5">
                         {(["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"] as const).map((c) => (
                         <button
                             type="button"
@@ -405,22 +405,22 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                     </div>
 
                     <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Description</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Description</label>
                     <textarea
                         value={description}
                         onChange={(e)=>setDescription(e.target.value)}
-                        className="w-full min-h-24 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all custom-scrollbar"
+                        className="w-full min-h-24 bg-white/[0.03] border border-white/5 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all custom-scrollbar"
                         placeholder="Add notes, details, or agenda..."
                     />
                     </div>
 
                     <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 ml-1 flex items-center gap-1.5">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 ml-1 flex items-center gap-1.5">
                         <FiBell className="text-purple-400" /> Reminders
                     </label>
                     <div className="flex flex-wrap gap-1.5 mb-2">
                         {reminders.map((r, idx) => (
-                        <span key={idx} className="inline-flex items-center gap-1.5 px-3 py-0.5 text-[10px] font-semibold rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-200">
+                        <span key={idx} className="inline-flex items-center gap-1.5 px-3 py-0.5 text-[11px] font-semibold rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-200">
                              {r.days > 0 && `${r.days}d `}
                              {r.hours > 0 && `${r.hours}h `}
                              {r.minutes > 0 && `${r.minutes}m `}
@@ -432,9 +432,9 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                         ))}
                     </div>
                     
-                    <div className="flex flex-wrap items-end gap-2 p-3 bg-white/5 border border-white/5 rounded-lg">
+                    <div className="flex flex-wrap items-end gap-2 p-3 bg-white/[0.03] border border-white/5 rounded-lg">
                         <div className="flex-1 min-w-[50px]">
-                        <label className="block text-[8px] uppercase font-bold tracking-widest text-slate-500 mb-1 ml-0.5">Days</label>
+                        <label className="block text-[11px] uppercase font-bold tracking-wider text-slate-500 mb-1 ml-0.5">Days</label>
                         <CustomNumberInput
                             value={rDays}
                             onChange={(val) => setRDays(Number(val) || 0)}
@@ -443,7 +443,7 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                         />
                         </div>
                         <div className="flex-1 min-w-[50px]">
-                        <label className="block text-[8px] uppercase font-bold tracking-widest text-slate-500 mb-1 ml-0.5">Hrs</label>
+                        <label className="block text-[11px] uppercase font-bold tracking-wider text-slate-500 mb-1 ml-0.5">Hrs</label>
                         <CustomNumberInput
                             value={rHours}
                             onChange={(val) => setRHours(Number(val) || 0)}
@@ -453,7 +453,7 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                         />
                         </div>
                         <div className="flex-1 min-w-[50px]">
-                        <label className="block text-[8px] uppercase font-bold tracking-widest text-slate-500 mb-1 ml-0.5">Mins</label>
+                        <label className="block text-[11px] uppercase font-bold tracking-wider text-slate-500 mb-1 ml-0.5">Mins</label>
                         <CustomNumberInput
                             value={rMinutes}
                             onChange={(val) => setRMinutes(Number(val) || 0)}
@@ -469,7 +469,7 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
                             setReminders((prev) => [...prev, { days: rDays, hours: rHours, minutes: rMinutes }]);
                             setRDays(0); setRHours(0); setRMinutes(0);
                         }}
-                        className="h-6 px-3 inline-flex items-center gap-1 text-[10px] font-bold rounded bg-white/10 text-white border border-white/10 hover:bg-white/20 transition-all active:scale-95"
+                        className="h-6 px-3 inline-flex items-center gap-1 text-[11px] font-bold rounded bg-white/[0.06] text-white border border-white/5 hover:bg-white/20 transition-all active:scale-95"
                         >
                         <FiPlus className="h-3 w-3" /> Add
                         </button>
@@ -482,12 +482,12 @@ export default function EventModal({ open, initialStart, onClose, onCreated, onO
         </div>
 
         {/* Fixed Footer */}
-        <div className="flex-none flex items-center justify-end gap-2 p-3 border-t border-white/10 bg-white/5">
+        <div className="flex-none flex items-center justify-end gap-2 p-3 border-t border-white/5 bg-white/[0.03]">
             <Tooltip content="Cancel and Close">
               <button
                 type="button"
                 onClick={onClose}
-                className="group h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/5 hover:bg-rose-500/10 hover:border-rose-500/20 hover:text-rose-400 text-slate-400 transition-all"
+                className="group h-8 w-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/5 hover:bg-rose-500/10 hover:border-rose-500/20 hover:text-rose-400 text-slate-400 transition-all"
               >
                 <FiX className="h-4 w-4" />
               </button>

@@ -44,7 +44,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
               id="name"
               required
               defaultValue={defaultValues?.name}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
               placeholder="Enter project name"
             />
           </div>
@@ -58,7 +58,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
               name="key"
               id="key"
               defaultValue={defaultValues?.key || ''}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
               placeholder="e.g., PROJ-123"
             />
           </div>
@@ -73,7 +73,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
             id="description"
             rows={3}
             defaultValue={defaultValues?.description || ''}
-            className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
+            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
             placeholder="Add details about this project..."
           />
         </div>
@@ -87,7 +87,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
             name="tags"
             id="tags"
             defaultValue={defaultValues?.tags ? (Array.isArray(defaultValues.tags) ? defaultValues.tags.join(', ') : defaultValues.tags) : ''}
-            className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
             placeholder="Comma-separated tags"
           />
         </div>
@@ -106,7 +106,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
               name="status"
               id="status"
               defaultValue={defaultValues?.status || 'planning'}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
+              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
             >
               <option value="planning">Planning</option>
               <option value="in_progress">In Progress</option>
@@ -123,7 +123,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
               name="priority"
               id="priority"
               defaultValue={defaultValues?.priority || 'medium'}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
+              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -209,7 +209,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
               name="currency"
               id="currency"
               defaultValue={defaultValues?.currency || 'USD'}
-              className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
               placeholder="USD"
             />
           </div>
@@ -223,7 +223,7 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
             name="billingType"
             id="billingType"
             defaultValue={defaultValues?.billingType || 'non_billable'}
-            className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
+            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
           >
             <option value="non_billable">Non-Billable</option>
             <option value="time_and_materials">Time & Materials</option>

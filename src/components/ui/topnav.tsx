@@ -52,7 +52,7 @@ const TopNav = ({ user }: TopNavProps) => {
         <div className="flex items-center gap-6 flex-1">
           {/* Mobile Logo */}
           <div className="md:hidden flex items-center gap-2">
-             <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
+             <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/5">
                <div className="text-lg font-bold text-white leading-none">M</div>
              </div>
              <span className="text-lg font-bold text-white">MD<span className="text-emerald-500">*</span></span>
@@ -65,9 +65,9 @@ const TopNav = ({ user }: TopNavProps) => {
               placeholder="Search anything..."
               onClick={() => setIsCommandOpen(true)}
               readOnly
-              className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-16 py-2.5 text-sm focus:outline-none focus:bg-white/10 focus:border-white/20 w-full transition-all duration-300 placeholder:text-zinc-600 cursor-pointer hidden md:block"
+              className="bg-white/[0.03] border border-white/5 rounded-xl pl-10 pr-16 py-2.5 text-sm focus:outline-none focus:bg-white/[0.06] focus:border-white/5 w-full transition-all duration-300 placeholder:text-zinc-600 cursor-pointer hidden md:block"
             />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px] font-medium text-zinc-500 pointer-events-none">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 px-1.5 py-0.5 rounded border border-white/5 bg-white/[0.03] text-[11px] font-medium text-zinc-500 pointer-events-none">
               <span className="text-[12px]">⌘</span>
               <span>K</span>
             </div>
@@ -79,7 +79,7 @@ const TopNav = ({ user }: TopNavProps) => {
           <div className="relative" ref={notificationRef}>
             <button 
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className="relative p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/5 border border-white/10 rounded-xl hover:border-white/20 group hover-scale"
+              className="relative p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/[0.03] border border-white/5 rounded-xl hover:border-white/5 group hover-scale"
             >
               <FiBell className="text-xl group-hover:text-[var(--pastel-yellow)] transition-colors" />
               {unreadCount > 0 && (
@@ -88,11 +88,11 @@ const TopNav = ({ user }: TopNavProps) => {
             </button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-zinc-900 border border-white/10 rounded-xl shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50">
+              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-zinc-900 border border-white/5 rounded-xl shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50">
                 <div className="px-4 py-3 border-b border-white/5 flex justify-between items-center">
                   <p className="text-sm font-medium text-white">Notifications</p>
                   {unreadCount > 0 && (
-                    <span className="text-xs text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full">{unreadCount} New</span>
+                    <span className="text-xs text-zinc-500 bg-white/[0.03] px-2 py-0.5 rounded-full">{unreadCount} New</span>
                   )}
                 </div>
                 
@@ -108,7 +108,7 @@ const TopNav = ({ user }: TopNavProps) => {
                         <div 
                           key={notification.id} 
                           onClick={() => !notification.is_read && markAsRead(notification.id)}
-                          className={`px-4 py-3 hover:bg-white/5 transition-colors cursor-pointer border-b border-white/5 last:border-0 ${!notification.is_read ? 'bg-white/[0.02]' : ''}`}
+                          className={`px-4 py-3 hover:bg-white/[0.03] transition-colors cursor-pointer border-b border-white/5 last:border-0 ${!notification.is_read ? 'bg-white/[0.02]' : ''}`}
                         >
                           <div className="flex gap-3">
                             <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border ${
@@ -126,7 +126,7 @@ const TopNav = ({ user }: TopNavProps) => {
                               <p className={`text-sm line-clamp-2 ${!notification.is_read ? 'text-white font-medium' : 'text-zinc-400'}`}>
                                 {notification.message}
                               </p>
-                              <p className="text-[10px] text-zinc-500 mt-1">
+                              <p className="text-[11px] text-zinc-500 mt-1">
                                 {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                               </p>
                             </div>
@@ -150,7 +150,7 @@ const TopNav = ({ user }: TopNavProps) => {
                     {unreadCount > 0 && (
                       <button 
                         onClick={() => markAllAsRead()}
-                        className="flex-1 py-2 text-xs text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/10"
+                        className="flex-1 py-2 text-xs text-zinc-400 hover:text-white hover:bg-white/[0.03] rounded-lg transition-colors border border-transparent hover:border-white/5"
                       >
                         Mark all as read
                       </button>
@@ -158,7 +158,7 @@ const TopNav = ({ user }: TopNavProps) => {
                     <Link 
                       href="/notifications"
                       onClick={() => setIsNotificationsOpen(false)}
-                      className="flex-1 py-2 text-xs text-center bg-white/5 text-zinc-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors border border-white/10"
+                      className="flex-1 py-2 text-xs text-center bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors border border-white/5"
                     >
                       View all
                     </Link>
@@ -169,21 +169,21 @@ const TopNav = ({ user }: TopNavProps) => {
           </div>
 
           <div className="flex gap-2 hidden md:flex">
-            <button className="p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/5 border border-white/10 rounded-xl hover:border-white/20 hover-scale" title="Help & Support">
+            <button className="p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/[0.03] border border-white/5 rounded-xl hover:border-white/5 hover-scale" title="Help & Support">
               <FiHelpCircle className="text-xl" />
             </button>
-            <button className="p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/5 border border-white/10 rounded-xl hover:border-white/20 hover-scale" title="Send Feedback">
+            <button className="p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/[0.03] border border-white/5 rounded-xl hover:border-white/5 hover-scale" title="Send Feedback">
               <FiMessageSquare className="text-xl" />
             </button>
           </div>
 
-          <div className="h-8 w-[1px] bg-white/10 hidden md:block"></div>
+          <div className="h-8 w-[1px] bg-white/[0.06] hidden md:block"></div>
 
           {user ? (
             <div className="relative" ref={dropdownRef}>
               <button 
                   onClick={() => setIsOpen(!isOpen)}
-                  className="flex items-center gap-3 p-1 rounded-xl hover:bg-white/5 transition-all cursor-pointer group focus:outline-none"
+                  className="flex items-center gap-3 p-1 rounded-xl hover:bg-white/[0.03] transition-all cursor-pointer group focus:outline-none"
               >
                   <div className="relative">
                   {user.image ? (
@@ -192,7 +192,7 @@ const TopNav = ({ user }: TopNavProps) => {
                           alt="Avatar"
                           width={36}
                           height={36}
-                          className="rounded-lg object-cover border-2 border-white/10 group-hover:border-[var(--pastel-purple)]/50 transition-colors"
+                          className="rounded-lg object-cover border-2 border-white/5 group-hover:border-[var(--pastel-purple)]/50 transition-colors"
                       />
                   ) : (
                       <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/20 group-hover:border-emerald-500/50 transition-colors">
@@ -210,7 +210,7 @@ const TopNav = ({ user }: TopNavProps) => {
 
               {/* Dropdown Menu */}
               {isOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50">
+                  <div className="absolute right-0 mt-2 w-56 bg-zinc-900 border border-white/5 rounded-xl shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50">
                       <div className="px-4 py-3 border-b border-white/5 mb-2">
                           <p className="text-sm font-medium text-white truncate">{user.name || 'User'}</p>
                           <p className="text-xs text-zinc-500 truncate">{user.email}</p>
@@ -218,7 +218,7 @@ const TopNav = ({ user }: TopNavProps) => {
                       
                       <Link 
                           href="/profile" 
-                          className="flex items-center px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors group"
+                          className="flex items-center px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/[0.03] transition-colors group"
                           onClick={() => setIsOpen(false)}
                       >
                           <FiUser className="mr-3 text-zinc-500 group-hover:text-[var(--pastel-blue)]" />
@@ -226,7 +226,7 @@ const TopNav = ({ user }: TopNavProps) => {
                       </Link>
                       <Link 
                           href="/settings" 
-                          className="flex items-center px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors group"
+                          className="flex items-center px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/[0.03] transition-colors group"
                           onClick={() => setIsOpen(false)}
                       >
                           <FiSettings className="mr-3 text-zinc-500 group-hover:text-[var(--pastel-teal)]" />
@@ -248,7 +248,7 @@ const TopNav = ({ user }: TopNavProps) => {
               )}
             </div>
           ) : (
-            <Link href="/login" className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors">
+            <Link href="/login" className="px-4 py-2 rounded-full bg-white/[0.06] hover:bg-white/20 text-white text-sm font-medium transition-colors">
               Login
             </Link>
           )}

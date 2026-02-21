@@ -22,7 +22,7 @@ export default function ClientCard({ client, onEdit, onDelete, isPending = false
             {/* Pending Overlay/Indicator */}
             {isPending && (
                 <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/10 backdrop-blur-[1px] rounded-2xl pointer-events-none">
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full border border-white/20 animate-pulse text-[10px] font-bold text-white uppercase tracking-widest shadow-xl">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.06] rounded-full border border-white/5 animate-pulse text-[11px] font-bold text-white uppercase tracking-wider shadow-xl">
                         <div className="h-2 w-2 bg-emerald-400 rounded-full animate-ping"></div>
                         Saving...
                     </div>
@@ -35,7 +35,7 @@ export default function ClientCard({ client, onEdit, onDelete, isPending = false
                         {client.companyName}
                     </h3>
                     {client.createdAt && (
-                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">
+                        <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 uppercase tracking-wider font-semibold">
                             <FiClock size={10} className="text-zinc-600" />
                             <span>Added {format(new Date(client.createdAt), 'MMM yyyy')}</span>
                         </div>
@@ -46,7 +46,7 @@ export default function ClientCard({ client, onEdit, onDelete, isPending = false
                     <button
                         onClick={() => onEdit(client)}
                         disabled={isPending}
-                        className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white border border-white/5 hover:border-white/10 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                        className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] text-zinc-400 hover:text-white border border-white/5 hover:border-white/5 transition-all shadow-lg active:scale-95 disabled:opacity-50"
                         title="Edit Client"
                     >
                         <FiEdit2 className="w-4 h-4" />
@@ -65,12 +65,12 @@ export default function ClientCard({ client, onEdit, onDelete, isPending = false
             <div className="space-y-4">
                 {/* Contact Person */}
                 {client.contactPersonName && (
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors group/item">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/5 transition-colors group/item">
                         <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 group-hover/item:bg-indigo-500/20 transition-colors">
                             <FiUser className="w-4 h-4" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] uppercase tracking-widest text-zinc-600 font-bold mb-0.5">Contact</span>
+                            <span className="text-[11px] uppercase tracking-wider text-zinc-600 font-bold mb-0.5">Contact</span>
                             <span className="text-sm text-zinc-300 font-medium">{client.contactPersonName}</span>
                         </div>
                     </div>
@@ -78,12 +78,12 @@ export default function ClientCard({ client, onEdit, onDelete, isPending = false
 
                 {/* Email */}
                 {client.contactEmail && (
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors group/item">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/5 transition-colors group/item">
                         <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 group-hover/item:bg-emerald-500/20 transition-colors">
                             <FiMail className="w-4 h-4" />
                         </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-[10px] uppercase tracking-widest text-zinc-600 font-bold mb-0.5">Email</span>
+                            <span className="text-[11px] uppercase tracking-wider text-zinc-600 font-bold mb-0.5">Email</span>
                             <span className="text-sm text-zinc-300 font-medium truncate">{client.contactEmail}</span>
                         </div>
                     </div>
@@ -91,12 +91,12 @@ export default function ClientCard({ client, onEdit, onDelete, isPending = false
 
                 {/* Website */}
                 {client.websiteUrl && (
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors group/item relative overflow-hidden">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/5 transition-colors group/item relative overflow-hidden">
                         <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 group-hover/item:bg-amber-500/20 transition-colors">
                             <FiGlobe className="w-4 h-4" />
                         </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-[10px] uppercase tracking-widest text-zinc-600 font-bold mb-0.5">Website</span>
+                            <span className="text-[11px] uppercase tracking-wider text-zinc-600 font-bold mb-0.5">Website</span>
                             <a 
                                 href={client.websiteUrl.startsWith('http') ? client.websiteUrl : `https://${client.websiteUrl}`} 
                                 target="_blank" 

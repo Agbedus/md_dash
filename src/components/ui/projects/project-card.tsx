@@ -45,7 +45,7 @@ const CircularProgress = ({ percentage, size = 32 }: { percentage: number; size?
           strokeLinecap="round"
         />
       </svg>
-      <span className="absolute text-[8px] font-bold text-white">{Math.round(percentage)}%</span>
+      <span className="absolute text-[11px] font-bold text-white">{Math.round(percentage)}%</span>
     </div>
   );
 };
@@ -66,14 +66,14 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
   };
 
   return (
-    <div className="group relative bg-zinc-900/30 hover:bg-zinc-900/50 border border-white/5 hover:border-white/10 rounded-xl lg:rounded-2xl p-4 lg:p-5 transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-1">
+    <div className="group relative bg-zinc-900/30 hover:bg-zinc-900/50 border border-white/5 hover:border-white/5 rounded-xl lg:rounded-2xl p-4 lg:p-5 transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-1">
       <div className="flex justify-between items-start mb-2 lg:mb-3">
         <div className="flex items-center gap-2">
-          <div className={`px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-lg text-[10px] lg:text-xs font-medium border ${statusColors[project.status]}`}>
+          <div className={`px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-lg text-[11px] lg:text-xs font-medium border ${statusColors[project.status]}`}>
             {statusMapping[project.status]}
           </div>
           {project.key && (
-            <div className="px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-lg text-[10px] lg:text-xs font-mono text-zinc-500 bg-white/5 border border-white/5">
+            <div className="px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-lg text-[11px] lg:text-xs font-mono text-zinc-500 bg-white/[0.03] border border-white/5">
               {project.key}
             </div>
           )}
@@ -88,7 +88,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onEdit(project)}
-            className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-colors"
             title="Edit project"
           >
             <FiEdit2 className="w-3.5 h-3.5" />
@@ -142,7 +142,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
             if (!project.tags || !Array.isArray(project.tags)) return null;
             
             return project.tags.slice(0, 3).map((tag: string, idx: number) => (
-              <span key={idx} className="px-1.5 py-0.5 rounded-md text-[9px] lg:text-[10px] bg-white/5 text-zinc-400 border border-white/5">
+              <span key={idx} className="px-1.5 py-0.5 rounded-md text-[11px] lg:text-[11px] bg-white/[0.03] text-zinc-400 border border-white/5">
                 {tag}
               </span>
             ));
@@ -152,7 +152,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
 
       {/* Budget Info */}
       {(project.budget || project.spent) && (
-        <div className="mb-3 p-2 rounded-lg bg-white/5 border border-white/5">
+        <div className="mb-3 p-2 rounded-lg bg-white/[0.03] border border-white/5">
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5 text-zinc-400">
               <FiDollarSign className="w-3 h-3" />
@@ -163,7 +163,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
             </div>
           </div>
           {project.budget && project.budget > 0 && (
-            <div className="mt-1.5 h-1 bg-white/5 rounded-full overflow-hidden">
+            <div className="mt-1.5 h-1 bg-white/[0.03] rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all"
                 style={{ width: `${Math.min(((project.spent || 0) / project.budget) * 100, 100)}%` }}

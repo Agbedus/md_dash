@@ -47,7 +47,7 @@ export default function DayGrid({ date, events = [], onSelectDateTime, onEventCl
     <div className="glass rounded-2xl overflow-hidden">
       <div className="overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[60px_1fr] border-b border-white/5 bg-white/5">
+        <div className="grid grid-cols-[60px_1fr] border-b border-white/5 bg-white/[0.03]">
           <div className="px-2 py-2 text-right pr-3 border-r border-white/5">&nbsp;</div>
           <div className="px-3 py-2 text-center uppercase tracking-wide">
             <div className="text-xs font-bold text-zinc-500 mb-1">{format(date, "EEE")}</div>
@@ -60,7 +60,7 @@ export default function DayGrid({ date, events = [], onSelectDateTime, onEventCl
           {/* Time labels */}
           <div className="flex flex-col border-r border-white/5 bg-white/[0.02]">
             {HOURS.map((h, i) => (
-              <div key={i} className="h-16 border-b border-white/5 text-[10px] text-right pr-2 pt-2 text-zinc-500 font-medium">
+              <div key={i} className="h-16 border-b border-white/5 text-[11px] text-right pr-2 pt-2 text-zinc-500 font-medium">
                 {format(h, "HH:00")}
               </div>
             ))}
@@ -91,7 +91,7 @@ export default function DayGrid({ date, events = [], onSelectDateTime, onEventCl
                             key={e.id}
                             role="button"
                             onClick={(ev) => { ev.stopPropagation(); onEventClick?.(e); }}
-                            className={`h-full truncate text-[10px] px-1.5 py-1 rounded-lg border ${c.border} bg-white/10 hover:bg-white/20 flex items-center gap-1.5 transition-colors`}
+                            className={`h-full truncate text-[11px] px-1.5 py-1 rounded-lg border ${c.border} bg-white/[0.06] hover:bg-white/20 flex items-center gap-1.5 transition-colors`}
                             style={{ flex: `0 0 ${widthPct}%` }}
                             title={e.title}
                           >

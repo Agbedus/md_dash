@@ -17,17 +17,17 @@ export default function Toolbar({ currentDate, view, onPrev, onNext, onToday, on
   return (
     <div className="glass p-4 rounded-2xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-2">
-        <div className="flex items-center bg-white/5 rounded-xl border border-white/10 p-1">
-            <button onClick={onPrev} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-all">
+        <div className="flex items-center bg-white/[0.03] rounded-xl border border-white/5 p-1">
+            <button onClick={onPrev} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
             <FiChevronLeft className="h-4 w-4" />
             </button>
-            <button onClick={onNext} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-all">
+            <button onClick={onNext} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
             <FiChevronRight className="h-4 w-4" />
             </button>
         </div>
         <button 
             onClick={onToday} 
-            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 text-sm font-medium transition-all"
+            className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/5 text-zinc-400 hover:text-white hover:bg-white/[0.06] text-sm font-medium transition-all"
         >
             Today
         </button>
@@ -37,14 +37,14 @@ export default function Toolbar({ currentDate, view, onPrev, onNext, onToday, on
         {format(currentDate, "MMMM yyyy")}
       </div>
 
-      <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10">
+      <div className="flex items-center space-x-1 bg-white/[0.03] p-1 rounded-xl border border-white/5">
         {(['month', 'week', 'day'] as const).map((v) => (
             <button
                 key={v}
                 onClick={() => onChangeView?.(v)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     view === v 
-                    ? "bg-white/10 text-white shadow-sm" 
+                    ? "bg-white/[0.06] text-white shadow-sm" 
                     : "text-zinc-500 hover:text-zinc-300"
                 }`}
             >

@@ -5,6 +5,12 @@
 
 ## Changelog
 
+### 2026-02-19
+
+- Simplified Task Timer: Removed `pause` endpoint as redundant; `start` now stops other active sessions automatically.
+- Registered `TimeLog` CRUD endpoints under `/api/v1/timelogs`.
+- Updated API documentation to reflect timer changes and new TimeLog resource.
+
 ### 2026-02-18
 
 - Synchronized web view submit handlers with API notification triggers.
@@ -33,6 +39,7 @@
    - Clients
    - Projects
    - Tasks
+   - TimeLogs
    - Notes
    - Events
    - Decisions
@@ -356,17 +363,13 @@ Base path: `/api/v1/tasks`
 
 - **DELETE** `/api/v1/tasks/{task_id}`
 - **Auth Required:** `SUPER_ADMIN`
+- Note: cannot delete yourself
 
 ### Start Timer
 
 - **POST** `/api/v1/tasks/{task_id}/timer/start`
 - **Auth Required:** Any authenticated user
-- Closes other active sessions for current user first.
-
-### Pause Timer
-
-- **POST** `/api/v1/tasks/{task_id}/timer/pause`
-- **Auth Required:** Any authenticated user
+- **Behavior**: Stops any other active timer sessions for the current user across all tasks, then creates a new session for the target task. Automatically moves task to `IN_PROGRESS` if it's in `TODO`.
 
 ### Stop Timer
 
@@ -380,6 +383,44 @@ Task status enum:
 - `QA`
 - `REVIEW`
 - `DONE`
+
+---
+
+## TimeLogs Endpoints
+
+Base path: `/api/v1/timelogs`
+
+### List TimeLogs
+
+- **GET** `/api/v1/timelogs`
+- **Auth Required:** Any authenticated user
+- **Query params**: `skip`, `limit`, `task_id`
+- **Behavior**:
+  - `SUPER_ADMIN` and `MANAGER`: all logs
+  - others: only their own logs
+
+### Get TimeLog
+
+- **GET** `/api/v1/timelogs/{log_id}`
+- **Auth Required:** Any authenticated user
+- **Visibility**: self OR (`MANAGER`/`SUPER_ADMIN`)
+
+### Create TimeLog (Manual)
+
+- **POST** `/api/v1/timelogs`
+- **Auth Required:** Any authenticated user
+- **Payload**: `TaskTimeLogCreate`
+- **Notes**: `user_id` is forced to current user.
+
+### Update TimeLog
+
+- **PATCH** `/api/v1/timelogs/{log_id}`
+- **Auth Required:** self OR (`MANAGER`/`SUPER_ADMIN`)
+
+### Delete TimeLog
+
+- **DELETE** `/api/v1/timelogs/{log_id}`
+- **Auth Required:** self OR (`MANAGER`/`SUPER_ADMIN`)
 
 ---
 
@@ -852,7 +893,6 @@ Response JSON: updated `TaskReadWithTimeLogs` object.
 #### Timer endpoints
 
 - `POST /api/v1/tasks/{task_id}/timer/start`
-- `POST /api/v1/tasks/{task_id}/timer/pause`
 - `POST /api/v1/tasks/{task_id}/timer/stop`
 
 Response JSON (`TaskTimeLog`):
@@ -860,6 +900,32 @@ Response JSON (`TaskTimeLog`):
 ```json
 {
   "id": 101,
+  "task_id": 12,
+  "user_id": "user-uuid-1",
+  "start_time": "2026-02-17T02:10:00Z",
+  "end_time": "2026-02-17T02:35:00Z"
+}
+```
+
+### TimeLogs payload contracts
+
+#### `POST /api/v1/timelogs`
+
+Request JSON (`TaskTimeLogCreate`):
+
+```json
+{
+  "task_id": 12,
+  "start_time": "2026-02-17T02:10:00Z",
+  "end_time": "2026-02-17T02:35:00Z"
+}
+```
+
+Response JSON (`TaskTimeLogRead`):
+
+```json
+{
+  "id": 105,
   "task_id": 12,
   "user_id": "user-uuid-1",
   "start_time": "2026-02-17T02:10:00Z",
@@ -1142,6 +1208,7 @@ Response JSON:
 | Clients       | Manager, Super Admin                       | Manager, Super Admin | Manager, Super Admin         | Super Admin |
 | Projects      | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |
 | Tasks         | Any auth (scoped by role/owner/assignment) | Any auth             | Manager, Super Admin         | Super Admin |
+| TimeLogs      | Self, Manager, Super Admin                 | Any auth (manual)    | Self, Manager, Super Admin   | Super Admin |
 | Notes         | Any auth (scoped by role/owner/share)      | Any auth             | Manager, Super Admin         | Super Admin |
 | Events        | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |
 | Decisions     | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |

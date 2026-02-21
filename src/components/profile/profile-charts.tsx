@@ -14,7 +14,7 @@ const ProfileCharts: React.FC<ProfileChartsProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Productivity Trends - Full Width */}
-      <div className="lg:col-span-2 glass p-6 rounded-3xl border border-white/10 bg-zinc-900/50">
+      <div className="lg:col-span-2 glass p-6 rounded-3xl border border-white/5 bg-zinc-900/50">
         <h3 className="text-lg font-semibold text-white mb-6">Productivity Growth</h3>
         <div className="h-[300px] w-full">
           <ProductivityChart data={productivityData} />
@@ -22,7 +22,7 @@ const ProfileCharts: React.FC<ProfileChartsProps> = ({
       </div>
 
       {/* Task Breakdown */}
-      <div className="glass p-6 rounded-3xl border border-white/10 bg-zinc-900/50">
+      <div className="glass p-6 rounded-3xl border border-white/5 bg-zinc-900/50">
         <h3 className="text-lg font-semibold text-white mb-6">Task Distribution</h3>
         <div className="h-[250px] w-full">
           <TasksChart data={tasksOverviewData} />
@@ -30,7 +30,7 @@ const ProfileCharts: React.FC<ProfileChartsProps> = ({
       </div>
 
       {/* Workload Distribution */}
-      <div className="glass p-6 rounded-3xl border border-white/10 bg-zinc-900/50">
+      <div className="glass p-6 rounded-3xl border border-white/5 bg-zinc-900/50">
         <h3 className="text-lg font-semibold text-white mb-6">Project Workload</h3>
         <div className="h-[250px] w-full">
           <WorkloadChart data={workloadData} />

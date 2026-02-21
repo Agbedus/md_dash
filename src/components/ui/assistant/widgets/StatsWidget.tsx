@@ -18,7 +18,7 @@ export default function StatsWidget({ title, stats }: StatsWidgetProps) {
       
       <div className="grid grid-cols-2 gap-3">
         {stats.map((stat, idx) => (
-          <div key={idx} className="bg-white/5 rounded-lg p-3">
+          <div key={idx} className="bg-white/[0.03] rounded-lg p-3">
             <div className={`text-2xl font-bold mb-1 ${stat.color || 'text-white'}`}>
               {stat.value}
             </div>

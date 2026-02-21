@@ -132,3 +132,39 @@ export async function getUsers() {
         return [];
     }
 }
+
+export async function getUserTimeLogs(userId: string) {
+    const session = await auth();
+    // @ts-expect-error accessToken is not in default session type
+    if (!session?.user?.accessToken) return [];
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/timelogs`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                // @ts-expect-error accessToken is not in default session type
+                'Authorization': `Bearer ${session.user.accessToken}`
+            },
+            next: { tags: ['timelogs'], revalidate: 60 }
+        });
+
+        if (!response.ok) {
+            console.error("Failed to fetch timelogs:", await response.text());
+            return [];
+        }
+
+        const allLogs = await response.json();
+        // Filter logs by user
+        return allLogs.filter((log: any) => log.user_id === userId).map((log: any) => ({
+            id: log.id,
+            task_id: log.task_id,
+            user_id: log.user_id,
+            start_time: log.start_time,
+            end_time: log.end_time ?? null,
+        }));
+    } catch (error) {
+        console.error("Error fetching user timelogs:", error);
+        return [];
+    }
+}

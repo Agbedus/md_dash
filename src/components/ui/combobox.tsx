@@ -149,14 +149,14 @@ export function Combobox({
       {/* Trigger */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full min-h-[34px] bg-zinc-900/50 border border-white/10 rounded-xl px-3 py-1.5 text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer flex items-center justify-between gap-2"
+        className="w-full min-h-[34px] bg-zinc-900/50 border border-white/5 rounded-xl px-3 py-1.5 text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer flex items-center justify-between gap-2"
       >
         <div className="flex flex-wrap gap-1.5">
           {selectedOptions.length > 0 ? (
             selectedOptions.map((option) => (
               <span
                 key={option.value}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800 border border-white/10 text-[10px] text-zinc-200"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800 border border-white/5 text-[11px] text-zinc-200"
               >
                 {option.label}
                 <button
@@ -187,7 +187,7 @@ export function Combobox({
               left: `${coords.left}px`,
               width: `${coords.width}px`,
             }}
-            className={`z-[9999] bg-zinc-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${
+            className={`z-[9999] bg-zinc-900 border border-white/5 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${
               openUpward ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'
             }`}
           >
@@ -217,12 +217,12 @@ export function Combobox({
                       type="button"
                       onClick={() => handleSelect(option.value)}
                       className={`w-full text-left px-3 py-1.5 rounded-lg text-xs flex items-center justify-between group transition-colors ${
-                        isSelected ? 'bg-indigo-500/10 text-indigo-400' : 'text-zinc-300 hover:bg-white/5 hover:text-white'
+                        isSelected ? 'bg-indigo-500/10 text-indigo-400' : 'text-zinc-300 hover:bg-white/[0.03] hover:text-white'
                       }`}
                     >
                       <div>
                         <div className="font-medium text-xs text-white">{option.label}</div>
-                        {option.subLabel && <div className="text-[9px] text-zinc-500 group-hover:text-zinc-400">{option.subLabel}</div>}
+                        {option.subLabel && <div className="text-[11px] text-zinc-500 group-hover:text-zinc-400">{option.subLabel}</div>}
                       </div>
                       {isSelected && <FiCheck className="w-4 h-4" />}
                     </button>

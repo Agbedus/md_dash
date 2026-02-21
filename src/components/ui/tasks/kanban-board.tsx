@@ -47,7 +47,7 @@ function Column({ col, items, users, user, projects, columns, onMove, onDelete, 
       data-column={col}
       className={`glass rounded-2xl p-4 flex flex-col transition-all duration-300 ${
         isOver
-          ? 'bg-white/10 ring-2 ring-indigo-500/50 shadow-[0_0_30px_rgba(99,102,241,0.1)]'
+          ? 'bg-white/[0.06] ring-2 ring-indigo-500/50 shadow-[0_0_30px_rgba(99,102,241,0.1)]'
           : 'bg-zinc-900/10'
       } ${flash ? 'ring-2 ring-emerald-500/50 bg-emerald-500/10' : ''}`}
     >
@@ -60,17 +60,17 @@ function Column({ col, items, users, user, projects, columns, onMove, onDelete, 
             col === 'REVIEW' ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]' :
             'bg-zinc-500'
           }`} />
-          <h3 className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">
+          <h3 className="text-[11px] font-medium text-white/50 uppercase tracking-wider">
             {statusMapping[col]}
           </h3>
           {flash && (
-            <span className="inline-flex items-center text-emerald-400 text-[10px] animate-pulse font-bold uppercase tracking-tight bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+            <span className="inline-flex items-center text-emerald-400 text-[11px] animate-pulse font-bold uppercase tracking-tight bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
               Updated
             </span>
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-black text-zinc-500 bg-white/5 px-2 py-1 rounded-lg border border-white/5 min-w-[28px] text-center">
+          <span className="text-[11px] font-medium text-zinc-500 bg-white/[0.03] px-2 py-1 rounded-lg border border-white/5 min-w-[28px] text-center">
             {items?.length ?? 0}
           </span>
         </div>

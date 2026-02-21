@@ -128,7 +128,7 @@ export default function TaskForm({ onSuccess }: { onSuccess: () => void }) {
             />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-purple-400 rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity" />
           </div>
-          <span className="text-xs font-bold text-slate-400 group-hover:text-purple-400 transition-colors uppercase tracking-widest">QA Required</span>
+          <span className="text-xs font-bold text-slate-400 group-hover:text-purple-400 transition-colors uppercase tracking-wider">QA Required</span>
         </label>
         <label className="flex items-center gap-2 cursor-pointer group">
           <div className="relative flex items-center">
@@ -140,7 +140,7 @@ export default function TaskForm({ onSuccess }: { onSuccess: () => void }) {
             />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-blue-400 rounded-sm opacity-0 peer-checked:opacity-100 transition-opacity" />
           </div>
-          <span className="text-xs font-bold text-slate-400 group-hover:text-blue-400 transition-colors uppercase tracking-widest">Review Required</span>
+          <span className="text-xs font-bold text-slate-400 group-hover:text-blue-400 transition-colors uppercase tracking-wider">Review Required</span>
         </label>
       </div>
 

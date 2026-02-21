@@ -7,7 +7,7 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
 export function Skeleton({ className, ...props }: SkeletonProps) {
   return (
     <div 
-      className={`relative overflow-hidden bg-white/5 rounded-lg ${className}`}
+      className={`relative overflow-hidden bg-white/[0.03] rounded-lg ${className}`}
       {...props}
     >
       <motion.div

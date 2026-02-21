@@ -227,7 +227,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                 <FiLayers className="text-purple-400 flex-shrink-0" size={16} title="Associated with a task" />
                             )}
                         </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500">
+                        <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
                             <FiClock size={10} />
                             <span suppressHydrationWarning>{note.updated_at ? new Date(note.updated_at).toLocaleDateString() : note.created_at ? new Date(note.created_at).toLocaleDateString() : 'No date'}</span>
                         </div>
@@ -258,12 +258,12 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                 <div className="mt-4">
                     <div className="flex flex-wrap gap-2 mb-3">
                         {noteTags.map((tag: string) => (
-                            <span key={tag} className="px-2.5 py-1 bg-white/5 text-zinc-300 text-xs rounded-full">{tag}</span>
+                            <span key={tag} className="px-2.5 py-1 bg-white/[0.03] text-zinc-300 text-xs rounded-full">{tag}</span>
                         ))}
                     </div>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-lg border border-white/10">
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/[0.03] rounded-lg border border-white/5">
                                 {note.is_pinned === 1 && (
                                     <div className="text-blue-400" title="Pinned">
                                         <FiMapPin size={12} className="fill-current" />
@@ -315,7 +315,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                             />
                                         )}
                                         {isSharing && (
-                                            <div className="w-6 h-6 rounded-full bg-white/10 animate-pulse" />
+                                            <div className="w-6 h-6 rounded-full bg-white/[0.06] animate-pulse" />
                                         )}
                                     </div>
                                 )}
@@ -332,22 +332,22 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                         left: `${ownerCoords.left}px`,
                                         transform: 'translate(-50%, -100%)',
                                     }}
-                                    className="mb-2 w-48 p-2 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                                    className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
                                 >
                                     <div className="flex items-center gap-2">
                                         <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">
                                             {note.owner.avatar_url || note.owner.image ? (
                                                 <Image src={note.owner.avatar_url || note.owner.image || ''} alt={note.owner.name || ''} fill className="object-cover" />
                                             ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-emerald-400 bg-emerald-500/10">
+                                                <div className="flex h-full w-full items-center justify-center text-[11px] font-bold text-emerald-400 bg-emerald-500/10">
                                                     {(note.owner.full_name || note.owner.name || '?').charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-xs font-semibold text-white truncate">{note.owner.full_name || note.owner.name}</p>
-                                            <p className="text-[10px] text-zinc-500 truncate">Creator</p>
-                                            {note.owner.email && <p className="text-[10px] text-zinc-500 truncate">{note.owner.email}</p>}
+                                            <p className="text-[11px] text-zinc-500 truncate">Creator</p>
+                                            {note.owner.email && <p className="text-[11px] text-zinc-500 truncate">{note.owner.email}</p>}
                                         </div>
                                     </div>
                                 </div>
@@ -358,17 +358,17 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                 <button 
                                     onClick={() => setShowUserDropdown(!showUserDropdown)} 
                                     disabled={isSharing}
-                                    className={`p-2 rounded-xl transition-all ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
+                                    className={`p-2 rounded-xl transition-all ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'}`}
                                     title="Add User"
                                 >
                                     <FiUserPlus size={16} />
                                 </button>
                                 {showUserDropdown && availableUsers.length > 0 && (
-                                    <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 rounded-2xl shadow-2xl p-2 border border-white/10 z-50">
+                                    <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 rounded-2xl shadow-2xl p-2 border border-white/5 z-50">
                                         <select
                                             value={selectedUser}
                                             onChange={(e) => setSelectedUser(e.target.value)}
-                                            className="w-full bg-zinc-950 border border-white/10 rounded-xl px-2 py-1.5 text-xs text-white mb-2 focus:outline-none focus:border-emerald-500/50"
+                                            className="w-full bg-zinc-950 border border-white/5 rounded-xl px-2 py-1.5 text-xs text-white mb-2 focus:outline-none focus:border-emerald-500/50"
                                         >
                                             <option value="">Select user...</option>
                                             {availableUsers.map(u => (
@@ -387,7 +387,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                     </div>
                                 )}
                             </div>
-                            <button onClick={() => onEdit?.(note)} className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all"><FiEdit2 size={16} /></button>
+                            <button onClick={() => onEdit?.(note)} className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all"><FiEdit2 size={16} /></button>
                             <form onSubmit={async (e) => { e.preventDefault(); const fd = new FormData(); fd.append('id', note.id.toString()); await onNoteDelete(fd); }} style={{ display: 'inline' }}>
                                 <input type="hidden" name="id" value={note.id} />
                                 <button type="submit" className="p-2 rounded-xl text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-all"><FiTrash2 size={16} /></button>
@@ -430,9 +430,9 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                             className="relative flex-shrink-0 cursor-pointer"
                         >
                             {note.owner?.avatar_url || note.owner?.image ? (
-                                <Image src={(note.owner.avatar_url || note.owner.image)!} alt={note.owner.full_name || note.owner.name || 'Owner'} width={28} height={28} className="rounded-full border border-white/10 object-cover" />
+                                <Image src={(note.owner.avatar_url || note.owner.image)!} alt={note.owner.full_name || note.owner.name || 'Owner'} width={28} height={28} className="rounded-full border border-white/5 object-cover" />
                             ) : note.owner?.name || note.owner?.full_name ? (
-                                <div className="w-7 h-7 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center text-[10px] font-bold border border-white/10">
+                                <div className="w-7 h-7 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center text-[11px] font-bold border border-white/5">
                                     {(note.owner.full_name || note.owner.name)!.charAt(0).toUpperCase()}
                                 </div>
                             ) : null}
@@ -443,7 +443,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                         <div className="flex items-center gap-1 ml-6 shrink-0">
                             {note.shared_with && note.shared_with.length > 0 && (
                                 <>
-                                    <span className="text-[10px] text-zinc-500">+</span>
+                                    <span className="text-[11px] text-zinc-500">+</span>
                                     <UserAvatarGroup 
                                         users={note.shared_with.map(u => typeof u === 'string' ? { name: u } : u)} 
                                         size="sm" 
@@ -452,7 +452,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                 </>
                             )}
                             {isSharing && (
-                                <div className="w-5 h-5 rounded-full bg-white/10 animate-pulse" />
+                                <div className="w-5 h-5 rounded-full bg-white/[0.06] animate-pulse" />
                             )}
                         </div>
                     )}
@@ -471,7 +471,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
             <td className="px-6 py-4 text-sm text-zinc-400">
                 <div className="flex flex-wrap gap-1">
                     {noteTags.map((tag: string) => (
-                        <span key={tag} className="px-2 py-1 bg-white/5 text-zinc-300 text-xs rounded-full">{tag}</span>
+                        <span key={tag} className="px-2 py-1 bg-white/[0.03] text-zinc-300 text-xs rounded-full">{tag}</span>
                     ))}
                 </div>
             </td>
@@ -481,7 +481,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                         type="button" 
                         onClick={() => setShowUserDropdown(!showUserDropdown)} 
                         disabled={isSharing}
-                        className={`p-2 rounded-lg transition-colors ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
+                        className={`p-2 rounded-lg transition-colors ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'}`}
                         title="Add User"
                     >
                         <FiUserPlus size={16} />
@@ -510,10 +510,10 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                         </div>
                     )}
                 </div>
-                <button type="button" onClick={() => onEdit?.(note)} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10"><FiEdit2 size={16} /></button>
+                <button type="button" onClick={() => onEdit?.(note)} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06]"><FiEdit2 size={16} /></button>
                 <form onSubmit={async (e) => { e.preventDefault(); const fd = new FormData(); fd.append('id', note.id.toString()); await onNoteDelete(fd); }} style={{ display: 'inline' }}>
                     <input type="hidden" name="id" value={note.id} />
-                    <button type="submit" className="p-2 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-white/10"><FiTrash2 size={16} /></button>
+                    <button type="submit" className="p-2 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-white/[0.06]"><FiTrash2 size={16} /></button>
                 </form>
             </td>
             {/* Owner Tooltip */}
@@ -526,22 +526,22 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                             left: `${ownerCoords.left}px`,
                             transform: 'translate(-50%, -100%)',
                         }}
-                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
                     >
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">
                                 {note.owner.avatar_url || note.owner.image ? (
                                     <Image src={note.owner.avatar_url || note.owner.image || ''} alt={note.owner.name || ''} fill className="object-cover" />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-emerald-400 bg-emerald-500/10">
+                                    <div className="flex h-full w-full items-center justify-center text-[11px] font-bold text-emerald-400 bg-emerald-500/10">
                                         {(note.owner.full_name || note.owner.name || '?').charAt(0).toUpperCase()}
                                     </div>
                                 )}
                             </div>
                             <div className="min-w-0">
                                 <p className="text-xs font-semibold text-white truncate">{note.owner.full_name || note.owner.name}</p>
-                                <p className="text-[10px] text-zinc-500 truncate">Creator</p>
-                                {note.owner.email && <p className="text-[10px] text-zinc-500 truncate">{note.owner.email}</p>}
+                                <p className="text-[11px] text-zinc-500 truncate">Creator</p>
+                                {note.owner.email && <p className="text-[11px] text-zinc-500 truncate">{note.owner.email}</p>}
                             </div>
                         </div>
                     </div>

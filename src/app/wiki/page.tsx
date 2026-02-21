@@ -83,7 +83,7 @@ export default function WikiPage() {
                             <div className="p-2 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
                                 <FiBookOpen className="text-lg text-indigo-400" />
                             </div>
-                            <h1 className="text-base font-black text-white tracking-tight uppercase">Wiki</h1>
+                            <h1 className="text-base font-medium text-white tracking-tight uppercase">Wiki</h1>
                         </div>
                     </div>
                     <nav className="flex-1 overflow-y-auto p-3 space-y-4 no-scrollbar">
@@ -91,7 +91,7 @@ export default function WikiPage() {
                             <div key={topic.id} className="space-y-1">
                                 <button
                                     onClick={() => scrollToSection(topic.id)}
-                                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-zinc-100 bg-white/5 hover:bg-white/10 transition-all text-xs font-black uppercase tracking-wider border border-white/5 group"
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-zinc-100 bg-white/[0.03] hover:bg-white/[0.06] transition-all text-xs font-medium uppercase tracking-wider border border-white/5 group"
                                 >
                                     <topic.icon className={`text-base ${topic.color} group-hover:scale-110 transition-transform`} />
                                     {topic.title}
@@ -101,7 +101,7 @@ export default function WikiPage() {
                                         <button
                                             key={sub.id}
                                             onClick={() => scrollToSection(sub.id)}
-                                            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all text-[11px] font-medium group"
+                                            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03] transition-all text-[11px] font-medium group"
                                         >
                                             <sub.icon className="text-zinc-600 group-hover:text-zinc-400 transition-colors" />
                                             {sub.title}
@@ -112,8 +112,8 @@ export default function WikiPage() {
                         ))}
                     </nav>
                     <div className="p-4 border-t border-white/5 bg-zinc-950/20">
-                        <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest text-center leading-none">Intelligence v0.1.0-beta</p>
+                        <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                            <p className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider text-center leading-none">Intelligence v0.1.0-beta</p>
                         </div>
                     </div>
                 </aside>
@@ -127,7 +127,7 @@ export default function WikiPage() {
                                 <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
                                     <FiInfo className="text-xl text-indigo-400" />
                                 </div>
-                                <h2 className="text-4xl font-black text-white uppercase tracking-tight">Mission Briefing</h2>
+                                <h2 className="text-4xl font-medium text-white uppercase tracking-tight">Mission Briefing</h2>
                                 <div className="h-1 w-20 bg-gradient-to-r from-indigo-500/50 to-transparent rounded-full" />
                             </div>
 
@@ -135,7 +135,7 @@ export default function WikiPage() {
                                 <article id="mission-briefing" className="space-y-6">
                                     <div className="flex items-center gap-3">
                                         <FiTarget className="text-indigo-400" />
-                                        <h3 className="text-lg font-black text-white uppercase tracking-wider">The Platform Vision</h3>
+                                        <h3 className="text-lg font-medium text-white uppercase tracking-wider">The Platform Vision</h3>
                                     </div>
                                     <p className="text-zinc-400 text-base leading-relaxed font-medium">
                                         MD Platform is a bespoke, secure, and intelligent productivity environment designed for high-level executive oversight. The system integrates local intelligence with robust resource management to streamline decision-making and mission-critical workflows.
@@ -145,7 +145,7 @@ export default function WikiPage() {
                                 <article id="ai-aide" className="space-y-6">
                                     <div className="flex items-center gap-3">
                                         <FiZap className="text-amber-400" />
-                                        <h3 className="text-lg font-black text-white uppercase tracking-wider">The AI Aide</h3>
+                                        <h3 className="text-lg font-medium text-white uppercase tracking-wider">The AI Aide</h3>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
@@ -166,15 +166,15 @@ export default function WikiPage() {
                                 <article id="local-llm" className="space-y-6">
                                     <div className="flex items-center gap-3">
                                         <FiShield className="text-emerald-400" />
-                                        <h3 className="text-lg font-black text-white uppercase tracking-wider">Local Privacy Protocol</h3>
+                                        <h3 className="text-lg font-medium text-white uppercase tracking-wider">Local Privacy Protocol</h3>
                                     </div>
                                     <div className="p-6 rounded-2xl bg-emerald-500/[0.02] border border-emerald-500/10 space-y-4">
                                         <p className="text-zinc-400 text-sm leading-relaxed">
                                             Intelligence is powered by local, open-source models (Llama 3 / Mistral) served via Ollama. This ensures complete data sovereignty: no mission data ever leaves the secure perimeter.
                                         </p>
                                         <div className="flex gap-4">
-                                            <span className="px-3 py-1 rounded-lg bg-zinc-900 border border-white/5 text-[9px] font-black text-zinc-500 uppercase tracking-widest">Llama 3 Ready</span>
-                                            <span className="px-3 py-1 rounded-lg bg-zinc-900 border border-white/5 text-[9px] font-black text-zinc-500 uppercase tracking-widest">Zero Tracking</span>
+                                            <span className="px-3 py-1 rounded-lg bg-zinc-900 border border-white/5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Llama 3 Ready</span>
+                                            <span className="px-3 py-1 rounded-lg bg-zinc-900 border border-white/5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Zero Tracking</span>
                                         </div>
                                     </div>
                                 </article>
@@ -187,7 +187,7 @@ export default function WikiPage() {
                                 <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                                     <FiLayers className="text-xl text-emerald-400" />
                                 </div>
-                                <h2 className="text-4xl font-black text-white uppercase tracking-tight">Operational Vectors</h2>
+                                <h2 className="text-4xl font-medium text-white uppercase tracking-tight">Operational Vectors</h2>
                                 <div className="h-1 w-20 bg-gradient-to-r from-emerald-500/50 to-transparent rounded-full" />
                             </div>
 
@@ -195,7 +195,7 @@ export default function WikiPage() {
                                 <article id="tasks-timers" className="space-y-4">
                                     <div className="flex items-center gap-3">
                                         <FiClock className="text-emerald-400" />
-                                        <h3 className="text-lg font-black text-white uppercase tracking-wider">Tasks & Timers</h3>
+                                        <h3 className="text-lg font-medium text-white uppercase tracking-wider">Tasks & Timers</h3>
                                     </div>
                                     <p className="text-zinc-400 text-sm leading-relaxed">
                                         Precision time logging is integrated into every task via the TaskTimer system, enabling granular budget and resource analysis.
@@ -205,7 +205,7 @@ export default function WikiPage() {
                                 <article id="decisions-hub" className="space-y-4">
                                     <div className="flex items-center gap-3">
                                         <FiDatabase className="text-emerald-400" />
-                                        <h3 className="text-lg font-black text-white uppercase tracking-wider">Decision Synthesis</h3>
+                                        <h3 className="text-lg font-medium text-white uppercase tracking-wider">Decision Synthesis</h3>
                                     </div>
                                     <p className="text-zinc-400 text-sm leading-relaxed">
                                         The Decisions Hub provides argument summarization and risk analysis, synthesizing disparate notes and documents into clear executive summaries.
@@ -220,14 +220,14 @@ export default function WikiPage() {
                                 <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                                     <FiCpu className="text-xl text-amber-400" />
                                 </div>
-                                <h2 className="text-4xl font-black text-white uppercase tracking-tight">API Infrastructure</h2>
+                                <h2 className="text-4xl font-medium text-white uppercase tracking-tight">API Infrastructure</h2>
                                 <div className="h-1 w-20 bg-gradient-to-r from-amber-500/50 to-transparent rounded-full" />
                             </div>
 
                             <article id="secure-uplink" className="space-y-6">
                                 <div className="flex items-center gap-3">
                                     <FiShield className="text-amber-400" />
-                                    <h3 className="text-lg font-black text-white uppercase tracking-wider">Secure Uplink</h3>
+                                    <h3 className="text-lg font-medium text-white uppercase tracking-wider">Secure Uplink</h3>
                                 </div>
                                 <div className="bg-zinc-950/50 border border-white/5 rounded-2xl p-6 font-mono text-xs text-zinc-500 space-y-4">
                                     <div className="flex justify-between border-b border-white/5 pb-2">

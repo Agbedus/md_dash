@@ -138,9 +138,9 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
             <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md transition-opacity duration-300" onClick={onClose} />
             
             {/* Modal Body */}
-            <div className={`relative w-full max-w-4xl max-h-[90vh] bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden border border-white/10 transition-all duration-300 transform ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`} onClick={e => e.stopPropagation()}>
+            <div className={`relative w-full max-w-4xl max-h-[90vh] bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden border border-white/5 transition-all duration-300 transform ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`} onClick={e => e.stopPropagation()}>
                 <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col h-full max-h-[90vh]">
-                    <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 bg-white/5">
+                    <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 bg-white/[0.03]">
                         {/* Group 1: Selections */}
                         <div className="flex items-center gap-3">
                             <select
@@ -148,7 +148,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                                 id="priority"
                                 value={priority || 'low'}
                                 onChange={(e) => setPriority(e.target.value as Note['priority'])}
-                                className="h-9 bg-white/5 border border-white/10 rounded-xl px-3 text-[10px] uppercase font-bold tracking-wider text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer hover:bg-white/10 transition-all"
+                                className="h-9 bg-white/[0.03] border border-white/5 rounded-xl px-3 text-[11px] uppercase font-bold tracking-wider text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer hover:bg-white/[0.06] transition-all"
                                 required
                             >
                                 <option value="low">Low Priority</option>
@@ -160,7 +160,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                                 id="type"
                                 value={typeVal}
                                 onChange={(e) => setTypeVal(e.target.value as Note['type'])}
-                                className="h-9 bg-white/5 border border-white/10 rounded-xl px-3 text-[10px] uppercase font-bold tracking-wider text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer hover:bg-white/10 transition-all"
+                                className="h-9 bg-white/[0.03] border border-white/5 rounded-xl px-3 text-[11px] uppercase font-bold tracking-wider text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 cursor-pointer hover:bg-white/[0.06] transition-all"
                                 required
                             >
                                 {noteTypes.map(type => (
@@ -172,7 +172,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                                 id="task_id"
                                 value={taskId}
                                 onChange={(e) => setTaskId(e.target.value)}
-                                className="h-9 bg-white/5 border border-white/10 rounded-xl px-3 text-[10px] uppercase font-bold tracking-wider text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 max-w-[150px] cursor-pointer hover:bg-white/10 transition-all"
+                                className="h-9 bg-white/[0.03] border border-white/5 rounded-xl px-3 text-[11px] uppercase font-bold tracking-wider text-zinc-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 max-w-[150px] cursor-pointer hover:bg-white/[0.06] transition-all"
                             >
                                 <option value="">No Task Associated</option>
                                 {tasks?.map(task => (
@@ -182,11 +182,11 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                         </div>
 
                         {/* Group 2: Status */}
-                        <div className="flex items-center gap-1.5 p-1 bg-white/5 rounded-xl border border-white/5 h-9">
+                        <div className="flex items-center gap-1.5 p-1 bg-white/[0.03] rounded-xl border border-white/5 h-9">
                             <button
                                 type="button"
                                 onClick={() => setIsPinned(!isPinned)}
-                                className={`h-full px-3 rounded-lg transition-all ${isPinned ? 'text-blue-400 bg-blue-400/10' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                className={`h-full px-3 rounded-lg transition-all ${isPinned ? 'text-blue-400 bg-blue-400/10' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]'}`}
                                 title="Pin note"
                             >
                                 <FiMapPin size={14} className={isPinned ? 'fill-current' : ''} />
@@ -194,7 +194,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                             <button
                                 type="button"
                                 onClick={() => setIsFavorite(!isFavorite)}
-                                className={`h-full px-3 rounded-lg transition-all ${isFavorite ? 'text-yellow-400 bg-yellow-400/10' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                className={`h-full px-3 rounded-lg transition-all ${isFavorite ? 'text-yellow-400 bg-yellow-400/10' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]'}`}
                                 title="Favorite note"
                             >
                                 <FiStar size={14} className={isFavorite ? 'fill-current' : ''} />
@@ -202,7 +202,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                             <button
                                 type="button"
                                 onClick={() => setIsArchived(!isArchived)}
-                                className={`h-full px-3 rounded-lg transition-all ${isArchived ? 'text-zinc-400 bg-zinc-400/20' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                className={`h-full px-3 rounded-lg transition-all ${isArchived ? 'text-zinc-400 bg-zinc-400/20' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.03]'}`}
                                 title="Archive note"
                             >
                                 <FiArchive size={14} className={isArchived ? 'fill-current' : ''} />
@@ -215,7 +215,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                                 type="button"
                                 onClick={onClose}
                                 disabled={isSaving}
-                                className="h-9 w-9 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 flex items-center justify-center border border-white/5"
+                                className="h-9 w-9 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-50 flex items-center justify-center border border-white/5"
                                 title="Cancel"
                             >
                                 <FiX size={18} />
@@ -223,7 +223,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                             <button
                                 type="submit"
                                 disabled={isSaving}
-                                className="h-9 px-5 rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 transition-all disabled:opacity-50 flex items-center justify-center shadow-lg shadow-emerald-500/20 font-bold text-xs uppercase tracking-widest gap-2"
+                                className="h-9 px-5 rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 transition-all disabled:opacity-50 flex items-center justify-center shadow-lg shadow-emerald-500/20 font-bold text-xs uppercase tracking-wider gap-2"
                                 title={initialNote ? 'Update Note' : 'Save Note'}
                             >
                                 <FiCheck size={18} />
@@ -241,7 +241,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                             placeholder="Note Title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="text-4xl font-black w-full bg-transparent pb-6 text-white focus:outline-none placeholder:text-zinc-800 tracking-tight"
+                            className="text-4xl font-medium w-full bg-transparent pb-6 text-white focus:outline-none placeholder:text-zinc-800 tracking-tight"
                             required
                         />
                         <div className="flex items-center gap-3 mb-8">
@@ -252,7 +252,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                                 placeholder="Add labels (travel, important, research)..."
                                 value={tags}
                                 onChange={(e) => setTags(e.target.value)}
-                                className="text-sm flex-1 bg-white/5 border border-white/5 py-2 px-4 rounded-xl text-zinc-400 focus:outline-none focus:bg-white/10 transition-all placeholder:text-zinc-600"
+                                className="text-sm flex-1 bg-white/[0.03] border border-white/5 py-2 px-4 rounded-xl text-zinc-400 focus:outline-none focus:bg-white/[0.06] transition-all placeholder:text-zinc-600"
                             />
                         </div>
                         <div ref={editorContainerRef} id="quill-editor" className="min-h-[25rem]" />
@@ -265,7 +265,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                      </div>
 
 
-                    <div id="toolbar-container" className="px-6 py-4 border-t border-white/5 bg-white/5 flex flex-wrap gap-2">
+                    <div id="toolbar-container" className="px-6 py-4 border-t border-white/5 bg-white/[0.03] flex flex-wrap gap-2">
                         <span className="ql-formats">
                             <button className="ql-bold"></button>
                             <button className="ql-italic"></button>

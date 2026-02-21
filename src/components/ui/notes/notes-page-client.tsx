@@ -251,21 +251,21 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                             placeholder="Search notes..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:bg-white/10 focus:border-white/20 text-white placeholder:text-zinc-600 transition-all"
+                            className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/5 rounded-xl focus:outline-none focus:bg-white/[0.06] focus:border-white/5 text-white placeholder:text-zinc-600 transition-all"
                         />
                     </div>
                     
                     <div className="flex items-center gap-3 md:gap-4 ml-auto">
-                        <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10">
-                            <button onClick={() => setViewMode('grid')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Grid view">
+                        <div className="flex items-center space-x-1 bg-white/[0.03] p-1 rounded-xl border border-white/5">
+                            <button onClick={() => setViewMode('grid')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Grid view">
                                 <FiGrid className="w-4 h-4 md:w-5 md:h-5" />
                             </button>
-                            <button onClick={() => setViewMode('table')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Table view">
+                            <button onClick={() => setViewMode('table')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Table view">
                                 <FiList className="w-4 h-4 md:w-5 md:h-5" />
                             </button>
                         </div>
 
-                        <button onClick={() => setIsModalOpen(true)} className="flex items-center px-3 md:px-5 py-2 md:py-2.5 border border-white/10 text-xs md:text-sm font-medium text-white rounded-xl bg-white/5 hover:bg-white/10 transition-all hover-scale">
+                        <button onClick={() => setIsModalOpen(true)} className="flex items-center px-3 md:px-5 py-2 md:py-2.5 border border-white/5 text-xs md:text-sm font-medium text-white rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-all hover-scale">
                             <FiPlus className="mr-1 md:mr-2" />
                             <span className="hidden sm:inline">Add new note</span>
                             <span className="sm:hidden">Add</span>
@@ -276,7 +276,7 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                 <div className="flex overflow-x-auto scrollbar-hide gap-2 mb-6 md:mb-8 pb-2">
                     <button
                         onClick={() => setFilterType('all')}
-                        className={`px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-all hover-scale whitespace-nowrap flex-shrink-0 ${filterType === 'all' ? 'bg-white text-black' : 'bg-white/10 text-zinc-300 hover:bg-white/20'}`}>
+                        className={`px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-all hover-scale whitespace-nowrap flex-shrink-0 ${filterType === 'all' ? 'bg-white text-black' : 'bg-white/[0.06] text-zinc-300 hover:bg-white/20'}`}>
                         All Notes
                     </button>
                     {noteTypes.map(type => {
@@ -285,7 +285,7 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                             <button 
                                 key={type} 
                                 onClick={() => setFilterType(type)} 
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-all hover-scale whitespace-nowrap flex-shrink-0 ${filterType === type ? 'bg-white text-black' : 'bg-white/10 text-zinc-300 hover:bg-white/20'}`}>
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-all hover-scale whitespace-nowrap flex-shrink-0 ${filterType === type ? 'bg-white text-black' : 'bg-white/[0.06] text-zinc-300 hover:bg-white/20'}`}>
                                 {Icon && <Icon className={`${filterType === type ? 'text-black' : (noteTypeColors[type] || 'text-zinc-400')}`} />}
                                 <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
                             </button>
@@ -334,7 +334,7 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
                         <table className="w-full border-collapse">
                             <caption className="sr-only">Notes table</caption>
                             <thead>
-                                <tr className="border-b border-white/5 bg-white/5">
+                                <tr className="border-b border-white/5 bg-white/[0.03]">
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Title</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Content</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Priority</th>

@@ -37,59 +37,103 @@ export function TaskTimerProvider({ children }: { children: React.ReactNode }) {
     }, [activeTask, isPaused]);
 
     const startTimer = useCallback(async (task: Task, targetMinutes?: number) => {
-        if (activeTask) {
+        if (activeTask && activeTask.id !== task.id) {
             toast.error("Finish your current task first!");
             return;
         }
 
-        const result = await startTaskTimer(task.id);
-        if (result.success) {
-            setActiveTask(task);
-            setIsPaused(false);
-            setElapsedTime(0);
-            setTargetTime(targetMinutes ? targetMinutes * 60 : null);
-            toast.success(`Starting work on: ${task.name}`);
-        } else {
-            toast.error(result.error || "Failed to start timer");
+        // Optimistic UI update
+        const previousActiveTask = activeTask;
+        const previousIsPaused = isPaused;
+        const previousElapsedTime = elapsedTime;
+        const previousTargetTime = targetTime;
+
+        setActiveTask(task);
+        setIsPaused(false);
+        setElapsedTime(0);
+        setTargetTime(targetMinutes ? targetMinutes * 60 : null);
+        toast.success(`Starting work on: ${task.name}`);
+
+        try {
+            const result = await startTaskTimer(task.id);
+            if (!result.success) {
+                // Rollback if failed
+                setActiveTask(previousActiveTask);
+                setIsPaused(previousIsPaused);
+                setElapsedTime(previousElapsedTime);
+                setTargetTime(previousTargetTime);
+                toast.error(result.error || "Failed to start timer");
+            }
+        } catch (error) {
+            // Rollback on network error
+            setActiveTask(previousActiveTask);
+            setIsPaused(previousIsPaused);
+            setElapsedTime(previousElapsedTime);
+            setTargetTime(previousTargetTime);
+            toast.error("Network error: Failed to start timer");
         }
-    }, [activeTask]);
+    }, [activeTask, isPaused, elapsedTime, targetTime]);
 
     const pauseTimer = useCallback(async () => {
         if (!activeTask) return;
 
-        const result = await pauseTaskTimer(activeTask.id);
-        if (result.success) {
-            setIsPaused(true);
-            toast.success("Timer paused (minimized)");
-        } else {
-            toast.error(result.error || "Failed to pause timer");
+        // Optimistic UI update
+        setIsPaused(true);
+        toast.success("Timer paused");
+
+        try {
+            const result = await pauseTaskTimer(activeTask.id);
+            if (!result.success) {
+                setIsPaused(false);
+                toast.error(result.error || "Failed to pause timer");
+            }
+        } catch (error) {
+            setIsPaused(false);
+            toast.error("Network error: Failed to pause timer");
         }
     }, [activeTask]);
 
     const resumeTimer = useCallback(async () => {
         if (!activeTask) return;
 
-        const result = await startTaskTimer(activeTask.id);
-        if (result.success) {
-            setIsPaused(false);
-            toast.success("Resuming work");
-        } else {
-            toast.error(result.error || "Failed to resume timer");
+        // Optimistic UI update
+        setIsPaused(false);
+        toast.success("Resuming work");
+
+        try {
+            const result = await startTaskTimer(activeTask.id);
+            if (!result.success) {
+                setIsPaused(true);
+                toast.error(result.error || "Failed to resume timer");
+            }
+        } catch (error) {
+            setIsPaused(true);
+            toast.error("Network error: Failed to resume timer");
         }
     }, [activeTask]);
 
     const stopTimer = useCallback(async () => {
         if (!activeTask) return;
 
-        const result = await stopTaskTimerAction(activeTask.id);
-        if (result.success) {
-            setActiveTask(null);
-            setIsPaused(false);
-            setElapsedTime(0);
-            setTargetTime(null);
-            toast.success("Work session completed and logged");
-        } else {
-            toast.error(result.error || "Failed to stop timer");
+        // Optimistic UI update
+        const previousActiveTask = activeTask;
+        setActiveTask(null);
+        setIsPaused(false);
+        setElapsedTime(0);
+        setTargetTime(null);
+        toast.success("Work session completed and logged");
+
+        try {
+            const result = await stopTaskTimerAction(activeTask.id);
+            if (!result.success) {
+                // Rollback
+                setActiveTask(previousActiveTask);
+                toast.error(result.error || "Failed to stop timer");
+            }
+        } catch (error) {
+            // Rollback
+            setActiveTask(previousActiveTask);
+            toast.error("Network error: Failed to stop timer");
         }
     }, [activeTask]);
 

@@ -47,14 +47,14 @@ const AvatarGroup = ({ users, total }: { users: any[], total: number }) => {
                     {user.image ? (
                         <img src={user.image} alt={user.name} className="h-full w-full object-cover" />
                     ) : (
-                        <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-white bg-emerald-500/20">
+                        <div className="h-full w-full flex items-center justify-center text-[11px] font-bold text-white bg-emerald-500/20">
                             {user.name?.[0]?.toUpperCase()}
                         </div>
                     )}
                 </div>
             ))}
             {total > users.length && (
-                <div className="flex items-center justify-center h-8 w-8 rounded-full ring-2 ring-[var(--background)] bg-zinc-800 text-[10px] font-bold text-white">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full ring-2 ring-[var(--background)] bg-zinc-800 text-[11px] font-bold text-white">
                     +{total - users.length}
                 </div>
             )}
@@ -78,10 +78,10 @@ export async function SummaryStatsSection() {
             {statCards.map((stat, i) => (
                 <div 
                     key={i} 
-                    className={`glass p-3 lg:p-6 rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-300 flex flex-col justify-between h-24 lg:h-40 group ${i === 0 ? 'col-span-2 lg:col-span-1' : 'col-span-1'}`}
+                    className={`glass p-3 lg:p-6 rounded-2xl border border-white/5 hover:border-white/5 transition-all duration-300 flex flex-col justify-between h-24 lg:h-40 group ${i === 0 ? 'col-span-2 lg:col-span-1' : 'col-span-1'}`}
                 >
                     <div className="flex justify-between items-start">
-                        <div className={`p-1.5 lg:p-3 rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/10`}>
+                        <div className={`p-1.5 lg:p-3 rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/[0.06]`}>
                             <stat.icon className="text-sm lg:text-xl" />
                         </div>
                         {stat.users ? (
@@ -98,11 +98,11 @@ export async function SummaryStatsSection() {
                         )}
                     </div>
                     <div className="mt-2 lg:mt-4">
-                        <p className="text-[9px] lg:text-xs text-zinc-500 font-medium uppercase tracking-wider mb-0.5 lg:mb-1">{stat.label}</p>
+                        <p className="text-[11px] lg:text-xs text-zinc-500 font-medium uppercase tracking-wider mb-0.5 lg:mb-1">{stat.label}</p>
                         <div className="flex items-baseline justify-between">
                             <p className="text-xl lg:text-3xl font-bold text-white leading-none">{stat.value}</p>
                             {i !== 0 && (
-                                <div className={`text-[8px] lg:text-[10px] font-bold ${stat.color} bg-white/5 px-1.5 py-0.5 rounded-full`}>
+                                <div className={`text-[11px] lg:text-[11px] font-bold ${stat.color} bg-white/[0.03] px-1.5 py-0.5 rounded-full`}>
                                    +{Math.floor(Math.random() * 15)}%
                                 </div>
                             )}
@@ -117,7 +117,7 @@ export async function SummaryStatsSection() {
 export async function ProductivitySection({ range }: { range?: string }) {
   const data = await getProductivityData(range);
   return (
-    <div className="col-span-1 lg:col-span-6 h-80 lg:h-96 glass p-4 lg:p-6 rounded-2xl flex flex-col group overflow-hidden relative border border-white/5 hover:border-white/20 transition-all duration-300">
+    <div className="col-span-1 lg:col-span-6 h-80 lg:h-96 glass p-4 lg:p-6 rounded-2xl flex flex-col group overflow-hidden relative border border-white/5 hover:border-white/5 transition-all duration-300">
       <div className="flex justify-between items-center mb-4 lg:mb-6 shrink-0">
         <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
           Productivity Trend
@@ -138,7 +138,7 @@ export async function StatsOverviewSection() {
   ]);
 
   return (
-    <div className="col-span-1 lg:col-span-3 h-80 lg:h-96 glass p-4 lg:p-6 rounded-2xl flex flex-col overflow-hidden relative border border-white/5 hover:border-white/20 transition-all duration-300">
+    <div className="col-span-1 lg:col-span-3 h-80 lg:h-96 glass p-4 lg:p-6 rounded-2xl flex flex-col overflow-hidden relative border border-white/5 hover:border-white/5 transition-all duration-300">
       <h2 className="text-lg lg:text-xl font-bold text-white mb-4 lg:mb-6 tracking-tight">
         Overview
       </h2>
@@ -155,13 +155,13 @@ export async function StatsOverviewSection() {
               ) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5"
+                  className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/5"
                 >
                   <div className="flex flex-col">
                     <span className="text-sm text-zinc-400">{stat.name}</span>
                     {stat.trend !== undefined && stat.trend !== 0 && (
                       <div
-                        className={`flex items-center gap-1 text-[10px] font-bold ${stat.trend > 0 ? "text-emerald-400" : "text-rose-400"}`}
+                        className={`flex items-center gap-1 text-[11px] font-bold ${stat.trend > 0 ? "text-emerald-400" : "text-rose-400"}`}
                       >
                         {stat.trend > 0 ? <FiArrowUp /> : <FiArrowDown />}
                         {Math.abs(stat.trend)}%
@@ -186,7 +186,7 @@ export async function StatsOverviewSection() {
               (stat: { name: string; value: number }, i: number) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5"
+                  className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/5"
                 >
                   <span className="text-sm text-zinc-400">{stat.name}</span>
                   <span className="text-sm font-bold text-white">
@@ -248,7 +248,7 @@ export async function KeyTasksSection() {
           keyTasks.map((task, i) => (
             <div
               key={i}
-              className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all cursor-pointer group"
+              className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/5 transition-all cursor-pointer group"
             >
               <div className="shrink-0 w-2 h-2 mt-1.5 rounded-full bg-blue-400"></div>
               <div className="flex-1 min-w-0">
@@ -256,20 +256,20 @@ export async function KeyTasksSection() {
                   {task.title}
                 </span>
                 <div className="flex items-center justify-between gap-2 mt-1.5">
-                  <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-semibold uppercase tracking-wider">
-                    <FiActivity className="text-[8px]" />
+                  <span className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-semibold uppercase tracking-wider">
+                    <FiActivity className="text-[11px]" />
                     {task.status}
                   </span>
                   <div className="flex items-center gap-1.5">
                     {task.priority && (
-                      <span className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${task.priority === 'high' ? 'bg-rose-500/10 text-rose-400' : task.priority === 'medium' ? 'bg-amber-500/10 text-amber-400' : 'bg-zinc-500/10 text-zinc-400'}`}>
-                        <FiZap className="text-[8px]" />
+                      <span className={`inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${task.priority === 'high' ? 'bg-rose-500/10 text-rose-400' : task.priority === 'medium' ? 'bg-amber-500/10 text-amber-400' : 'bg-zinc-500/10 text-zinc-400'}`}>
+                        <FiZap className="text-[11px]" />
                         {task.priority}
                       </span>
                     )}
                     {task.dueDate && (
-                      <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-md bg-zinc-500/10 text-zinc-400 font-medium">
-                        <FiClock className="text-[8px]" />
+                      <span className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md bg-zinc-500/10 text-zinc-400 font-medium">
+                        <FiClock className="text-[11px]" />
                         {new Date(task.dueDate).toLocaleDateString()}
                       </span>
                     )}
@@ -284,7 +284,7 @@ export async function KeyTasksSection() {
           </p>
         )}
       </div>
-      <button className="w-full mt-6 py-2.5 rounded-xl border border-white/10 text-zinc-400 text-sm font-medium hover:bg-white/5 hover:text-white transition-all hover-scale">
+      <button className="w-full mt-6 py-2.5 rounded-xl border border-white/5 text-zinc-400 text-sm font-medium hover:bg-white/[0.03] hover:text-white transition-all hover-scale">
         View All Tasks
       </button>
     </div>
@@ -300,9 +300,9 @@ export async function PrioritiesSection() {
         <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
           Today's Priorities
         </h2>
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
-          <FiCpu className="text-[10px] text-[var(--pastel-indigo)]" />
-          <span className="text-[10px] font-bold text-[var(--pastel-indigo)] uppercase tracking-wider">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/5">
+          <FiCpu className="text-[11px] text-[var(--pastel-indigo)]" />
+          <span className="text-[11px] font-bold text-[var(--pastel-indigo)] uppercase tracking-wider">
             AI
           </span>
         </div>
@@ -312,7 +312,7 @@ export async function PrioritiesSection() {
           priorities.map((priority: any, i: number) => {
             const isHigh = priority.priority === "high";
             return (
-              <div key={i} className="group flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.08]">
+              <div key={i} className="group flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/5 transition-all hover:bg-white/[0.08]">
                 <div className={`mt-0.5 shrink-0 ${isHigh ? 'text-[var(--pastel-rose)]' : 'text-zinc-500'}`}>
                   {isHigh ? (
                     <FiAlertCircle className="text-sm" />
@@ -326,7 +326,7 @@ export async function PrioritiesSection() {
                   >
                     {priority.action}
                   </h3>
-                  <p className="text-[10px] text-zinc-500 leading-tight mt-0.5 flex items-center gap-1">
+                  <p className="text-[11px] text-zinc-500 leading-tight mt-0.5 flex items-center gap-1">
                     <span className="font-medium">Why:</span> {priority.reason}
                   </p>
                 </div>
@@ -340,7 +340,7 @@ export async function PrioritiesSection() {
           </div>
         )}
       </div>
-      <button className="w-full mt-4 py-2 rounded-xl border border-white/10 text-zinc-400 text-xs font-semibold hover:bg-white/5 hover:text-white transition-all hover-scale shrink-0">
+      <button className="w-full mt-4 py-2 rounded-xl border border-white/5 text-zinc-400 text-xs font-semibold hover:bg-white/[0.03] hover:text-white transition-all hover-scale shrink-0">
         Refresh AI Analysis
       </button>
     </div>
@@ -356,7 +356,7 @@ export async function RecentNotesSection() {
         <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
           Recent Notes
         </h2>
-        <button className="p-2 rounded-lg bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all hover-scale">
+        <button className="p-2 rounded-lg bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all hover-scale">
           <FiPlus />
         </button>
       </div>
@@ -377,7 +377,7 @@ export async function RecentNotesSection() {
             return (
               <div
                 key={i}
-                className="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 hover:bg-white/[0.07] transition-all cursor-pointer group"
+                className="p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/5 hover:bg-white/[0.07] transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-3 mb-2">
                   {React.createElement(icon, { className: color })}
@@ -419,7 +419,7 @@ export async function ProjectProgressSection() {
 export function FocusModeSection() {
   return (
     <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col justify-center items-center text-center relative overflow-hidden group h-80 lg:h-96">
-      <div className="p-4 rounded-full bg-white/5 mb-4 border border-white/10 relative z-10">
+      <div className="p-4 rounded-full bg-white/[0.03] mb-4 border border-white/5 relative z-10">
         <FiClock className="text-3xl text-[var(--pastel-indigo)]" />
       </div>
       <h2 className="text-lg lg:text-xl font-bold text-white mb-2 relative z-10">
@@ -428,7 +428,7 @@ export function FocusModeSection() {
       <p className="text-sm text-zinc-400 mb-6 relative z-10">
         Block distractions and concentrate on your tasks.
       </p>
-      <button className="relative z-10 px-6 py-2.5 rounded-xl bg-white/10 border border-white/10 text-white font-medium hover:bg-white/20 transition-all duration-200 active:scale-95">
+      <button className="relative z-10 px-6 py-2.5 rounded-xl bg-white/[0.06] border border-white/5 text-white font-medium hover:bg-white/20 transition-all duration-200 active:scale-95">
         Start Session
       </button>
     </div>

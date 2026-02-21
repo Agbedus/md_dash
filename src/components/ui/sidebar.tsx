@@ -96,10 +96,10 @@ const Sidebar = ({ user }: SidebarProps) => {
 
   // Mobile: smaller padding, Desktop: normal padding
   const baseLinkClasses =
-    "flex items-center py-1.5 md:py-2 rounded-lg transition-all duration-200 font-light text-sm hover:bg-white/5 hover:text-white whitespace-nowrap";
+    "flex items-center py-1.5 md:py-2 rounded-lg transition-all duration-200 font-light text-sm hover:bg-white/[0.03] hover:text-white whitespace-nowrap";
 
   const activeLinkClasses =
-    "bg-white/10 text-white border border-white/10 font-medium";
+    "bg-white/[0.06] text-white border border-white/5 font-medium";
 
   const inactiveLinkClasses = "text-zinc-400";
 
@@ -153,7 +153,7 @@ const Sidebar = ({ user }: SidebarProps) => {
             }}
             className="flex items-center gap-3 hover-scale focus:outline-none"
           >
-            <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
+            <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/5">
               <FiLayers className="text-lg text-white" />
             </div>
             <span className={`text-xl font-bold text-white ${contentVisibilityClass}`}>
@@ -166,14 +166,14 @@ const Sidebar = ({ user }: SidebarProps) => {
       {/* ---------- Menu ---------- */}
       <div className={menuContainerClass}>
         <h3
-          className={`px-6 text-[10px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
+          className={`px-6 text-[11px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
         >
           Menu
         </h3>
         <nav className="space-y-2">{mainMenuItems.map(renderMenuItem)}</nav>
 
         <h3
-          className={`px-6 mt-6 text-[10px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
+          className={`px-6 mt-6 text-[11px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
         >
           Tools
         </h3>
@@ -189,7 +189,7 @@ const Sidebar = ({ user }: SidebarProps) => {
         </nav>
 
         <h3
-          className={`px-6 mt-6 text-[10px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
+          className={`px-6 mt-6 text-[11px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
         >
           System
         </h3>
@@ -242,10 +242,10 @@ const Sidebar = ({ user }: SidebarProps) => {
         </button>
 
         <div className={`px-6 py-2 flex items-center justify-between ${contentVisibilityClass}`}>
-            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest leading-none">
+            <span className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider leading-none">
                 v{version}
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[8px] font-black text-amber-500 uppercase tracking-widest leading-none">
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] font-medium text-amber-500 uppercase tracking-wider leading-none">
                 Beta
             </span>
         </div>

@@ -93,8 +93,8 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative overflow-hidden rounded-2xl border border-white/10 ${styles.tint} transition-all duration-500 backdrop-blur-md cursor-grab active:cursor-grabbing ${
-        isDragging ? 'opacity-40 ring-2 ring-indigo-500/50 shadow-2xl scale-[1.02] z-50' : `hover:border-white/20 hover:-translate-y-1.5 ring-0 ${styles.ring} ${styles.glow}`
+      className={`group relative overflow-hidden rounded-2xl border border-white/5 ${styles.tint} transition-all duration-500 backdrop-blur-md cursor-grab active:cursor-grabbing ${
+        isDragging ? 'opacity-40 ring-2 ring-indigo-500/50 shadow-2xl scale-[1.02] z-50' : `hover:border-white/5 hover:-translate-y-1.5 ring-0 ${styles.ring} ${styles.glow}`
       }`}
       {...attributes}
       {...listeners}
@@ -144,12 +144,12 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
 
         <div className="flex flex-wrap gap-2.5 mb-5">
           {project && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border border-[var(--pastel-indigo)]/20 shadow-sm">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border border-[var(--pastel-indigo)]/20 shadow-sm">
               {project.name}
             </span>
           )}
           <span
-            className={`px-2.5 py-1 inline-flex text-[9px] font-bold rounded-lg border uppercase tracking-wider shadow-sm ${
+            className={`px-2.5 py-1 inline-flex text-[11px] font-bold rounded-lg border uppercase tracking-wider shadow-sm ${
               task.priority === 'high'
                 ? 'bg-[var(--pastel-rose)]/10 text-[var(--pastel-rose)] border-[var(--pastel-rose)]/20 pulse-soft'
                 : task.priority === 'medium'
@@ -160,13 +160,13 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
             {task.priority}
           </span>
           {task.qa_required && (
-            <span className="px-2.5 py-1 inline-flex text-[9px] font-bold rounded-lg border uppercase tracking-wider bg-purple-500/10 text-purple-400 border-purple-500/20">QA</span>
+            <span className="px-2.5 py-1 inline-flex text-[11px] font-bold rounded-lg border uppercase tracking-wider bg-purple-500/10 text-purple-400 border-purple-500/20">QA</span>
           )}
           {task.review_required && (
-            <span className="px-2.5 py-1 inline-flex text-[9px] font-bold rounded-lg border uppercase tracking-wider bg-blue-500/10 text-blue-400 border-blue-500/20">REVIEW</span>
+            <span className="px-2.5 py-1 inline-flex text-[11px] font-bold rounded-lg border uppercase tracking-wider bg-blue-500/10 text-blue-400 border-blue-500/20">REVIEW</span>
           )}
           {task.depends_on_id && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-400 text-[9px] font-black uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-400 text-[11px] font-medium uppercase tracking-wider">
               <FiClock className="w-3 h-3" />
               <span>Blocker: #{task.depends_on_id}</span>
             </div>
@@ -176,7 +176,7 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
         <div className="flex items-center justify-between pt-4 border-t border-white/5">
           <div className="flex items-center gap-3">
             {task.dueDate && (
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 bg-white/5 px-2.5 py-1.5 rounded-xl border border-white/5 group-hover:bg-white/10 transition-colors">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-500 bg-white/[0.03] px-2.5 py-1.5 rounded-xl border border-white/5 group-hover:bg-white/[0.06] transition-colors">
                 <FiCalendar className="w-3.5 h-3.5" />
                 <span>{new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
               </div>
@@ -198,7 +198,7 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
               {task.status === 'TODO' && (
                 <button
                   onClick={(e) => { e.stopPropagation(); void onMove(task, 'IN_PROGRESS'); }}
-                  className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                  className="p-1.5 rounded-xl hover:bg-white/[0.06] text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                   title="Move to In Progress"
                 >
                   <FiChevronRight className="h-4 w-4" />
@@ -208,14 +208,14 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
                 <>
                   <button
                     onClick={(e) => { e.stopPropagation(); void onMove(task, 'TODO'); }}
-                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    className="p-1.5 rounded-xl hover:bg-white/[0.06] text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                     title="Move to To Do"
                   >
                     <FiChevronLeft className="h-4 w-4" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); void onMove(task, task.qa_required ? 'QA' : task.review_required ? 'REVIEW' : 'DONE'); }}
-                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    className="p-1.5 rounded-xl hover:bg-white/[0.06] text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                     title={`Move to ${task.qa_required ? 'QA' : task.review_required ? 'Review' : 'Done'}`}
                   >
                     <FiChevronRight className="h-4 w-4" />
@@ -226,14 +226,14 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
                 <>
                   <button
                     onClick={(e) => { e.stopPropagation(); void onMove(task, 'IN_PROGRESS'); }}
-                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    className="p-1.5 rounded-xl hover:bg-white/[0.06] text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                     title="Move to In Progress"
                   >
                     <FiChevronLeft className="h-4 w-4" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); void onMove(task, task.review_required ? 'REVIEW' : 'DONE'); }}
-                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    className="p-1.5 rounded-xl hover:bg-white/[0.06] text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                     title={`Move to ${task.review_required ? 'Review' : 'Done'}`}
                   >
                     <FiChevronRight className="h-4 w-4" />
@@ -244,14 +244,14 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
                 <>
                   <button
                     onClick={(e) => { e.stopPropagation(); void onMove(task, task.qa_required ? 'QA' : 'IN_PROGRESS'); }}
-                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    className="p-1.5 rounded-xl hover:bg-white/[0.06] text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                     title={`Move to ${task.qa_required ? 'QA' : 'In Progress'}`}
                   >
                     <FiChevronLeft className="h-4 w-4" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); void onMove(task, 'DONE'); }}
-                    className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                    className="p-1.5 rounded-xl hover:bg-white/[0.06] text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                     title="Move to Done"
                   >
                     <FiChevronRight className="h-4 w-4" />
@@ -261,7 +261,7 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
               {task.status === 'DONE' && (
                 <button
                   onClick={(e) => { e.stopPropagation(); void onMove(task, task.review_required ? 'REVIEW' : task.qa_required ? 'QA' : 'IN_PROGRESS'); }}
-                  className="p-1.5 rounded-xl hover:bg-white/10 text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
+                  className="p-1.5 rounded-xl hover:bg-white/[0.06] text-zinc-500 hover:text-white transition-all border border-white/5 active:scale-90"
                   title={`Move to ${task.review_required ? 'Review' : task.qa_required ? 'QA' : 'In Progress'}`}
                 >
                   <FiChevronLeft className="h-4 w-4" />

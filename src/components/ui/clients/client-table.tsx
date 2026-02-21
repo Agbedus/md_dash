@@ -17,13 +17,13 @@ export default function ClientTable({ clients, onEdit, onDelete }: ClientTablePr
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-white/5 border-b border-white/10">
-              <th className="px-6 py-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Company</th>
-              <th className="px-6 py-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Contact</th>
-              <th className="px-6 py-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest">Email</th>
-              <th className="px-6 py-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest hidden lg:table-cell">Website</th>
-              <th className="px-6 py-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest hidden sm:table-cell">Added</th>
-              <th className="px-6 py-4 text-[10px] font-black text-zinc-500 uppercase tracking-widest text-right">Actions</th>
+            <tr className="bg-white/[0.03] border-b border-white/5">
+              <th className="px-6 py-4 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Company</th>
+              <th className="px-6 py-4 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Contact</th>
+              <th className="px-6 py-4 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Email</th>
+              <th className="px-6 py-4 text-[11px] font-medium text-zinc-500 uppercase tracking-wider hidden lg:table-cell">Website</th>
+              <th className="px-6 py-4 text-[11px] font-medium text-zinc-500 uppercase tracking-wider hidden sm:table-cell">Added</th>
+              <th className="px-6 py-4 text-[11px] font-medium text-zinc-500 uppercase tracking-wider text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -67,7 +67,7 @@ export default function ClientTable({ clients, onEdit, onDelete }: ClientTablePr
                   <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => onEdit(client)}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
+                      className="p-1.5 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-all"
                       title="Edit"
                     >
                       <FiEdit2 size={14} />

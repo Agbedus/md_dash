@@ -248,12 +248,12 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                             placeholder="Search..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-8 pr-4 h-9 lg:h-11 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:bg-white/10 focus:border-white/20 text-white placeholder:text-zinc-600 transition-all text-xs lg:text-sm"
+                            className="w-full pl-8 pr-4 h-9 lg:h-11 bg-white/[0.03] border border-white/5 rounded-xl focus:outline-none focus:bg-white/[0.06] focus:border-white/5 text-white placeholder:text-zinc-600 transition-all text-xs lg:text-sm"
                         />
                     </div>
                     
                     <div className="relative group flex-shrink-0">
-                         <div className="h-9 lg:h-11 w-9 lg:w-36 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden focus-within:outline-none focus-within:bg-white/10 focus-within:border-white/20 transition-all">
+                         <div className="h-9 lg:h-11 w-9 lg:w-36 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden focus-within:outline-none focus-within:bg-white/[0.06] focus-within:border-white/5 transition-all">
                             <FiFilter className="text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5 lg:absolute lg:left-3 lg:top-1/2 lg:-translate-y-1/2 lg:z-10" />
                             <select
                                 value={filterPriority}
@@ -267,7 +267,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                     </div>
 
                      <div className="relative group flex-shrink-0">
-                         <div className="h-9 lg:h-11 w-9 lg:w-36 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden focus-within:outline-none focus-within:bg-white/10 focus-within:border-white/20 transition-all">
+                         <div className="h-9 lg:h-11 w-9 lg:w-36 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden focus-within:outline-none focus-within:bg-white/[0.06] focus-within:border-white/5 transition-all">
                             <FiFilter className="text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5 lg:absolute lg:left-3 lg:top-1/2 lg:-translate-y-1/2 lg:z-10" />
                             <select
                                 value={filterStatus}
@@ -278,18 +278,31 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                 {Object.entries(statusMapping).map(([key, value]) => <option key={key} value={key} className="bg-zinc-900">{value}</option>)}
                             </select>
                         </div>
-                    </div>
+                     </div>
 
-                    <div className="flex items-center space-x-1 bg-white/5 p-1 h-9 lg:h-11 rounded-xl border border-white/10 flex-shrink-0 ml-auto">
+                     {/* My Tasks Toggle */}
+                     <button
+                        onClick={() => setFilterMyTasks(f => !f)}
+                        className={`flex items-center gap-2 h-9 lg:h-11 px-3 lg:px-4 rounded-xl border text-[11px] font-medium uppercase tracking-wider transition-all flex-shrink-0 ${
+                            filterMyTasks
+                                ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300 shadow-[0_0_20px_rgba(99,102,241,0.15)]'
+                                : 'bg-white/[0.03] border-white/5 text-zinc-500 hover:text-zinc-200 hover:border-white/5'
+                        }`}
+                     >
+                        <FiUser className="w-3.5 h-3.5" />
+                        <span className="hidden lg:inline">My Tasks</span>
+                     </button>
+
+                    <div className="flex items-center space-x-1 bg-white/[0.03] p-1 h-9 lg:h-11 rounded-xl border border-white/5 flex-shrink-0 ml-auto">
                         <button
                             onClick={() => setViewMode('table')}
-                            className={`p-1.5 lg:p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            className={`p-1.5 lg:p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
                         >
                             <FiList className="w-4 h-4 lg:w-5 lg:h-5"/>
                         </button>
                         <button
                             onClick={() => setViewMode('kanban')}
-                            className={`p-1.5 lg:p-2 rounded-lg transition-all ${viewMode === 'kanban' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            className={`p-1.5 lg:p-2 rounded-lg transition-all ${viewMode === 'kanban' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
                         >
                             <FiGrid className="w-4 h-4 lg:w-5 lg:h-5"/>
                         </button>
@@ -316,16 +329,16 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
             ) : (
                 <div className="flex flex-col gap-6">
                     <div className="flex items-center justify-between gap-4 overflow-x-auto pb-1 scrollbar-hide">
-                         <div className="flex items-center gap-1 bg-white/5 p-1 w-fit rounded-xl border border-white/10 flex-shrink-0">
+                         <div className="flex items-center gap-1 bg-white/[0.03] p-1 w-fit rounded-xl border border-white/5 flex-shrink-0">
                             <button
                                 onClick={() => setTableTab('active')}
-                                className={`px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg text-[10px] lg:text-xs font-bold uppercase tracking-wider transition-all ${tableTab === 'active' ? 'bg-emerald-500 text-zinc-950 shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                className={`px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg text-[11px] lg:text-xs font-bold uppercase tracking-wider transition-all ${tableTab === 'active' ? 'bg-emerald-500 text-zinc-950 shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
                             >
                                 Active
                             </button>
                         <button
                             onClick={() => setTableTab('done')}
-                            className={`px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg text-[10px] lg:text-xs font-bold uppercase tracking-wider transition-all ${tableTab === 'done' ? 'bg-emerald-500 text-zinc-950 shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            className={`px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg text-[11px] lg:text-xs font-bold uppercase tracking-wider transition-all ${tableTab === 'done' ? 'bg-emerald-500 text-zinc-950 shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
                         >
                             Done
                         </button>
@@ -337,18 +350,19 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                             <table className="w-full border-collapse">
                                 <caption className="sr-only">Tasks table</caption>
                                 <thead>
-                                    <tr className="border-b border-white/5 bg-white/5 text-left">
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap sticky left-0 z-20 bg-zinc-950/90 backdrop-blur-md border-r border-white/5">Name</th>
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden lg:table-cell">Description</th>
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Due Date</th>
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">QA/Review</th>
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Depends On</th>
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden md:table-cell">Owner</th>
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden sm:table-cell">Priority</th>
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden lg:table-cell">Assignee</th>
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap hidden md:table-cell">Project</th>
-                                        <th scope="col" className="px-6 py-4 text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap">Status</th>
-                                        <th scope="col" className="px-6 py-4 text-right text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap sticky right-0 z-20 bg-zinc-950/90 backdrop-blur-md border-l border-white/5">Actions</th>
+                                    <tr className="border-b border-white/5 bg-white/[0.03] text-left">
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap sticky left-0 z-20 bg-zinc-950/90 backdrop-blur-md border-r border-white/5">Name</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Description</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Due Date</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">QA/Review</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Depends On</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Owner</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">Priority</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Assignee</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap hidden md:table-cell">Project</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+                                        <th scope="col" className="px-6 py-4 text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Time Logged</th>
+                                        <th scope="col" className="px-6 py-4 text-right text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap sticky right-0 z-20 bg-zinc-950/90 backdrop-blur-md border-l border-white/5">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
@@ -373,7 +387,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 initial={{ opacity: 0, y: -20 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                                                className="bg-white/5"
+                                                className="bg-white/[0.03]"
                                             >
                                                 <td className="px-4 py-2 sticky left-0 z-10 bg-zinc-950/90 backdrop-blur-md border-r border-white/5">
                                                     <form id="create-task-form" onSubmit={async (e) => {
@@ -407,23 +421,23 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                             type="text"
                                                             name="name"
                                                             placeholder="Task name"
-                                                            className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
+                                                            className="w-full bg-white/[0.03] border border-white/5 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
                                                             onChange={() => setIsDirty(true)}
                                                             required
                                                         />
                                                     </form>
                                                 </td>
-                                                <td className="px-4 py-2 bg-white/5">
+                                                <td className="px-4 py-2 bg-white/[0.03]">
                                                     <input
                                                         type="text"
                                                         name="description"
                                                         placeholder="Description"
                                                         form="create-task-form"
-                                                        className="w-full bg-white/10 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
+                                                        className="w-full bg-white/[0.06] border border-white/5 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white placeholder:text-zinc-600 text-xs transition-all"
                                                         onChange={() => setIsDirty(true)}
                                                     />
                                                 </td>
-                                                <td className="px-4 py-2 bg-white/5">
+                                                <td className="px-4 py-2 bg-white/[0.03]">
                                                     <CustomDatePicker
                                                         value={newDueDate}
                                                         onChange={(date) => {
@@ -434,7 +448,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                         className="w-full"
                                                     />
                                                 </td>
-                                                <td className="px-4 py-2 bg-white/5">
+                                                <td className="px-4 py-2 bg-white/[0.03]">
                                                     <div className="flex items-center gap-4">
                                                         <label className="flex items-center gap-2 cursor-pointer group">
                                                             <div className="relative flex items-center">
@@ -442,11 +456,11 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                                     type="checkbox" 
                                                                     checked={newQARequired}
                                                                     onChange={(e) => { setNewQARequired(e.target.checked); setIsDirty(true); }}
-                                                                    className="peer h-4 w-4 appearance-none rounded border border-white/20 bg-white/5 checked:bg-purple-500/40 checked:border-purple-400 transition-all"
+                                                                    className="peer h-4 w-4 appearance-none rounded border border-white/5 bg-white/[0.03] checked:bg-purple-500/40 checked:border-purple-400 transition-all"
                                                                 />
                                                                 <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-purple-400 opacity-0 peer-checked:opacity-100 transition-opacity" />
                                                             </div>
-                                                            <span className="text-[10px] font-bold text-zinc-500 group-hover:text-purple-400 transition-colors uppercase tracking-widest">QA</span>
+                                                            <span className="text-[11px] font-bold text-zinc-500 group-hover:text-purple-400 transition-colors uppercase tracking-wider">QA</span>
                                                         </label>
                                                         <label className="flex items-center gap-2 cursor-pointer group">
                                                             <div className="relative flex items-center">
@@ -454,15 +468,15 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                                     type="checkbox" 
                                                                     checked={newReviewRequired}
                                                                     onChange={(e) => { setNewReviewRequired(e.target.checked); setIsDirty(true); }}
-                                                                    className="peer h-4 w-4 appearance-none rounded border border-white/20 bg-white/5 checked:bg-blue-500/40 checked:border-blue-400 transition-all"
+                                                                    className="peer h-4 w-4 appearance-none rounded border border-white/5 bg-white/[0.03] checked:bg-blue-500/40 checked:border-blue-400 transition-all"
                                                                 />
                                                                 <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-blue-400 opacity-0 peer-checked:opacity-100 transition-opacity" />
                                                             </div>
-                                                            <span className="text-[10px] font-bold text-zinc-500 group-hover:text-blue-400 transition-colors uppercase tracking-widest">Review</span>
+                                                            <span className="text-[11px] font-bold text-zinc-500 group-hover:text-blue-400 transition-colors uppercase tracking-wider">Review</span>
                                                         </label>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-2 bg-white/5">
+                                                <td className="px-4 py-2 bg-white/[0.03]">
                                                     <Combobox
                                                         options={optimisticTasks.filter(t => t.id > 0).map(t => ({ value: t.id, label: t.name }))}
                                                         value={newDependsOn || ''}
@@ -475,7 +489,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                     <select
                                                         name="priority"
                                                         form="create-task-form"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
+                                                        className="w-full bg-white/[0.03] border border-white/5 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
                                                         required
                                                         onChange={() => setIsDirty(true)}
                                                     >
@@ -509,13 +523,17 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                     <select
                                                         name="status"
                                                         form="create-task-form"
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
+                                                        className="w-full bg-white/[0.03] border border-white/5 rounded-xl focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 px-3 py-2 text-white text-xs appearance-none cursor-pointer transition-all"
                                                         required
                                                     >
                                                         {Object.entries(statusMapping).map(([key, value]) => (
                                                             <option key={key} value={key} className="bg-zinc-900">{value}</option>
                                                         ))}
                                                     </select>
+                                                </td>
+                                                {/* Time Logged placeholder in create row */}
+                                                <td className="px-4 py-2">
+                                                    <span className="text-zinc-700 text-[11px]">—</span>
                                                 </td>
                                                 <td className="px-4 py-2 text-right text-xs font-medium sticky right-0 z-10 bg-zinc-950/90 backdrop-blur-md border-l border-white/5">
                                                     <div className="flex items-center justify-end space-x-2">
@@ -546,7 +564,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                                 }
                                                             }}
                                                             disabled={savingCreate}
-                                                            className="inline-flex items-center p-1.5 border border-white/10 rounded-lg text-zinc-400 bg-white/5 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 disabled:opacity-50 transition-all"
+                                                            className="inline-flex items-center p-1.5 border border-white/5 rounded-lg text-zinc-400 bg-white/[0.03] hover:bg-white/[0.06] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 disabled:opacity-50 transition-all"
                                                         >
                                                             <FiX className="h-3 w-3" />
                                                         </button>
@@ -559,9 +577,9 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                             </table>
                         </div>
                         {isLoadingMore && (
-                            <div className="p-4 flex items-center justify-center border-t border-white/5 bg-white/5">
+                            <div className="p-4 flex items-center justify-center border-t border-white/5 bg-white/[0.03]">
                                 <div className="h-5 w-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                                <span className="ml-3 text-xs text-zinc-400 font-bold uppercase tracking-widest">Hydrating data stream...</span>
+                                <span className="ml-3 text-xs text-zinc-400 font-bold uppercase tracking-wider">Hydrating data stream...</span>
                             </div>
                         )}
                         {!isAddingTask && (
@@ -577,9 +595,9 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                             setIsAddingTask(!isAddingTask);
                                         }
                                     }}
-                                    className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm text-zinc-400 hover:text-white transition-all duration-200 group"
+                                    className="flex items-center gap-2 p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 text-sm text-zinc-400 hover:text-white transition-all duration-200 group"
                                 >
-                                    <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
+                                    <div className="p-1 rounded-lg bg-white/[0.03] group-hover:bg-white/[0.06] transition-colors">
                                         <FiPlus className="w-4 h-4" />
                                     </div>
                                     <span>{isAddingTask ? 'Cancel' : 'New Task'}</span>

@@ -68,7 +68,7 @@ export default function MonthGrid({ date, events = [], onSelectDate, onEventClic
     <div className="glass rounded-2xl overflow-hidden">
       <div className="overflow-hidden">
         {/* Weekday headers */}
-        <div className="grid grid-cols-7 border-b border-white/5 bg-white/5">
+        <div className="grid grid-cols-7 border-b border-white/5 bg-white/[0.03]">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="px-4 py-3 text-center text-xs font-bold text-zinc-500 uppercase tracking-wider">
               {format(addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), i), "EEE")}
@@ -77,7 +77,7 @@ export default function MonthGrid({ date, events = [], onSelectDate, onEventClic
         </div>
 
         {/* Days grid */}
-        <div className="grid grid-cols-7 bg-white/5 gap-px border-b border-white/5">
+        <div className="grid grid-cols-7 bg-white/[0.03] gap-px border-b border-white/5">
           {days.map((d) => {
             const dayEvents = events.filter((e) => isSameDay(e.start, d));
             const isCurrentMonth = isSameMonth(d, monthStart);
@@ -113,7 +113,7 @@ export default function MonthGrid({ date, events = [], onSelectDate, onEventClic
                         key={e.id}
                         role="button"
                         onClick={(ev) => { ev.stopPropagation(); onEventClick?.(e); }}
-                        className={`group truncate text-[10px] px-2 py-1 rounded-lg border ${c.border} bg-white/5 hover:bg-white/10 flex items-center gap-2 w-full transition-colors`}
+                        className={`group truncate text-[11px] px-2 py-1 rounded-lg border ${c.border} bg-white/[0.03] hover:bg-white/[0.06] flex items-center gap-2 w-full transition-colors`}
                       >
                         {isTask ? (
                           <FiCheckCircle className={`h-3 w-3 ${c.text}`} />
@@ -136,7 +136,7 @@ export default function MonthGrid({ date, events = [], onSelectDate, onEventClic
                     );
                   })}
                   {dayEvents.length > 3 && (
-                    <div className="text-[10px] text-zinc-500 pl-2">+{dayEvents.length - 3} more</div>
+                    <div className="text-[11px] text-zinc-500 pl-2">+{dayEvents.length - 3} more</div>
                   )}
                 </div>
               </div>

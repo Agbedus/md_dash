@@ -40,8 +40,8 @@ export default function UserAvatarGroup({ users, limit = 3, size = 'md' }: UserA
     };
 
     const sizeClasses = {
-        xs: 'h-6 w-6 text-[10px]',
-        sm: 'h-8 w-8 text-[10px]',
+        xs: 'h-6 w-6 text-[11px]',
+        sm: 'h-8 w-8 text-[11px]',
         md: 'h-10 w-10 text-xs',
         lg: 'h-12 w-12 text-sm',
     };
@@ -87,21 +87,21 @@ export default function UserAvatarGroup({ users, limit = 3, size = 'md' }: UserA
                             left: `${coords.left}px`,
                             transform: 'translate(-50%, -100%)',
                         }}
-                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
                     >
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">
                                 {hoveredUser.avatar_url || hoveredUser.avatarUrl || hoveredUser.image ? (
                                     <Image src={hoveredUser.avatar_url || hoveredUser.avatarUrl || hoveredUser.image || ''} alt={hoveredUser.name || ''} fill className="object-cover" />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-emerald-400 bg-emerald-500/10">
+                                    <div className="flex h-full w-full items-center justify-center text-[11px] font-bold text-emerald-400 bg-emerald-500/10">
                                         {(hoveredUser.name || hoveredUser.fullName || hoveredUser.full_name || '?').charAt(0).toUpperCase()}
                                     </div>
                                 )}
                             </div>
                             <div className="min-w-0">
                                 <p className="text-xs font-semibold text-white truncate">{hoveredUser.name || hoveredUser.fullName || hoveredUser.full_name}</p>
-                                {hoveredUser.email && <p className="text-[10px] text-zinc-500 truncate">{hoveredUser.email}</p>}
+                                {hoveredUser.email && <p className="text-[11px] text-zinc-500 truncate">{hoveredUser.email}</p>}
                             </div>
                         </div>
                     </div>

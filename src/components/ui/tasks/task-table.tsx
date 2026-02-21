@@ -90,7 +90,7 @@ export default function TaskTable({ tasks, updateTask, deleteTask }: TaskTablePr
                                                 {task.owner.avatarUrl ? (
                                                     <img src={task.owner.avatarUrl} alt={task.owner.fullName || ''} className="w-5 h-5 rounded-full" />
                                                 ) : (
-                                                    <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white">
+                                                    <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[11px] text-white">
                                                         {(task.owner.fullName || task.owner.email || '?')[0].toUpperCase()}
                                                     </div>
                                                 )}

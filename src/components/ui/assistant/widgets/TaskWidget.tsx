@@ -41,7 +41,7 @@ export default function TaskWidget({ task }: TaskWidgetProps) {
   };
 
   return (
-    <div className="glass p-4 rounded-xl border border-white/5 hover:border-white/10 transition-all">
+    <div className="glass p-4 rounded-xl border border-white/5 hover:border-white/5 transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-white mb-2 truncate">{task.name}</h4>
@@ -55,11 +55,11 @@ export default function TaskWidget({ task }: TaskWidgetProps) {
               {task.status.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
             </span>
             
-            <span className={`px-2 py-1 rounded-lg bg-white/5 ${priorityColor} font-medium`}>
+            <span className={`px-2 py-1 rounded-lg bg-white/[0.03] ${priorityColor} font-medium`}>
               {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
             </span>
             
-            <span className="px-2 py-1 rounded-lg bg-white/5 text-zinc-400">
+            <span className="px-2 py-1 rounded-lg bg-white/[0.03] text-zinc-400">
               {formatDate(task.dueDate)}
             </span>
           </div>

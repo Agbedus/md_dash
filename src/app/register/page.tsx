@@ -25,7 +25,7 @@ export default function RegisterPage() {
             <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-500/10 blur-[100px]" />
           </div>
 
-          <div className="relative w-full max-w-md p-10 space-y-8 glass rounded-3xl shadow-2xl z-10 border-white/10">
+          <div className="relative w-full max-w-md p-10 space-y-8 glass rounded-3xl shadow-2xl z-10 border-white/5">
             <div className="text-center space-y-2">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 mb-4 animate-in zoom-in duration-500">
                 <div className="w-8 h-8 rounded-lg bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]" />

@@ -147,14 +147,14 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-10">
         <div>
-          <h1 className="text-4xl font-black text-white mb-2 tracking-tight uppercase">Client Ecosystem</h1>
-          <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Global company coordination & contact intelligence.</p>
+          <h1 className="text-4xl font-medium text-white mb-2 tracking-tight uppercase">Client Ecosystem</h1>
+          <p className="text-zinc-500 text-sm font-bold uppercase tracking-wider">Global company coordination & contact intelligence.</p>
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="flex items-center gap-2 h-11 px-6 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-sm font-bold text-white transition-all duration-300 hover-scale"
+          className="flex items-center gap-2 h-11 px-6 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 text-sm font-bold text-white transition-all duration-300 hover-scale"
         >
-          <div className="p-1 rounded-lg bg-white/5 group-hover:bg-white/10 transition-colors">
+          <div className="p-1 rounded-lg bg-white/[0.03] group-hover:bg-white/[0.06] transition-colors">
             <FiPlus className="w-4 h-4" />
           </div>
           <span>Initialize Client</span>
@@ -169,21 +169,21 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
             placeholder="Search ecosystem..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-11 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:bg-white/10 focus:border-white/20 text-white placeholder:text-zinc-600 transition-all text-sm"
+            className="w-full h-11 pl-10 pr-4 bg-white/[0.03] border border-white/5 rounded-xl focus:outline-none focus:bg-white/[0.06] focus:border-white/5 text-white placeholder:text-zinc-600 transition-all text-sm"
           />
         </div>
 
-        <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10 h-11 flex-shrink-0">
+        <div className="flex items-center space-x-1 bg-white/[0.03] p-1 rounded-xl border border-white/5 h-11 flex-shrink-0">
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
             title="Grid view"
           >
             <FiGrid className="w-5 h-5"/>
           </button>
           <button
             onClick={() => setViewMode('table')}
-            className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            className={`p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
             title="Table view"
           >
             <FiList className="w-5 h-5"/>
@@ -220,30 +220,30 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
       {/* Create Modal */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+          <div className="bg-zinc-900 border border-white/5 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-white/5 flex justify-between items-center">
               <h2 className="text-xl font-bold text-white">Create New Client</h2>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-zinc-400 hover:text-white">×</button>
             </div>
             <form action={handleCreate} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Company Name *</label>
-                <input type="text" name="companyName" required className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="Acme Corp" />
+                <input type="text" name="companyName" required className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="Acme Corp" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Contact Person</label>
-                <input type="text" name="contactPersonName" className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="Jane Smith" />
+                <input type="text" name="contactPersonName" className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="Jane Smith" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Contact Email</label>
-                <input type="email" name="contactEmail" className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="contact@acme.com" />
+                <input type="email" name="contactEmail" className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="contact@acme.com" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Website</label>
-                <input type="url" name="websiteUrl" className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="https://acme.com" />
+                <input type="url" name="websiteUrl" className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="https://acme.com" />
               </div>
               <div className="flex justify-end gap-3 mt-6">
-                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all" title="Cancel">
+                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 transition-all" title="Cancel">
                   <FiX className="w-5 h-5" />
                 </button>
                 <button type="submit" className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all" title="Create Client">
@@ -258,30 +258,30 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
       {/* Edit Modal */}
       {editingClient && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+          <div className="bg-zinc-900 border border-white/5 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-white/5 flex justify-between items-center">
               <h2 className="text-xl font-bold text-white">Edit Client</h2>
               <button onClick={() => setEditingClient(null)} className="text-zinc-400 hover:text-white">×</button>
             </div>
             <form action={handleUpdate} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Company Name *</label>
-                <input type="text" name="companyName" required defaultValue={editingClient.companyName} className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
+                <input type="text" name="companyName" required defaultValue={editingClient.companyName} className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Contact Person</label>
-                <input type="text" name="contactPersonName" defaultValue={editingClient.contactPersonName || ''} className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
+                <input type="text" name="contactPersonName" defaultValue={editingClient.contactPersonName || ''} className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Contact Email</label>
-                <input type="email" name="contactEmail" defaultValue={editingClient.contactEmail || ''} className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
+                <input type="email" name="contactEmail" defaultValue={editingClient.contactEmail || ''} className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Website</label>
-                <input type="url" name="websiteUrl" defaultValue={editingClient.websiteUrl || ''} className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
+                <input type="url" name="websiteUrl" defaultValue={editingClient.websiteUrl || ''} className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
               </div>
               <div className="flex justify-end gap-3 mt-6">
-                <button type="button" onClick={() => setEditingClient(null)} className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all" title="Cancel">
+                <button type="button" onClick={() => setEditingClient(null)} className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 transition-all" title="Cancel">
                   <FiX className="w-5 h-5" />
                 </button>
                 <button type="submit" className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all" title="Save Changes">

@@ -13,9 +13,9 @@ const AssistantCard: React.FC<CardProps> = ({ item, type }) => {
   const Icon = isNote ? FiFileText : FiCheckSquare;
 
   return (
-    <div className="glass rounded-xl p-4 border border-white/10 hover:bg-white/5 transition-all duration-300 group cursor-pointer">
+    <div className="glass rounded-xl p-4 border border-white/5 hover:bg-white/[0.03] transition-all duration-300 group cursor-pointer">
       <div className="flex items-center mb-2">
-        <div className="p-2 rounded-lg bg-white/5 mr-3 group-hover:bg-white/10 transition-colors">
+        <div className="p-2 rounded-lg bg-white/[0.03] mr-3 group-hover:bg-white/[0.06] transition-colors">
             <Icon className="text-purple-400 w-5 h-5" />
         </div>
         <h3 className="font-semibold text-zinc-200 truncate group-hover:text-white transition-colors">

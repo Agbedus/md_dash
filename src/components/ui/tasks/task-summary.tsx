@@ -76,12 +76,12 @@ export function TaskSummarySection({ tasks }: TaskSummarySectionProps) {
   return (
     <div className="flex flex-col gap-4 mb-4 lg:mb-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em]">Quick Stats</h2>
+        <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Quick Stats</h2>
         {activeTasks.length > 0 && (
           <button
             onClick={handleMarkAllDone}
             disabled={isUpdating}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest text-emerald-400 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-[11px] font-medium uppercase tracking-wider text-emerald-400 transition-all disabled:opacity-50"
           >
             {isUpdating ? (
               <div className="h-3 w-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
@@ -95,16 +95,16 @@ export function TaskSummarySection({ tasks }: TaskSummarySectionProps) {
 
       <div className="flex overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-4 gap-3 lg:gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="glass p-3 lg:p-6 rounded-xl lg:rounded-2xl border border-white/5 hover:border-white/20 transition-all duration-300 flex flex-col justify-between group min-w-[120px] lg:min-w-0 flex-shrink-0">
+          <div key={i} className="glass p-3 lg:p-6 rounded-xl lg:rounded-2xl border border-white/5 hover:border-white/5 transition-all duration-300 flex flex-col justify-between group min-w-[120px] lg:min-w-0 flex-shrink-0">
             <div className="flex items-center justify-between gap-4 mb-2 lg:mb-4">
               <div className="flex items-center gap-2 lg:gap-4 overflow-hidden">
-                <div className={`p-1.5 lg:p-3 rounded-lg lg:rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/10 flex-shrink-0`}>
+                <div className={`p-1.5 lg:p-3 rounded-lg lg:rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/[0.06] flex-shrink-0`}>
                   <stat.icon className="text-sm lg:text-xl" />
                 </div>
                 <div className="min-w-0">
-                    <p className="text-[9px] lg:text-[10px] text-zinc-500 font-bold uppercase tracking-widest truncate">{stat.label}</p>
+                    <p className="text-[11px] lg:text-[11px] text-zinc-500 font-bold uppercase tracking-wider truncate">{stat.label}</p>
                     {stat.sub && (
-                        <p className="text-[8px] lg:text-[9px] font-bold text-zinc-400 mt-0.5 uppercase tracking-tight truncate">
+                        <p className="text-[11px] lg:text-[11px] font-bold text-zinc-400 mt-0.5 uppercase tracking-tight truncate">
                             {stat.sub}
                         </p>
                     )}
@@ -120,7 +120,7 @@ export function TaskSummarySection({ tasks }: TaskSummarySectionProps) {
               </div>
             </div>
             <div className="text-left lg:text-right mt-auto">
-              <p className="text-xl lg:text-4xl font-black text-white leading-none tracking-tight">{stat.value}</p>
+              <p className="text-xl lg:text-4xl font-medium text-white leading-none tracking-tight">{stat.value}</p>
             </div>
           </div>
         ))}

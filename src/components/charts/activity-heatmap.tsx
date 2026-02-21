@@ -49,12 +49,12 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, variant = 'comp
 
   const getLevelColor = (level: number) => {
     switch (level) {
-      case 0: return 'bg-white/5 hover:bg-white/10';
+      case 0: return 'bg-white/[0.03] hover:bg-white/[0.06]';
       case 1: return 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30';
       case 2: return 'bg-emerald-500/40 text-emerald-300 hover:bg-emerald-500/50';
       case 3: return 'bg-emerald-500/70 text-emerald-100 hover:bg-emerald-500/80';
       case 4: return 'bg-emerald-400 text-zinc-900 hover:bg-emerald-300';
-      default: return 'bg-white/5';
+      default: return 'bg-white/[0.03]';
     }
   };
 
@@ -86,12 +86,12 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, variant = 'comp
   return (
     <div className={`w-full ${variant === 'compact' ? 'space-y-3' : 'space-y-4'}`}>
       {/* Period Selector */}
-      <div className="flex justify-between items-center bg-white/5 rounded-lg p-1">
+      <div className="flex justify-between items-center bg-white/[0.03] rounded-lg p-1">
         {[30, 90, 180, 365].map((p) => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`flex-1 text-[10px] font-bold py-1 px-2 rounded-md transition-all ${
+            className={`flex-1 text-[11px] font-bold py-1 px-2 rounded-md transition-all ${
               period === p 
               ? 'bg-emerald-500/20 text-emerald-400 shadow-sm' 
               : 'text-zinc-500 hover:text-zinc-300'
@@ -103,7 +103,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, variant = 'comp
       </div>
 
       <div className="flex gap-2">
-            <div className={`flex flex-col justify-between py-1 text-[8px] text-zinc-600 font-bold uppercase tracking-tighter w-4 select-none mt-6 ${variant === 'compact' ? 'hidden md:flex' : ''}`}>
+            <div className={`flex flex-col justify-between py-1 text-[11px] text-zinc-600 font-bold uppercase tracking-tight w-4 select-none mt-6 ${variant === 'compact' ? 'hidden md:flex' : ''}`}>
                 <span>M</span>
                 <span>W</span>
                 <span>F</span>
@@ -117,7 +117,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, variant = 'comp
                     {months.map((m, i) => (
                       <span 
                         key={i} 
-                        className="absolute text-[9px] text-zinc-500 font-bold uppercase tracking-widest whitespace-nowrap"
+                        className="absolute text-[11px] text-zinc-500 font-bold uppercase tracking-wider whitespace-nowrap"
                         style={{ 
                           left: `${m.offset * (cellWidth + gapWidth)}px`,
                         }}
@@ -152,11 +152,11 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, variant = 'comp
         </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-between text-[9px] text-zinc-500 font-bold uppercase tracking-wider pt-2 border-t border-white/5">
+      <div className="flex items-center justify-between text-[11px] text-zinc-500 font-bold uppercase tracking-wider pt-2 border-t border-white/5">
         <div className="flex items-center gap-2">
           <span>Less</span>
           <div className="flex gap-1">
-            <div className="w-2.5 h-2.5 rounded-[1px] bg-white/5"></div>
+            <div className="w-2.5 h-2.5 rounded-[1px] bg-white/[0.03]"></div>
             <div className="w-2.5 h-2.5 rounded-[1px] bg-emerald-500/20"></div>
             <div className="w-2.5 h-2.5 rounded-[1px] bg-emerald-500/40"></div>
             <div className="w-2.5 h-2.5 rounded-[1px] bg-emerald-500/70"></div>
@@ -175,11 +175,11 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, variant = 'comp
           className="fixed z-[9999] pointer-events-none -translate-x-1/2 -translate-y-full mb-2"
           style={{ left: hoveredDay.x, top: hoveredDay.y }}
         >
-          <div className="bg-zinc-900 border border-white/10 px-3 py-1.5 rounded-lg shadow-2xl whitespace-nowrap">
-              <p className="text-[10px] font-bold text-white">{format(new Date(hoveredDay.day.date), 'MMMM d, yyyy')}</p>
-              <p className="text-[9px] text-emerald-400 mt-0.5">{getFunMessage(hoveredDay.day.count)}</p>
+          <div className="bg-zinc-900 border border-white/5 px-3 py-1.5 rounded-lg shadow-2xl whitespace-nowrap">
+              <p className="text-[11px] font-bold text-white">{format(new Date(hoveredDay.day.date), 'MMMM d, yyyy')}</p>
+              <p className="text-[11px] text-emerald-400 mt-0.5">{getFunMessage(hoveredDay.day.count)}</p>
           </div>
-          <div className="w-2 h-2 bg-zinc-900 border-r border-b border-white/10 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"></div>
+          <div className="w-2 h-2 bg-zinc-900 border-r border-b border-white/5 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"></div>
         </div>,
         document.body
       )}

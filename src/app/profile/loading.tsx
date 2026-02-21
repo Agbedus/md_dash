@@ -6,7 +6,7 @@ export default function ProfileLoading() {
     <div className="p-8 max-w-4xl mx-auto min-h-screen space-y-8">
       <Skeleton className="h-10 w-48 mb-8" />
 
-      <div className="glass p-8 rounded-3xl border border-white/10 bg-zinc-900/50 backdrop-blur-xl">
+      <div className="glass p-8 rounded-3xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl">
         <div className="flex flex-col md:flex-row items-start gap-8">
           {/* Avatar Section Skeleton */}
           <div className="flex-shrink-0">

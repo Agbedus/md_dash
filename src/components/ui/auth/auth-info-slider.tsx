@@ -56,7 +56,7 @@ export default function AuthInfoSlider() {
             <div className="flex flex-col gap-2">
                {/* Line 1: Icon Box */}
                <div 
-                 className={`mb-8 w-20 h-20 flex items-center justify-center rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md transition-all duration-700 delay-[100ms] ${
+                 className={`mb-8 w-20 h-20 flex items-center justify-center rounded-3xl bg-white/[0.03] border border-white/5 backdrop-blur-md transition-all duration-700 delay-[100ms] ${
                    index === currentSlide ? 'translate-y-0 opacity-100' : '-translate-y-12 opacity-0'
                  }`}
                >
@@ -65,7 +65,7 @@ export default function AuthInfoSlider() {
 
                {/* Line 2: Title */}
                <h2 
-                 className={`text-7xl lg:text-8xl font-black bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/30 mb-8 leading-[0.9] tracking-tighter transition-all duration-700 delay-[300ms] ${
+                 className={`text-7xl lg:text-8xl font-medium bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/30 mb-8 leading-[0.9] tracking-tight transition-all duration-700 delay-[300ms] ${
                    index === currentSlide ? 'translate-y-0 opacity-100' : '-translate-y-12 opacity-0'
                  }`}
                >
@@ -92,7 +92,7 @@ export default function AuthInfoSlider() {
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`h-2.5 rounded-full transition-all duration-500 hover:bg-white/30 ${
-              index === currentSlide ? 'w-16 bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'w-4 bg-white/10'
+              index === currentSlide ? 'w-16 bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'w-4 bg-white/[0.06]'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

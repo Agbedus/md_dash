@@ -31,7 +31,7 @@ export default function RegisterForm() {
             <FiUser className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
+            className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/5 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
             id="fullName"
             type="text"
             name="fullName"
@@ -50,7 +50,7 @@ export default function RegisterForm() {
             <FiMail className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
+            className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/5 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
             id="email"
             type="email"
             name="email"
@@ -68,7 +68,7 @@ export default function RegisterForm() {
             <FiLock className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-10 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
+            className="block w-full pl-10 pr-10 py-2.5 bg-white/[0.03] border border-white/5 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
             id="password"
             type={showPassword ? "text" : "password"}
             name="password"
@@ -87,18 +87,18 @@ export default function RegisterForm() {
       </div>
 
       <button
-        className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-sm font-bold text-zinc-400 hover:text-zinc-100 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 text-sm font-bold text-zinc-400 hover:text-zinc-100 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
         aria-disabled={isPending}
         disabled={isPending}
       >
-        <div className="p-2.5 rounded-xl bg-white/5 group-hover:bg-emerald-500/10 transition-colors flex items-center justify-center shrink-0">
+        <div className="p-2.5 rounded-xl bg-white/[0.03] group-hover:bg-emerald-500/10 transition-colors flex items-center justify-center shrink-0">
           {isPending ? (
             <FiLoader className="animate-spin h-5 w-5 text-emerald-400" />
           ) : (
             <FiArrowRight className="h-5 w-5 text-emerald-400 group-hover:translate-x-1 transition-transform" />
           )}
         </div>
-        <span className="uppercase tracking-widest">{isPending ? 'Creating account...' : 'Create Account'}</span>
+        <span className="uppercase tracking-wider">{isPending ? 'Creating account...' : 'Create Account'}</span>
       </button>
       <div className="text-center text-sm text-zinc-400 mt-4">
         Already have an account?{' '}

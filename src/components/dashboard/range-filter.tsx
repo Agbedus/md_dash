@@ -22,7 +22,7 @@ export function RangeFilter() {
     <select 
       value={currentRange}
       onChange={handleRangeChange}
-      className="bg-white/5 border border-white/10 text-zinc-400 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-white/20 transition-colors cursor-pointer hover:text-white"
+      className="bg-white/[0.03] border border-white/5 text-zinc-400 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-white/5 transition-colors cursor-pointer hover:text-white"
     >
       <option value="7d">This Week</option>
       <option value="last_week">Last Week</option>
