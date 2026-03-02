@@ -1,4 +1,6 @@
-export type CalendarView = "month" | "week" | "day";
+import type { User } from "./user";
+
+export type CalendarView = "month" | "week" | "day" | "gantt";
 
 export type EventStatus = "tentative" | "confirmed" | "cancelled";
 export type EventPrivacy = "public" | "private" | "confidential";
@@ -32,12 +34,23 @@ export interface CalendarEvent {
   reminders?: EventReminder[];
   color?: string; // HEX color string, e.g. '#6366f1'
   userId?: string;
+  user?: User;
   createdAt?: string;
   updatedAt?: string;
-  isTask?: boolean;
-  taskStatus?: "task" | "in_progress" | "completed";
   isProject?: boolean;
   projectStatus?: string;
+  projectPriority?: string;
+  projectClient?: string;
+  projectKey?: string;
+  projectBudget?: number;
+  
+  isTask?: boolean;
+  taskStatus?: "task" | "in_progress" | "completed";
+  taskPriority?: string;
+  taskAssignees?: User[];
+  
   isTimeOff?: boolean;
   timeOffStatus?: string;
+  timeOffType?: string;
+  timeOffJustification?: string;
 }

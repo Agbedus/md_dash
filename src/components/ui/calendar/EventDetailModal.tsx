@@ -4,7 +4,7 @@ import type { CalendarEvent, EventReminder } from "@/types/calendar";
 import { format } from "date-fns";
 import { 
   FiX, FiCalendar, FiMapPin, FiUsers, FiEdit2, FiTrash2, 
-  FiGlobe, FiLock, FiBell, FiPlus, FiCheck
+  FiGlobe, FiLock, FiBell, FiPlus, FiCheck, FiFlag, FiTrello, FiCheckCircle, FiDollarSign, FiSun, FiClock, FiCoffee
 } from "react-icons/fi";
 import { updateEvent, deleteEvent } from "@/app/calendar/actions";
 import { Tooltip } from "@/components/ui/Tooltip";
@@ -207,7 +207,9 @@ export default function EventDetailModal({
       <div className="w-full md:max-w-3xl bg-slate-950/40 backdrop-blur-2xl border border-white/5 rounded-t-2xl md:rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex-none px-5 py-3 border-b border-white/5 flex items-center justify-between bg-white/[0.03]">
-          <div className="text-slate-100 font-bold tracking-tight truncate pr-4 text-sm">{isEditing ? "Edit Event" : event.title}</div>
+          <div className="text-slate-100 font-bold tracking-tight truncate pr-4 text-sm">
+            {isEditing ? "Edit Event" : event.title.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim()}
+          </div>
           <Tooltip content="Close">
             <button
               type="button"
@@ -252,81 +254,197 @@ export default function EventDetailModal({
                     </div>
                  </div>
 
-                 {/* Location */}
-                 {event.location && (
-                    <div className="flex items-start gap-3">
-                        <div className="mt-0.5 h-7 w-7 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-purple-400 shrink-0">
-                          <FiMapPin className="h-3.5 w-3.5" />
+                  {/* Time Off Specific Details */}
+                  {event.isTimeOff && (
+                    <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                            <FiCoffee className="w-3 h-3 text-amber-400" /> Type
+                          </div>
+                          <div className="text-sm font-bold text-slate-200 uppercase tracking-tight">
+                            {event.timeOffType || 'Vacation'}
+                          </div>
                         </div>
-                        <div>
-                            <div className="text-sm text-slate-300">{event.location}</div>
-                            <div className="text-xs text-slate-500 mt-0.5">Location</div>
+                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                            {event.timeOffStatus === 'approved' ? <FiCheckCircle className="w-3 h-3 text-emerald-400" /> : <FiClock className="w-3 h-3 text-amber-400" />} Status
+                          </div>
+                          <div className={`text-sm font-bold uppercase tracking-tight ${event.timeOffStatus === 'approved' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                            {event.timeOffStatus || 'Pending'}
+                          </div>
                         </div>
+                      </div>
+                      
+                      {event.timeOffJustification && (
+                        <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                            <FiEdit2 className="w-3 h-3" /> Justification
+                          </div>
+                          <div className="text-sm text-slate-300 leading-relaxed italic">
+                            &ldquo;{event.timeOffJustification}&rdquo;
+                          </div>
+                        </div>
+                      )}
                     </div>
-                 )}
+                  )}
 
-                 {/* Attendees */}
-                 {event.attendees && event.attendees.length > 0 && (
-                     <div className="flex items-start gap-3">
-                        <div className="mt-0.5 h-7 w-7 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-purple-400 shrink-0">
-                           <FiUsers className="h-3.5 w-3.5" />
+                  {/* Project Specific Details */}
+                  {event.isProject && (
+                    <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                            <FiTrello className="w-3 h-3 text-indigo-400" /> Key / Client
+                          </div>
+                          <div className="text-sm font-bold text-slate-200">
+                            {event.projectKey || 'N/A'} {event.projectClient ? `• ${event.projectClient}` : ''}
+                          </div>
                         </div>
-                        <div>
-                            <div className="flex flex-wrap gap-2">
-                                {event.attendees.map((email, idx) => (
-                                    <span key={idx} className="px-2 py-1 text-xs bg-white/[0.03] text-slate-300 rounded-md border border-white/5">
-                                        {email.trim()}
-                                    </span>
-                                ))}
-                            </div>
-                            <div className="text-xs text-slate-500 mt-1">Attendees</div>
+                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                            <FiFlag className="w-3 h-3 text-rose-400" /> Priority
+                          </div>
+                          <div className="text-sm font-bold text-slate-200 uppercase tracking-tight">
+                            {event.projectPriority || 'Medium'}
+                          </div>
                         </div>
-                     </div>
-                 )}
+                      </div>
 
-                 {/* Description */}
-                 {event.description && (
-                    <div className="bg-white/[0.03] rounded-xl border border-white/5 p-4 mt-2">
-                        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-2">
-                            <FiEdit2 className="h-3 w-3" /> Description
+                      {event.projectBudget && (
+                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-between">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                            <FiDollarSign className="w-3 h-3 text-emerald-400" /> Project Budget
+                          </div>
+                          <div className="text-sm font-black text-emerald-400 tracking-tighter">
+                            ${event.projectBudget.toLocaleString()}
+                          </div>
                         </div>
-                        <div className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">
-                            {event.description}
-                        </div>
+                      )}
                     </div>
-                 )}
-                 
-                 {/* Metadata Badge Row */}
-                 <div className="flex flex-wrap gap-3 mt-4 border-t border-white/5 pt-4">
-                    <Tooltip content="Event Status" position="bottom">
-                        <div className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide border inline-flex items-center gap-1.5 cursor-help ${
-                            event.status === 'confirmed' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
-                            event.status === 'cancelled' ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' :
-                            'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                        }`}>
-                            <div className={`h-1.5 w-1.5 rounded-full ${
-                                event.status === 'confirmed' ? 'bg-emerald-400' :
-                                event.status === 'cancelled' ? 'bg-rose-400' :
-                                'bg-amber-400'
-                            }`} />
-                            {event.status || 'Tentative'}
-                        </div>
-                    </Tooltip>
-                    
-                    <Tooltip content="Visibility" position="bottom">
-                        <div className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-800 border border-slate-700 text-slate-400 inline-flex items-center gap-1.5 cursor-help">
-                            {event.privacy === 'private' ? <FiLock className="h-2.5 w-2.5" /> : <FiGlobe className="h-2.5 w-2.5" />}
-                            {event.privacy || 'Public'}
-                        </div>
-                    </Tooltip>
+                  )}
 
-                    <Tooltip content="Color Code" position="bottom">
-                        <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-800 border border-slate-700 text-slate-400 cursor-help">
-                            <div className="h-2 w-2 rounded-full ring-1 ring-white/20" style={{backgroundColor: event.color || '#6366f1'}} />
-                            <span className="opacity-70">Color</span>
+                  {/* Task Specific Details */}
+                  {event.isTask && (
+                    <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                            <FiCheckCircle className="w-3 h-3 text-indigo-400" /> Status
+                          </div>
+                          <div className="text-sm font-bold text-slate-200 uppercase tracking-tight">
+                            {event.taskStatus || 'Todo'}
+                          </div>
                         </div>
-                    </Tooltip>
-                 </div>
+                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                            <FiFlag className="w-3 h-3 text-rose-400" /> Priority
+                          </div>
+                          <div className="text-sm font-bold text-slate-200 uppercase tracking-tight">
+                            {event.taskPriority || 'Medium'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {event.taskAssignees && event.taskAssignees.length > 0 && (
+                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                            <FiUsers className="w-3 h-3" /> Assignees
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                             {event.taskAssignees.map((u, i) => (
+                               <div key={i} className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+                                 <div className="h-4 w-4 bg-indigo-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white uppercase">
+                                   {u.fullName?.charAt(0) || u.email?.charAt(0)}
+                                 </div>
+                                 <span className="text-[10px] text-slate-300 font-medium">{u.fullName || u.email}</span>
+                               </div>
+                             ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!event.isProject && !event.isTask && !event.isTimeOff && (
+                    <>
+                      {/* Location */}
+                      {event.location && (
+                          <div className="flex items-start gap-3">
+                              <div className="mt-0.5 h-7 w-7 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-purple-400 shrink-0">
+                                <FiMapPin className="h-3.5 w-3.5" />
+                              </div>
+                              <div>
+                                  <div className="text-sm text-slate-300">{event.location}</div>
+                                  <div className="text-xs text-slate-500 mt-0.5">Location</div>
+                              </div>
+                          </div>
+                      )}
+
+                      {/* Attendees */}
+                      {event.attendees && event.attendees.length > 0 && (
+                          <div className="flex items-start gap-3">
+                              <div className="mt-0.5 h-7 w-7 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-purple-400 shrink-0">
+                                <FiUsers className="h-3.5 w-3.5" />
+                              </div>
+                              <div>
+                                  <div className="flex flex-wrap gap-2">
+                                      {event.attendees.map((email, idx) => (
+                                          <span key={idx} className="px-2 py-1 text-xs bg-white/[0.03] text-slate-300 rounded-md border border-white/5">
+                                              {email.trim()}
+                                          </span>
+                                      ))}
+                                  </div>
+                                  <div className="text-xs text-slate-500 mt-1">Attendees</div>
+                              </div>
+                          </div>
+                      )}
+
+                      {/* Description */}
+                      {event.description && (
+                          <div className="bg-white/[0.03] rounded-xl border border-white/5 p-4 mt-2">
+                              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-2">
+                                  <FiEdit2 className="h-3 w-3" /> Description
+                              </div>
+                              <div className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">
+                                  {event.description}
+                              </div>
+                          </div>
+                      )}
+                      
+                      {/* Metadata Badge Row */}
+                      <div className="flex flex-wrap gap-3 mt-4 border-t border-white/5 pt-4">
+                          <Tooltip content="Event Status" position="bottom">
+                              <div className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide border inline-flex items-center gap-1.5 cursor-help ${
+                                  event.status === 'confirmed' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+                                  event.status === 'cancelled' ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' :
+                                  'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                              }`}>
+                                  <div className={`h-1.5 w-1.5 rounded-full ${
+                                      event.status === 'confirmed' ? 'bg-emerald-400' :
+                                      event.status === 'cancelled' ? 'bg-rose-400' :
+                                      'bg-amber-400'
+                                  }`} />
+                                  {event.status || 'Tentative'}
+                              </div>
+                          </Tooltip>
+                          
+                          <Tooltip content="Visibility" position="bottom">
+                              <div className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-800 border border-slate-700 text-slate-400 inline-flex items-center gap-1.5 cursor-help">
+                                  {event.privacy === 'private' ? <FiLock className="h-2.5 w-2.5" /> : <FiGlobe className="h-2.5 w-2.5" />}
+                                  {event.privacy || 'Public'}
+                              </div>
+                          </Tooltip>
+
+                          <Tooltip content="Color Code" position="bottom">
+                              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-800 border border-slate-700 text-slate-400 cursor-help">
+                                  <div className="h-2 w-2 rounded-full ring-1 ring-white/20" style={{backgroundColor: event.color || '#6366f1'}} />
+                                  <span className="opacity-70">Color</span>
+                              </div>
+                          </Tooltip>
+                      </div>
+                    </>
+                  )}
               </div>
             </div>
           )}
@@ -595,17 +713,27 @@ export default function EventDetailModal({
                         <button
                             type="button"
                             onClick={handleDelete}
-                            className="group h-8 w-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/5 hover:bg-rose-500/10 hover:border-rose-500/20 text-slate-400 hover:text-rose-400 transition-all"
+                            disabled={event.isProject || event.isTask || event.isTimeOff}
+                            className={`group h-8 w-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/5 transition-all ${
+                                (event.isProject || event.isTask || event.isTimeOff) 
+                                ? 'opacity-20 cursor-not-allowed grayscale' 
+                                : 'hover:bg-rose-500/10 hover:border-rose-500/20 text-slate-400 hover:text-rose-400'
+                            }`}
                         >
                             <FiTrash2 className="h-3.5 w-3.5" />
                         </button>
                     </Tooltip>
                     
-                    <Tooltip content="Edit Event">
+                    <Tooltip content={(event.isProject || event.isTask || event.isTimeOff) ? "Editing disabled for this item" : "Edit Event"}>
                         <button
                             type="button"
                             onClick={() => setIsEditing(true)}
-                            className="group h-8 w-8 flex items-center justify-center rounded-lg bg-white/[0.06] hover:bg-white/20 text-white border border-white/5 transition-all shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                            disabled={event.isProject || event.isTask || event.isTimeOff}
+                            className={`group h-8 w-8 flex items-center justify-center rounded-lg border transition-all ${
+                                (event.isProject || event.isTask || event.isTimeOff)
+                                ? 'bg-white/[0.02] border-white/5 text-slate-600 cursor-not-allowed'
+                                : 'bg-white/[0.06] hover:bg-white/20 text-white border-white/5 shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]'
+                            }`}
                         >
                             <FiEdit2 className="h-3.5 w-3.5" />
                         </button>

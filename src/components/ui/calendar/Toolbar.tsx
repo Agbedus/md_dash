@@ -14,14 +14,16 @@ interface ToolbarProps {
   onAddEvent?: () => void;
   onRequestTimeOff?: () => void;
   canRequestTimeOff?: boolean;
-  filters: { projects: boolean; tasks: boolean; events: boolean; timeOff: boolean };
-  setFilters: React.Dispatch<React.SetStateAction<{ projects: boolean; tasks: boolean; events: boolean; timeOff: boolean }>>;
+  activeFilter: 'projects' | 'tasks' | 'events' | 'timeOff';
+  setActiveFilter: (filter: 'projects' | 'tasks' | 'events' | 'timeOff') => void;
+  hideViewSwitcher?: boolean;
 }
 
 export default function Toolbar({ 
   currentDate, view, onPrev, onNext, onToday, onChangeView, onAddEvent,
   onRequestTimeOff, canRequestTimeOff,
-  filters, setFilters
+  activeFilter, setActiveFilter,
+  hideViewSwitcher
 }: ToolbarProps) {
   return (
     <div className="flex flex-col gap-6 mb-8">
@@ -65,47 +67,49 @@ export default function Toolbar({
           {format(currentDate, "MMMM yyyy")}
         </div>
 
-        <div className="flex items-center space-x-1 bg-white/[0.03] p-1 rounded-xl border border-white/5">
-          {(['month', 'week', 'day'] as const).map((v) => (
-              <button
-                  key={v}
-                  onClick={() => onChangeView?.(v)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      view === v 
-                      ? "bg-white/[0.06] text-white shadow-sm" 
-                      : "text-zinc-500 hover:text-zinc-300"
-                  }`}
-              >
-                  {v.charAt(0).toUpperCase() + v.slice(1)}
-              </button>
-          ))}
-        </div>
+        {!hideViewSwitcher && (
+          <div className="flex items-center space-x-1 bg-white/[0.03] p-1 rounded-xl border border-white/5">
+            {(['month', 'week', 'day'] as const).map((v) => (
+                <button
+                    key={v}
+                    onClick={() => onChangeView?.(v)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        view === v 
+                        ? "bg-white/[0.06] text-white shadow-sm" 
+                        : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                >
+                    {v.charAt(0).toUpperCase() + v.slice(1)}
+                </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Filter Toggles */}
       <div className="flex items-center gap-3">
           <FilterToggle 
             label="Projects" 
-            active={filters.projects} 
-            onClick={() => setFilters(f => ({ ...f, projects: !f.projects }))}
+            active={activeFilter === 'projects'} 
+            onClick={() => setActiveFilter('projects')}
             color="indigo"
           />
           <FilterToggle 
             label="Tasks" 
-            active={filters.tasks} 
-            onClick={() => setFilters(f => ({ ...f, tasks: !f.tasks }))}
+            active={activeFilter === 'tasks'} 
+            onClick={() => setActiveFilter('tasks')}
             color="emerald"
           />
           <FilterToggle 
             label="Events" 
-            active={filters.events} 
-            onClick={() => setFilters(f => ({ ...f, events: !f.events }))}
+            active={activeFilter === 'events'} 
+            onClick={() => setActiveFilter('events')}
             color="purple"
           />
           <FilterToggle 
             label="Time Off" 
-            active={filters.timeOff} 
-            onClick={() => setFilters(f => ({ ...f, timeOff: !f.timeOff }))}
+            active={activeFilter === 'timeOff'} 
+            onClick={() => setActiveFilter('timeOff')}
             color="amber"
           />
       </div>

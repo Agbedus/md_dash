@@ -6,6 +6,7 @@ import Toolbar from "./Toolbar";
 import MonthGrid from "./MonthGrid";
 import WeekGrid from "./WeekGrid";
 import DayGrid from "./DayGrid";
+import GanttGrid from "./GanttGrid";
 
 import EventModal from "./EventModal";
 import EventDetailModal from "./EventDetailModal";
@@ -40,8 +41,17 @@ interface CalendarProps {
 export default function Calendar({ initialDate, initialView = "month", initialEvents, initialTasks, initialUsers, initialProjects, initialTimeOff, currentUserRoles = [] }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState<Date>(initialDate ? startOfDay(initialDate) : startOfDay(new Date()));
   const [view, setView] = useState<CalendarView>(initialView);
-  const [filters, setFilters] = useState({ projects: false, tasks: true, events: true, timeOff: true });
+  const [activeFilter, setActiveFilter] = useState<'projects' | 'tasks' | 'events' | 'timeOff'>('tasks');
   const [, startTransition] = useTransition();
+
+  // Force Gantt view for Projects and Time Off
+  useEffect(() => {
+    if (activeFilter === 'projects' || activeFilter === 'timeOff') {
+      setView('gantt');
+    } else if (view === 'gantt') {
+      setView('month'); // Default back to month if switching from Gantt-forced categories
+    }
+  }, [activeFilter, view]);
 
   // Background data
   const { users } = useUsers(initialUsers);
@@ -69,40 +79,38 @@ export default function Calendar({ initialDate, initialView = "month", initialEv
   // Can the current user request time off? (staff or above)
   const canRequestTimeOff = currentUserRoles.some(r => ['staff', 'manager', 'super_admin'].includes(r));
 
-  // Revalidate data when filters are toggled to ensure fresh data
-  useEffect(() => {
-    if (filters.tasks) mutate();
-  }, [filters.tasks, mutate]);
-
   // Combine events, tasks, projects, and time-off for the calendar
   const allEvents = useMemo(() => {
     const items: UICalendarEvent[] = [];
 
-    serverEvents.forEach((ev: any) => {
-        const isTimeOffEvent = ev.title.toLowerCase().startsWith('leave:') || 
-                               ev.title.toLowerCase().startsWith('off:') || 
-                               ev.title.toLowerCase().startsWith('sick:') ||
-                               ev.title.toLowerCase().startsWith('other:');
-        
-        // Only push if the corresponding filter is active
-        if ((isTimeOffEvent && filters.timeOff) || (!isTimeOffEvent && filters.events)) {
-            // If it's a time-off event, it means it's already approved
-            const status = isTimeOffEvent ? 'approved' : undefined;
-            const color = isTimeOffEvent ? 'bg-emerald-400' : ev.color;
+    if (activeFilter === 'events' || activeFilter === 'timeOff') {
+        serverEvents.forEach((ev: any) => {
+            const isTimeOffEvent = ev.title.toLowerCase().startsWith('leave:') || 
+                                   ev.title.toLowerCase().startsWith('off:') || 
+                                   ev.title.toLowerCase().startsWith('sick:') ||
+                                   ev.title.toLowerCase().startsWith('other:');
+            
+            if ((isTimeOffEvent && activeFilter === 'timeOff') || (!isTimeOffEvent && activeFilter === 'events')) {
+                const status = isTimeOffEvent ? 'approved' : undefined;
+                const color = isTimeOffEvent ? 'bg-emerald-400' : ev.color;
+                
+                const user = isTimeOffEvent ? users.find((u: User) => u.id === ev.userId) : undefined;
 
-            items.push({
-                ...ev,
-                start: new Date(ev.start),
-                end: new Date(ev.end),
-                color: color,
-                title: isTimeOffEvent ? `🌴 ${ev.title}` : ev.title,
-                isTimeOff: isTimeOffEvent,
-                timeOffStatus: status,
-            });
-        }
-    });
+                items.push({
+                    ...ev,
+                    start: new Date(ev.start),
+                    end: new Date(ev.end),
+                    color: color,
+                    title: isTimeOffEvent ? `🌴 ${ev.title}` : ev.title,
+                    isTimeOff: isTimeOffEvent,
+                    timeOffStatus: status,
+                    user: user,
+                });
+            }
+        });
+    }
 
-    if (filters.tasks) {
+    if (activeFilter === 'tasks') {
         serverTasks
           .filter((t: Task) => t.dueDate)
           .forEach((t: Task) => {
@@ -116,14 +124,16 @@ export default function Calendar({ initialDate, initialView = "month", initialEv
               end: new Date(t.dueDate!),
               allDay: true,
               color,
-              taskStatus: statusMap as any,
               isTask: true,
+              taskStatus: statusMap as any,
+              taskPriority: t.priority,
+              taskAssignees: t.assignees?.map(a => a.user),
               description: t.description || "",
             });
           });
     }
 
-    if (filters.projects) {
+    if (activeFilter === 'projects') {
         serverProjects.forEach((p: Project) => {
             if (p.startDate) {
                 items.push({
@@ -135,15 +145,18 @@ export default function Calendar({ initialDate, initialView = "month", initialEv
                     color: '#818cf8',
                     isProject: true,
                     projectStatus: p.status,
+                    projectPriority: p.priority,
+                    projectKey: p.key || undefined,
+                    projectBudget: p.budget || undefined,
                     description: p.description || "",
                 } as any);
             }
         });
     }
 
-    if (filters.timeOff) {
+    if (activeFilter === 'timeOff') {
         timeOffRequests
-          .filter((r: TimeOffRequest) => r.status === 'pending') // Only show pending here; approved shows as Event
+          .filter((r: TimeOffRequest) => r.status === 'pending')
           .forEach((r: TimeOffRequest) => {
             const user = users.find((u: User) => u.id === r.user_id);
             const userName = user?.fullName || user?.email || 'User';
@@ -158,14 +171,18 @@ export default function Calendar({ initialDate, initialView = "month", initialEv
               description: r.justification || '',
               isTimeOff: true,
               timeOffStatus: r.status,
+              timeOffType: r.type,
+              timeOffJustification: r.justification || undefined,
+              user: user,
+              userId: r.user_id,
             } as any);
           });
     }
 
     return items;
-  }, [serverEvents, serverTasks, serverProjects, timeOffRequests, users, filters]);
+  }, [serverEvents, serverTasks, serverProjects, timeOffRequests, users, activeFilter]);
 
-  // Optimistic UI
+  // Optimistic UI (rest of existing logic)
   const [optimisticEvents, addOptimisticEvent] = useOptimistic(
     allEvents,
     (state: UICalendarEvent[], action: { type: 'add' | 'update' | 'delete', event: UICalendarEvent }) => {
@@ -211,6 +228,8 @@ export default function Calendar({ initialDate, initialView = "month", initialEv
     return <CalendarLoading />;
   }
 
+  const isGanttForced = activeFilter === 'projects' || activeFilter === 'timeOff';
+
   return (
     <div className="flex flex-col h-full space-y-6 relative">
       <Toolbar
@@ -226,43 +245,63 @@ export default function Calendar({ initialDate, initialView = "month", initialEv
         }}
         onRequestTimeOff={() => setTimeOffModalOpen(true)}
         canRequestTimeOff={canRequestTimeOff}
-        filters={filters}
-        setFilters={setFilters}
+        activeFilter={activeFilter}
+        setActiveFilter={setActiveFilter}
+        hideViewSwitcher={isGanttForced}
       />
 
       <div className="flex-1 glass rounded-2xl border border-white/5 overflow-hidden">
-        {view === "month" && (
-          <MonthGrid
+        {isGanttForced ? (
+          <GanttGrid
             date={currentDate}
             events={normalizedEvents}
-            onSelectDate={(d) => {
-              setModalStart(d);
-              setModalOpen(true);
-            }}
+            activeFilter={activeFilter}
             onEventClick={setSelectedEvent}
           />
-        )}
-        {view === "week" && (
-          <WeekGrid
-            date={currentDate}
-            events={normalizedEvents}
-            onSelectDateTime={(d) => {
-              setModalStart(d);
-              setModalOpen(true);
-            }}
-            onEventClick={setSelectedEvent}
-          />
-        )}
-        {view === "day" && (
-          <DayGrid
-            date={currentDate}
-            events={normalizedEvents}
-            onSelectDateTime={(d) => {
-              setModalStart(d);
-              setModalOpen(true);
-            }}
-            onEventClick={setSelectedEvent}
-          />
+        ) : (
+          <>
+            {view === "month" && (
+              <MonthGrid
+                date={currentDate}
+                events={normalizedEvents}
+                onSelectDate={(d) => {
+                  setModalStart(d);
+                  setModalOpen(true);
+                }}
+                onEventClick={setSelectedEvent}
+              />
+            )}
+            {view === "week" && (
+              <WeekGrid
+                date={currentDate}
+                events={normalizedEvents}
+                onSelectDateTime={(d) => {
+                  setModalStart(d);
+                  setModalOpen(true);
+                }}
+                onEventClick={setSelectedEvent}
+              />
+            )}
+            {view === "day" && (
+              <DayGrid
+                date={currentDate}
+                events={normalizedEvents}
+                onSelectDateTime={(d) => {
+                  setModalStart(d);
+                  setModalOpen(true);
+                }}
+                onEventClick={setSelectedEvent}
+              />
+            )}
+            {view === "gantt" && (
+               <GanttGrid
+               date={currentDate}
+               events={normalizedEvents}
+               activeFilter={activeFilter}
+               onEventClick={setSelectedEvent}
+             />
+            )}
+          </>
         )}
       </div>
 
