@@ -446,7 +446,7 @@ export async function getAIPriorities() {
 }
 
 
-export async function getActivityData() {
+export async function getActivityData(userId?: string) {
   const [tasks, notes] = await Promise.all([
     getTasks(undefined, undefined, undefined, undefined, 2000),
     getNotes(2000)
@@ -458,6 +458,10 @@ export async function getActivityData() {
   // Last 365 days
   const startDate = subDays(now, 364);
   
+  // Filter by userId if provided
+  const filteredTasks = userId ? tasks.filter(t => t.userId === userId || t.assigneeIds?.includes(userId)) : tasks;
+  const filteredNotes = userId ? notes.filter(n => n.user_id === userId) : notes;
+
   // Helper to increment count for a date string
   const addActivity = (dateStr: string | undefined | null) => {
     if (!dateStr) return;
@@ -466,7 +470,7 @@ export async function getActivityData() {
   };
 
   // Process tasks
-  tasks.forEach(t => {
+  filteredTasks.forEach(t => {
     addActivity(t.createdAt);
     if (t.status === 'DONE') {
       addActivity(t.updatedAt);
@@ -474,7 +478,7 @@ export async function getActivityData() {
   });
 
   // Process notes
-  notes.forEach(n => {
+  filteredNotes.forEach(n => {
     addActivity(n.created_at);
     addActivity(n.updated_at);
   });

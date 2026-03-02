@@ -1,23 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import TasksPageClient from "@/components/ui/tasks/tasks-page-client";
-import { getTasks } from './actions';
+import { auth } from '@/auth';
+import { getTasks } from '@/app/tasks/actions';
 import { getUsers } from '@/app/users/actions';
 import { getProjects } from '@/app/projects/actions';
 
-import { auth } from '@/auth';
-
 export default async function TasksPage() {
     const session = await auth();
-    const [allTasks, allUsers, allProjects] = await Promise.all([
+
+    const [tasks, users, projects] = await Promise.all([
         getTasks(),
         getUsers(),
         getProjects(),
     ]);
 
-    return <TasksPageClient 
-        allTasks={allTasks as any[]} 
-        users={allUsers as any[]} 
-        projects={allProjects as any[]} 
+    return <TasksPageClient
+        allTasks={tasks}
+        users={users}
+        projects={projects}
         currentUserId={session?.user?.id}
     />;
 }

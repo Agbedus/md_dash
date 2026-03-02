@@ -49,6 +49,7 @@ Thumbs.db
 
 # local debug scripts
 diagnose.ts
+debug_tasks.js
 
 
 FEATURES.md

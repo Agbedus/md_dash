@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { cache } from 'react';
 import type { CalendarEvent } from '@/types/calendar';
 
 const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
@@ -71,7 +72,7 @@ function mapApiEvent(p: ApiEvent): CalendarEvent {
     };
 }
 
-export async function getEvents(): Promise<CalendarEvent[]> {
+export const getEvents = cache(async function(): Promise<CalendarEvent[]> {
   const session = await auth();
   // @ts-expect-error accessToken is not in default session type
   if (!session?.user?.accessToken) return [];
@@ -99,7 +100,7 @@ export async function getEvents(): Promise<CalendarEvent[]> {
     console.error("Error fetching events:", error);
     return [];
   }
-}
+});
 
 export async function createEvent(formData: FormData) {
   const session = await auth();
@@ -277,3 +278,21 @@ export async function deleteEvent(id: string | number) {
     return { success: false, error: "Network error deleting event" };
   }
 }
+
+export const getCalendarData = cache(async function() {
+    const [events, tasks, projects, timeOff, users] = await Promise.all([
+        getEvents(),
+        import('@/app/tasks/actions').then(m => m.getTasks(undefined, undefined, undefined, undefined, 1000)),
+        import('@/app/projects/actions').then(m => m.getProjects(1000)),
+        import('@/app/time-off/actions').then(m => m.getTimeOffRequests()),
+        import('@/app/users/actions').then(m => m.getUsers())
+    ]);
+
+    return {
+        events,
+        tasks,
+        projects,
+        timeOff,
+        users
+    };
+});

@@ -15,6 +15,9 @@ export function Sparkline({
   width = 100,
   height = 40,
 }: SparklineProps) {
+  // Unique ID for gradient to avoid collisions if multiple sparklines exist
+  const gradientId = React.useId();
+
   if (!data || data.length < 2) return null;
 
   const min = 0; // Standardize baseline at 0
@@ -32,9 +35,6 @@ export function Sparkline({
 
   const pathData = `M ${points.join(" L ")}`;
   const areaData = `${pathData} L ${width - padding},${height} L ${padding},${height} Z`;
-
-  // Unique ID for gradient to avoid collisions if multiple sparklines exist
-  const gradientId = React.useId();
 
   return (
     <div className="flex items-center" style={{ width, height }}>

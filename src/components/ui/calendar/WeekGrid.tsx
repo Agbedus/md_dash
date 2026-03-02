@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
 import { FiCheckCircle } from "react-icons/fi";
-import { addDays, eachHourOfInterval, endOfDay, format, isSameDay, startOfDay, startOfWeek } from "date-fns";
+import { addDays, eachHourOfInterval, endOfDay, format, isSameDay, startOfDay, startOfWeek, isWithinInterval } from "date-fns";
 import type { CalendarEvent } from "@/types/calendar";
-import TimezoneClocks from "./TimezoneClocks";
+import { Tooltip } from "@/components/ui/Tooltip";
 
-type UICalendarEvent = CalendarEvent;
+type UICalendarEvent = CalendarEvent & { isProject?: boolean; projectStatus?: string };
 
 interface WeekGridProps {
   date: Date; // any date inside the target week
@@ -33,12 +33,24 @@ function privacyClasses(p?: CalendarEvent["privacy"]) {
 function taskClasses(status?: "task" | "in_progress" | "completed") {
   switch (status) {
     case "completed":
-      return { dot: "", border: "border-emerald-500/50", text: "text-emerald-200" };
+      return { dot: "", border: "border-emerald-500/50", text: "text-emerald-200", bg: "bg-emerald-500/10" };
     case "in_progress":
-      return { dot: "", border: "border-amber-500/50", text: "text-amber-200" };
+      return { dot: "", border: "border-amber-500/50", text: "text-amber-200", bg: "bg-amber-500/10" };
     case "task":
     default:
-      return { dot: "", border: "border-sky-500/50", text: "text-sky-200" };
+      return { dot: "", border: "border-sky-500/50", text: "text-sky-200", bg: "bg-sky-500/10" };
+  }
+}
+
+function timeOffClasses(status?: string) {
+  switch (status) {
+    case "approved":
+      return { dot: "bg-emerald-400", border: "border-emerald-500/50", text: "text-emerald-200", bg: "bg-emerald-500/10" };
+    case "rejected":
+      return { dot: "bg-rose-400", border: "border-rose-500/50", text: "text-rose-200", bg: "bg-rose-500/10" };
+    case "pending":
+    default:
+      return { dot: "bg-amber-400", border: "border-amber-500/50", text: "text-amber-200", bg: "bg-amber-500/10" };
   }
 }
 
@@ -77,65 +89,82 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
           </div>
 
           {/* Day columns */}
-          {days.map((d) => (
-            <div key={d.toISOString()} className="flex flex-col border-r border-white/5 last:border-r-0">
-              {HOURS.map((h, i) => {
-                const slot = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h.getHours(), 0, 0, 0);
-                const slotEvents = events.filter((e) => isSameDay(e.start, d) && new Date(e.start).getHours() === slot.getHours());
-                return (
-                  <div
-                    key={i}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => onSelectDateTime?.(slot)}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelectDateTime?.(slot); } }}
-                    className="h-16 border-b border-white/5 hover:bg-white/[0.02] text-left p-1 transition-colors"
-                  >
-                    {slotEvents.length > 0 && (
-                      <div className="h-full w-full flex gap-1">
-                        {slotEvents.map((e) => {
-                          const isTask = (e as UICalendarEvent).isTask;
-                          const c = isTask ? taskClasses((e as UICalendarEvent).taskStatus) : privacyClasses(e.privacy);
-                          const widthPct = 100 / slotEvents.length;
-                          return (
-                            <div
-                              key={e.id}
-                              role="button"
-                              onClick={(ev) => { ev.stopPropagation(); onEventClick?.(e); }}
-                              className={`h-full truncate text-[11px] px-1.5 py-1 rounded-lg border ${c.border} bg-white/[0.06] hover:bg-white/20 flex items-center gap-1.5 transition-colors`}
-                              style={{ flex: `0 0 ${widthPct}%` }}
-                              title={e.title}
-                            >
-                              {isTask ? (
-                                <FiCheckCircle className={`h-3 w-3 ${c.text}`} />
-                              ) : (
-                                <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
-                              )}
-                              <span className={`font-medium ${c.text} flex-1 min-w-0`}>{e.title}</span>
-                              {onEventDelete && (
-                                <button
-                                  type="button"
-                                  title="Delete"
-                                  aria-label="Delete event"
-                                  onClick={(ev) => { ev.stopPropagation(); onEventDelete(e); }}
-                                  className="ml-auto opacity-0 group-hover:opacity-100 inline-flex items-center justify-center h-4 w-4 rounded text-zinc-400 hover:text-red-400 transition-all"
+          {days.map((d) => {
+            const dayStart = startOfDay(d);
+            const dayEnd = endOfDay(d);
+
+            return (
+              <div key={d.toISOString()} className="flex flex-col border-r border-white/5 last:border-r-0 relative">
+                {HOURS.map((h, i) => {
+                  const slotStart = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h.getHours(), 0, 0, 0);
+                  const slotEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h.getHours(), 59, 59, 999);
+                  
+                  // Show events that occur during this hour slot on this specific day
+                  const slotEvents = events.filter((e) => {
+                      const eStart = new Date(e.start);
+                      const eEnd = e.end ? new Date(e.end) : eStart;
+                      
+                      // Check if the event overlaps with this hour slot
+                      return isWithinInterval(slotStart, { start: eStart, end: eEnd }) || 
+                             isWithinInterval(slotEnd, { start: eStart, end: eEnd }) || 
+                             (eStart >= slotStart && eEnd <= slotEnd);
+                  });
+
+                  return (
+                    <div
+                      key={i}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => onSelectDateTime?.(slotStart)}
+                      className="h-16 border-b border-white/5 hover:bg-white/[0.02] text-left p-1 transition-colors group/slot overflow-hidden"
+                    >
+                      {slotEvents.length > 0 && (
+                        <div className="h-full w-full flex gap-1 overflow-x-auto no-scrollbar">
+                          {slotEvents.map((e) => {
+                            const isTask = e.isTask;
+                            const isProject = e.isProject;
+                            const isTimeOff = e.isTimeOff;
+                            const c = isProject ? { border: 'border-indigo-500/50', text: 'text-indigo-200', dot: 'bg-indigo-400', bg: 'bg-indigo-500/10' } : (isTask ? taskClasses(e.taskStatus) : (isTimeOff ? timeOffClasses(e.timeOffStatus) : privacyClasses(e.privacy)));
+                            
+                            // Width depends on number of overlapping items to "fit"
+                            const widthPct = slotEvents.length > 1 ? (100 / slotEvents.length) : 100;
+                            
+                            const summary = isProject 
+                                ? `PROJECT: ${e.title} - ${e.projectStatus || 'Active'}`
+                                : (isTask ? `TASK: ${e.title} - ${e.taskStatus || 'TODO'}` : `EVENT: ${e.title} (${format(new Date(e.start), 'h:mm a')} - ${e.end ? format(new Date(e.end), 'h:mm a') : '...'})`);
+
+                            return (
+                              <Tooltip key={e.id} content={summary} className="h-full flex-shrink-0" style={{ width: slotEvents.length > 1 ? `${widthPct}%` : '100%', minWidth: slotEvents.length > 1 ? '40px' : 'none' }}>
+                                <div
+                                    role="button"
+                                    onClick={(ev) => { ev.stopPropagation(); onEventClick?.(e); }}
+                                    className={`h-full truncate text-[9px] px-1.5 py-1 rounded-lg border ${c.border} bg-white/[0.06] hover:bg-white/20 flex flex-col justify-center gap-0.5 transition-colors cursor-pointer w-full leading-tight`}
                                 >
-                                  ×
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+                                    <div className="flex items-center gap-1">
+                                        {isTask ? (
+                                        <FiCheckCircle className={`h-2.5 w-2.5 ${c.text}`} />
+                                        ) : (
+                                        <span className={`h-1 w-1 rounded-full ${c.dot}`} />
+                                        )}
+                                        <span className={`font-black uppercase tracking-tighter ${c.text} truncate`}>{e.title}</span>
+                                    </div>
+                                    {slotEvents.length <= 2 && !isTask && !isProject && (
+                                        <span className="text-[8px] opacity-60 text-zinc-400 truncate">{format(new Date(e.start), 'HH:mm')}</span>
+                                    )}
+                                </div>
+                              </Tooltip>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       </div>
-      <TimezoneClocks />
     </div>
   );
 }

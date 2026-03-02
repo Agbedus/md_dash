@@ -36,7 +36,8 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
             });
 
             if (!res.ok) {
-                console.error("Login failed:", await res.text());
+                const errorBody = await res.text();
+                console.error("Login API failed:", errorBody);
                 return null;
             }
 
@@ -52,24 +53,30 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
             if (userRes.ok) {
                 const userProfileData = await userRes.json();
                 
-                // User provided payload implies an array might be returned: [{...}]
-                // const userProfile = Array.isArray(userProfileData) ? userProfileData[0] : userProfileData;
-                // Actually the user said "Here's the payload for the user to expect from login: [...]" which is an array
-                const userProfile = Array.isArray(userProfileData) ? userProfileData[0] : userProfileData;
+                // Robustly handle if the profile is returned as an array or object
+                const userProfile = Array.isArray(userProfileData) 
+                  ? userProfileData[0] 
+                  : userProfileData;
+
+                if (!userProfile || !userProfile.id) {
+                    console.error("Invalid user profile response:", userProfileData);
+                    return null;
+                }
 
                 return {
                     id: userProfile.id,
                     name: userProfile.full_name,
                     email: userProfile.email,
-                    image: userProfile.avatar_url, // Explicitly use avatar_url as requested
-                    roles: userProfile.roles || [],
+                    image: userProfile.avatar_url || userProfile.image,
+                    roles: userProfile.roles || ['staff'],
                     accessToken: data.access_token,
                 };
             }
             
+            console.error("Failed to fetch user profile:", await userRes.text());
             return null;
           } catch (error) {
-            console.error("Auth error:", error);
+            console.error("Authentication catch block:", error);
             return null;
           }
         }

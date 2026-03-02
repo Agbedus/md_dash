@@ -15,17 +15,15 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      // Treat the app's authenticated area as dashboard and related sections
-      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard') || nextUrl.pathname.startsWith('/projects') || nextUrl.pathname.startsWith('/users') || nextUrl.pathname.startsWith('/clients') || nextUrl.pathname.startsWith('/tasks');
+      const isAdminRoute = nextUrl.pathname.startsWith('/dashboard') || 
+                          nextUrl.pathname.startsWith('/projects') || 
+                          nextUrl.pathname.startsWith('/users') || 
+                          nextUrl.pathname.startsWith('/clients') || 
+                          nextUrl.pathname.startsWith('/tasks');
 
-      if (isOnDashboard) {
+      if (isAdminRoute) {
         if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn) {
-        // Redirect authenticated users to dashboard page if they visit login or home
-        if (nextUrl.pathname === '/login') {
-             return Response.redirect(new URL('/', nextUrl));
-        }
+        return false; // Redirect unauthenticated users to login page (handled by auth config usually, but proxy.ts is our middleware)
       }
       return true;
     },

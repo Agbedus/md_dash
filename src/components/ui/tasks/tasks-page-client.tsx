@@ -23,7 +23,23 @@ import { Project } from "@/types/project";
 
 import { Combobox } from "@/components/ui/combobox";
 
-export default function TasksPageClient({ allTasks: initialTasks, users, projects, projectId, currentUserId }: { allTasks: Task[], users: User[], projects: Project[], projectId?: number, currentUserId?: string }) {
+import { useUsers } from '@/hooks/use-users';
+import { useProjects } from '@/hooks/use-projects';
+import TasksLoading from '@/app/tasks/loading';
+
+export default function TasksPageClient({ 
+    allTasks: initialTasks = [], 
+    users: initialUsers = [], 
+    projects: initialProjects = [], 
+    projectId, 
+    currentUserId 
+}: { 
+    allTasks?: Task[], 
+    users?: User[], 
+    projects?: Project[], 
+    projectId?: number, 
+    currentUserId?: string 
+}) {
     const [tableTab, setTableTab] = useState<'active' | 'done'>('active');
     const [viewMode, setViewMode] = useState<ViewMode>('table');
     const [isAddingTask, setIsAddingTask] = useState(false);
@@ -39,10 +55,14 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
     const [filterStatus, setFilterStatus] = useState('');
     const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
     
+    // Background data
+    const { users } = useUsers(initialUsers);
+    const { projects } = useProjects({ initialProjects });
+
     // SWR Hook
     const { 
         tasks: serverTasks, 
-        isLoading, 
+        isLoading: tasksLoading, 
         isLoadingMore, 
         size, 
         setSize, 
@@ -57,6 +77,8 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
         users,
         initialTasks
     });
+
+    const isLoading = tasksLoading && serverTasks.length === 0;
 
     // Optimistic UI
     const [optimisticTasks, addOptimisticTask] = useOptimistic(
@@ -171,6 +193,10 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
             setSavingCreate(false);
         }
     };
+
+    if (isLoading) {
+        return <TasksLoading />;
+    }
 
     const handleUpdate = async (formData: FormData) => {
         // Optimistic Update
@@ -321,7 +347,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                 <KanbanBoard
                     tasks={filteredTasks}
                     users={users}
-                    user={users.find(u => u.id === currentUserId)}
+                    user={users.find((u: User) => u.id === currentUserId)}
                     projects={projects}
                     updateTask={handleUpdate}
                     deleteTask={handleDelete}
@@ -371,7 +397,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                             <TaskCard
                                                 key={task.id}
                                                 task={task}
-                                                user={users.find(u => u.id === currentUserId)}
+                                                user={users.find((u: User) => u.id === currentUserId)}
                                                 users={users}
                                                 projects={projects}
                                                 updateTask={handleUpdate}
@@ -500,7 +526,7 @@ export default function TasksPageClient({ allTasks: initialTasks, users, project
                                                 </td>
                                                 <td className="px-4 py-2 min-w-[200px]">
                                                     <Combobox
-                                                        options={users.map(u => ({ value: u.id, label: u.fullName || u.email, subLabel: u.email }))}
+                                                        options={users.map((u: User) => ({ value: u.id, label: u.fullName || u.email, subLabel: u.email }))}
                                                         value={newAssignees}
                                                         onChange={(val) => { setNewAssignees(val as (string | number)[]); setIsDirty(true); }}
                                                         multiple

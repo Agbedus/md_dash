@@ -4,22 +4,24 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { User } from '@/types/user';
-import { FiSearch, FiEdit2, FiTrash2, FiX, FiCheck, FiClock, FiChevronRight } from 'react-icons/fi';
+import { FiSearch, FiEdit2, FiTrash2, FiX, FiCheck, FiClock, FiChevronRight, FiSun } from 'react-icons/fi';
 import { updateUser, deleteUser, getUsers } from '@/app/users/actions';
 import { useOptimistic, useTransition } from 'react';
+import type { TimeOffRequest } from '@/types/time-off';
 
 interface UsersPageClientProps {
   initialUsers: User[];
   currentUser?: {
-    role?: string; // Keeping for backward compat if needed, but we use roles now
+    role?: string;
     roles?: string[];
     id?: string;
   };
+  timeOffRequests?: TimeOffRequest[];
 }
 
 const AVAILABLE_ROLES = ['user', 'client', 'staff', 'manager', 'super_admin'];
 
-export default function UsersPageClient({ initialUsers, currentUser }: UsersPageClientProps) {
+export default function UsersPageClient({ initialUsers, currentUser, timeOffRequests = [] }: UsersPageClientProps) {
   const [allUsers, setAllUsers] = useState<User[]>(initialUsers);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -165,6 +167,7 @@ export default function UsersPageClient({ initialUsers, currentUser }: UsersPage
                 <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Access Interface</th>
                 <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Assigned Roles</th>
                 <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">System ID</th>
+                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Time Off</th>
                 <th scope="col" className="px-6 py-4 text-right text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Productivity</th>
                 {(canEdit || canDelete) && (
                   <th scope="col" className="px-6 py-4 text-right text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Operations</th>
@@ -259,6 +262,33 @@ export default function UsersPageClient({ initialUsers, currentUser }: UsersPage
                     ) : (
                         <span className="truncate max-w-[150px] block" title={user.avatarUrl || ''}>{user.avatarUrl || '-'}</span>
                     )}
+                  </td>
+
+                  {/* Time Off Summary */}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {!isEditing && (() => {
+                        const userRequests = timeOffRequests.filter(r => r.user_id === user.id);
+                        const approved = userRequests.filter(r => r.status === 'approved').length;
+                        const pending = userRequests.filter(r => r.status === 'pending').length;
+                        if (approved === 0 && pending === 0) return <span className="text-xs text-zinc-600">—</span>;
+                        return (
+                            <div className="flex items-center gap-2">
+                                <FiSun className="w-3 h-3 text-amber-400" />
+                                <div className="flex gap-1.5">
+                                    {approved > 0 && (
+                                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                            {approved} approved
+                                        </span>
+                                    )}
+                                    {pending > 0 && (
+                                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                            {pending} pending
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })()}
                   </td>
 
                   {/* Productivity Link */}

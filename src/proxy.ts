@@ -17,11 +17,16 @@ export default auth((req) => {
     }
 
     if (!isLoggedIn && !isPublicRoute) {
-        return Response.redirect(new URL('/login', nextUrl));
+        let callbackUrl = nextUrl.pathname;
+        if (nextUrl.search) {
+            callbackUrl += nextUrl.search;
+        }
+        const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+        return Response.redirect(new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
     }
     
-    const isUsers = nextUrl.pathname.startsWith('/users');
-    if (isUsers) {
+    // Authorization check for /users path
+    if (nextUrl.pathname.startsWith('/users')) {
         const hasAccess = req.auth?.user?.roles?.some(role => ['super_admin', 'manager'].includes(role));
         if (!hasAccess) {
              return Response.redirect(new URL('/', nextUrl));

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useOptimistic, useMemo } from 'react';
+import React, { useState, useOptimistic, useMemo, useTransition } from 'react';
 import { Project } from '@/types/project';
 import { User } from '@/types/user';
 import { Client } from '@/types/client';
@@ -10,19 +10,32 @@ import { ProjectCard } from './project-card';
 import { ProjectTable } from './project-table';
 import { ProjectDetails } from './project-details';
 import { ProjectFormFields } from './project-form-fields';
-import { FiTrendingUp, FiCheckSquare, FiDollarSign, FiActivity, FiUsers, FiPieChart as FiPie, FiChevronRight as FiChevron, FiClock, FiAlertCircle } from 'react-icons/fi';
+import { FiTrendingUp, FiCheckSquare, FiDollarSign, FiActivity, FiPieChart as FiPie } from 'react-icons/fi';
 import { createProject, updateProject, deleteProject } from '@/app/projects/actions';
 import { Sparkline } from "@/components/ui/sparkline";
-import { format, subDays, isSameDay } from 'date-fns';
+import { subDays, isSameDay } from 'date-fns';
+import { useProjects } from '@/hooks/use-projects';
+import { createOptimisticProject, updateOptimisticProject } from '@/lib/optimistic-utils';
+import toast from 'react-hot-toast';
+
+import { useUsers } from '@/hooks/use-users';
+import { useClients } from '@/hooks/use-clients';
+import { useNotes } from '@/hooks/use-notes';
+import ProjectsLoading from '@/app/projects/loading';
 
 interface ProjectsPageClientProps {
-  initialProjects: Project[];
-  users: User[];
-  clients: Client[];
-  notes: Note[];
+  initialProjects?: Project[];
+  initialUsers?: User[];
+  initialClients?: Client[];
+  initialNotes?: Note[];
 }
 
-export default function ProjectsPageClient({ initialProjects, users, clients, notes }: ProjectsPageClientProps) {
+export default function ProjectsPageClient({ 
+  initialProjects = [], 
+  initialUsers = [], 
+  initialClients = [], 
+  initialNotes = [] 
+}: ProjectsPageClientProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -31,14 +44,24 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  // SWR Hooks for background sync
+  const { projects: serverProjects, mutate, isLoading: projectsLoading } = useProjects({ initialProjects });
+  const { users } = useUsers(initialUsers);
+  const { clients } = useClients({ initialClients });
+  const { notes } = useNotes({ initialNotes });
+
+  // Only show skeleton if we have no data and are loading
+  const isLoading = projectsLoading && serverProjects.length === 0;
 
   // Optimistic UI
   const [optimisticProjects, addOptimisticProject] = useOptimistic(
-    initialProjects,
+    serverProjects,
     (state: Project[], action: { type: 'add' | 'update' | 'delete', project: Project }) => {
       switch (action.type) {
         case 'add':
-          return [...state, action.project];
+          return [action.project, ...state];
         case 'update':
           return state.map(p => p.id === action.project.id ? action.project : p);
         case 'delete':
@@ -56,8 +79,7 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
     const getTrend = (items: Project[], status?: Project['status']) => {
       return last7Days.map(day => 
         items.filter(item => {
-          // Fallback to createdAt or similar if startDate is missing
-          const date = item.startDate ? new Date(item.startDate) : (item.id > 0 ? new Date() : null); 
+          const date = item.startDate ? new Date(item.startDate) : (item.createdAt ? new Date(item.createdAt) : null); 
           if (!date) return false;
           const matchesDate = isSameDay(date, day);
           const matchesStatus = status ? item.status === status : true;
@@ -73,66 +95,68 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
     };
   }, [optimisticProjects]);
 
-  const filteredProjects = optimisticProjects.filter(project => {
-    const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredProjects = useMemo(() => {
+    return optimisticProjects.filter(project => {
+      const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            (project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+      const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [optimisticProjects, searchQuery, statusFilter]);
 
   const handleCreate = async (formData: FormData) => {
-    // ... handleCreate logic ...
-    const newProject: Project = {
-      id: -1, // Temporary ID
-      name: formData.get('name') as string,
-      key: formData.get('key') as string,
-      status: (formData.get('status') as Project['status']) || 'planning',
-      priority: (formData.get('priority') as Project['priority']) || 'medium',
-      ownerId: formData.get('ownerId') as string,
-      clientId: formData.get('clientId') as string,
-      description: '',
-      tags: [],
-      startDate: format(new Date(), 'yyyy-MM-dd'),
-      endDate: null,
-      budget: null,
-      spent: null,
-      currency: 'USD',
-      billingType: null,
-      isArchived: 0,
-      tasks: [],
-    };
-    addOptimisticProject({ type: 'add', project: newProject });
+    const newProject = createOptimisticProject(formData);
+    
+    startTransition(() => {
+      addOptimisticProject({ type: 'add', project: newProject });
+    });
     
     setIsCreating(true);
+    setIsCreateModalOpen(false);
+    
     try {
-      await createProject(formData);
-      setIsCreateModalOpen(false);
+      const result = await createProject(formData);
+      if (result && 'error' in result) {
+        toast.error(result.error || "Failed to create project");
+        mutate(); // Revert
+      } else {
+        toast.success("Project initiated successfully");
+        mutate(); // Sync with server
+      }
+    } catch (e) {
+      toast.error("An unexpected error occurred");
+      mutate();
     } finally {
       setIsCreating(false);
     }
   };
 
   const handleUpdate = async (formData: FormData) => {
-    const id = editingProject!.id;
+    if (!editingProject) return;
+    const id = editingProject.id;
     formData.set('id', id.toString());
     
-    // Optimistic Update
-    const updatedProject: Project = {
-      ...editingProject!,
-      name: formData.get('name') as string,
-      key: formData.get('key') as string,
-      status: formData.get('status') as Project['status'],
-      priority: formData.get('priority') as Project['priority'],
-      ownerId: formData.get('ownerId') as string,
-      clientId: formData.get('clientId') as string,
-      tags: formData.get('tags') ? (formData.get('tags') as string).split(',').map(t => t.trim()).filter(Boolean) : [],
-    };
-    addOptimisticProject({ type: 'update', project: updatedProject });
+    const updatedProject = updateOptimisticProject(editingProject, formData);
+    
+    startTransition(() => {
+      addOptimisticProject({ type: 'update', project: updatedProject });
+    });
     
     setIsUpdating(true);
+    setEditingProject(null);
+    
     try {
-      await updateProject(formData);
-      setEditingProject(null);
+      const result = await updateProject(formData);
+      if (result && 'error' in result) {
+        toast.error(result.error || "Failed to update project");
+        mutate();
+      } else {
+        toast.success("Project updated");
+        mutate();
+      }
+    } catch (e) {
+      toast.error("Failed to update project");
+      mutate();
     } finally {
       setIsUpdating(false);
     }
@@ -140,13 +164,26 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
 
   const handleDelete = async (project: Project) => {
     if (confirm('Are you sure you want to delete this project?')) {
-      addOptimisticProject({ type: 'delete', project });
+      startTransition(() => {
+        addOptimisticProject({ type: 'delete', project });
+      });
       
-      const formData = new FormData();
-      formData.set('id', project.id.toString());
-      await deleteProject(formData);
+      try {
+        const formData = new FormData();
+        formData.set('id', project.id.toString());
+        await deleteProject(formData);
+        toast.success("Project deleted");
+        mutate();
+      } catch (e) {
+        toast.error("Failed to delete project");
+        mutate();
+      }
     }
   };
+
+  if (isLoading) {
+    return <ProjectsLoading />;
+  }
 
   return (
     <div className="px-4 py-8 max-w-[1600px] mx-auto min-h-screen">
@@ -275,7 +312,6 @@ export default function ProjectsPageClient({ initialProjects, users, clients, no
           </div>
       </div>
 
-      {/* ... rest of the component ... */}
       <div className="flex items-center justify-between gap-4 mb-6 lg:mb-10 overflow-x-auto pb-2 scrollbar-hide">
         <div className="flex items-center gap-2 lg:gap-4 w-full lg:w-auto">
           <div className="relative flex-1 min-w-[140px] max-w-sm group">

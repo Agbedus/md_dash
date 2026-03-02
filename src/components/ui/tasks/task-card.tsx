@@ -534,4 +534,6 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
     );
 });
 
+TaskCard.displayName = "TaskCard";
+
 export default TaskCard;

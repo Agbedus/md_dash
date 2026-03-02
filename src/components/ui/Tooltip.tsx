@@ -5,9 +5,10 @@ interface TooltipProps {
   children: React.ReactNode;
   position?: 'top' | 'bottom' | 'left' | 'right';
   className?: string; // Allow passing extra classes to the wrapper
+  style?: React.CSSProperties;
 }
 
-export function Tooltip({ content, children, position = 'top', className = "" }: TooltipProps) {
+export function Tooltip({ content, children, position = 'top', className = "", style }: TooltipProps) {
   // Simple positioning logic classes
   const positionClasses = {
     top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
@@ -17,7 +18,8 @@ export function Tooltip({ content, children, position = 'top', className = "" }:
   };
 
   return (
-    <div className={`group relative flex items-center justify-center ${className}`}>
+    <div className={`group relative flex items-center justify-center ${className}`} style={style}>
+
       {children}
       <div 
         className={`absolute ${positionClasses[position]} hidden group-hover:block whitespace-nowrap rounded-md bg-slate-900 border border-slate-700 px-2 py-1 text-[11px] items-center font-medium text-slate-200 shadow-xl z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-200`}

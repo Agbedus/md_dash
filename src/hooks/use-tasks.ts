@@ -44,9 +44,10 @@ export function useTasks({
     };
 
     const { data, error, size, setSize, mutate, isLoading } = useSWRInfinite(getKey, fetcher, {
-        revalidateOnFocus: false,
+        revalidateOnFocus: true,
         fallbackData: initialTasks ? [initialTasks] : undefined,
         keepPreviousData: true,
+        dedupingInterval: 2000, // Short interval to allow frequent updates
     });
 
     const tasks = data ? data.flat() : [];

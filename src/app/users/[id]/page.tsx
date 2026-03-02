@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation';
 import { getUsers, getUserTimeLogs } from '@/app/users/actions';
 import { getTasks } from '@/app/tasks/actions';
+import { getTimeOffRequests } from '@/app/time-off/actions';
+import { getActivityData } from '@/app/lib/dashboard-actions';
+import { auth } from '@/auth';
 import UserDetailClient from '@/components/ui/users/user-detail-client';
 
 interface UserDetailPageProps {
@@ -10,10 +13,13 @@ interface UserDetailPageProps {
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
     const { id } = await params;
 
-    const [allUsers, allTasks, timeLogs] = await Promise.all([
+    const [allUsers, allTasks, timeLogs, timeOffRequests, activityData, session] = await Promise.all([
         getUsers(),
         getTasks(),
         getUserTimeLogs(id),
+        getTimeOffRequests(),
+        getActivityData(id),
+        auth(),
     ]);
 
     const user = allUsers.find((u: any) => u.id === id);
@@ -23,9 +29,22 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
         t.assigneeIds?.includes(id) || t.userId === id
     );
 
+    // Filter time-off for this user
+    const userTimeOff = timeOffRequests.filter(r => r.user_id === id);
+
+    const currentUserRoles = session?.user?.roles || [];
+    const isSuperAdmin = currentUserRoles.includes('super_admin');
+
     return (
         <div className="px-4 py-8 max-w-[1600px] mx-auto min-h-screen">
-            <UserDetailClient user={user} tasks={assignedTasks} timeLogs={timeLogs} />
+            <UserDetailClient
+                user={user}
+                tasks={assignedTasks}
+                timeLogs={timeLogs}
+                timeOffRequests={userTimeOff}
+                activityData={activityData}
+                isSuperAdmin={isSuperAdmin}
+            />
         </div>
     );
 }

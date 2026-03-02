@@ -6,6 +6,7 @@ const API_BASE_URL = `${BASE_URL}/api/v1`;
 import { auth } from '@/auth';
 import { Task } from '@/types/task';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { cache } from 'react';
 
 // Interface for what the API returns (snake_case)
 interface ApiTask {
@@ -40,7 +41,7 @@ interface ApiTask {
     total_hours?: number;
 }
 
-export async function getTasks(query?: string, priority?: string, status?: string, projectId?: number, limit?: number, skip?: number): Promise<Task[]> {
+export const getTasks = cache(async function(query?: string, priority?: string, status?: string, projectId?: number, limit?: number, skip?: number): Promise<Task[]> {
 
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
@@ -114,7 +115,7 @@ export async function getTasks(query?: string, priority?: string, status?: strin
         console.error("Error fetching tasks:", error);
         return [];
     }
-}
+});
 
 export async function createTask(formData: FormData) {
     const session = await auth();
@@ -165,10 +166,11 @@ export async function createTask(formData: FormData) {
             return { success: false, error: "Failed to create task" };
         }
 
+        const apiTask: ApiTask = await response.json();
         revalidatePath('/tasks');
         revalidateTag('tasks', 'max');
         revalidateTag('projects', 'max');
-        return { success: true };
+        return { success: true, task: apiTask };
     } catch (error) {
         console.error("Error creating task:", error);
         return { success: false, error: "Failed to create task" };
@@ -247,10 +249,11 @@ export async function updateTask(formData: FormData) {
             return { success: false, error: "Failed to update task" };
         }
 
+        const apiTask: ApiTask = await response.json();
         revalidatePath('/tasks');
         revalidateTag('tasks', 'max');
         revalidateTag('projects', 'max');
-        return { success: true };
+        return { success: true, task: apiTask };
     } catch (error) {
         console.error("Error updating task:", error);
         return { success: false, error: "Failed to update task" };

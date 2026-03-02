@@ -5,6 +5,13 @@
 
 ## Changelog
 
+### 2026-03-02
+
+- Added Leave & Time-Off Management system.
+- Implemented `/api/v1/time-off` endpoints for requests, approval, and rejection.
+- Integrated leave availability checks into task assignment.
+- Automated calendar blocking on approved time-off.
+
 ### 2026-02-19
 
 - Simplified Task Timer: Removed `pause` endpoint as redundant; `start` now stops other active sessions automatically.
@@ -42,6 +49,7 @@
    - TimeLogs
    - Notes
    - Events
+   - Leave & Time-Off
    - Decisions
    - Notifications
    - Admin
@@ -507,6 +515,65 @@ Event enum values:
 - status: `tentative`, `confirmed`, `cancelled`
 - privacy: `public`, `private`, `confidential`
 - recurrence: `none`, `daily`, `weekly`, `monthly`, `yearly`
+
+---
+
+## Leave & Time-Off Endpoints
+
+Base path: `/api/v1/time-off`
+
+### List Time-Off Requests
+
+- **GET** `/api/v1/time-off`
+- **Auth Required:** Any authenticated user
+- **Query params**: `skip`, `limit`
+- **Behavior**:
+  - `SUPER_ADMIN` and `MANAGER`: all requests
+  - others: only their own requests
+
+### Create Time-Off Request
+
+- **POST** `/api/v1/time-off`
+- **Auth Required:** `STAFF` or above
+- **Payload**: `TimeOffCreate`
+- **Constraints**:
+  - `leave` type is limited to 15 days per year total.
+  - `off`, `sick`, and `other` types require a `justification`.
+
+### Get Request by ID
+
+- **GET** `/api/v1/time-off/{request_id}`
+- **Auth Required:** self OR (`MANAGER`/`SUPER_ADMIN`)
+
+### Approve Request
+
+- **POST** `/api/v1/time-off/{request_id}/approve`
+- **Auth Required:** `SUPER_ADMIN`
+- **Behavior**: Sets status to `approved` and automatically creates a confirmed calendar `Event` for the user. Flags user as unavailable for task assignments during this period.
+
+### Reject Request
+
+- **POST** `/api/v1/time-off/{request_id}/reject`
+- **Auth Required:** `SUPER_ADMIN`
+
+### Delete Request
+
+- **DELETE** `/api/v1/time-off/{request_id}`
+- **Auth Required:** Owner
+- **Constraint**: Only pending requests can be deleted by the owner.
+
+Time-Off Type enum:
+
+- `leave` (limited to 15 days)
+- `off`
+- `sick`
+- `other`
+
+Time-Off Status enum:
+
+- `pending`
+- `approved`
+- `rejected`
 
 ---
 
@@ -1092,6 +1159,42 @@ Request JSON (partial):
 
 Response JSON: updated Decision object.
 
+### Leave & Time-Off payload contracts
+
+#### `POST /api/v1/time-off`
+
+Request JSON (`TimeOffCreate`):
+
+```json
+{
+  "type": "leave",
+  "start_date": "2026-03-10",
+  "end_date": "2026-03-12",
+  "justification": "Visiting family"
+}
+```
+
+Response JSON (`TimeOffRead`):
+
+```json
+{
+  "id": 12,
+  "user_id": "user-uuid",
+  "type": "leave",
+  "start_date": "2026-03-10",
+  "end_date": "2026-03-12",
+  "status": "pending",
+  "justification": "Visiting family",
+  "requested_at": "2026-03-02T10:00:00Z"
+}
+```
+
+#### `POST /api/v1/time-off/{request_id}/approve`
+
+Request body: none.
+
+Response JSON (`TimeOffRead`): same as above with `status: "approved"`.
+
 ### Notifications payload contracts
 
 #### `GET /api/v1/notifications`
@@ -1211,6 +1314,7 @@ Response JSON:
 | TimeLogs      | Self, Manager, Super Admin                 | Any auth (manual)    | Self, Manager, Super Admin   | Super Admin |
 | Notes         | Any auth (scoped by role/owner/share)      | Any auth             | Manager, Super Admin         | Super Admin |
 | Events        | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |
+| Time-Off      | Scoped by role/owner                       | Staff or above       | Super Admin (Approve/Reject) | Owner       |
 | Decisions     | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |
 | Notifications | Recipient only                             | System/service       | Recipient only (`mark read`) | Not exposed |
 

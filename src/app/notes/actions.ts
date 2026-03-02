@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
+import { cache } from 'react';
 import type { Note } from '@/types/note';
 
 const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
@@ -54,8 +55,8 @@ function mapApiNote(p: ApiNote): Note {
 
     return {
         id: p.id,
-        title: p.title,
-        content: p.content,
+        title: p.title || 'Untitled Note',
+        content: p.content || '',
         type: validTypes.includes(p.type) ? p.type : 'note',
         tags: tags,
         is_pinned: p.is_pinned,
@@ -70,7 +71,7 @@ function mapApiNote(p: ApiNote): Note {
 }
 
 
-export async function getNotes(limit?: number, skip?: number): Promise<Note[]> {
+export const getNotes = cache(async function(limit?: number, skip?: number): Promise<Note[]> {
 
   const session = await auth();
 
@@ -176,7 +177,7 @@ export async function getNotes(limit?: number, skip?: number): Promise<Note[]> {
     console.error("Error fetching notes:", error);
     return [];
   }
-}
+});
 
 export async function getUsers() {
     return getRealUsers();

@@ -1,3 +1,4 @@
+import path from "path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -9,6 +10,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  turbopack: {
+    root: path.resolve(process.cwd()),
+  },
+  allowedDevOrigins: ['192.168.0.163'],
 };
 
 export default nextConfig;

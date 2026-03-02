@@ -19,6 +19,7 @@ import {
   FiUsers,
   FiBookOpen,
   FiInfo,
+  FiSun,
 } from "react-icons/fi";
 
 import { logout } from "@/app/lib/actions";
@@ -185,6 +186,9 @@ const Sidebar = ({ user }: SidebarProps) => {
               {renderMenuItem({ href: "/users", icon: FiUsers, label: "Users", color: "text-teal-400" })}
               {renderMenuItem({ href: "/clients", icon: FiUsers, label: "Clients", color: "text-violet-400" })}
             </>
+          )}
+          {user?.roles?.includes("super_admin") && (
+            renderMenuItem({ href: "/time-off", icon: FiSun, label: "Time Off", color: "text-amber-400" })
           )}
         </nav>
 

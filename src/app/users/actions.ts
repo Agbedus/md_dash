@@ -1,170 +1,178 @@
-'use server';
+"use server";
 
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from "next/cache";
+import { cache } from "react";
 
 // createUser removed
 
 export async function updateUser(formData: FormData) {
-    const session = await auth();
-    // @ts-expect-error accessToken is not in default session type
-    if (!session?.user?.accessToken) return;
+  const session = await auth();
+  // @ts-expect-error accessToken is not in default session type
+  if (!session?.user?.accessToken) return;
 
-    const id = formData.get('id');
-    const payload = {
-        full_name: formData.get('fullName'),
-        email: formData.get('email'),
-        avatar_url: formData.get('avatarUrl'),
-        roles: JSON.parse(formData.get('roles') as string || '[]'),
-    };
+  const id = formData.get("id");
+  const payload = {
+    full_name: formData.get("fullName"),
+    email: formData.get("email"),
+    avatar_url: formData.get("avatarUrl"),
+    roles: JSON.parse((formData.get("roles") as string) || "[]"),
+  };
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                // @ts-expect-error accessToken is not in default session type
-                'Authorization': `Bearer ${session.user.accessToken}`
-            },
-            body: JSON.stringify(payload)
-        });
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        // @ts-expect-error accessToken is not in default session type
+        Authorization: `Bearer ${session.user.accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-        if (!response.ok) {
-            console.error("Failed to update user:", await response.text());
-            return;
-        }
-
-        revalidatePath('/users');
-        revalidateTag('users', 'max');
-    } catch (error) {
-        console.error("Error updating user:", error);
+    if (!response.ok) {
+      console.error("Failed to update user:", await response.text());
+      return;
     }
+
+    revalidatePath("/users");
+    revalidateTag("users", "max");
+  } catch (error) {
+    console.error("Error updating user:", error);
+  }
 }
 
 export async function deleteUser(formData: FormData) {
-    const session = await auth();
-    // @ts-expect-error accessToken is not in default session type
-    if (!session?.user?.accessToken) return;
+  const session = await auth();
+  // @ts-expect-error accessToken is not in default session type
+  if (!session?.user?.accessToken) return;
 
-    const id = formData.get('id');
-    try {
-        const response = await fetch(`${API_BASE_URL}/users/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                // @ts-expect-error accessToken is not in default session type
-                'Authorization': `Bearer ${session.user.accessToken}`
-            }
-        });
+  const id = formData.get("id");
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        // @ts-expect-error accessToken is not in default session type
+        Authorization: `Bearer ${session.user.accessToken}`,
+      },
+    });
 
-        if (!response.ok) {
-            console.error("Failed to delete user:", await response.text());
-            return;
-        }
-
-        revalidatePath('/users');
-        revalidateTag('users', 'max');
-    } catch (error) {
-        console.error("Error deleting user:", error);
+    if (!response.ok) {
+      console.error("Failed to delete user:", await response.text());
+      return;
     }
+
+    revalidatePath("/users");
+    revalidateTag("users", "max");
+  } catch (error) {
+    console.error("Error deleting user:", error);
+  }
 }
 
 const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
 const API_BASE_URL = `${BASE_URL}/api/v1`;
 
-import { auth } from '@/auth';
+import { auth } from "@/auth";
 
-export async function getUsers() {
+export const getUsers = cache(async function () {
+  const session = await auth();
 
-    const session = await auth();
+  // @ts-expect-error accessToken is not in default session type
+  if (!session?.user?.accessToken) {
+    return [];
+  }
 
+  try {
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // @ts-expect-error accessToken is not in default session type
+        Authorization: `Bearer ${session.user.accessToken}`,
+      },
+      next: { tags: ["users"], revalidate: 60 },
+    });
 
-    // @ts-expect-error accessToken is not in default session type
-    if (!session?.user?.accessToken) {
-
+    if (!response.ok) {
+      const errorText = await response.text();
+      // Suppress "The user doesn't have enough privileges" errors for non-admins
+      // This prevents the app from crashing when fetching users for task assignment/display
+      if (
+        response.status === 403 ||
+        (response.status === 400 && errorText.includes("privileges"))
+      ) {
+        console.warn(
+          "User fetch suppressed due to lack of privileges. Returning empty list.",
+        );
         return [];
+      }
+      console.error("Failed to fetch users:", errorText);
+      return [];
     }
 
-    try {
+    const users = await response.json();
 
-        const response = await fetch(`${API_BASE_URL}/users`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                // @ts-expect-error accessToken is not in default session type
-                'Authorization': `Bearer ${session.user.accessToken}`
-            },
-            next: { tags: ['users'], revalidate: 60 }
-        });
-
-
-
-        if (!response.ok) {
-            console.error("Failed to fetch users:", await response.text());
-            return [];
-        }
-
-        const users = await response.json();
-
-        
-        // Define interface for API response
-        interface ApiUser {
-            id: string;
-            full_name: string;
-            email: string;
-            avatar_url: string;
-            roles: string[];
-        }
-
-        // Map payload to User type
-        return users.map((u: ApiUser) => ({
-            id: u.id,
-            name: u.full_name, // Map full_name to name
-            email: u.email,
-            image: u.avatar_url, // Use avatar_url for image
-            fullName: u.full_name,
-            full_name: u.full_name,
-            roles: u.roles || [],
-            avatarUrl: u.avatar_url,
-            avatar_url: u.avatar_url,
-        }));
-    } catch (error) {
-        console.error("Error fetching users:", error);
-        return [];
+    // Define interface for API response
+    interface ApiUser {
+      id: string;
+      full_name: string;
+      email: string;
+      avatar_url: string;
+      roles: string[];
     }
-}
 
-export async function getUserTimeLogs(userId: string) {
-    const session = await auth();
-    // @ts-expect-error accessToken is not in default session type
-    if (!session?.user?.accessToken) return [];
+    // Map payload to User type
+    return users.map((u: ApiUser) => ({
+      id: u.id,
+      name: u.full_name, // Map full_name to name
+      email: u.email,
+      image: u.avatar_url, // Use avatar_url for image
+      fullName: u.full_name,
+      full_name: u.full_name,
+      roles: u.roles || [],
+      avatarUrl: u.avatar_url,
+      avatar_url: u.avatar_url,
+    }));
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
+  }
+});
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/timelogs`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                // @ts-expect-error accessToken is not in default session type
-                'Authorization': `Bearer ${session.user.accessToken}`
-            },
-            next: { tags: ['timelogs'], revalidate: 60 }
-        });
+export const getUserTimeLogs = cache(async function (userId: string) {
+  const session = await auth();
+  // @ts-expect-error accessToken is not in default session type
+  if (!session?.user?.accessToken) return [];
 
-        if (!response.ok) {
-            console.error("Failed to fetch timelogs:", await response.text());
-            return [];
-        }
+  try {
+    const response = await fetch(`${API_BASE_URL}/timelogs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // @ts-expect-error accessToken is not in default session type
+        Authorization: `Bearer ${session.user.accessToken}`,
+      },
+      next: { tags: ["timelogs"], revalidate: 60 },
+    });
 
-        const allLogs = await response.json();
-        // Filter logs by user
-        return allLogs.filter((log: any) => log.user_id === userId).map((log: any) => ({
-            id: log.id,
-            task_id: log.task_id,
-            user_id: log.user_id,
-            start_time: log.start_time,
-            end_time: log.end_time ?? null,
-        }));
-    } catch (error) {
-        console.error("Error fetching user timelogs:", error);
-        return [];
+    if (!response.ok) {
+      console.error("Failed to fetch timelogs:", await response.text());
+      return [];
     }
-}
+
+    const allLogs = await response.json();
+    // Filter logs by user
+    return allLogs
+      .filter((log: any) => log.user_id === userId)
+      .map((log: any) => ({
+        id: log.id,
+        task_id: log.task_id,
+        user_id: log.user_id,
+        start_time: log.start_time,
+        end_time: log.end_time ?? null,
+      }));
+  } catch (error) {
+    console.error("Error fetching user timelogs:", error);
+    return [];
+  }
+});

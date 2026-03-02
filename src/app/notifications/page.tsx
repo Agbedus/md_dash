@@ -334,7 +334,7 @@ export default function NotificationsPage() {
                <div className="flex-1 overflow-y-auto p-6 lg:p-10 space-y-8 no-scrollbar bg-zinc-900/10">
                 <div className="max-w-3xl">
                   <p className="text-base lg:text-lg text-zinc-400 leading-relaxed font-medium italic">
-                    "{selectedNotification.message}"
+                    &quot;{selectedNotification.message}&quot;
                   </p>
                   
                   {/* Metadata Matrix */}

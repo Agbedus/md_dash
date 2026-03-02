@@ -13,7 +13,12 @@ export function TaskTimerUI() {
     useEffect(() => {
         if (elapsedTime > 0 && elapsedTime % 900 === 0) {
             const milestoneNum = elapsedTime / 900;
-            setMilestone(milestoneNum);
+            
+            // Use a microtask to avoid synchronous setState warning and cascading renders
+            queueMicrotask(() => {
+                setMilestone(milestoneNum);
+            });
+
             // Hide milestone after 5 seconds
             const timer = setTimeout(() => setMilestone(null), 5000);
             return () => clearTimeout(timer);

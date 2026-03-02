@@ -1,33 +1,40 @@
 'use client';
 
 import React, { useState, useOptimistic, useTransition } from 'react';
-import { getClients } from '@/app/clients/actions';
 import { Client } from '@/types/client';
 import { FiPlus, FiSearch, FiX, FiCheck, FiEdit2, FiTrash2, FiMail, FiGlobe, FiUser, FiGrid, FiList } from 'react-icons/fi';
 import { createClient, updateClient, deleteClient } from '@/app/clients/actions';
 import ClientCard from './client-card';
 import ClientTable from './client-table';
 import toast from 'react-hot-toast';
+import { useClients } from '@/hooks/use-clients';
+import { createOptimisticClient, updateOptimisticClient } from '@/lib/optimistic-utils';
+
+import ClientsLoading from '@/app/clients/loading';
 
 interface ClientsPageClientProps {
-  initialClients: Client[];
+  initialClients?: Client[];
 }
 
-export default function ClientsPageClient({ initialClients }: ClientsPageClientProps) {
-  const [allClients, setAllClients] = useState<Client[]>(initialClients);
+export default function ClientsPageClient({ initialClients = [] }: ClientsPageClientProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
+
+  // SWR Hook for background sync
+  const { clients: serverClients, mutate, isLoading: clientsLoading } = useClients({ initialClients });
+
+  const isLoading = clientsLoading && serverClients.length === 0;
 
   // Optimistic UI for Clients
   const [optimisticClients, addOptimisticClient] = useOptimistic(
-    allClients,
-    (state: Client[], action: { type: 'add' | 'update' | 'delete', client: Client & { pending?: boolean } }) => {
+    serverClients,
+    (state: Client[], action: { type: 'add' | 'update' | 'delete', client: Client }) => {
       switch (action.type) {
         case 'add':
-          return [...state, action.client];
+          return [action.client, ...state];
         case 'update':
           return state.map(c => c.id === action.client.id ? action.client : c);
         case 'delete':
@@ -44,38 +51,25 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
   );
 
   const handleCreate = async (formData: FormData) => {
-    const tempId = `temp-${Date.now()}`;
-    const newClient: Client & { pending?: boolean } = {
-      id: tempId,
-      companyName: formData.get('companyName') as string,
-      contactPersonName: formData.get('contactPersonName') as string,
-      contactEmail: formData.get('contactEmail') as string,
-      websiteUrl: formData.get('websiteUrl') as string,
-      createdAt: new Date().toISOString(),
-      pending: true,
-    };
+    const newClient = createOptimisticClient(formData);
 
-    // UI Feedback
-    addOptimisticClient({ type: 'add', client: newClient });
+    startTransition(() => {
+      addOptimisticClient({ type: 'add', client: newClient });
+    });
     setIsCreateModalOpen(false);
 
     try {
       const result = await createClient(formData);
-      if (result?.success) {
+      if (result && 'success' in result && result.success) {
         toast.success("Client created successfully");
-        const clients = await getClients();
-        startTransition(() => {
-          setAllClients(clients);
-        });
+        mutate();
       } else {
-        toast.error(result?.error || "Failed to create client");
-        const clients = await getClients();
-        setAllClients(clients);
+        toast.error((result as any)?.error || "Failed to create client");
+        mutate();
       }
     } catch (err) {
       toast.error("An unexpected error occurred");
-      const clients = await getClients();
-      setAllClients(clients);
+      mutate();
     }
   };
 
@@ -83,64 +77,55 @@ export default function ClientsPageClient({ initialClients }: ClientsPageClientP
     const editing = editingClient;
     if (!editing) return;
 
-    const updatedClient: Client & { pending?: boolean } = {
-      ...editing,
-      companyName: formData.get('companyName') as string,
-      contactPersonName: formData.get('contactPersonName') as string,
-      contactEmail: formData.get('contactEmail') as string,
-      websiteUrl: formData.get('websiteUrl') as string,
-      pending: true,
-    };
-
-    addOptimisticClient({ type: 'update', client: updatedClient });
+    const updatedClient = updateOptimisticClient(editing, formData);
+    
+    startTransition(() => {
+      addOptimisticClient({ type: 'update', client: updatedClient });
+    });
     setEditingClient(null);
 
     try {
       formData.set('id', editing.id);
       const result = await updateClient(formData);
-      if (result?.success) {
+      if (result && 'success' in result && result.success) {
         toast.success("Client updated successfully");
-        const clients = await getClients();
-        startTransition(() => {
-          setAllClients(clients);
-        });
+        mutate();
       } else {
-        toast.error(result?.error || "Failed to update client");
-        const clients = await getClients();
-        setAllClients(clients);
+        toast.error((result as any)?.error || "Failed to update client");
+        mutate();
       }
     } catch (err) {
       toast.error("An unexpected error occurred");
-      const clients = await getClients();
-      setAllClients(clients);
+      mutate();
     }
   };
 
   const handleDelete = async (client: Client) => {
     if (confirm(`Are you sure you want to delete ${client.companyName}?`)) {
-      addOptimisticClient({ type: 'delete', client });
+      startTransition(() => {
+        addOptimisticClient({ type: 'delete', client });
+      });
       try {
         const formData = new FormData();
         formData.set('id', client.id);
         const result = await deleteClient(formData);
-        if (result?.success) {
+        if (result && 'success' in result && result.success) {
           toast.success("Client deleted successfully");
-          const clients = await getClients();
-          startTransition(() => {
-            setAllClients(clients);
-          });
+          mutate();
         } else {
-          toast.error(result?.error || "Failed to delete client");
-          const clients = await getClients();
-          setAllClients(clients);
+          toast.error((result as any)?.error || "Failed to delete client");
+          mutate();
         }
       } catch (err) {
         toast.error("An unexpected error occurred");
-        const clients = await getClients();
-        setAllClients(clients);
+        mutate();
       }
     }
   };
+
+  if (isLoading) {
+    return <ClientsLoading />;
+  }
 
   return (
     <div className="space-y-8">

@@ -1,13 +1,17 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { User } from '@/types/user';
 import { Task } from '@/types/task';
-import { FiArrowLeft, FiClock, FiCheckSquare, FiActivity, FiUser, FiCalendar } from 'react-icons/fi';
-import { format, differenceInSeconds, parseISO } from 'date-fns';
+import { FiArrowLeft, FiClock, FiCheckSquare, FiActivity, FiUser, FiCalendar, FiSun, FiCheck, FiX } from 'react-icons/fi';
+import { format, differenceInSeconds, parseISO, differenceInDays } from 'date-fns';
 import { motion } from 'framer-motion';
+import { ActivityHeatmap } from '@/components/ui/client-charts';
+import type { TimeOffRequest } from '@/types/time-off';
+import { approveTimeOffRequest, rejectTimeOffRequest } from '@/app/time-off/actions';
+import toast from 'react-hot-toast';
 
 interface TimeLog {
     id: number;
@@ -17,10 +21,19 @@ interface TimeLog {
     end_time: string | null;
 }
 
+interface ActivityItem {
+    date: string;
+    count: number;
+    level: number;
+}
+
 interface UserDetailClientProps {
     user: User;
     tasks: Task[];
     timeLogs: TimeLog[];
+    timeOffRequests?: TimeOffRequest[];
+    activityData?: ActivityItem[];
+    isSuperAdmin?: boolean;
 }
 
 function formatDuration(seconds: number): string {
@@ -40,7 +53,30 @@ function getLogDuration(log: TimeLog): number {
     }
 }
 
-export default function UserDetailClient({ user, tasks, timeLogs }: UserDetailClientProps) {
+const statusColors: Record<string, string> = {
+    pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    approved: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    rejected: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+};
+
+const typeLabels: Record<string, string> = {
+    leave: 'Leave',
+    off: 'Day Off',
+    sick: 'Sick',
+    other: 'Other',
+};
+
+export default function UserDetailClient({ 
+    user, 
+    tasks, 
+    timeLogs, 
+    timeOffRequests = [], 
+    activityData = [], 
+    isSuperAdmin = false 
+}: UserDetailClientProps) {
+    const [actionLoading, setActionLoading] = useState<number | null>(null);
+    const [localTimeOff, setLocalTimeOff] = useState(timeOffRequests);
+
     const totalSeconds = timeLogs.reduce((sum, log) => sum + getLogDuration(log), 0);
     const totalHours = (totalSeconds / 3600).toFixed(1);
     const doneTasks = tasks.filter(t => t.status === 'DONE').length;
@@ -71,6 +107,40 @@ export default function UserDetailClient({ user, tasks, timeLogs }: UserDetailCl
         user: 'bg-zinc-700/50 text-zinc-400 border-white/5',
     };
 
+    const handleApprove = async (id: number) => {
+        setActionLoading(id);
+        try {
+            const result = await approveTimeOffRequest(id);
+            if (result.success) {
+                toast.success('Request approved');
+                setLocalTimeOff(prev => prev.map(r => r.id === id ? { ...r, status: 'approved' as const } : r));
+            } else {
+                toast.error(result.error || 'Failed to approve');
+            }
+        } catch {
+            toast.error('An error occurred');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleReject = async (id: number) => {
+        setActionLoading(id);
+        try {
+            const result = await rejectTimeOffRequest(id);
+            if (result.success) {
+                toast.success('Request rejected');
+                setLocalTimeOff(prev => prev.map(r => r.id === id ? { ...r, status: 'rejected' as const } : r));
+            } else {
+                toast.error(result.error || 'Failed to reject');
+            }
+        } catch {
+            toast.error('An error occurred');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -98,6 +168,15 @@ export default function UserDetailClient({ user, tasks, timeLogs }: UserDetailCl
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            {/* Activity Heatmap */}
+            <div className="glass p-6 rounded-3xl border border-white/5 bg-zinc-900/50 space-y-4 overflow-hidden">
+                <div className="flex justify-between items-center mb-1">
+                    <h4 className="text-[11px] font-medium text-emerald-400 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded">Activity Engine</h4>
+                    <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-wider">Historical Performance</span>
+                </div>
+                <ActivityHeatmap data={activityData} variant="full" />
             </div>
 
             {/* Stats */}
@@ -235,6 +314,92 @@ export default function UserDetailClient({ user, tasks, timeLogs }: UserDetailCl
                     </div>
                 </div>
             </div>
+
+            {/* Time Off Section */}
+            {localTimeOff.length > 0 && (
+                <div className="glass rounded-2xl border border-white/5 bg-zinc-900/10 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-white/5">
+                        <h2 className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                            <FiSun className="text-amber-400 w-4 h-4" />
+                            Time Off Requests ({localTimeOff.length})
+                        </h2>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-white/5 bg-white/[0.02]">
+                                    <th className="px-6 py-3 text-left text-[11px] font-medium text-zinc-600 uppercase tracking-wider">Type</th>
+                                    <th className="px-6 py-3 text-left text-[11px] font-medium text-zinc-600 uppercase tracking-wider">Period</th>
+                                    <th className="px-6 py-3 text-left text-[11px] font-medium text-zinc-600 uppercase tracking-wider">Days</th>
+                                    <th className="px-6 py-3 text-left text-[11px] font-medium text-zinc-600 uppercase tracking-wider">Justification</th>
+                                    <th className="px-6 py-3 text-left text-[11px] font-medium text-zinc-600 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3 text-left text-[11px] font-medium text-zinc-600 uppercase tracking-wider">Requested</th>
+                                    {isSuperAdmin && (
+                                        <th className="px-6 py-3 text-right text-[11px] font-medium text-zinc-600 uppercase tracking-wider">Actions</th>
+                                    )}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {localTimeOff.map(req => {
+                                    const days = differenceInDays(new Date(req.end_date), new Date(req.start_date)) + 1;
+                                    return (
+                                        <tr key={req.id} className="hover:bg-white/[0.02] transition-colors">
+                                            <td className="px-6 py-3 text-xs font-bold text-white">
+                                                {typeLabels[req.type] || req.type}
+                                            </td>
+                                            <td className="px-6 py-3 text-xs text-zinc-400 tabular-nums">
+                                                {format(new Date(req.start_date), 'MMM dd')} — {format(new Date(req.end_date), 'MMM dd, yyyy')}
+                                            </td>
+                                            <td className="px-6 py-3 text-xs text-zinc-300 font-medium">
+                                                {days}d
+                                            </td>
+                                            <td className="px-6 py-3 text-xs text-zinc-500 max-w-[200px] truncate">
+                                                {req.justification || '—'}
+                                            </td>
+                                            <td className="px-6 py-3">
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusColors[req.status]}`}>
+                                                    {req.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-3 text-xs text-zinc-500 tabular-nums">
+                                                {req.requested_at ? format(new Date(req.requested_at), 'MMM dd, yyyy') : '—'}
+                                            </td>
+                                            {isSuperAdmin && (
+                                                <td className="px-6 py-3 text-right">
+                                                    {req.status === 'pending' && (
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <button
+                                                                onClick={() => handleApprove(req.id)}
+                                                                disabled={actionLoading === req.id}
+                                                                className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all disabled:opacity-50"
+                                                                title="Approve"
+                                                            >
+                                                                {actionLoading === req.id ? (
+                                                                    <div className="w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                                                                ) : (
+                                                                    <FiCheck className="w-3.5 h-3.5" />
+                                                                )}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleReject(req.id)}
+                                                                disabled={actionLoading === req.id}
+                                                                className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-all disabled:opacity-50"
+                                                                title="Reject"
+                                                            >
+                                                                <FiX className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            )}
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

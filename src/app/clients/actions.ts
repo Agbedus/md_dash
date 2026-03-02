@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { cache } from 'react';
 
 const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
 const API_BASE_URL = `${BASE_URL}/api/v1`;
@@ -18,7 +19,7 @@ interface ApiClient {
     created_at: string;
 }
 
-export async function getClients(): Promise<Client[]> {
+export const getClients = cache(async function(): Promise<Client[]> {
 
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
@@ -58,7 +59,7 @@ export async function getClients(): Promise<Client[]> {
         console.error("Error fetching clients:", error);
         return [];
     }
-}
+});
 
 export async function createClient(formData: FormData) {
     const session = await auth();

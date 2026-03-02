@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import useSWR, { useSWRConfig } from 'swr';
 import { fetcher } from '@/lib/api';
@@ -38,13 +38,13 @@ export const useNotifications = () => {
   return context;
 };
 
-
-
 export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: any }> = ({ children, user }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const { mutate } = useSWRConfig();
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const socketRef = useRef<WebSocket>(null);
   
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://fast-dash-b1e5.onrender.com" || "http://127.0.0.1:8000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
   // SWR for Users
   const { data: users = [] } = useSWR(
@@ -71,7 +71,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
   const markAsRead = async (id: string) => {
     if (!user?.accessToken) return;
 
-    // Optimistic update
     mutateNotifications(
         (currentNotifications = []) => currentNotifications.map(n => n.id === id ? { ...n, is_read: true } : n),
         false
@@ -86,11 +85,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
       });
 
       if (!res.ok) throw new Error('Failed to mark read');
-      // Revalidate to be sure
       mutateNotifications();
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
-      // Rollback
       mutateNotifications();
     }
   };
@@ -98,7 +95,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
   const markAllAsRead = async () => {
     const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
     
-    // Optimistic update
     mutateNotifications(
         (currentNotifications = []) => currentNotifications.map(n => ({ ...n, is_read: true })),
         false
@@ -119,47 +115,58 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
       return;
     }
 
-    const wsBaseUrl = baseUrl.replace(/^http/, 'ws');
-    const wsUrl = `${wsBaseUrl}/api/v1/notifications/ws/${user.id}`;
-    
-    const socket = new WebSocket(wsUrl);
+    const connect = () => {
+      if (socketRef.current?.readyState === WebSocket.OPEN) return;
 
-    socket.onopen = () => {
-      console.log('Notification WebSocket connected');
-      setIsConnected(true);
+      const wsBaseUrl = baseUrl.replace(/^http/, 'ws');
+      const wsUrl = `${wsBaseUrl}/api/v1/notifications/ws/${user.id}`;
+      
+      const socket = new WebSocket(wsUrl);
+      socketRef.current = socket;
+
+      socket.onopen = () => {
+        console.log('Notification WebSocket connected');
+        setIsConnected(true);
+        reconnectAttemptsRef.current = 0;
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const notification: Notification = JSON.parse(event.data);
+          mutateNotifications((currentNotifications = []) => [notification, ...currentNotifications], false);
+          toast(notification.title, {
+            icon: notification.type === 'success' ? '✅' : '🔔',
+            duration: 4000,
+          });
+        } catch (err) {
+          console.error('Failed to parse WebSocket message:', err);
+        }
+      };
+
+      socket.onclose = () => {
+        setIsConnected(false);
+        // Reconnect logic
+        const timeout = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+        reconnectTimeoutRef.current = setTimeout(() => {
+          reconnectAttemptsRef.current += 1;
+          connect();
+        }, timeout);
+      };
+
+      socket.onerror = (err) => {
+        console.warn('Notification WebSocket error - check server connection');
+        socket.close();
+      };
     };
 
-    socket.onmessage = (event) => {
-      try {
-        const notification: Notification = JSON.parse(event.data);
-        
-        // Update cache with new notification
-        mutateNotifications((currentNotifications = []) => [notification, ...currentNotifications], false);
-        
-        // Show a toast for the new notification
-        toast(notification.title, {
-          icon: notification.type === 'success' ? '✅' : '🔔',
-          duration: 4000,
-        });
-      } catch (err) {
-        console.error('Failed to parse WebSocket message:', err);
-      }
-    };
-
-    socket.onclose = () => {
-      console.log('Notification WebSocket disconnected');
-      setIsConnected(false);
-    };
-
-    socket.onerror = (err) => {
-      if (user?.id) {
-        console.error('Notification WebSocket error:', err);
-      }
-      setIsConnected(false);
-    };
+    connect();
 
     return () => {
-      socket.close();
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      if (socketRef.current) {
+        socketRef.current.onclose = null; // Prevent reconnect on explicit cleanup
+        socketRef.current.close();
+      }
     };
   }, [user?.id, user?.accessToken, baseUrl, mutateNotifications]);
 

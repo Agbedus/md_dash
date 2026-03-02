@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo, useCallback, useEffect, useOptimistic, useTransition } from "react";
-import { addDays, addMonths, addWeeks, startOfDay } from "date-fns";
+import { addDays, addMonths, addWeeks, startOfDay, isWithinInterval, endOfDay } from "date-fns";
 import type { CalendarEvent, CalendarView } from "@/types/calendar";
 import Toolbar from "./Toolbar";
 import MonthGrid from "./MonthGrid";
@@ -9,20 +9,19 @@ import DayGrid from "./DayGrid";
 
 import EventModal from "./EventModal";
 import EventDetailModal from "./EventDetailModal";
-import { getEvents, deleteEvent } from "@/app/calendar/actions";
-import { getTasks, deleteTask } from "@/app/tasks/actions";
-
-// Shape of rows returned by GET /api/tasks (simplified for internal use or imported if needed)
-type TaskRow = {
-  id: number;
-  name: string;
-  description: string | null;
-  dueDate: string | null;
-  priority: "low" | "medium" | "high";
-  status: "TODO" | "IN_PROGRESS" | "QA" | "REVIEW" | "DONE";
-  createdAt?: string | null;
-  updatedAt?: string | null;
-};
+import TimeOffModal from "./TimeOffModal";
+import { useEvents } from "@/hooks/use-events";
+import { useTasks } from "@/hooks/use-tasks";
+import { useUsers } from "@/hooks/use-users";
+import { useProjects } from "@/hooks/use-projects";
+import { useTimeOff } from "@/hooks/use-time-off";
+import { useCalendarData } from "@/hooks/use-calendar-data";
+import CalendarLoading from "@/app/calendar/loading";
+import TimezoneClocks from "./TimezoneClocks";
+import type { Task } from "@/types/task";
+import type { User } from "@/types/user";
+import type { Project } from "@/types/project";
+import type { TimeOffRequest } from "@/types/time-off";
 
 // UI-level event that may include task metadata
 type UICalendarEvent = CalendarEvent;
@@ -30,22 +29,145 @@ type UICalendarEvent = CalendarEvent;
 interface CalendarProps {
   initialDate?: Date;
   initialView?: CalendarView;
-  events?: CalendarEvent[];
+  initialEvents?: CalendarEvent[];
+  initialTasks?: Task[];
+  initialUsers?: User[];
+  initialProjects?: Project[];
+  initialTimeOff?: TimeOffRequest[];
+  currentUserRoles?: string[];
 }
 
-export default function Calendar({ initialDate, initialView = "month", events = [] }: CalendarProps) {
+export default function Calendar({ initialDate, initialView = "month", initialEvents, initialTasks, initialUsers, initialProjects, initialTimeOff, currentUserRoles = [] }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState<Date>(initialDate ? startOfDay(initialDate) : startOfDay(new Date()));
   const [view, setView] = useState<CalendarView>(initialView);
-  // augment events with optional task metadata
-  const [serverEvents, setServerEvents] = useState<UICalendarEvent[]>(
-    // allow initial prop events (may contain string dates)
-    events.map((ev) => ({ ...ev }))
-  );
-  const [, ] = useTransition();
+  const [filters, setFilters] = useState({ projects: false, tasks: true, events: true, timeOff: true });
+  const [, startTransition] = useTransition();
 
-  // Optimistic UI for Calendar
+  // Background data
+  const { users } = useUsers(initialUsers);
+  const { 
+    events: serverEvents, 
+    tasks: serverTasks, 
+    projects: serverProjects, 
+    timeOffRequests, 
+    isLoading: dataLoading, 
+    mutate 
+  } = useCalendarData({
+    events: initialEvents,
+    tasks: initialTasks,
+    projects: initialProjects,
+    timeOff: initialTimeOff
+  }, users);
+
+  const isLoading = dataLoading && serverEvents.length === 0;
+
+  // Mutate data for everything when an update happens
+  const mutateAll = useCallback(() => {
+    mutate();
+  }, [mutate]);
+
+  // Can the current user request time off? (staff or above)
+  const canRequestTimeOff = currentUserRoles.some(r => ['staff', 'manager', 'super_admin'].includes(r));
+
+  // Revalidate data when filters are toggled to ensure fresh data
+  useEffect(() => {
+    if (filters.tasks) mutate();
+  }, [filters.tasks, mutate]);
+
+  // Combine events, tasks, projects, and time-off for the calendar
+  const allEvents = useMemo(() => {
+    const items: UICalendarEvent[] = [];
+
+    serverEvents.forEach((ev: any) => {
+        const isTimeOffEvent = ev.title.toLowerCase().startsWith('leave:') || 
+                               ev.title.toLowerCase().startsWith('off:') || 
+                               ev.title.toLowerCase().startsWith('sick:') ||
+                               ev.title.toLowerCase().startsWith('other:');
+        
+        // Only push if the corresponding filter is active
+        if ((isTimeOffEvent && filters.timeOff) || (!isTimeOffEvent && filters.events)) {
+            // If it's a time-off event, it means it's already approved
+            const status = isTimeOffEvent ? 'approved' : undefined;
+            const color = isTimeOffEvent ? 'bg-emerald-400' : ev.color;
+
+            items.push({
+                ...ev,
+                start: new Date(ev.start),
+                end: new Date(ev.end),
+                color: color,
+                title: isTimeOffEvent ? `🌴 ${ev.title}` : ev.title,
+                isTimeOff: isTimeOffEvent,
+                timeOffStatus: status,
+            });
+        }
+    });
+
+    if (filters.tasks) {
+        serverTasks
+          .filter((t: Task) => t.dueDate)
+          .forEach((t: Task) => {
+            const statusMap = t.status === "DONE" ? "completed" : t.status === "IN_PROGRESS" ? "in_progress" : "task";
+            const color =
+              statusMap === "completed" ? "bg-emerald-400" : statusMap === "in_progress" ? "bg-amber-400" : "bg-sky-400";
+            items.push({
+              id: `task-${t.id}`,
+              title: t.name,
+              start: new Date(t.dueDate!),
+              end: new Date(t.dueDate!),
+              allDay: true,
+              color,
+              taskStatus: statusMap as any,
+              isTask: true,
+              description: t.description || "",
+            });
+          });
+    }
+
+    if (filters.projects) {
+        serverProjects.forEach((p: Project) => {
+            if (p.startDate) {
+                items.push({
+                    id: `project-${p.id}`,
+                    title: `[PROJ] ${p.name}`,
+                    start: new Date(p.startDate),
+                    end: p.endDate ? new Date(p.endDate) : addDays(new Date(p.startDate), 14),
+                    allDay: true,
+                    color: '#818cf8',
+                    isProject: true,
+                    projectStatus: p.status,
+                    description: p.description || "",
+                } as any);
+            }
+        });
+    }
+
+    if (filters.timeOff) {
+        timeOffRequests
+          .filter((r: TimeOffRequest) => r.status === 'pending') // Only show pending here; approved shows as Event
+          .forEach((r: TimeOffRequest) => {
+            const user = users.find((u: User) => u.id === r.user_id);
+            const userName = user?.fullName || user?.email || 'User';
+            const typeLabel = r.type.charAt(0).toUpperCase() + r.type.slice(1);
+            items.push({
+              id: `timeoff-${r.id}`,
+              title: `⏳ ${userName} — ${typeLabel}`,
+              start: new Date(r.start_date),
+              end: new Date(r.end_date),
+              allDay: true,
+              color: 'bg-amber-300/80',
+              description: r.justification || '',
+              isTimeOff: true,
+              timeOffStatus: r.status,
+            } as any);
+          });
+    }
+
+    return items;
+  }, [serverEvents, serverTasks, serverProjects, timeOffRequests, users, filters]);
+
+  // Optimistic UI
   const [optimisticEvents, addOptimisticEvent] = useOptimistic(
-    serverEvents,
+    allEvents,
     (state: UICalendarEvent[], action: { type: 'add' | 'update' | 'delete', event: UICalendarEvent }) => {
       switch (action.type) {
         case 'add':
@@ -59,9 +181,11 @@ export default function Calendar({ initialDate, initialView = "month", events = 
       }
     }
   );
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalStart, setModalStart] = useState<Date | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<UICalendarEvent | null>(null);
+  const [timeOffModalOpen, setTimeOffModalOpen] = useState(false);
 
   const onPrev = useCallback(() => {
     setCurrentDate((d) => (view === "month" ? addMonths(d, -1) : view === "week" ? addWeeks(d, -1) : addDays(d, -1)));
@@ -83,152 +207,94 @@ export default function Calendar({ initialDate, initialView = "month", events = 
     [optimisticEvents]
   );
 
-  const loadEvents = useCallback(async () => {
-    try {
-      const [eventsData, tasksData] = await Promise.all([
-        getEvents(),
-        getTasks(),
-      ]);
-
-      const mappedEvents: UICalendarEvent[] = eventsData.map((ev) => ({
-          ...ev,
-          start: new Date(ev.start),
-          end: new Date(ev.end),
-      }));
-
-      // map tasks with dueDate into calendar items
-      const taskItems: UICalendarEvent[] = tasksData
-        .filter((t) => t.dueDate)
-        .map((t) => {
-          const due = new Date(t.dueDate as string);
-          // place at 09:00 local for visibility
-          const start = new Date(due.getFullYear(), due.getMonth(), due.getDate(), 9, 0, 0, 0);
-          const statusMap: UICalendarEvent["taskStatus"] =
-            t.status === "IN_PROGRESS" ? "in_progress" : t.status === "DONE" ? "completed" : "task";
-          const color =
-            statusMap === "completed" ? "bg-emerald-400" : statusMap === "in_progress" ? "bg-amber-400" : "bg-sky-400";
-          return {
-            id: `task-${t.id}`,
-            title: t.name,
-            description: t.description ?? undefined,
-            start,
-            end: new Date(start.getTime() + 60 * 60 * 1000),
-            allDay: false,
-            color,
-            isTask: true,
-            taskStatus: statusMap,
-            createdAt: t.createdAt ?? undefined,
-            updatedAt: t.updatedAt ?? undefined,
-          };
-        });
-
-      setServerEvents([...mappedEvents, ...taskItems]);
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadEvents();
-  }, [loadEvents]);
-
-  const openCreateAt = useCallback((d: Date) => {
-    setModalStart(d);
-    setModalOpen(true);
-  }, []);
-
-  // handle deletes for both events and tasks (task ids prefixed with "task-")
-  const handleDeleteEvent = useCallback(
-    async (e: UICalendarEvent) => {
-      const ok = confirm(`Delete "${e.title}"?`);
-      if (!ok) return;
-      try {
-        addOptimisticEvent({ type: "delete", event: e });
-        if (e.isTask || String(e.id).startsWith("task-")) {
-          // extract numeric id for tasks
-          const idStr = String(e.id).replace(/^task-/, "");
-          const formData = new FormData();
-          formData.append("id", idStr);
-          await deleteTask(formData);
-        } else {
-          await deleteEvent(e.id);
-        }
-        await loadEvents();
-        if (selectedEvent && selectedEvent.id === e.id) setSelectedEvent(null);
-      } catch (err) {
-        console.error(err);
-        alert("Failed to delete item");
-        await loadEvents(); // revert
-      }
-    },
-    [loadEvents, selectedEvent, addOptimisticEvent]
-  );
+  if (isLoading) {
+    return <CalendarLoading />;
+  }
 
   return (
-    <div className="space-y-4 pb-40">
-      <div className="mb-10">
-        <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Calendar</h1>
-        <p className="text-zinc-400 text-lg">Manage your schedule and upcoming events.</p>
-      </div>
-
+    <div className="flex flex-col h-full space-y-6 relative">
       <Toolbar
         currentDate={currentDate}
         view={view}
+        onChangeView={setView}
         onPrev={onPrev}
         onNext={onNext}
         onToday={onToday}
-        onChangeView={setView}
+        onAddEvent={() => {
+          setModalStart(new Date());
+          setModalOpen(true);
+        }}
+        onRequestTimeOff={() => setTimeOffModalOpen(true)}
+        canRequestTimeOff={canRequestTimeOff}
+        filters={filters}
+        setFilters={setFilters}
       />
 
-        {/* Views */}
+      <div className="flex-1 glass rounded-2xl border border-white/5 overflow-hidden">
         {view === "month" && (
           <MonthGrid
             date={currentDate}
             events={normalizedEvents}
-            onSelectDate={(d)=>openCreateAt(d)}
-            onEventClick={(e)=>setSelectedEvent(e as UICalendarEvent)}
-            onEventDelete={handleDeleteEvent}
+            onSelectDate={(d) => {
+              setModalStart(d);
+              setModalOpen(true);
+            }}
+            onEventClick={setSelectedEvent}
           />
         )}
         {view === "week" && (
           <WeekGrid
             date={currentDate}
             events={normalizedEvents}
-            onSelectDateTime={(d)=>openCreateAt(d)}
-            onEventClick={(e)=>setSelectedEvent(e as UICalendarEvent)}
-            onEventDelete={handleDeleteEvent}
+            onSelectDateTime={(d) => {
+              setModalStart(d);
+              setModalOpen(true);
+            }}
+            onEventClick={setSelectedEvent}
           />
         )}
         {view === "day" && (
           <DayGrid
             date={currentDate}
             events={normalizedEvents}
-            onSelectDateTime={(d)=>openCreateAt(d)}
-            onEventClick={(e)=>setSelectedEvent(e as UICalendarEvent)}
-            onEventDelete={handleDeleteEvent}
+            onSelectDateTime={(d) => {
+              setModalStart(d);
+              setModalOpen(true);
+            }}
+            onEventClick={setSelectedEvent}
           />
         )}
+      </div>
 
-        <EventModal
-          open={modalOpen}
-          initialStart={modalStart}
-          onClose={() => setModalOpen(false)}
-          onCreated={async () => {
-            await loadEvents();
-          }}
-          onOptimisticAdd={(evt) => addOptimisticEvent({ type: 'add', event: evt })}
-        />
+      <TimezoneClocks />
 
+      <EventModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setModalStart(null);
+        }}
+        initialStart={modalStart}
+        onCreated={() => { mutateAll(); }}
+        onOptimisticAdd={(e) => startTransition(() => addOptimisticEvent({ type: 'add', event: e }))}
+      />
+
+      <TimeOffModal
+        open={timeOffModalOpen}
+        onClose={() => setTimeOffModalOpen(false)}
+        onCreated={() => { mutateAll(); }}
+      />
+
+      {selectedEvent && (
         <EventDetailModal
           event={selectedEvent}
           open={!!selectedEvent}
           onClose={() => setSelectedEvent(null)}
-          onUpdated={async () => {
-            await loadEvents();
-          }}
-          onOptimisticUpdate={(evt) => addOptimisticEvent({ type: 'update', event: evt })}
-          onOptimisticDelete={(evt) => addOptimisticEvent({ type: 'delete', event: evt })}
+          onUpdated={() => { mutateAll(); }}
+          onOptimisticUpdate={(e) => startTransition(() => addOptimisticEvent({ type: 'update', event: e }))}
+          onOptimisticDelete={(e) => startTransition(() => addOptimisticEvent({ type: 'delete', event: e }))}
         />
-      </div>
+      )}
+    </div>
   );
 }

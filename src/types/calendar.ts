@@ -2,7 +2,12 @@ export type CalendarView = "month" | "week" | "day";
 
 export type EventStatus = "tentative" | "confirmed" | "cancelled";
 export type EventPrivacy = "public" | "private" | "confidential";
-export type EventRecurrence = "none" | "daily" | "weekly" | "monthly" | "yearly";
+export type EventRecurrence =
+  | "none"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly";
 
 export interface EventReminder {
   days: number;
@@ -31,5 +36,8 @@ export interface CalendarEvent {
   updatedAt?: string;
   isTask?: boolean;
   taskStatus?: "task" | "in_progress" | "completed";
+  isProject?: boolean;
+  projectStatus?: string;
+  isTimeOff?: boolean;
+  timeOffStatus?: string;
 }
-

@@ -103,7 +103,7 @@ export async function SummaryStatsSection() {
                             <p className="text-xl lg:text-3xl font-bold text-white leading-none">{stat.value}</p>
                             {i !== 0 && (
                                 <div className={`text-[11px] lg:text-[11px] font-bold ${stat.color} bg-white/[0.03] px-1.5 py-0.5 rounded-full`}>
-                                   +{Math.floor(Math.random() * 15)}%
+                                   +{(i * 7 + 4) % 15}%
                                 </div>
                             )}
                         </div>
@@ -298,7 +298,7 @@ export async function PrioritiesSection() {
     <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col h-80 lg:h-96">
       <div className="flex justify-between items-center mb-4 lg:mb-6 shrink-0">
         <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
-          Today's Priorities
+          Today&apos;s Priorities
         </h2>
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/5">
           <FiCpu className="text-[11px] text-[var(--pastel-indigo)]" />

@@ -5,12 +5,15 @@ import {
     FiPlus, FiGrid, FiList, FiFileText, FiCheckSquare, 
     FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiSearch
 } from 'react-icons/fi';
-import { createNote, updateNote, deleteNote, getNotes, getUsers, shareNote } from '@/app/notes/actions';
+import { createNote, updateNote, deleteNote, getUsers } from '@/app/notes/actions';
 import { getTasks } from '@/app/tasks/actions';
 import type { Note } from "@/types/note";
 import type { Task } from "@/types/task";
 import NoteCard from './note-card';
 import dynamic from 'next/dynamic';
+import { useNotes } from '@/hooks/use-notes';
+import { createOptimisticNote, updateOptimisticNote } from '@/lib/optimistic-utils';
+import toast from 'react-hot-toast';
 
 const NoteFormModal = dynamic(() => import('./NoteFormModal'), { ssr: false });
 
@@ -43,15 +46,23 @@ const noteTypeColors: Record<Note['type'], string> = {
     sketch: 'text-teal-400',
 };
 
-export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: Note[] }) {
-    const [allNotes, setAllNotes] = useState<Note[]>(initialNotes);
+import NotesLoading from '@/app/notes/loading';
+
+export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNotes?: Note[] }) {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [, startTransition] = useTransition();
+    const [isPending, startTransition] = useTransition();
+
+    // SWR Hook for background sync
+    const { notes: serverNotes, mutate, isLoading: notesLoading } = useNotes({ initialNotes });
+
+    // Only show skeleton if we have no data and are loading
+    const isLoading = notesLoading && serverNotes.length === 0;
 
     // Optimistic UI for Notes
+
     const [optimisticNotes, addOptimisticNote] = useOptimistic(
-        allNotes,
+        serverNotes,
         (state: Note[], action: { type: 'add' | 'update' | 'delete' | 'share', note: Note }) => {
             switch (action.type) {
                 case 'add':
@@ -93,129 +104,93 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
 
     const handleModalSave = async (formData: FormData) => {
         setErrorMsg(null);
-        // We close immediately for snappy feel
         setIsModalOpen(false);
         const editing = editingNote;
         setEditingNote(null);
 
-        try {
-            const isEditingFlag = formData.get('_editing');
-            const formId = formData.get('id');
-            const title = formData.get('title') as string;
-            const content = formData.get('content') as string;
-
-            const type = formData.get('type') as Note['type'];
-            const tags = (formData.get('tags') as string) || '';
-            const task_id = formData.get('task_id') ? Number(formData.get('task_id')) : null;
-
-            if (isEditingFlag || formId || editing) {
-                const id = Number(formId || editing?.id);
-                const updatedNote: Note = {
-                    ...(editing || allNotes.find(n => n.id === id)!),
-                    title,
-                    content,
-                    type,
-                    task_id,
-                    tags,
-                    updated_at: new Date().toISOString()
-                };
-                addOptimisticNote({ type: 'update', note: updatedNote });
-                await updateNote(formData);
-            } else {
-                const newNote: Note = {
-                    id: Date.now(), // Temp ID
-                    title,
-                    content,
-                    type,
-                    task_id,
-                    tags,
-                    is_pinned: 0,
-                    is_archived: 0,
-                    is_favorite: 0,
-                    user_id: 'me', // placeholder
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                };
-
-                addOptimisticNote({ type: 'add', note: newNote });
-                await createNote(formData);
-            }
+        const isEditingFlag = formData.get('_editing') || formData.get('id') || editing;
+        
+        if (isEditingFlag) {
+            const id = Number(formData.get('id') || editing?.id);
+            const existing = editing || serverNotes.find(n => n.id === id);
+            if (!existing) return;
             
-            // Re-fetch to sync
-            const notes = (await getNotes()) as Note[];
+            const updatedNote = updateOptimisticNote(existing, formData);
             startTransition(() => {
-                setAllNotes(notes);
+                addOptimisticNote({ type: 'update', note: updatedNote });
             });
-        } catch (err) {
-            console.error(err);
-            setErrorMsg('Could not save the note. Please try again.');
-            // Re-fetch on error to revert optimistic state
-            const notes = (await getNotes()) as Note[];
-            setAllNotes(notes);
+            
+            try {
+                await updateNote(formData);
+                toast.success("Note updated");
+                mutate();
+            } catch (err) {
+                toast.error("Failed to update note");
+                mutate();
+            }
+        } else {
+            const newNote = createOptimisticNote(formData);
+            startTransition(() => {
+                addOptimisticNote({ type: 'add', note: newNote });
+            });
+            
+            try {
+                await createNote(formData);
+                toast.success("Note created");
+                mutate();
+            } catch (err) {
+                toast.error("Failed to create note");
+                mutate();
+            }
         }
     };
+
     const handleUpdate = async (formData: FormData) => {
         const id = Number(formData.get('id'));
-        const existing = allNotes.find(n => n.id === id);
+        const existing = serverNotes.find(n => n.id === id);
         if (existing) {
-            const updated: Note = {
-                ...existing,
-                is_pinned: formData.has('is_pinned') ? (formData.get('is_pinned') === '1' ? 1 : 0) : existing.is_pinned,
-                is_archived: formData.has('is_archived') ? (formData.get('is_archived') === '1' ? 1 : 0) : existing.is_archived,
-                is_favorite: formData.has('is_favorite') ? (formData.get('is_favorite') === '1' ? 1 : 0) : existing.is_favorite,
-            };
+            const updatedNote = updateOptimisticNote(existing, formData);
+            // Handle flags specifically if not in updateOptimisticNote
+            if (formData.has('is_pinned')) updatedNote.is_pinned = formData.get('is_pinned') === '1' ? 1 : 0;
+            if (formData.has('is_archived')) updatedNote.is_archived = formData.get('is_archived') === '1' ? 1 : 0;
+            if (formData.has('is_favorite')) updatedNote.is_favorite = formData.get('is_favorite') === '1' ? 1 : 0;
 
-            if (formData.has('shared_with')) {
-                try {
-                    const sw = JSON.parse(formData.get('shared_with') as string);
-                    updated.shared_with = sw;
-                } catch {}
-            }
-
-            addOptimisticNote({ type: 'update', note: updated });
+            startTransition(() => {
+                addOptimisticNote({ type: 'update', note: updatedNote });
+            });
         }
 
-        setErrorMsg(null);
         try {
             await updateNote(formData);
-            const notes = (await getNotes()) as Note[];
-            startTransition(() => {
-                setAllNotes(notes);
-            });
+            mutate();
         } catch (err) {
-            console.error(err);
-            setErrorMsg('Could not update the note. Please try again.');
-            const notes = (await getNotes()) as Note[];
-            setAllNotes(notes);
+            toast.error("Update failed");
+            mutate();
         }
     };
 
     const handleDelete = async (formData: FormData) => {
         const id = Number(formData.get('id'));
-        const existing = allNotes.find(n => n.id === id);
+        const existing = serverNotes.find(n => n.id === id);
         if (existing) {
-            addOptimisticNote({ type: 'delete', note: existing });
+            if (!confirm('Are you sure you want to delete this note?')) return;
+            startTransition(() => {
+                addOptimisticNote({ type: 'delete', note: existing });
+            });
         }
 
-        setErrorMsg(null);
         try {
             await deleteNote(formData);
-            const notes = (await getNotes()) as Note[];
-            startTransition(() => {
-                setAllNotes(notes);
-            });
+            toast.success("Note deleted");
+            mutate();
         } catch (err) {
-            console.error(err);
-            setErrorMsg('Could not delete the note. Please try again.');
-            const notes = (await getNotes()) as Note[];
-            setAllNotes(notes);
+            toast.error("Delete failed");
+            mutate();
         }
     };
 
-
-
     const filteredNotes = useMemo(() => {
-        let notes = optimisticNotes;
+        let notes = Array.isArray(optimisticNotes) ? optimisticNotes.filter(Boolean) : [];
 
         if (filterType !== 'all') {
             notes = notes.filter(note => note.type === filterType);
@@ -223,14 +198,20 @@ export default function NotesPageClient({ allNotes: initialNotes }: { allNotes: 
 
         if (searchQuery) {
             const lowercasedQuery = searchQuery.toLowerCase();
-            notes = notes.filter(note =>
-                note.title.toLowerCase().includes(lowercasedQuery) ||
-                (note.content && note.content.toLowerCase().includes(lowercasedQuery))
-            );
+            notes = notes.filter(note => {
+                const title = note.title || '';
+                const content = note.content || '';
+                return title.toLowerCase().includes(lowercasedQuery) ||
+                       content.toLowerCase().includes(lowercasedQuery);
+            });
         }
 
         return notes;
     }, [optimisticNotes, filterType, searchQuery]);
+
+    if (isLoading) {
+        return <NotesLoading />;
+    }
 
     return (
         <div className="flex flex-col h-screen px-4 py-8 max-w-[1600px] mx-auto text-white">
