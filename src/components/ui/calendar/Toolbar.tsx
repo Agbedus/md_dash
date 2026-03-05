@@ -87,31 +87,46 @@ export default function Toolbar({
       </div>
 
       {/* Filter Toggles */}
-      <div className="flex items-center gap-3">
-          <FilterToggle 
-            label="Projects" 
-            active={activeFilter === 'projects'} 
-            onClick={() => setActiveFilter('projects')}
-            color="indigo"
-          />
-          <FilterToggle 
-            label="Tasks" 
-            active={activeFilter === 'tasks'} 
-            onClick={() => setActiveFilter('tasks')}
-            color="emerald"
-          />
-          <FilterToggle 
-            label="Events" 
-            active={activeFilter === 'events'} 
-            onClick={() => setActiveFilter('events')}
-            color="purple"
-          />
-          <FilterToggle 
-            label="Time Off" 
-            active={activeFilter === 'timeOff'} 
-            onClick={() => setActiveFilter('timeOff')}
-            color="amber"
-          />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-2">
+          {/* Main Calendar Group */}
+          <div className="flex flex-col gap-2.5">
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] px-1">Main Calendar</span>
+              <div className="flex items-center gap-2">
+                  <FilterToggle 
+                    label="Events" 
+                    active={activeFilter === 'events'} 
+                    onClick={() => setActiveFilter('events')}
+                    color="purple"
+                  />
+                  <FilterToggle 
+                    label="Tasks" 
+                    active={activeFilter === 'tasks'} 
+                    onClick={() => setActiveFilter('tasks')}
+                    color="emerald"
+                  />
+              </div>
+          </div>
+
+          <div className="hidden sm:block h-6 w-px bg-white/10 self-end mb-2" />
+
+          {/* Timeline Group */}
+          <div className="flex flex-col gap-2.5">
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] px-1">Timeline (Gantt)</span>
+              <div className="flex items-center gap-2">
+                  <FilterToggle 
+                    label="Projects" 
+                    active={activeFilter === 'projects'} 
+                    onClick={() => setActiveFilter('projects')}
+                    color="indigo"
+                  />
+                  <FilterToggle 
+                    label="Time Off" 
+                    active={activeFilter === 'timeOff'} 
+                    onClick={() => setActiveFilter('timeOff')}
+                    color="amber"
+                  />
+              </div>
+          </div>
       </div>
     </div>
   );
