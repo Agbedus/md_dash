@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { getAggregatedDashboardData } from "@/app/lib/dashboard-actions";
 import { getTasks } from "@/app/tasks/actions";

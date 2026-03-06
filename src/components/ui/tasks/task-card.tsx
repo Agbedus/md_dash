@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { startTaskTimer, pauseTaskTimer, stopTaskTimer } from "@/app/tasks/actions";
 import { useTaskTimer } from "@/providers/task-timer-provider";
 import { canUserWorkOnTask } from "@/lib/task-auth";
+import Image from "next/image";
 
 interface TaskCardProps {
     task: Task;
@@ -253,7 +254,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
              {task.owner ? (
                 <div className="flex items-center gap-2">
                      {task.owner.avatarUrl ? (
-                        <img src={task.owner.avatarUrl} alt={task.owner.fullName || ''} className="w-5 h-5 rounded-full" />
+                        <Image src={task.owner.avatarUrl} alt={task.owner.fullName || ''} width={20} height={20} className="w-5 h-5 rounded-full" />
                     ) : (
                         <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[11px] text-white">
                             {(task.owner.fullName || task.owner.email || '?')[0].toUpperCase()}
@@ -401,7 +402,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
             {task.owner ? (
                 <div className="flex items-center gap-2">
                      {task.owner.avatarUrl ? (
-                        <img src={task.owner.avatarUrl} alt={task.owner.fullName || ''} className="w-5 h-5 rounded-full" />
+                        <Image src={task.owner.avatarUrl} alt={task.owner.fullName || ''} width={20} height={20} className="w-5 h-5 rounded-full" />
                     ) : (
                         <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[11px] text-white">
                             {(task.owner.fullName || task.owner.email || '?')[0].toUpperCase()}

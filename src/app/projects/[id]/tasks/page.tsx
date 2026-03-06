@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
+import Link from 'next/link';
 import TasksPageClient from "@/components/ui/tasks/tasks-page-client";
 import { getTasks } from '@/app/tasks/actions';
 import { getUsers } from '@/app/users/actions';
@@ -33,7 +33,7 @@ export default async function ProjectTasksPage({ params }: ProjectTasksPageProps
         <div className="flex flex-col gap-4">
             <div className="px-8 pt-8">
                 <div className="flex items-center gap-2 text-zinc-400 text-sm mb-2">
-                    <a href="/projects" className="hover:text-white transition-colors">Projects</a>
+                    <Link href="/projects" className="hover:text-white transition-colors">Projects</Link>
                     <span>/</span>
                     <span className="text-white">{project.name}</span>
                 </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Task } from "@/types/task";
 import { FiEdit, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { useState } from "react";
@@ -88,7 +89,7 @@ export default function TaskTable({ tasks, updateTask, deleteTask }: TaskTablePr
                                         {task.owner ? (
                                             <div className="flex items-center gap-2">
                                                 {task.owner.avatarUrl ? (
-                                                    <img src={task.owner.avatarUrl} alt={task.owner.fullName || ''} className="w-5 h-5 rounded-full" />
+                                                    <Image src={task.owner.avatarUrl} alt={task.owner.fullName || ''} width={20} height={20} className="w-5 h-5 rounded-full" />
                                                 ) : (
                                                     <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[11px] text-white">
                                                         {(task.owner.fullName || task.owner.email || '?')[0].toUpperCase()}

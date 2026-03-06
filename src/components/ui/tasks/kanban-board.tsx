@@ -112,21 +112,20 @@ function Column({ col, items, users, user, projects, columns, onMove, onDelete, 
 export default function KanbanBoard({ tasks = [], users, user, projects, updateTask, deleteTask }: KanbanBoardProps) {
   const columns = useMemo(() => Object.keys(statusMapping) as Array<keyof typeof statusMapping>, []);
 
-  const [grouped, setGrouped] = useState<Record<string, Task[]>>(() => {
-    const init: Record<string, Task[]> = {};
-    (Object.keys(statusMapping) as Array<keyof typeof statusMapping>).forEach((c) => (init[c] = []));
-    return init;
-  });
+  const [grouped, setGrouped] = useState<Record<string, Task[]>>({});
+  const [lastTasks, setLastTasks] = useState<Task[]>([]);
 
-  const [highlightedIds, setHighlightedIds] = useState<Record<string, boolean>>({});
-  const [flashCol, setFlashCol] = useState<keyof typeof statusMapping | null>(null);
-
-  useEffect(() => {
+  if (tasks !== lastTasks) {
     const next: Record<string, Task[]> = {};
     (Object.keys(statusMapping) as Array<keyof typeof statusMapping>).forEach((c) => (next[c] = []));
     tasks.forEach((t) => next[t.status].push(t));
     setGrouped(next);
-  }, [tasks]);
+    setLastTasks(tasks);
+  }
+
+  const [highlightedIds, setHighlightedIds] = useState<Record<string, boolean>>({});
+  const [flashCol, setFlashCol] = useState<keyof typeof statusMapping | null>(null);
+
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

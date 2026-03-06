@@ -44,14 +44,15 @@ export default function Calendar({ initialDate, initialView = "month", initialEv
   const [activeFilter, setActiveFilter] = useState<'projects' | 'tasks' | 'events' | 'timeOff'>('tasks');
   const [, startTransition] = useTransition();
 
-  // Force Gantt view for Projects and Time Off
-  useEffect(() => {
-    if (activeFilter === 'projects' || activeFilter === 'timeOff') {
+  // Force Gantt view for Projects and Time Off - Handle this in the change handler
+  const handleFilterChange = useCallback((newFilter: 'projects' | 'tasks' | 'events' | 'timeOff') => {
+    setActiveFilter(newFilter);
+    if (newFilter === 'projects' || newFilter === 'timeOff') {
       setView('gantt');
     } else if (view === 'gantt') {
-      setView('month'); // Default back to month if switching from Gantt-forced categories
+      setView('month');
     }
-  }, [activeFilter, view]);
+  }, [view]);
 
   // Background data
   const { users } = useUsers(initialUsers);
@@ -246,7 +247,7 @@ export default function Calendar({ initialDate, initialView = "month", initialEv
         onRequestTimeOff={() => setTimeOffModalOpen(true)}
         canRequestTimeOff={canRequestTimeOff}
         activeFilter={activeFilter}
-        setActiveFilter={setActiveFilter}
+        setActiveFilter={handleFilterChange}
         hideViewSwitcher={isGanttForced}
       />
 

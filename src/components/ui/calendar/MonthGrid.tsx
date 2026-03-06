@@ -94,12 +94,17 @@ function timeOffClasses(status?: string) {
 }
 
 export default function MonthGrid({ date, events = [], onSelectDate, onEventClick }: MonthGridProps) {
-  const monthStart = startOfMonth(date);
-  const monthEnd = endOfMonth(monthStart);
-  const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // Monday
-  const gridEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const { gridStart, gridEnd, monthStart } = useMemo(() => {
+    const start = startOfMonth(date);
+    const end = endOfMonth(start);
+    return {
+      monthStart: start,
+      gridStart: startOfWeek(start, { weekStartsOn: 1 }),
+      gridEnd: endOfWeek(end, { weekStartsOn: 1 })
+    };
+  }, [date]);
 
-  const days = eachDayOfInterval({ start: gridStart, end: gridEnd });
+  const days = useMemo(() => eachDayOfInterval({ start: gridStart, end: gridEnd }), [gridStart, gridEnd]);
   
   // Group days into weeks for spanning calculations
   const weeks = useMemo(() => {

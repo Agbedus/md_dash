@@ -1,59 +1,69 @@
-# Project Proposal: The AI-Powered Productivity Platform
+# MD Dashboard: Features & Capabilities
 
-## 1. Vision & Goal
-
-To build a bespoke, secure, and intelligent productivity platform for a top-level executive. The system will go beyond simple organization by integrating a local, open-source Large Language Model (LLM) to act as a proactive, intelligent assistant. The primary goals are to streamline workflows, automate preparation, and enhance decision-making while ensuring complete data privacy.
+MD Dash is a premium, AI-powered productivity platform designed for high-level management. It integrates project tracking, task management, and intelligent scheduling with a focus on data privacy through local LLM integration.
 
 ---
 
-## 2. Core AI-Enhanced Features
+## 1. AI-Powered Command Center (Dashboard)
 
-### a. The AI Aide (Unified Dashboard)
+The central hub providing a proactive, intelligent overview of your professional life. Instead of just displaying raw data, it pushes actionable insights to help you start your day with clarity.
 
-*   **Concept:** The central hub that provides a proactive, intelligent overview of the day. Instead of just displaying data, it pushes actionable insights.
-*   **AI Enhancement: Proactive Daily Briefings.**
-*   **How it Works:** Upon opening the app, the LLM generates a natural language summary of the day's agenda.
-    *   **Example:** *"Good morning. You have 4 meetings today, with the most critical being the 'Q3 Budget Review' at 11 AM. I've analyzed your tasks and recommend focusing on 'Finalize Board Presentation' first, as it's due this afternoon. There are also 3 unread emails from key contacts that seem urgent."*
+- **Proactive Daily Briefings**: Upon opening the dashboard, a local LLM generates a natural language summary of your day. It analyzes your calendar, pending tasks, and urgent notifications to provide a briefing like: _"Good morning. You have 3 critical meetings today. I recommend finalizing the 'Q3 Strategy' deck before your 11 AM session, as it's currently flagged as high priority."_
+- **Real-time Analytics & Key Performance Indicators**:
+  - **Productivity Tracking**: Visualized trends of completed vs. pending work.
+  - **Workload Overview**: Distribution of tasks across different projects and team members.
+  - **Time Allocation**: A breakdown of where your time is spent (e.g., meetings vs. deep work).
+- **Intelligent Prioritization (The "Top 3")**: The AI analyzes your task list based on language cues, deadlines, and project links to suggest three items you should focus on today, providing a brief justification for each.
+- **Focus Mode Integration**: A dedicated, distraction-free environment for deep work. It includes a structured timer that automatically moves the associated task to "In Progress" and mutes non-critical notifications.
 
-### b. AI-Powered Command Center (Task Management)
+## 2. Advanced Calendar & Timeline System
 
-*   **Concept:** An advanced task manager that uses AI to handle the cognitive load of planning and prioritization.
-*   **AI Enhancement 1: Task Decomposition.**
-*   **How it Works:** The user inputs a high-level objective (e.g., "Prepare for the annual shareholder meeting"). The LLM automatically breaks this down into a detailed checklist of actionable sub-tasks (e.g., "Draft agenda," "Coordinate with department heads," "Create slide deck").
-*   **AI Enhancement 2: Intelligent Prioritization.**
-*   **How it Works:** The LLM analyzes all tasks based on language, deadlines, and project links to suggest a "Top 3" for the day, providing a brief justification for its recommendations.
+A sophisticated scheduling engine designed to handle both granular daily tasks and high-level project milestones in a single, unified interface.
 
-### c. The Intelligent Timetabler (Calendar & Meeting Prep)
+- **Multi-Dimensional Views**:
+  - **Month/Week/Day**: Standard scheduling views optimized with high-density layouts for quick scanning.
+  - **Timeline (Gantt) View**: A specialized view for projects and long-term initiatives, allowing you to see overlapping timelines and resource allocation at a glance.
+- **Intelligent Grouped Filters**: A custom-built toolbar that organizes filters into logical groups to prevent UI clutter:
+  - **Main Calendar Group**: Toggles for granular items like **Events** and **Individual Tasks**.
+  - **Timeline Group**: Toggles for high-level items like **Project Milestones** and **Organizational Time Off**.
+- **Visual Status Indicators**:
+  - **Task Progress**: Tasks on the calendar are color-coded based on status (Todo, In Progress, Completed).
+  - **Time-Off States**: Leave requests are visually distinct based on their approval status (Pending = Amber, Approved = Emerald, Rejected = Rose).
+  - **Privacy Markers**: Events are marked as Public, Private, or Confidential with subtle visual cues.
 
-*   **Concept:** A calendar that not only schedules but prepares you for what's scheduled.
-*   **AI Enhancement: Automated Meeting Prep.**
-*   **How it Works:** Before any scheduled meeting, the AI automatically gathers all relevant information available within the platform—linked tasks, notes from past meetings with the same attendees, and related documents. It then generates a concise "Pre-Meeting Brief" so the user can walk into every meeting fully prepared with zero manual effort.
+## 3. Leave & Time-Off Management System
 
-### d. The Decision Synthesizer (Decision Hub)
+A professional-grade system for managing availability that is deeply integrated into the project planning workflow.
 
-*   **Concept:** A dedicated space for making high-stakes decisions, moving beyond scattered notes and emails.
-*   **AI Enhancement: Argument Summarization & Risk Analysis.**
-*   **How it Works:** The user links all documents, notes, and data related to a major decision. The LLM reads and synthesizes this information, automatically populating "Pros" and "Cons" sections. It can also generate a "Potential Risks" section, flagging blind spots or unanswered questions based on the provided context.
+- **Automated Workflow**:
+  - **Request & Approval**: A structured process for users to request various types of time off (`Leave`, `Sick`, `Other`).
+  - **Manager Dashboard**: Managers and Admins have a central view to review and approve/reject requests with one click.
+- **Intelligent Syncing**: Once a request is approved, the system automatically creates a confirmed entry on the user's calendar and flags the period as "Unavailable."
+- **Assignment Guards**: The API prevents managers from assigning high-priority tasks to users during their approved time-off periods, ensuring realistic project timelines.
+- **Justification & Tracking**: All non-standard leave requests require a written justification, which is stored securely for administrative review. The system also tracks annual leave limits (e.g., 15 days/year).
+
+## 4. Intelligent Task & Project Ecosystem
+
+Moving beyond simple checklists to a robust system that handles the cognitive load of project management.
+
+- **AI Task Decomposition**: For complex objectives like "Launch Q4 Marketing Campaign," the LLM can automatically generate a detailed checklist of sub-tasks, saving manual planning time.
+- **Granular Permission Model (RBAC)**: A robust security layer ensuring data access is strictly controlled:
+  - **Super Admin**: Total system control and user management.
+  - **Manager**: Project oversight and team task assignment.
+  - **Staff/User**: Focus on personal tasks and project contributions.
+  - **Client**: Restricted "view-only" access to specific project progress.
+- **Integrated Time Tracking**: Native timers built into every task. Starting a timer automatically updates the task status and creates a `TimeLog` entry for accurate billing or productivity analysis.
+- **Real-time WebSocket Notifications**: Instant alerts for task assignments, mentions, and project updates, ensuring you never miss a critical change.
+
+## 5. Privacy-First "Local-AI" Architecture
+
+The cornerstone of the MD Dash philosophy: total privacy and data sovereignty for high-level executives.
+
+- **The Ollama Engine**: All AI capabilities are powered by industry-leading open-source models (Llama 3, Mistral, or Phi-3) running **locally** via Ollama.
+- **Identity-as-a-Service**: Secure authentication flow using NextAuth.js with JWT and secure cookie handling.
+- **Zero-Cloud Footprint**: No sensitive data is ever sent to external AI providers or third-party cloud analytics services. Your strategy notes, meeting briefs, and financial tasks remain on your hardware.
+- **Bespoke Customization**: Because the models run locally, they can be fine-tuned or configured to understand your specific professional context and vocabulary over time.
 
 ---
 
-## 3. Open-Source LLM Strategy
-
-To power these features, the platform will run a powerful open-source LLM locally. This is the cornerstone of our commitment to privacy and security.
-
-### a. Why a Local, Open-Source Model?
-
-1.  **Total Privacy & Security:** All data (tasks, notes, calendar events, documents) remains on the user's local machine. Nothing is ever sent to a third-party cloud service, which is non-negotiable for a Managing Director's confidential information.
-2.  **Cost-Effective:** Eliminates recurring API fees associated with commercial models.
-3.  **Unmatched Customization:** Provides deep control over the model's behavior, allowing for fine-tuning on personal data to create a truly bespoke assistant.
-
-### b. Recommended Models
-
-*   **Llama 3:** State-of-the-art model for complex reasoning and high-quality text generation.
-*   **Mistral:** Renowned for its excellent balance of high performance and efficiency.
-*   **Phi-3:** A highly capable smaller model that can run very efficiently on local hardware.
-
-### c. Implementation Plan
-
-*   We will use a tool like **Ollama** to easily download, manage, and serve one of the selected LLMs locally.
-*   The Next.js front-end application will communicate with this local AI engine via a simple API, ensuring a clean separation between the user interface and the AI backend.
+_Version 1.1.0 — Empowering Proactive Management_
