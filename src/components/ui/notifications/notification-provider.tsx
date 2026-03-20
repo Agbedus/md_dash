@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { toast } from 'react-hot-toast';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
+import { toast } from '@/lib/toast';
 import useSWR, { useSWRConfig } from 'swr';
 import { fetcher } from '@/lib/api';
+import { FiCheckCircle, FiInfo, FiAlertCircle } from 'react-icons/fi';
 
 export interface Notification {
   id: string;
@@ -68,7 +69,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
-  const markAsRead = async (id: string) => {
+  const markAsRead = useCallback(async (id: string) => {
     if (!user?.accessToken) return;
 
     mutateNotifications(
@@ -90,9 +91,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
       console.error('Failed to mark notification as read:', error);
       mutateNotifications();
     }
-  };
+  }, [user?.accessToken, baseUrl, mutateNotifications]);
 
-  const markAllAsRead = async () => {
+  const markAllAsRead = useCallback(async () => {
     const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
     
     mutateNotifications(
@@ -107,7 +108,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
         })
     ));
     mutateNotifications();
-  };
+  }, [notifications, user?.accessToken, baseUrl, mutateNotifications]);
 
   useEffect(() => {
     if (!user?.id || !user?.accessToken) {
@@ -130,12 +131,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
         reconnectAttemptsRef.current = 0;
       };
 
-      socket.onmessage = (event) => {
+      socket.onmessage = (event: MessageEvent) => {
         try {
           const notification: Notification = JSON.parse(event.data);
           mutateNotifications((currentNotifications = []) => [notification, ...currentNotifications], false);
+          
+          let icon = <FiInfo size={22} className="text-blue-400" />;
+          if (notification.type === 'success') icon = <FiCheckCircle size={22} className="text-emerald-400" />;
+          if (notification.type === 'error') icon = <FiAlertCircle size={22} className="text-rose-400" />;
+          if (notification.type === 'warning') icon = <FiAlertCircle size={22} className="text-amber-400" />;
+
           toast(notification.title, {
-            icon: notification.type === 'success' ? '✅' : '🔔',
+            icon,
             duration: 4000,
           });
         } catch (err) {
@@ -170,8 +177,26 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
     };
   }, [user?.id, user?.accessToken, baseUrl, mutateNotifications]);
 
+  const contextValue = React.useMemo(() => ({ 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    isConnected, 
+    user, 
+    users 
+  }), [
+    notifications, 
+    unreadCount, 
+    markAsRead,
+    markAllAsRead,
+    isConnected, 
+    user, 
+    users
+  ]);
+
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, isConnected, user, users }}>
+    <NotificationContext.Provider value={contextValue}>
       {children}
     </NotificationContext.Provider>
   );

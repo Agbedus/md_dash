@@ -11,6 +11,12 @@ import {
   getProjectProgressData,
   getAIPriorities,
   getSummaryStats,
+  getUnitLoadDistribution,
+  getPriorityMatrix,
+  getTemporalBurnRate,
+  getCriticalBottlenecks,
+  getLatestIntelligence,
+  getOperationVelocity,
 } from "@/app/lib/dashboard-actions";
 import { RangeFilter } from "./range-filter";
 import {
@@ -19,6 +25,7 @@ import {
   WorkloadChart,
   TimeAllocationChart,
   ProjectProgressChart,
+  VelocityChart,
 } from "@/components/ui/client-charts";
 import { Sparkline } from "@/components/ui/sparkline";
 import {
@@ -37,6 +44,11 @@ import {
   FiCalendar,
   FiActivity,
   FiUsers,
+  FiAlertTriangle,
+  FiTrendingUp,
+  FiTarget,
+  FiShield,
+  FiRadio,
 } from "react-icons/fi";
 
 const AvatarGroup = ({ users, total }: { users: any[], total: number }) => {
@@ -431,6 +443,367 @@ export function FocusModeSection() {
       <button className="relative z-10 px-6 py-2.5 rounded-xl bg-white/[0.06] border border-white/5 text-white font-medium hover:bg-white/20 transition-all duration-200 active:scale-95">
         Start Session
       </button>
+    </div>
+  );
+}
+
+// ── NEW TACTICAL INSIGHT SECTIONS ──────────────────────────────────
+
+export async function UnitLoadSection() {
+  const data = await getUnitLoadDistribution();
+  const maxTasks = Math.max(...data.map(d => d.activeTasks), 1);
+
+  return (
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+      <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
+        <div>
+          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Resource Saturation</h2>
+          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Unit Load Distribution</p>
+        </div>
+        <div className="p-2 rounded-xl bg-[var(--pastel-blue)]/10">
+          <FiUsers className="text-sm text-[var(--pastel-blue)]" />
+        </div>
+      </div>
+      <div className="flex-1 min-h-0 space-y-2.5 overflow-y-auto pr-1 custom-scrollbar">
+        {data.length > 0 ? (
+          data.map((user, i) => (
+            <div key={i} className="flex items-center gap-3 group">
+              <div className="shrink-0 h-7 w-7 rounded-full bg-zinc-800 overflow-hidden ring-1 ring-white/10">
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-white bg-[var(--pastel-purple)]/20">
+                    {user.name?.[0]?.toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-zinc-300 font-medium truncate">{user.name}</span>
+                  <span className="text-xs font-bold text-white ml-2">{user.activeTasks}</span>
+                </div>
+                <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${(user.activeTasks / maxTasks) * 100}%`,
+                      background: user.activeTasks >= maxTasks * 0.8
+                        ? 'var(--pastel-rose)' 
+                        : user.activeTasks >= maxTasks * 0.5 
+                          ? 'var(--pastel-amber)' 
+                          : 'var(--pastel-emerald)'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
+            <FiUsers className="text-2xl mb-2 text-zinc-500" />
+            <p className="text-sm text-zinc-400">No active assignments</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export async function PriorityMatrixSection() {
+  const data = await getPriorityMatrix();
+
+  const COLORS: Record<string, string> = {
+    'Critical': 'var(--pastel-rose)',
+    'Medium': 'var(--pastel-amber)',
+    'Low': 'var(--pastel-emerald)',
+  };
+
+  return (
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+      <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
+        <div>
+          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Threat Level</h2>
+          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Priority Matrix</p>
+        </div>
+        {data.hasCritical && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20">
+            <FiAlertTriangle className="text-[11px] text-[var(--pastel-rose)]" />
+            <span className="text-[11px] font-bold text-[var(--pastel-rose)]">{data.criticalCount} CRITICAL</span>
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-center">
+        {/* Segmented ring */}
+        <div className="relative w-36 h-36 mb-5">
+          <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+            {(() => {
+              let offset = 0;
+              const total = data.segments.reduce((s, seg) => s + seg.value, 0);
+              if (total === 0) return <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10" />;
+              return data.segments.map((seg, i) => {
+                const pct = (seg.value / total) * 100;
+                const dashArray = `${pct * 2.512} ${251.2 - pct * 2.512}`;
+                const el = (
+                  <circle
+                    key={i}
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    stroke={seg.color}
+                    strokeWidth="10"
+                    strokeDasharray={dashArray}
+                    strokeDashoffset={-offset * 2.512}
+                    strokeLinecap="round"
+                    className="transition-all duration-700"
+                  />
+                );
+                offset += pct;
+                return el;
+              });
+            })()}
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-2xl font-bold text-white">{data.total}</span>
+            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Active</span>
+          </div>
+        </div>
+        {/* Legend */}
+        <div className="flex gap-4">
+          {data.segments.map((seg, i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full" style={{ background: COLORS[seg.name] || seg.color }} />
+              <span className="text-[11px] text-zinc-400">{seg.name}</span>
+              <span className="text-[11px] font-bold text-white">{seg.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export async function TemporalBurnRateSection() {
+  const data = await getTemporalBurnRate();
+
+  const actualPct = Math.min(data.burnRatio, 150);
+
+  const statusConfig = {
+    over: { label: 'Over Budget', color: 'text-[var(--pastel-rose)]', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
+    on_track: { label: 'On Track', color: 'text-[var(--pastel-emerald)]', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+    under: { label: 'Under Estimate', color: 'text-[var(--pastel-blue)]', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+  };
+  const sc = statusConfig[data.status as keyof typeof statusConfig];
+
+  return (
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+      <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
+        <div>
+          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Temporal Burn Rate</h2>
+          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Chronological Efficiency</p>
+        </div>
+        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${sc.bg} border ${sc.border}`}>
+          <FiTarget className={`text-[11px] ${sc.color}`} />
+          <span className={`text-[11px] font-bold ${sc.color}`}>{sc.label}</span>
+        </div>
+      </div>
+      <div className="flex-1 flex flex-col justify-center space-y-8">
+        {/* Estimated Hours Bar */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-zinc-400 font-medium">Estimated Hours</span>
+            <span className="text-sm font-bold text-white">{data.estimatedHours}h</span>
+          </div>
+          <div className="h-3 bg-white/[0.04] rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-[var(--pastel-indigo)]/60 transition-all duration-700" style={{ width: '100%' }} />
+          </div>
+        </div>
+
+        {/* Actual Hours Bar */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-zinc-400 font-medium">Actual Hours Logged</span>
+            <span className="text-sm font-bold text-white">{data.actualHours}h</span>
+          </div>
+          <div className="h-3 bg-white/[0.04] rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-700"
+              style={{
+                width: `${Math.min((actualPct / 150) * 100, 100)}%`,
+                background: data.status === 'over' ? 'var(--pastel-rose)' : data.status === 'on_track' ? 'var(--pastel-emerald)' : 'var(--pastel-blue)'
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Stats footer */}
+        <div className="flex items-center justify-between pt-2 border-t border-white/5">
+          <div className="flex items-center gap-1.5">
+            <FiActivity className="text-xs text-zinc-500" />
+            <span className="text-[11px] text-zinc-500">{data.projectCount} active projects</span>
+          </div>
+          <div className={`text-sm font-bold ${sc.color}`}>
+            {data.burnRatio}% burn
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export async function CriticalBottlenecksSection() {
+  const bottlenecks = await getCriticalBottlenecks();
+
+  return (
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+      <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
+        <div>
+          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Delayed Maneuvers</h2>
+          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Critical Bottlenecks</p>
+        </div>
+        <div className="p-2 rounded-xl bg-rose-500/10">
+          <FiShield className="text-sm text-[var(--pastel-rose)]" />
+        </div>
+      </div>
+      <div className="flex-1 min-h-0 space-y-2.5 overflow-y-auto pr-1 custom-scrollbar">
+        {bottlenecks.length > 0 ? (
+          bottlenecks.map((task, i) => (
+            <div key={i} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all group">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <h3 className="text-sm text-zinc-300 font-medium group-hover:text-white transition-colors truncate flex-1">
+                  {task.title}
+                </h3>
+                <span className="shrink-0 inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-rose-500/15 text-[var(--pastel-rose)] font-bold border border-rose-500/20">
+                  <FiClock className="text-[10px]" />
+                  {task.daysOverdue}d overdue
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                  task.priority === 'high' ? 'bg-rose-500/10 text-rose-400'
+                  : task.priority === 'medium' ? 'bg-amber-500/10 text-amber-400'
+                  : 'bg-zinc-500/10 text-zinc-400'
+                }`}>
+                  <FiZap className="text-[10px]" />
+                  {task.priority}
+                </span>
+                <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-semibold uppercase tracking-wider">
+                  <FiActivity className="text-[10px]" />
+                  {task.status.replace('_', ' ')}
+                </span>
+                {task.projectName && (
+                  <span className="text-[10px] text-zinc-500 truncate">
+                    {task.projectName}
+                  </span>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
+            <FiCheckCircle className="text-2xl mb-2 text-emerald-500" />
+            <p className="text-sm text-zinc-400">No overdue tasks!</p>
+            <p className="text-[11px] text-zinc-600 mt-1">All operations on schedule</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export async function LatestIntelligenceSection() {
+  const intel = await getLatestIntelligence();
+
+  const typeColors: Record<string, string> = {
+    meeting: 'bg-blue-500/10 text-blue-400',
+    idea: 'bg-amber-500/10 text-amber-400',
+    journal: 'bg-pink-500/10 text-pink-400',
+    code: 'bg-purple-500/10 text-purple-400',
+    note: 'bg-zinc-500/10 text-zinc-400',
+  };
+
+  return (
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+      <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
+        <div>
+          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Field Reports</h2>
+          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Latest Intelligence</p>
+        </div>
+        <div className="p-2 rounded-xl bg-[var(--pastel-amber)]/10">
+          <FiRadio className="text-sm text-[var(--pastel-amber)]" />
+        </div>
+      </div>
+      <div className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
+        {intel.length > 0 ? (
+          intel.map((note, i) => (
+            <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.07] transition-all cursor-pointer group">
+              <div className="flex items-center gap-3 mb-2.5">
+                <div className="shrink-0 h-8 w-8 rounded-full bg-zinc-800 overflow-hidden ring-1 ring-white/10">
+                  {note.authorAvatar ? (
+                    <img src={note.authorAvatar} alt={note.authorName} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-white bg-[var(--pastel-indigo)]/20">
+                      {note.authorName?.[0]?.toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-zinc-300 group-hover:text-white transition-colors truncate">
+                    {note.title}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] text-zinc-500">{note.authorName}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-semibold uppercase tracking-wider ${typeColors[note.type] || typeColors.note}`}>
+                      {note.type}
+                    </span>
+                  </div>
+                </div>
+                {note.updatedAt && (
+                  <span className="text-[10px] text-zinc-600 shrink-0" suppressHydrationWarning>
+                    {new Date(note.updatedAt).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
+                {note.excerpt}
+              </p>
+            </div>
+          ))
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
+            <FiFileText className="text-2xl mb-2 text-zinc-500" />
+            <p className="text-sm text-zinc-400">No recent briefings</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export async function OperationVelocitySection() {
+  const data = await getOperationVelocity();
+  const totalClosed = data.reduce((s, d) => s + d.count, 0);
+  const avgPerDay = totalClosed > 0 ? (totalClosed / data.length).toFixed(1) : '0';
+
+  return (
+    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+      <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
+        <div>
+          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Momentum Tracker</h2>
+          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Operation Velocity</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-sm font-bold text-white">{totalClosed}</p>
+            <p className="text-[10px] text-zinc-500">14d total</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-bold text-[var(--pastel-teal)]">{avgPerDay}</p>
+            <p className="text-[10px] text-zinc-500">avg/day</p>
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 w-full min-h-0">
+        <VelocityChart data={data} />
+      </div>
     </div>
   );
 }

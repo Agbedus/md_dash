@@ -14,7 +14,7 @@ import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import TaskCard from '@/components/ui/tasks/task-card';
 import { FiChevronRight, FiChevronDown, FiPlus, FiPieChart } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 interface ProjectTableProps {
   projects: Project[];

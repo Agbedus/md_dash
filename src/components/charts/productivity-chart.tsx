@@ -1,12 +1,22 @@
 "use client";
 
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const ProductivityChart = ({ data }: { data: Array<{ name: string; productivity: number; previousProductivity?: number }> }) => {
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+      <AreaChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+        <defs>
+          <linearGradient id="colorProductivity" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="var(--pastel-indigo)" stopOpacity={0.3}/>
+            <stop offset="95%" stopColor="var(--pastel-indigo)" stopOpacity={0}/>
+          </linearGradient>
+          <linearGradient id="colorPrevious" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="var(--pastel-indigo)" stopOpacity={0.3}/>
+            <stop offset="95%" stopColor="var(--pastel-indigo)" stopOpacity={0}/>
+          </linearGradient>
+        </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
         <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
         <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
@@ -23,25 +33,27 @@ const ProductivityChart = ({ data }: { data: Array<{ name: string; productivity:
             wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }} 
             iconType="circle"
         />
-        <Line 
-            name="Current Period"
-            type="monotone" 
-            dataKey="productivity" 
-            stroke="var(--pastel-indigo)" 
-            strokeWidth={3} 
-            dot={{ r: 4, fill: 'var(--pastel-indigo)', strokeWidth: 2, stroke: 'var(--background)' }} 
-            activeDot={{ r: 6, strokeWidth: 0 }} 
-        />
-        <Line 
+        <Area 
             name="Previous Period"
             type="monotone" 
             dataKey="previousProductivity" 
-            stroke="var(--pastel-rose)" 
+            stroke="var(--pastel-indigo)" 
+            fill="url(#colorPrevious)"
             strokeWidth={2} 
             strokeDasharray="5 5"
             dot={false}
         />
-      </LineChart>
+        <Area 
+            name="Current Period"
+            type="monotone" 
+            dataKey="productivity" 
+            stroke="var(--pastel-indigo)" 
+            fill="url(#colorProductivity)"
+            strokeWidth={3} 
+            dot={{ r: 4, fill: 'var(--pastel-indigo)', strokeWidth: 2, stroke: 'var(--background)' }} 
+            activeDot={{ r: 6, strokeWidth: 0 }} 
+        />
+      </AreaChart>
     </ResponsiveContainer>
   );
 };

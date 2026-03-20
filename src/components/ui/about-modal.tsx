@@ -2,7 +2,8 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiX, FiGithub, FiGlobe, FiCpu, FiShield, FiHeart, FiActivity } from "react-icons/fi";
+import Image from "next/image";
+import { FiX, FiGithub, FiGlobe, FiCpu, FiShield, FiHeart } from "react-icons/fi";
 
 interface AboutModalProps {
     isOpen: boolean;
@@ -40,8 +41,14 @@ export function AboutModal({ isOpen, onClose, version }: AboutModalProps) {
 
                     <div className="p-8 lg:p-10 text-center space-y-8">
                         <div className="space-y-4">
-                            <div className="mx-auto w-24 h-24 rounded-3xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-                                <FiActivity className="w-16 h-16" />
+                            <div className="mx-auto w-24 h-24 rounded-3xl bg-white/[0.03] flex items-center justify-center border border-white/5">
+                                <Image 
+                                    src="/logo.svg" 
+                                    alt="MD Logo" 
+                                    width={64} 
+                                    height={64} 
+                                    className="w-12 h-12 object-contain"
+                                />
                             </div>
                             <div>
                                 <h2 className="text-2xl font-medium text-white uppercase tracking-tight">MD Platform</h2>

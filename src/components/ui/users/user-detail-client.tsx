@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 import { ActivityHeatmap } from '@/components/ui/client-charts';
 import type { TimeOffRequest } from '@/types/time-off';
 import { approveTimeOffRequest, rejectTimeOffRequest } from '@/app/time-off/actions';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 interface TimeLog {
     id: number;

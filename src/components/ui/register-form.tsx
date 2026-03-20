@@ -4,7 +4,7 @@ import { useActionState, useState, useEffect } from 'react';
 import { register } from '@/app/lib/actions';
 import { FiUser, FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLoader, FiEye, FiEyeOff } from 'react-icons/fi';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 export default function RegisterForm() {
   const [errorMessage, dispatch, isPending] = useActionState(register, undefined);

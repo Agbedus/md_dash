@@ -7,7 +7,10 @@ import { logout } from '@/app/lib/actions';
 import { useDashboard } from './dashboard-layout';
 import { FiBell, FiSearch, FiUser, FiSettings, FiLogOut, FiPlus, FiHelpCircle, FiMessageSquare, FiMenu, FiX, FiCheck, FiInfo, FiAlertCircle } from 'react-icons/fi';
 import { useNotifications } from './notifications/notification-provider';
+import { useAnnouncements } from './announcements/announcement-provider';
+import { AnnouncementDropdown } from './announcements/announcement-dropdown';
 import { formatDistanceToNow } from 'date-fns';
+import { useLocation } from '@/providers/location-provider';
 
 interface TopNavProps {
   user?: {
@@ -26,8 +29,14 @@ const TopNav = ({ user }: TopNavProps) => {
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const announcementRef = useRef<HTMLDivElement>(null);
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { unreadCount: announcementUnreadCount, isDropdownOpen: isAnnouncementsOpen, setIsDropdownOpen: setIsAnnouncementsOpen } = useAnnouncements();
   const { isMobileExpanded, setIsMobileExpanded } = useDashboard();
+  const { attendanceState } = useLocation();
+
+  const statusColor = attendanceState === 'CLOCKED_IN' ? 'bg-emerald-500' : 
+                      attendanceState === 'CLOCKED_OUT' ? 'bg-blue-500' : 'bg-zinc-500';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -37,13 +46,16 @@ const TopNav = ({ user }: TopNavProps) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false);
       }
+      if (announcementRef.current && !announcementRef.current.contains(event.target as Node)) {
+        setIsAnnouncementsOpen(false);
+      }
     };
-
+ 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [setIsAnnouncementsOpen, setIsOpen, setIsNotificationsOpen]);
 
   return (
     <>
@@ -51,12 +63,18 @@ const TopNav = ({ user }: TopNavProps) => {
       <nav className="h-16 md:h-24 px-4 md:px-8 flex items-center justify-between md:sticky md:top-0 z-40 bg-zinc-950/80 backdrop-blur-xl md:bg-zinc-950/50 md:backdrop-blur-xl border-b border-white/5 md:border-none">
         <div className="flex items-center gap-6 flex-1">
           {/* Mobile Logo */}
-          <div className="md:hidden flex items-center gap-2">
+          <Link href="/" className="md:hidden flex items-center gap-2">
              <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/5">
-               <div className="text-lg font-bold text-white leading-none">M</div>
+               <Image 
+                 src="/logo.svg" 
+                 alt="MD Logo" 
+                 width={24} 
+                 height={24} 
+                 className="w-6 h-6 object-contain"
+               />
              </div>
              <span className="text-lg font-bold text-white">MD<span className="text-emerald-500">*</span></span>
-          </div>
+          </Link>
 
           <div className="relative group hidden md:block w-full max-w-md">
             <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--pastel-indigo)] transition-colors" />
@@ -168,12 +186,24 @@ const TopNav = ({ user }: TopNavProps) => {
             )}
           </div>
 
+          <div className="relative" ref={announcementRef}>
+            <button 
+              onClick={() => setIsAnnouncementsOpen(!isAnnouncementsOpen)}
+              className="relative p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/[0.03] border border-white/5 rounded-xl hover:border-white/5 group hover-scale"
+              title="Announcements"
+            >
+              <FiMessageSquare className={`text-xl group-hover:text-[var(--pastel-yellow)] transition-colors ${isAnnouncementsOpen ? 'text-[var(--pastel-yellow)]' : 'text-zinc-400'}`} />
+              {announcementUnreadCount > 0 && (
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[var(--pastel-yellow)] rounded-full ring-2 ring-[#09090b] animate-pulse"></span>
+              )}
+            </button>
+
+            {isAnnouncementsOpen && <AnnouncementDropdown />}
+          </div>
+
           <div className="flex gap-2 hidden md:flex">
             <button className="p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/[0.03] border border-white/5 rounded-xl hover:border-white/5 hover-scale" title="Help & Support">
               <FiHelpCircle className="text-xl" />
-            </button>
-            <button className="p-2.5 text-zinc-400 hover:text-white transition-colors bg-white/[0.03] border border-white/5 rounded-xl hover:border-white/5 hover-scale" title="Send Feedback">
-              <FiMessageSquare className="text-xl" />
             </button>
           </div>
 
@@ -195,11 +225,11 @@ const TopNav = ({ user }: TopNavProps) => {
                           className="rounded-lg object-cover border-2 border-white/5 group-hover:border-[var(--pastel-purple)]/50 transition-colors"
                       />
                   ) : (
-                      <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/20 group-hover:border-emerald-500/50 transition-colors">
+                      <div className="w-9 h-9 rounded-lg bg-white/[0.03] flex items-center justify-center text-white font-bold border border-white/5 group-hover:border-white/20 transition-colors">
                           {user.name?.charAt(0) || user.email?.charAt(0)}
                       </div>
                   )}
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#09090b]"></span>
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 ${statusColor} rounded-full border-2 border-[#09090b]`}></span>
                   </div>
                   <div className="hidden lg:block text-left">
                   <p className="text-xs font-bold text-white group-hover:text-[var(--pastel-purple)] transition-colors uppercase tracking-tight">

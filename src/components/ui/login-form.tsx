@@ -3,7 +3,7 @@
 import { useActionState, useState, useEffect } from 'react';
 import { authenticate } from '@/app/lib/actions';
 import { FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLoader, FiEye, FiEyeOff } from 'react-icons/fi';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 export default function LoginForm() {
   const [errorMessage, dispatch, isPending] = useActionState(authenticate, undefined);

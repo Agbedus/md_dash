@@ -11,6 +11,12 @@ import {
   RecentNotesSection, 
   PrioritiesSection, 
   FocusModeSection,
+  UnitLoadSection,
+  PriorityMatrixSection,
+  TemporalBurnRateSection,
+  CriticalBottlenecksSection,
+  LatestIntelligenceSection,
+  OperationVelocitySection,
 } from '@/components/dashboard/sections';
 import { ChartSkeleton, ListSkeleton, CardSkeleton, SummarySkeleton } from '@/components/dashboard/skeletons';
 
@@ -87,6 +93,32 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
         <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><CardSkeleton /></div>}>
             <FocusModeSection />
+        </Suspense>
+
+        {/* Row 4 — Tactical Insights */}
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><ListSkeleton /></div>}>
+            <UnitLoadSection />
+        </Suspense>
+
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><ChartSkeleton /></div>}>
+            <PriorityMatrixSection />
+        </Suspense>
+
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><CardSkeleton /></div>}>
+            <TemporalBurnRateSection />
+        </Suspense>
+
+        {/* Row 5 — Operations Intel */}
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><ListSkeleton /></div>}>
+            <CriticalBottlenecksSection />
+        </Suspense>
+
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><ListSkeleton /></div>}>
+            <LatestIntelligenceSection />
+        </Suspense>
+
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><ChartSkeleton /></div>}>
+            <OperationVelocitySection />
         </Suspense>
 
       </div>

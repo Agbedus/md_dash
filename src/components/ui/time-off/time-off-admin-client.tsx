@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { FiSearch, FiCheck, FiX, FiSun, FiFilter, FiCalendar, FiTrash2 } from 'react-icons/fi';
 import { format, differenceInDays } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 import type { TimeOffRequest, TimeOffStatus, TimeOffType } from '@/types/time-off';
 import type { User } from '@/types/user';

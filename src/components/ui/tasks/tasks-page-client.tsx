@@ -11,7 +11,7 @@ import TaskCard from './task-card';
 import KanbanBoard from './kanban-board';
 import { TaskSummarySection } from './task-summary';
 import { UserLeaderboard } from './user-leaderboard';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 import { CustomDatePicker } from '@/components/ui/inputs/custom-date-picker';
 import { format } from 'date-fns';
 import { createOptimisticTask, updateOptimisticTask } from '@/lib/task-optimistic';

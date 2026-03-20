@@ -16,7 +16,7 @@ import { Sparkline } from "@/components/ui/sparkline";
 import { subDays, isSameDay } from 'date-fns';
 import { useProjects } from '@/hooks/use-projects';
 import { createOptimisticProject, updateOptimisticProject } from '@/lib/optimistic-utils';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 import { useUsers } from '@/hooks/use-users';
 import { useClients } from '@/hooks/use-clients';

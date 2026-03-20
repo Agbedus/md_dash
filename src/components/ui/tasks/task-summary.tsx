@@ -4,7 +4,7 @@ import { Task } from "@/types/task";
 import { batchUpdateTaskStatus } from '@/app/tasks/actions';
 import { Sparkline } from "@/components/ui/sparkline";
 import { format, subDays, isSameDay } from 'date-fns';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 interface TaskSummarySectionProps {
   tasks: Task[];

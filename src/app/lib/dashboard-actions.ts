@@ -445,6 +445,188 @@ export async function getAIPriorities() {
     }
 }
 
+// ── NEW TACTICAL INSIGHT FUNCTIONS ──────────────────────────────────
+
+export async function getUnitLoadDistribution() {
+    const [tasks, users] = await Promise.all([
+        getTasks(undefined, undefined, undefined, undefined, 1000),
+        getUsers()
+    ]);
+
+    // Only count non-DONE tasks
+    const activeTasks = tasks.filter(t => t.status !== 'DONE');
+
+    const userTaskMap = new Map<string, { name: string; avatar: string | null; count: number }>();
+
+    // Initialize with all known users
+    users.forEach((u: any) => {
+        userTaskMap.set(String(u.id), {
+            name: u.name || u.fullName || u.email || 'Unknown',
+            avatar: u.image || u.avatarUrl || null,
+            count: 0
+        });
+    });
+
+    // Count tasks per assignee
+    activeTasks.forEach(t => {
+        if (t.assigneeIds && t.assigneeIds.length > 0) {
+            t.assigneeIds.forEach(uid => {
+                const existing = userTaskMap.get(uid);
+                if (existing) {
+                    existing.count += 1;
+                }
+            });
+        } else if (t.userId) {
+            const existing = userTaskMap.get(t.userId);
+            if (existing) {
+                existing.count += 1;
+            }
+        }
+    });
+
+    return Array.from(userTaskMap.values())
+        .filter(u => u.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8)
+        .map(u => ({ name: u.name, activeTasks: u.count, avatar: u.avatar }));
+}
+
+export async function getPriorityMatrix() {
+    const tasks = await getTasks(undefined, undefined, undefined, undefined, 1000);
+    const activeTasks = tasks.filter(t => t.status !== 'DONE');
+
+    const high = activeTasks.filter(t => t.priority === 'high').length;
+    const medium = activeTasks.filter(t => t.priority === 'medium').length;
+    const low = activeTasks.filter(t => t.priority === 'low').length;
+    const total = activeTasks.length;
+
+    return {
+        segments: [
+            { name: 'Critical', value: high, color: 'var(--pastel-rose)' },
+            { name: 'Medium', value: medium, color: 'var(--pastel-amber)' },
+            { name: 'Low', value: low, color: 'var(--pastel-emerald)' },
+        ].filter(s => s.value > 0),
+        total,
+        criticalCount: high,
+        hasCritical: high > 0,
+    };
+}
+
+export async function getTemporalBurnRate() {
+    const [tasks, projects] = await Promise.all([
+        getTasks(undefined, undefined, undefined, undefined, 1000),
+        getProjects()
+    ]);
+
+    const activeProjects = projects.filter(p => p.status === 'in_progress' || p.status === 'planning');
+
+    // Aggregate actual hours from task timeLogs
+    let totalActualHours = 0;
+    let totalEstimatedHours = 0;
+
+    activeProjects.forEach(p => {
+        const projectTasks = tasks.filter(t => t.projectId === p.id);
+        projectTasks.forEach(t => {
+            if (t.totalHours) {
+                totalActualHours += t.totalHours;
+            }
+        });
+        // Use project budget as a proxy for estimated hours if no dedicated field
+        // Since projects have budget/spent but no estimated_hours field,
+        // we'll estimate based on task count * average hours
+        totalEstimatedHours += projectTasks.length * 4; // 4h estimate per task as baseline
+    });
+
+    // Ensure minimum values for visual display
+    if (totalEstimatedHours === 0) totalEstimatedHours = 1;
+
+    const burnRatio = totalActualHours / totalEstimatedHours;
+    const status = burnRatio > 1.2 ? 'over' : burnRatio > 0.8 ? 'on_track' : 'under';
+
+    return {
+        estimatedHours: Math.round(totalEstimatedHours),
+        actualHours: Math.round(totalActualHours * 10) / 10,
+        burnRatio: Math.round(burnRatio * 100),
+        status,
+        projectCount: activeProjects.length,
+    };
+}
+
+export async function getCriticalBottlenecks() {
+    const [tasks, projects] = await Promise.all([
+        getTasks(undefined, undefined, undefined, undefined, 1000),
+        getProjects()
+    ]);
+
+    const now = new Date();
+
+    const overdueTasks = tasks
+        .filter(t => {
+            if (t.status === 'DONE') return false;
+            if (!t.dueDate) return false;
+            return new Date(t.dueDate) < now;
+        })
+        .map(t => {
+            const dueDate = new Date(t.dueDate!);
+            const daysOverdue = Math.ceil((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+            const project = t.projectId ? projects.find(p => p.id === t.projectId) : null;
+            return {
+                title: t.name,
+                dueDate: t.dueDate!,
+                priority: t.priority,
+                status: t.status,
+                daysOverdue,
+                projectName: project?.name || null,
+            };
+        })
+        .sort((a, b) => b.daysOverdue - a.daysOverdue)
+        .slice(0, 4);
+
+    return overdueTasks;
+}
+
+export async function getLatestIntelligence() {
+    const [notes, users] = await Promise.all([
+        getNotes(5),
+        getUsers()
+    ]);
+
+    return notes.slice(0, 2).map(n => {
+        const author = users.find((u: any) => String(u.id) === String(n.user_id));
+        const excerpt = n.content
+            ? n.content.replace(/<[^>]*>/g, '').substring(0, 120).trim() + (n.content.length > 120 ? '…' : '')
+            : 'No content';
+
+        return {
+            title: n.title,
+            type: n.type,
+            authorName: author?.name || author?.fullName || 'Unknown',
+            authorAvatar: author?.image || author?.avatarUrl || null,
+            excerpt,
+            updatedAt: n.updated_at,
+        };
+    });
+}
+
+export async function getOperationVelocity() {
+    const tasks = await getTasks(undefined, undefined, 'DONE', undefined, 1000);
+
+    const now = new Date();
+    const days = 14;
+
+    return Array.from({ length: days }, (_, i) => {
+        const date = subDays(now, days - 1 - i);
+        const dateStr = format(date, 'yyyy-MM-dd');
+        const count = tasks.filter(t =>
+            t.updatedAt && format(new Date(t.updatedAt), 'yyyy-MM-dd') === dateStr
+        ).length;
+
+        return {
+            date: format(date, 'MMM d'),
+            count,
+        };
+    });
+}
 
 export async function getActivityData(userId?: string) {
   const [tasks, notes] = await Promise.all([

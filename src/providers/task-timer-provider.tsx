@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Task } from '@/types/task';
 import { startTaskTimer, pauseTaskTimer, stopTaskTimer as stopTaskTimerAction } from '@/app/tasks/actions';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 interface TaskTimerContextType {
     activeTask: Task | null;
@@ -137,17 +137,28 @@ export function TaskTimerProvider({ children }: { children: React.ReactNode }) {
         }
     }, [activeTask]);
 
+    const value = React.useMemo(() => ({
+        activeTask,
+        isPaused,
+        elapsedTime,
+        targetTime,
+        startTimer,
+        pauseTimer,
+        resumeTimer,
+        stopTimer
+    }), [
+        activeTask,
+        isPaused,
+        elapsedTime,
+        targetTime,
+        startTimer,
+        pauseTimer,
+        resumeTimer,
+        stopTimer
+    ]);
+
     return (
-        <TaskTimerContext.Provider value={{
-            activeTask,
-            isPaused,
-            elapsedTime,
-            targetTime,
-            startTimer,
-            pauseTimer,
-            resumeTimer,
-            stopTimer
-        }}>
+        <TaskTimerContext.Provider value={value}>
             {children}
         </TaskTimerContext.Provider>
     );

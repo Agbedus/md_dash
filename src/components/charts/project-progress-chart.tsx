@@ -30,7 +30,7 @@ const ProjectProgressChart = ({ data }: { data: Array<{ name: string; progress: 
             borderRadius: '0.75rem',
             fontSize: '12px'
           }}
-          formatter={(value: number) => [`${value}%`, 'Progress']}
+          formatter={(value: any) => [`${value}%`, 'Progress']}
         />
         <Bar dataKey="progress" radius={[0, 4, 4, 0]} barSize={12}>
           {data.map((entry, index) => (

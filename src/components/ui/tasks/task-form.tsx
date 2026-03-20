@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { createTask } from '@/app/tasks/actions';
 import { CustomDatePicker } from '@/components/ui/inputs/custom-date-picker';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 export default function TaskForm({ onSuccess }: { onSuccess: () => void }) {
   const [name, setName] = useState('');

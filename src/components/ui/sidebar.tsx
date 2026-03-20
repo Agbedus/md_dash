@@ -16,11 +16,16 @@ import {
   FiClock,
   FiLogOut,
   FiBriefcase,
+  FiMapPin,
   FiUsers,
   FiBookOpen,
   FiInfo,
   FiSun,
+  FiChevronDown,
+  FiChevronLeft,
+  FiChevronRight,
 } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { logout } from "@/app/lib/actions";
 import { AboutModal } from "./about-modal";
@@ -44,11 +49,15 @@ const Sidebar = ({ user }: SidebarProps) => {
     setIsDesktopCollapsed,
   } = useDashboard();
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [isToolsOpen, setIsToolsOpen] = useState(true);
+  const [isSystemOpen, setIsSystemOpen] = useState(true);
   const version = "0.1.0";
 
   // Existing expansion logic
   const isExpandedMobile = isMobileExpanded;
   const isExpandedDesktop = !isDesktopCollapsed;
+  const isSidebarCollapsed = !isExpandedMobile && !isExpandedDesktop;
 
   /* ---------------- Styles ---------------- */
 
@@ -56,8 +65,8 @@ const Sidebar = ({ user }: SidebarProps) => {
     isExpandedDesktop ? "w-64" : "w-20"
   }`;
 
-  // Always left-aligned with consistent padding
-  const itemAlignmentClass = "justify-start px-6";
+  // Dynamic alignment based on sidebar state
+  const itemAlignmentClass = isSidebarCollapsed ? "justify-center px-0" : "justify-start px-6";
 
   const contentVisibilityClass = `${isExpandedMobile ? "block" : "hidden"} md:${
     isExpandedDesktop ? "block" : "hidden"
@@ -81,12 +90,12 @@ const Sidebar = ({ user }: SidebarProps) => {
 
   const headerClass = `
     h-20 flex items-center border-b border-white/5 transition-all duration-300
-    justify-start px-6
+    ${isSidebarCollapsed ? "justify-center px-0" : "justify-start px-6"}
   `;
 
   const headerInnerClass = `
     flex items-center w-full
-    ${isExpandedMobile || isExpandedDesktop ? "justify-between" : "justify-start gap-2"}
+    ${isExpandedMobile || isExpandedDesktop ? "justify-between" : "justify-center"}
   `;
 
   /* ---------- Menu container ---------- */
@@ -115,6 +124,7 @@ const Sidebar = ({ user }: SidebarProps) => {
   ];
 
   const toolMenuItems = [
+    { href: "/attendance", icon: FiMapPin, label: "Attendance", color: "text-sky-400" },
     { href: "/focus", icon: FiClock, label: "Focus Mode", color: "text-orange-400" },
     { href: "/assistant", icon: FiCpu, label: "AI Assistant", color: "text-cyan-400" },
     { href: "/settings", icon: FiSettings, label: "Settings", color: "text-indigo-400" },
@@ -144,6 +154,18 @@ const Sidebar = ({ user }: SidebarProps) => {
       {/* ---------- Header ---------- */}
       <div className={headerClass}>
         <div className={headerInnerClass}>
+          <div className="flex items-center">
+            <div className="w-10 h-10 p-1 bg-white/[0.03] rounded-lg border border-white/5 flex items-center justify-center shrink-0">
+              <Image 
+                src="/logo.svg" 
+                alt="MD Logo" 
+                width={32} 
+                height={32} 
+                className="w-8 h-8 object-contain"
+              />
+            </div>
+          </div>
+
           <button
             onClick={() => {
               if (typeof window !== "undefined" && window.innerWidth < 768) {
@@ -152,61 +174,138 @@ const Sidebar = ({ user }: SidebarProps) => {
                 setIsDesktopCollapsed(!isDesktopCollapsed);
               }
             }}
-            className="flex items-center gap-3 hover-scale focus:outline-none"
+            className={`p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-white shrink-0 ${isSidebarCollapsed ? "" : "ml-2"}`}
+            title={isExpandedDesktop ? "Collapse Sidebar" : "Expand Sidebar"}
           >
-            <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/5">
-              <FiLayers className="text-lg text-white" />
-            </div>
-            <span className={`text-xl font-bold text-white ${contentVisibilityClass}`}>
-              MD<span className="text-emerald-500">*</span>
-            </span>
+            {isExpandedMobile || isExpandedDesktop ? (
+              <FiChevronLeft size={18} />
+            ) : (
+              <FiChevronRight size={18} />
+            )}
           </button>
         </div>
       </div>
 
       {/* ---------- Menu ---------- */}
       <div className={menuContainerClass}>
-        <h3
-          className={`px-6 text-[11px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className={`w-full flex items-center justify-between px-6 mb-2 group/header focus:outline-none ${!contentVisibilityClass.includes('hidden') ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          Menu
-        </h3>
-        <nav className="space-y-2">{mainMenuItems.map(renderMenuItem)}</nav>
-
-        <h3
-          className={`px-6 mt-6 text-[11px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
-        >
-          Tools
-        </h3>
-        <nav className="space-y-2">
-          {toolMenuItems.map(renderMenuItem)}
-
-          {user?.roles?.some((r) => ["manager", "super_admin"].includes(r)) && (
-            <>
-              {renderMenuItem({ href: "/users", icon: FiUsers, label: "Users", color: "text-teal-400" })}
-              {renderMenuItem({ href: "/clients", icon: FiUsers, label: "Clients", color: "text-violet-400" })}
-            </>
-          )}
-          {user?.roles?.includes("super_admin") && (
-            renderMenuItem({ href: "/time-off", icon: FiSun, label: "Time Off", color: "text-amber-400" })
-          )}
-        </nav>
-
-        <h3
-          className={`px-6 mt-6 text-[11px] font-semibold text-zinc-500 uppercase mb-2 ${contentVisibilityClass}`}
-        >
-          System
-        </h3>
-        <nav className="space-y-2">
-          {systemMenuItems.map(renderMenuItem)}
-          <button
-            onClick={() => setIsAboutOpen(true)}
-            className={`${baseLinkClasses} ${inactiveLinkClasses} ${itemAlignmentClass} ${iconSpacingClass} w-full`}
+          <h3 className={`text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ${contentVisibilityClass}`}>
+            Menu
+          </h3>
+          <motion.div
+            initial={false}
+            animate={{ rotate: isMenuOpen ? 0 : -90 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className={`${contentVisibilityClass} text-zinc-600 group-hover/header:text-zinc-400`}
           >
-            <FiInfo className={`flex-shrink-0 ${iconSizeClass} text-zinc-400`} />
-            <span className={contentVisibilityClass}>About Platform</span>
-          </button>
-        </nav>
+            <FiChevronDown size={14} />
+          </motion.div>
+        </button>
+        
+        <AnimatePresence initial={false}>
+          {(isMenuOpen || isSidebarCollapsed) && (
+            <motion.div
+              initial={isExpandedMobile || isExpandedDesktop ? { height: 0, opacity: 0 } : false}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              style={{ overflow: "hidden" }}
+              className="space-y-1"
+            >
+              <nav className="space-y-1.5 px-2">
+                {mainMenuItems.map(renderMenuItem)}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <button
+          onClick={() => setIsToolsOpen(!isToolsOpen)}
+          className={`w-full flex items-center justify-between px-6 mt-6 mb-2 group/header focus:outline-none ${!contentVisibilityClass.includes('hidden') ? 'cursor-pointer' : 'cursor-default'}`}
+        >
+          <h3 className={`text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ${contentVisibilityClass}`}>
+            Tools
+          </h3>
+          <motion.div
+            initial={false}
+            animate={{ rotate: isToolsOpen ? 0 : -90 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className={`${contentVisibilityClass} text-zinc-600 group-hover/header:text-zinc-400`}
+          >
+            <FiChevronDown size={14} />
+          </motion.div>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {(isToolsOpen || isSidebarCollapsed) && (
+            <motion.div
+              initial={isExpandedMobile || isExpandedDesktop ? { height: 0, opacity: 0 } : false}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              style={{ overflow: "hidden" }}
+              className="space-y-1"
+            >
+              <nav className="space-y-1.5 px-2">
+                {toolMenuItems.map(renderMenuItem)}
+
+                {user?.roles?.some((r) => ["manager", "super_admin"].includes(r)) && (
+                  <>
+                    {renderMenuItem({ href: "/users", icon: FiUsers, label: "Users", color: "text-teal-400" })}
+                    {renderMenuItem({ href: "/clients", icon: FiUsers, label: "Clients", color: "text-violet-400" })}
+                  </>
+                )}
+                {user?.roles?.includes("super_admin") && (
+                  renderMenuItem({ href: "/time-off", icon: FiSun, label: "Time Off", color: "text-amber-400" })
+                )}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <button
+          onClick={() => setIsSystemOpen(!isSystemOpen)}
+          className={`w-full flex items-center justify-between px-6 mt-6 mb-2 group/header focus:outline-none ${!contentVisibilityClass.includes('hidden') ? 'cursor-pointer' : 'cursor-default'}`}
+        >
+          <h3 className={`text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ${contentVisibilityClass}`}>
+            System
+          </h3>
+          <motion.div
+            initial={false}
+            animate={{ rotate: isSystemOpen ? 0 : -90 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className={`${contentVisibilityClass} text-zinc-600 group-hover/header:text-zinc-400`}
+          >
+            <FiChevronDown size={14} />
+          </motion.div>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {(isSystemOpen || isSidebarCollapsed) && (
+            <motion.div
+              initial={isExpandedMobile || isExpandedDesktop ? { height: 0, opacity: 0 } : false}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              style={{ overflow: "hidden" }}
+              className="space-y-1"
+            >
+              <nav className="space-y-1.5 px-2">
+                {systemMenuItems.map(renderMenuItem)}
+                <button
+                  onClick={() => setIsAboutOpen(true)}
+                  className={`${baseLinkClasses} ${inactiveLinkClasses} ${itemAlignmentClass} ${iconSpacingClass} w-full`}
+                >
+                  <FiInfo className={`flex-shrink-0 ${iconSizeClass} text-zinc-400`} />
+                  <span className={contentVisibilityClass}>About Platform</span>
+                </button>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* ---------- Footer ---------- */}
@@ -245,8 +344,8 @@ const Sidebar = ({ user }: SidebarProps) => {
           <span className={contentVisibilityClass}>Sign Out</span>
         </button>
 
-        <div className={`px-6 py-2 flex items-center justify-between ${contentVisibilityClass}`}>
-            <span className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider leading-none">
+        <div className={`py-2 flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between px-6"}`}>
+            <span className={`text-[11px] font-medium text-zinc-600 uppercase tracking-wider leading-none ${contentVisibilityClass}`}>
                 v{version}
             </span>
             <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] font-medium text-amber-500 uppercase tracking-wider leading-none">

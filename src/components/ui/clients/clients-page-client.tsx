@@ -6,7 +6,7 @@ import { FiPlus, FiSearch, FiX, FiCheck, FiEdit2, FiTrash2, FiMail, FiGlobe, FiU
 import { createClient, updateClient, deleteClient } from '@/app/clients/actions';
 import ClientCard from './client-card';
 import ClientTable from './client-table';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 import { useClients } from '@/hooks/use-clients';
 import { createOptimisticClient, updateOptimisticClient } from '@/lib/optimistic-utils';
 

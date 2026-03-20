@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { cache } from 'react';
 
 
 const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
@@ -32,7 +31,7 @@ interface ApiProject {
     updated_at: string;
 }
 
-export const getProjects = cache(async function(limit?: number, skip?: number): Promise<Project[]> {
+export async function getProjects(limit?: number, skip?: number): Promise<Project[]> {
 
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
@@ -93,9 +92,9 @@ export const getProjects = cache(async function(limit?: number, skip?: number): 
         console.error("Error fetching projects:", error);
         return [];
     }
-});
+}
 
-export const getProject = cache(async function(id: number): Promise<Project | null> {
+export async function getProject(id: number): Promise<Project | null> {
     const session = await auth();
     // @ts-expect-error accessToken is not in default session type
     if (!session?.user?.accessToken) return null;
@@ -143,7 +142,7 @@ export const getProject = cache(async function(id: number): Promise<Project | nu
         console.error(`Error fetching project ${id}:`, error);
         return null;
     }
-});
+}
 
 export async function createProject(formData: FormData) {
     const session = await auth();

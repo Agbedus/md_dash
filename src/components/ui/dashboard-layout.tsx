@@ -2,6 +2,8 @@
 
 import React, { useState, createContext, useContext } from 'react';
 import { NotificationProvider } from './notifications/notification-provider';
+import { AnnouncementProvider } from './announcements/announcement-provider';
+import { AnnouncementDrawer } from './announcements/announcement-drawer';
 import { MobileNav } from './mobile-nav';
 import { CommandMenu } from './command-menu';
 
@@ -45,26 +47,29 @@ export default function DashboardLayout({
         setIsDesktopCollapsed 
     }}>
       <NotificationProvider user={user}>
-        <div className="flex h-screen bg-zinc-950 overflow-hidden relative">
-          {/* Sidebar container */}
-          <div className="z-30">
-              {sidebar}
-          </div>
-
-          {/* Main Content Area */}
-          <div 
-            className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] relative
-              ${isMobileExpanded ? 'md:translate-x-0 translate-x-24' : 'translate-x-0'}
-            `}
-          >
-            {topnav}
-            <div className="flex-1 overflow-y-auto w-full pb-20 md:pb-0">
-              {children}
+        <AnnouncementProvider user={user}>
+          <div className="flex h-screen bg-zinc-950 overflow-hidden relative">
+            {/* Sidebar container */}
+            <div className="z-30">
+                {sidebar}
             </div>
+
+            {/* Main Content Area */}
+            <div 
+              className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] relative
+                ${isMobileExpanded ? 'md:translate-x-0 translate-x-24' : 'translate-x-0'}
+              `}
+            >
+              {topnav}
+              <div className="flex-1 overflow-y-auto w-full pb-20 md:pb-0">
+                {children}
+              </div>
+            </div>
+            <MobileNav setIsCommandOpen={setIsCommandOpen} />
+            <CommandMenu open={isCommandOpen} setOpen={setIsCommandOpen} />
+            <AnnouncementDrawer />
           </div>
-          <MobileNav setIsCommandOpen={setIsCommandOpen} />
-          <CommandMenu open={isCommandOpen} setOpen={setIsCommandOpen} />
-        </div>
+        </AnnouncementProvider>
       </NotificationProvider>
     </DashboardContext.Provider>
   );

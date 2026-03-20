@@ -13,7 +13,7 @@ import NoteCard from './note-card';
 import dynamic from 'next/dynamic';
 import { useNotes } from '@/hooks/use-notes';
 import { createOptimisticNote, updateOptimisticNote } from '@/lib/optimistic-utils';
-import toast from 'react-hot-toast';
+import { toast } from '@/lib/toast';
 
 const NoteFormModal = dynamic(() => import('./NoteFormModal'), { ssr: false });
 

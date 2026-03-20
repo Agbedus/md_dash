@@ -1,9 +1,32 @@
 # Fast Dash API Documentation
 
-**Version:** 1.1.0  
+**Version:** 1.2.0  
 **Base URL:** `/api/v1`
 
 ## Changelog
+
+
+### 2026-03-20
+
+- Enhanced Announcements system with `type` classification (info, success, warning, error, critical).
+- Added `creator` relationship to announcements for attribution.
+- Updated WebSocket broadcast payload to include announcement type and creator ID.
+- Improved Announcements UI with search filtering and color-coded priority levels.
+
+### 2026-03-19
+
+- Introduced Announcements system for system-wide broadcasts.
+- Added CRUD endpoints for announcements under `/api/v1/announcements`.
+- Implemented real-time announcement broadcasting via WebSocket at `/ws/announcements`.
+- Restricted announcement management (Create, Update, Delete) to `SUPER_ADMIN`.
+- Added automatic `creator_id` injection for announcements and other resources in admin-db.
+
+### 2026-03-09
+
+- Introduced Attendance & Presence tracking system.
+- Added endpoints for real-time location updates and presence state evaluation.
+- Implemented office location management and attendance policy configuration.
+- Added support for attendance record overrides by managers.
 
 ### 2026-03-02
 
@@ -50,6 +73,8 @@
    - Notes
    - Events
    - Leave & Time-Off
+   - Attendance
+   - Announcements
    - Decisions
    - Notifications
    - Admin
@@ -577,6 +602,173 @@ Time-Off Status enum:
 
 ---
 
+## Attendance Endpoints
+
+Base path: `/api/v1/attendance`
+
+### Frontend Implementation Notes
+
+- **Background Location Tracking**: The mobile/web client should periodically send the user's GPS coordinates (`latitude`, `longitude`, `accuracy_meters`) and `office_location_id` to `POST /api/v1/attendance/location-update` when the user is expected to be working.
+- **Automatic Transitions**: The backend automatically handles clock-ins, transitions, and clock-outs based on the derived zone calculate in `location-update`. The frontend does not need manual clock-in/out buttons.
+- **Accuracy Jitter Avoidance**: The backend ignores location updates with accuracy worst than 30m when evaluating exiting an office zone. Always pass the device's native `accuracy_meters` so the algorithm can function correctly.
+- **Admin & Manager Dashboards**: High-level team views should use `/team/today` to list the current status of the team. Super Admins have access to the `/admin/*` routes for detailed debugging logs (such as raw location logs and presence state histories).
+- **Overrides**: Use `POST /api/v1/attendance/{attendance_record_id}/override` to correct mistakes. This logs who made the override and what the original states were.
+- **Office Configuration CRUD**: The frontend database explorer natively handles full Create, Read, Update, and Delete operations for `office_locations` and `attendance_policies` by using the generic `/api/v1/admin-db/*` endpoints. Super admins can completely construct and adjust policy details here.
+
+### Standard User & Real-time Location
+
+#### Update Location & Presence
+- **POST** `/api/v1/attendance/location-update`
+- **Auth Required:** `STAFF` or above
+- **Behavior**: Evaluates current presence zone based on distance from office, updates presence state (e.g., `IN_OFFICE` -> `TEMPORARILY_OUT`), and manages automatic clock-in/out transitions.
+
+#### Get My Attendance Today
+- **GET** `/api/v1/attendance/me/today`
+- **Auth Required:** `STAFF` or above
+- **Returns**: Current day's `AttendanceRecord` or `null`.
+
+#### Get My Attendance History
+- **GET** `/api/v1/attendance/me/history`
+- **Auth Required:** `STAFF` or above
+- **Returns**: List of `AttendanceRecord` for the current user, newest first.
+
+### Manager & Admin Data Access
+
+#### List Team Attendance Today
+- **GET** `/api/v1/attendance/team/today`
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
+- **Returns**: List of all `AttendanceRecord` for today.
+
+#### Get User Attendance History
+- **GET** `/api/v1/attendance/{user_id}/history`
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
+- **Returns**: List of `AttendanceRecord` for the specified user.
+
+#### Override Attendance Record
+- **POST** `/api/v1/attendance/{attendance_record_id}/override`
+- **Auth Required:** `MANAGER` or `SUPER_ADMIN`
+- **Payload**: `AttendanceOverrideRequest`
+- **Behavior**: Manually sets clock-in/out times. Adjusts `attendance_state` automatically and creates an `AttendanceOverride` log.
+
+### Super Admin Raw Data & Configuration
+
+#### Office Locations Configuration
+- **GET** `/api/v1/attendance/office-locations` (Auth: `STAFF` or above)
+- **POST** `/api/v1/attendance/office-locations` (Auth: `SUPER_ADMIN` only)
+- **PATCH** `/api/v1/attendance/office-locations/{id}` (Auth: `SUPER_ADMIN` only)
+
+##### Attendance Policy (Office Link)
+- **GET** `/api/v1/attendance-policy/{office_location_id}` (Auth: `SUPER_ADMIN` only)
+- **PATCH** `/api/v1/attendance-policy/{office_location_id}` (Auth: `SUPER_ADMIN` only)
+- **Note**: Convenient endpoints for accessing a policy via its office ID.
+
+#### Attendance Policy (Full REST CRUD)
+These endpoints allow direct management of policy objects by their unique ID.
+- **GET** `/api/v1/attendance/admin/all-policies` (Auth: `SUPER_ADMIN` only)
+- **POST** `/api/v1/attendance/policies` (Auth: `SUPER_ADMIN` only)
+- **GET** `/api/v1/attendance/policies/{id}` (Auth: `SUPER_ADMIN` only)
+- **PATCH** `/api/v1/attendance/policies/{id}` (Auth: `SUPER_ADMIN` only)
+- **DELETE** `/api/v1/attendance/policies/{id}` (Auth: `SUPER_ADMIN` only)
+
+##### Attendance Policy Schema
+| Field | Type | Description | Required on Create |
+| :--- | :--- | :--- | :--- |
+| `id` | `int` | Primary key. | No |
+| `office_location_id` | `int` | Foreign key to `office_locations`. | **Yes** |
+| `check_in_open_time` | `time` | Earliest time user can be "first seen" (e.g., `07:30:00`). | No (Default: 07:30) |
+| `check_in_close_time` | `time` | Latest time for window-based check-in. | No (Default: 10:00) |
+| `work_start_time` | `time` | Target start time for lateness check. | No (Default: 08:30) |
+| `work_end_time` | `time` | Target end time. | No (Default: 18:00) |
+| `auto_clock_out_time` | `time` | Automatic clock out trigger time. | No (Default: 18:00) |
+| `temporarily_out_grace_minutes` | `int` | Minutes allowed in `TEMPORARILY_OUT`. | No (Default: 5) |
+| `out_of_office_grace_minutes` | `int` | Minutes allowed in `OUT_OF_OFFICE`. | No (Default: 10) |
+| `return_to_office_confirmation_minutes` | `int` | Duration for return confirmation. | No (Default: 2) |
+
+##### Implementation Notes
+- **Permissions**: All policy management is strictly restricted to `SUPER_ADMIN`.
+- **Unique Constraint**: Each office location can have only **one** policy. Personalize policies per location.
+- **Auto-Provisioning**: Creating an `office_location` via `POST /api/v1/attendance/office-locations` automatically creates a default policy.
+- **Time String Format**: Use `HH:MM:SS` for all time fields (e.g., `"09:00:00"`).
+
+#### Raw Analytics & Logs
+- **GET** `/api/v1/attendance/admin/all-records` (Auth: `SUPER_ADMIN` only)
+- **GET** `/api/v1/attendance/admin/all-logs` (Auth: `SUPER_ADMIN` only)
+- **GET** `/api/v1/attendance/admin/all-presence-history` (Auth: `SUPER_ADMIN` only)
+- **GET** `/api/v1/attendance/admin/all-overrides` (Auth: `SUPER_ADMIN` only)
+
+### Enums
+
+Presence State enum:
+- `IN_OFFICE`: Within `in_office_radius_meters`.
+- `TEMPORARILY_OUT`: Within `temporarily_out_radius_meters`.
+- `OUT_OF_OFFICE`: Beyond `out_of_office_radius_meters`.
+
+Attendance State enum:
+- `NOT_CLOCKED_IN`
+- `CLOCKED_IN`
+- `CLOCKED_OUT`
+
+---
+
+## Announcements Endpoints
+
+Base path: `/api/v1/announcements`
+
+### Real-time WebSocket
+
+- **WS** `/ws/announcements`
+- **Auth Required:** Any authenticated user
+- **Behavior**: Broadcasts new announcements in real-time. Clients should connect here to receive live updates.
+
+### List Announcements
+
+- **GET** `/api/v1/announcements`
+- **Auth Required:** Any authenticated user
+- **Behavior**:
+  - `SUPER_ADMIN`: all announcements (including inactive)
+  - others: only active announcements
+
+### Create Announcement
+
+- **POST** `/api/v1/announcements`
+- **Auth Required:** `SUPER_ADMIN`
+- **Payload (`AnnouncementCreate`):**
+  ```json
+  {
+    "title": "System Maintenance",
+    "content": "The system will be down for maintenance on Sunday at 2 AM.",
+    "type": "INFO",
+    "is_active": true
+  }
+  ```
+- **Note**: `creator_id` is automatically set to the current user.
+
+### Update Announcement
+
+- **PUT** `/api/v1/announcements/{id}`
+- **Auth Required:** `SUPER_ADMIN`
+- **Payload (`AnnouncementUpdate`):**
+  - `title` (optional string)
+  - `content` (optional string)
+  - `type` (optional `AnnouncementType`)
+  - `is_active` (optional boolean)
+
+### Delete Announcement
+
+- **DELETE** `/api/v1/announcements/{id}`
+- **Auth Required:** `SUPER_ADMIN`
+
+### Enums
+
+**AnnouncementType:**
+- `INFO`
+- `SUCCESS`
+- `WARNING`
+- `ERROR`
+- `CRITICAL`
+
+---
+
 ## Decisions Endpoints
 
 Base path: `/api/v1/decisions`
@@ -641,6 +833,8 @@ Current notification delivery patterns (from service usage):
 - **Note create/update:** sent to `MANAGER` and `SUPER_ADMIN` users.
 - **Note shared/sharing updated:** sent to shared users.
 - **Event create/update:** sent to `MANAGER` and `SUPER_ADMIN` users.
+- **Time-Off Request created:** sent to `MANAGER` and `SUPER_ADMIN` users.
+- **Time-Off Request updated (approved/rejected):** sent to the request owner.
 
 Access matrix (current implementation):
 
@@ -1235,6 +1429,56 @@ Response JSON (`NotificationRead`):
 }
 ```
 
+### Announcements payload contracts
+
+#### `POST /api/v1/announcements`
+
+Request JSON (`AnnouncementCreate`):
+
+```json
+{
+  "title": "System Maintenance",
+  "content": "Scheduled maintenance on Saturday at 10 PM.",
+  "type": "info",
+  "is_active": true
+}
+```
+
+- **type**: One of `info`, `success`, `warning`, `error`, `critical`. Defaults to `info`.
+
+Response JSON (`AnnouncementRead`):
+
+```json
+{
+  "id": 1,
+  "title": "System Maintenance",
+  "content": "Scheduled maintenance on Saturday at 10 PM.",
+  "type": "info",
+  "is_active": true,
+  "creator_id": "user-uuid",
+  "created_at": "2026-03-19T10:00:00Z",
+  "updated_at": "2026-03-19T10:00:00Z"
+}
+```
+
+#### `WS /ws/announcements`
+
+Broadcast Message Shape:
+
+```json
+{
+  "type": "new_announcement",
+  "data": {
+    "id": 1,
+    "title": "System Maintenance",
+    "content": "Scheduled maintenance on Saturday at 10 PM.",
+    "type": "info",
+    "creator_id": "user-uuid",
+    "created_at": "2026-03-19T10:00:00Z"
+  }
+}
+```
+
 ### Admin payload contracts
 
 #### `POST /api/v1/user-admin/create`
@@ -1315,6 +1559,7 @@ Response JSON:
 | Notes         | Any auth (scoped by role/owner/share)      | Any auth             | Manager, Super Admin         | Super Admin |
 | Events        | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |
 | Time-Off      | Scoped by role/owner                       | Staff or above       | Super Admin (Approve/Reject) | Owner       |
+| Announcements | Any auth (active only for non-admins)      | Super Admin          | Super Admin                  | Super Admin |
 | Decisions     | Any auth (scoped by role/owner)            | Any auth             | Manager, Super Admin         | Super Admin |
 | Notifications | Recipient only                             | System/service       | Recipient only (`mark read`) | Not exposed |
 
@@ -1368,6 +1613,119 @@ API may accept list input for some endpoints (`EventCreate/EventUpdate`, note/ta
 
 Budget/spent are stored as smallest currency unit (for example cents).
 
+### Attendance payload contracts
+
+#### `POST /api/v1/attendance/location-update`
+
+Request (`LocationUpdateRequest`):
+
+```json
+{
+  "office_location_id": 1,
+  "latitude": 5.1234,
+  "longitude": -0.1234,
+  "accuracy_meters": 10.5,
+  "recorded_at": "2026-03-09T10:00:00Z"
+}
+```
+
+Response (`LocationUpdateResponse`):
+
+```json
+{
+  "distance_from_office_meters": 12.5,
+  "derived_zone": "IN_OFFICE",
+  "presence_state": "IN_OFFICE",
+  "attendance_state": "CLOCKED_IN",
+  "clock_in_at": "2026-03-09T08:30:00Z",
+  "clock_out_at": null
+}
+```
+
+#### `GET /api/v1/attendance/me/today`
+
+Response JSON (`AttendanceRecord`):
+
+```json
+{
+  "id": 1,
+  "user_id": "user-uuid",
+  "office_location_id": 1,
+  "work_date": "2026-03-09",
+  "attendance_state": "CLOCKED_IN",
+  "clock_in_at": "2026-03-09T08:30:00Z",
+  "clock_out_at": null,
+  "first_seen_in_office_at": "2026-03-09T08:30:00Z",
+  "last_seen_in_office_at": "2026-03-09T10:00:00Z"
+}
+```
+
+#### `POST /api/v1/attendance/{record_id}/override`
+
+Request (`AttendanceOverrideRequest`):
+
+```json
+{
+  "new_clock_in_at": "2026-03-09T08:45:00Z",
+  "new_clock_out_at": "2026-03-09T17:30:00Z",
+  "reason": "Forgot to bring phone to office"
+}
+```
+
+#### `POST /api/v1/attendance/office-locations`
+
+Request (`OfficeLocationCreate`):
+
+```json
+{
+  "name": "Main Office",
+  "latitude": 5.1234,
+  "longitude": -0.1234,
+  "in_office_radius_meters": 10,
+  "temporarily_out_radius_meters": 30,
+  "out_of_office_radius_meters": 50,
+  "is_active": true
+}
+```
+
+#### `PATCH /api/v1/attendance-policy/{office_location_id}`
+
+Request (`AttendancePolicyUpdate`, partial):
+
+```json
+{
+  "check_in_open_time": "08:00:00",
+  "check_in_close_time": "10:30:00",
+  "work_start_time": "09:00:00",
+  "work_end_time": "18:00:00",
+  "auto_clock_out_time": "18:30:00",
+  "temporarily_out_grace_minutes": 10,
+  "out_of_office_grace_minutes": 20
+}
+```
+
+---
+
+## Attendance Logic Overview
+
+The attendance system uses a combination of geolocation tracking and policy-driven state management.
+
+### Geolocation & Presence
+
+- **Distance Calculation**: Uses the Haversine formula to determine distance from the office.
+- **Presence States**:
+  - `IN_OFFICE`: User is within the office radius.
+  - `TEMPORARILY_OUT`: User is slightly outside the office radius (e.g., in the parking lot).
+  - `OUT_OF_OFFICE`: User is far from the office.
+- **Grace Periods**: State transitions are not immediate. A user must consistently be in a new zone for a period defined in the `AttendancePolicy` before their `presence_state` is updated.
+- **Accuracy Filtering**: High-accuracy (e.g., GPS) is preferred. Updates with an accuracy radius > 30m are logged but ignored for transitioning *out* of an office zone to prevent false exits due to signal drift inside buildings.
+
+### Automatic Clock-In/Out
+
+- **Clock-In**: A user is automatically clocked in if they are detected `IN_OFFICE` (confirmed after the grace period) during the `check_in_open_time` to `check_in_close_time` window.
+- **Clock-Out**: A user is automatically clocked out at the `auto_clock_out_time` if they were previously clocked in.
+- **Manual Overrides**: Managers can override any record to fix errors or account for missed updates.
+
 ---
 
 ## Interactive API Docs
@@ -1375,6 +1733,31 @@ Budget/spent are stored as smallest currency unit (for example cents).
 - Swagger UI: `/docs`
 - ReDoc: `/redoc`
 
+
+---
+
+## Notes for Frontend Developers
+
+### Announcements System Implementation
+
+#### 1. Real-time Updates (WebSocket)
+Connect to `ws://[host]/ws/announcements` to receive real-time broadcasts. 
+The payload includes `type` and `creator_id` for immediate styling and attribution without needing a secondary fetch.
+
+#### 2. Visual Representation by `type`
+Map the `type` field to consistent UI colors and icons:
+- `info`: Blue / Megaphone icon
+- `success`: Green / Check circle icon
+- `warning`: Amber / Alert triangle icon
+- `error`: Rose / X circle icon
+- `critical`: Purple / Alert octagon icon (high emphasis)
+
+#### 3. Filtering and Search
+Implement local client-side filtering on the `title` and `content` fields. The system expects regular users to only see `is_active=true` announcements.
+
+#### 4. Permission Handling
+Buttons for Create, Toggle (Update), and Delete should only be rendered if the current user has the `SUPER_ADMIN` role. 
+Check `current_user.roles.includes("super_admin")`.
 ---
 
 ## Notes
