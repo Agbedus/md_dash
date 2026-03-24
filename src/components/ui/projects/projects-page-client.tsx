@@ -11,7 +11,7 @@ import { ProjectTable } from './project-table';
 import { ProjectDetails } from './project-details';
 import { ProjectFormFields } from './project-form-fields';
 import { FiTrendingUp, FiCheckSquare, FiDollarSign, FiActivity, FiPieChart as FiPie } from 'react-icons/fi';
-import { createProject, updateProject, deleteProject } from '@/app/projects/actions';
+import { createProject, updateProject, deleteProject } from '@/app/(dashboard)/projects/actions';
 import { Sparkline } from "@/components/ui/sparkline";
 import { subDays, isSameDay } from 'date-fns';
 import { useProjects } from '@/hooks/use-projects';
@@ -21,7 +21,7 @@ import { toast } from '@/lib/toast';
 import { useUsers } from '@/hooks/use-users';
 import { useClients } from '@/hooks/use-clients';
 import { useNotes } from '@/hooks/use-notes';
-import ProjectsLoading from '@/app/projects/loading';
+import ProjectsLoading from '@/app/(dashboard)/projects/loading';
 
 interface ProjectsPageClientProps {
   initialProjects?: Project[];

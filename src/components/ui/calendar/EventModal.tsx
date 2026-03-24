@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { FiBell, FiX, FiCheck, FiClock, FiCalendar, FiMapPin, FiPlus } from "react-icons/fi";
-import { createEvent } from "@/app/calendar/actions";
+import { createEvent } from "@/app/(dashboard)/calendar/actions";
 import type { CalendarEvent, EventReminder } from "@/types/calendar";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { CustomDatePicker } from "@/components/ui/inputs/custom-date-picker";

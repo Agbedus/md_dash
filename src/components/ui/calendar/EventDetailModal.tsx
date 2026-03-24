@@ -6,7 +6,7 @@ import {
   FiX, FiCalendar, FiMapPin, FiUsers, FiEdit2, FiTrash2, 
   FiGlobe, FiLock, FiBell, FiPlus, FiCheck, FiFlag, FiTrello, FiCheckCircle, FiDollarSign, FiSun, FiClock, FiCoffee
 } from "react-icons/fi";
-import { updateEvent, deleteEvent } from "@/app/calendar/actions";
+import { updateEvent, deleteEvent } from "@/app/(dashboard)/calendar/actions";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { CustomDatePicker } from "@/components/ui/inputs/custom-date-picker";
 import { CustomNumberInput } from "@/components/ui/inputs/custom-number-input";

@@ -5,8 +5,8 @@ import type { Note } from "@/types/note";
 import type { Task } from "@/types/task";
 import NoteCard from "@/components/ui/notes/note-card";
 import TaskCard from "@/components/ui/tasks/task-card";
-import { getNotes } from "@/app/notes/actions";
-import { getTasks } from "@/app/tasks/actions";
+import { getNotes } from "@/app/(dashboard)/notes/actions";
+import { getTasks } from "@/app/(dashboard)/tasks/actions";
 
 type SearchResult = (Note & { type: 'note' }) | (Task & { type: 'task' });
 

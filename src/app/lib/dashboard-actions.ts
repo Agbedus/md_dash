@@ -1,11 +1,11 @@
 'use server';
 
 import { auth } from '@/auth';
-import { getTasks } from '@/app/tasks/actions';
-import { getNotes } from '@/app/notes/actions';
-import { getProjects } from '@/app/projects/actions';
-import { getEvents } from '@/app/calendar/actions';
-import { getUsers } from '@/app/users/actions';
+import { getTasks } from '@/app/(dashboard)/tasks/actions';
+import { getNotes } from '@/app/(dashboard)/notes/actions';
+import { getProjects } from '@/app/(dashboard)/projects/actions';
+import { getEvents } from '@/app/(dashboard)/calendar/actions';
+import { getUsers } from '@/app/(dashboard)/users/actions';
 import { cache } from 'react';
 import { format, startOfWeek, endOfWeek, subWeeks, subDays, isSameDay } from 'date-fns';
 

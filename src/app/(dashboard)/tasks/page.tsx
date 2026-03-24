@@ -1,8 +1,8 @@
 import TasksPageClient from "@/components/ui/tasks/tasks-page-client";
 import { auth } from '@/auth';
-import { getTasks } from '@/app/tasks/actions';
-import { getUsers } from '@/app/users/actions';
-import { getProjects } from '@/app/projects/actions';
+import { getTasks } from '@/app/(dashboard)/tasks/actions';
+import { getUsers } from '@/app/(dashboard)/users/actions';
+import { getProjects } from '@/app/(dashboard)/projects/actions';
 
 export default async function TasksPage() {
     const session = await auth();

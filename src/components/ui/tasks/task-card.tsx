@@ -14,7 +14,7 @@ import { User } from "@/types/user";
 import { Project } from "@/types/project";
 
 import toast from "react-hot-toast";
-import { startTaskTimer, pauseTaskTimer, stopTaskTimer } from "@/app/tasks/actions";
+import { startTaskTimer, pauseTaskTimer, stopTaskTimer } from "@/app/(dashboard)/tasks/actions";
 import { useTaskTimer } from "@/providers/task-timer-provider";
 import { canUserWorkOnTask } from "@/lib/task-auth";
 import Image from "next/image";

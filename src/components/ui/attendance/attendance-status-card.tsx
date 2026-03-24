@@ -2,7 +2,7 @@
 
 import React from 'react';
 import useSWR from 'swr';
-import { fetchMyAttendanceLive } from '@/app/attendance/actions';
+import { fetchMyAttendanceLive } from '@/app/(dashboard)/attendance/actions';
 import type { AttendanceRecord } from '@/types/attendance';
 import { presenceStateLabels, presenceStateColors, attendanceStateLabels, attendanceStateColors } from '@/types/attendance';
 import { useLocation } from '@/providers/location-provider';

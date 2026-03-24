@@ -6,7 +6,7 @@ import useSWR from 'swr';
 import { fetcher } from '@/lib/api';
 import { Announcement, AnnouncementCreate, AnnouncementUpdate } from '@/types/announcement';
 import { HiSpeakerphone } from 'react-icons/hi';
-import { createAnnouncement as apiCreateAnnouncement, updateAnnouncement as apiUpdateAnnouncement, deleteAnnouncement as apiDeleteAnnouncement } from '@/app/announcements/actions';
+import { createAnnouncement as apiCreateAnnouncement, updateAnnouncement as apiUpdateAnnouncement, deleteAnnouncement as apiDeleteAnnouncement } from '@/app/(dashboard)/announcements/actions';
 
 interface AnnouncementContextType {
   announcements: Announcement[];

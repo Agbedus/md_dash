@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getAggregatedDashboardData } from "@/app/lib/dashboard-actions";
-import { getTasks } from "@/app/tasks/actions";
-import { getNotes } from "@/app/notes/actions";
-import { getProjects } from "@/app/projects/actions";
-import { getEvents } from "@/app/calendar/actions";
-import { getClients } from "@/app/clients/actions";
+import { getTasks } from "@/app/(dashboard)/tasks/actions";
+import { getNotes } from "@/app/(dashboard)/notes/actions";
+import { getProjects } from "@/app/(dashboard)/projects/actions";
+import { getEvents } from "@/app/(dashboard)/calendar/actions";
+import { getClients } from "@/app/(dashboard)/clients/actions";
 
 
 // --- Tool Definitions (OpenAI Format) ---

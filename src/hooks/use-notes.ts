@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { getNotes } from '@/app/notes/actions';
+import { getNotes } from '@/app/(dashboard)/notes/actions';
 import { Note } from '@/types/note';
 
 interface UseNotesProps {

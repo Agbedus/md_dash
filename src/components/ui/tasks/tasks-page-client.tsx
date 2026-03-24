@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef, useEffect, useCallback, useOptimistic, useMemo } from 'react';
 import { AnimatePresence, motion } from "framer-motion";
 import { FiCheck, FiX, FiPlus, FiGrid, FiList, FiSearch, FiFilter, FiUser } from 'react-icons/fi';
-import { createTask, updateTask, deleteTask } from '@/app/tasks/actions';
+import { createTask, updateTask, deleteTask } from '@/app/(dashboard)/tasks/actions';
 import { useTasks } from '@/hooks/use-tasks';
 import { statusMapping, priorityMapping } from "@/types/task";
 import type { Task } from "@/types/task";
@@ -25,7 +25,7 @@ import { Combobox } from "@/components/ui/combobox";
 
 import { useUsers } from '@/hooks/use-users';
 import { useProjects } from '@/hooks/use-projects';
-import TasksLoading from '@/app/tasks/loading';
+import TasksLoading from '@/app/(dashboard)/tasks/loading';
 
 export default function TasksPageClient({ 
     allTasks: initialTasks = [], 

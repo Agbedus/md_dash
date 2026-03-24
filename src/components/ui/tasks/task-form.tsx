@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { createTask } from '@/app/tasks/actions';
+import { createTask } from '@/app/(dashboard)/tasks/actions';
 import { CustomDatePicker } from '@/components/ui/inputs/custom-date-picker';
 import { format } from 'date-fns';
 import { toast } from '@/lib/toast';

@@ -9,7 +9,7 @@ const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
 const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 import { revalidateTag } from 'next/cache';
-import { getUsers as getRealUsers } from '@/app/users/actions';
+import { getUsers as getRealUsers } from '@/app/(dashboard)/users/actions';
 
 interface HydratedUser {
     id: string;

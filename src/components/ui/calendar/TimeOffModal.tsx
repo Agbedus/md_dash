@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { FiX, FiCalendar, FiCheck } from "react-icons/fi";
-import { createTimeOffRequest } from "@/app/time-off/actions";
+import { createTimeOffRequest } from "@/app/(dashboard)/time-off/actions";
 import type { TimeOffRequest, TimeOffType } from "@/types/time-off";
 import { CustomDatePicker } from "@/components/ui/inputs/custom-date-picker";
 import { format } from "date-fns";

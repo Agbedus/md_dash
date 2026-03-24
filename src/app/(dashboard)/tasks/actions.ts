@@ -69,7 +69,7 @@ export const getTasks = cache(async function(query?: string, priority?: string, 
                 },
                 next: { tags: ['tasks', 'projects'], revalidate: 60 }
             }),
-            import('@/app/users/actions').then(mod => mod.getUsers())
+            import('@/app/(dashboard)/users/actions').then(mod => mod.getUsers())
         ]);
 
 

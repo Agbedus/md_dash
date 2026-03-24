@@ -5,8 +5,8 @@ import {
     FiPlus, FiGrid, FiList, FiFileText, FiCheckSquare, 
     FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiSearch
 } from 'react-icons/fi';
-import { createNote, updateNote, deleteNote, getUsers } from '@/app/notes/actions';
-import { getTasks } from '@/app/tasks/actions';
+import { createNote, updateNote, deleteNote, getUsers } from '@/app/(dashboard)/notes/actions';
+import { getTasks } from '@/app/(dashboard)/tasks/actions';
 import type { Note } from "@/types/note";
 import type { Task } from "@/types/task";
 import NoteCard from './note-card';
@@ -46,7 +46,7 @@ const noteTypeColors: Record<Note['type'], string> = {
     sketch: 'text-teal-400',
 };
 
-import NotesLoading from '@/app/notes/loading';
+import NotesLoading from '@/app/(dashboard)/notes/loading';
 
 export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNotes?: Note[] }) {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');

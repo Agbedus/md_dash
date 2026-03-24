@@ -3,14 +3,14 @@
 import React, { useState, useOptimistic, useTransition } from 'react';
 import { Client } from '@/types/client';
 import { FiPlus, FiSearch, FiX, FiCheck, FiEdit2, FiTrash2, FiMail, FiGlobe, FiUser, FiGrid, FiList } from 'react-icons/fi';
-import { createClient, updateClient, deleteClient } from '@/app/clients/actions';
+import { createClient, updateClient, deleteClient } from '@/app/(dashboard)/clients/actions';
 import ClientCard from './client-card';
 import ClientTable from './client-table';
 import { toast } from '@/lib/toast';
 import { useClients } from '@/hooks/use-clients';
 import { createOptimisticClient, updateOptimisticClient } from '@/lib/optimistic-utils';
 
-import ClientsLoading from '@/app/clients/loading';
+import ClientsLoading from '@/app/(dashboard)/clients/loading';
 
 interface ClientsPageClientProps {
   initialClients?: Client[];

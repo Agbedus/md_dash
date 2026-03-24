@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/ui/sidebar";
-import TopNav from "@/components/ui/topnav";
-import Content from "@/components/ui/content";
-import DashboardLayout from "@/components/ui/dashboard-layout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +25,8 @@ import { Toaster } from 'react-hot-toast';
 import { TaskTimerProvider } from '@/providers/task-timer-provider';
 import { TaskTimerUI } from '@/components/ui/tasks/task-timer-ui';
 import { LocationProvider } from '@/providers/location-provider';
-import { getMyAttendanceToday } from '@/app/attendance/actions';
+import { getMyAttendanceToday } from '@/app/(dashboard)/attendance/actions';
+import { CookiePopup } from '@/components/ui/cookie-popup';
 
 export default async function RootLayout({
   children,
@@ -46,20 +43,11 @@ export default async function RootLayout({
       >
         <TaskTimerProvider>
           <LocationProvider initialRecord={initialAttendance}>
-            {session ? (
-              <DashboardLayout 
-                sidebar={<Sidebar user={session?.user} />}
-                topnav={<TopNav user={session?.user} />}
-                user={session?.user}
-              >
-                {children}
-              </DashboardLayout>
-            ) : (
-              <div className="min-h-screen bg-zinc-950">
-                {children}
-              </div>
-            )}
+            <div className="min-h-screen bg-zinc-950">
+              {children}
+            </div>
             <TaskTimerUI />
+            <CookiePopup />
           </LocationProvider>
         </TaskTimerProvider>
         <Toaster 

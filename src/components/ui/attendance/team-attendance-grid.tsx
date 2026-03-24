@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import useSWR from 'swr';
 import type { AttendanceRecord, PresenceState, AttendanceState } from '@/types/attendance';
 import { presenceStateLabels, presenceStateColors, attendanceStateLabels, attendanceStateColors } from '@/types/attendance';
-import { fetchTeamAttendanceLive, overrideAttendance } from '@/app/attendance/actions';
+import { fetchTeamAttendanceLive, overrideAttendance } from '@/app/(dashboard)/attendance/actions';
 import OverrideModal from './override-modal';
 import { FiUsers, FiEdit2, FiClock, FiRefreshCw } from 'react-icons/fi';
 

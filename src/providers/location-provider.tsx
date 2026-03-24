@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSWRConfig } from 'swr';
-import { updateLocation, getOfficeLocations } from '@/app/attendance/actions';
+import { updateLocation, getOfficeLocations } from '@/app/(dashboard)/attendance/actions';
 import { toast } from '@/lib/toast';
 import type { PresenceState, AttendanceState, AttendancePolicy, OfficeLocation, AttendanceRecord } from '@/types/attendance';
 
@@ -84,7 +84,7 @@ export function LocationProvider({
                 officesRef.current = offices;
                 
                 // Fetch policies for all offices to have them ready
-                const { getAttendancePolicy, updateAttendancePolicy } = await import('@/app/attendance/actions');
+                const { getAttendancePolicy, updateAttendancePolicy } = await import('@/app/(dashboard)/attendance/actions');
                 
                 const newPolicies: Record<number, AttendancePolicy> = {};
                 for (const office of offices) {

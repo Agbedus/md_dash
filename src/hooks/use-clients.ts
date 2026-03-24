@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { getClients } from '@/app/clients/actions';
+import { getClients } from '@/app/(dashboard)/clients/actions';
 import { Client } from '@/types/client';
 
 interface UseClientsProps {

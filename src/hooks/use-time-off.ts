@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { getTimeOffRequests } from '@/app/time-off/actions';
+import { getTimeOffRequests } from '@/app/(dashboard)/time-off/actions';
 import type { TimeOffRequest } from '@/types/time-off';
 
 export function useTimeOff(initialData?: TimeOffRequest[]) {

@@ -282,10 +282,10 @@ export async function deleteEvent(id: string | number) {
 export const getCalendarData = cache(async function() {
     const [events, tasks, projects, timeOff, users] = await Promise.all([
         getEvents(),
-        import('@/app/tasks/actions').then(m => m.getTasks(undefined, undefined, undefined, undefined, 1000)),
-        import('@/app/projects/actions').then(m => m.getProjects(1000)),
-        import('@/app/time-off/actions').then(m => m.getTimeOffRequests()),
-        import('@/app/users/actions').then(m => m.getUsers())
+        import('@/app/(dashboard)/tasks/actions').then(m => m.getTasks(undefined, undefined, undefined, undefined, 1000)),
+        import('@/app/(dashboard)/projects/actions').then(m => m.getProjects(1000)),
+        import('@/app/(dashboard)/time-off/actions').then(m => m.getTimeOffRequests()),
+        import('@/app/(dashboard)/users/actions').then(m => m.getUsers())
     ]);
 
     return {

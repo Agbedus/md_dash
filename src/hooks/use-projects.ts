@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { getProjects } from '@/app/projects/actions';
+import { getProjects } from '@/app/(dashboard)/projects/actions';
 import { Project } from '@/types/project';
 
 interface UseProjectsProps {

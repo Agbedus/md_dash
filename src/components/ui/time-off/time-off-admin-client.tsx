@@ -10,7 +10,7 @@ import { toast } from '@/lib/toast';
 
 import type { TimeOffRequest, TimeOffStatus, TimeOffType } from '@/types/time-off';
 import type { User } from '@/types/user';
-import { approveTimeOffRequest, rejectTimeOffRequest, deleteTimeOffRequest } from '@/app/time-off/actions';
+import { approveTimeOffRequest, rejectTimeOffRequest, deleteTimeOffRequest } from '@/app/(dashboard)/time-off/actions';
 
 interface TimeOffAdminClientProps {
     initialRequests: TimeOffRequest[];

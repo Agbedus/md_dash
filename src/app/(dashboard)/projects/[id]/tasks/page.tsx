@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import TasksPageClient from "@/components/ui/tasks/tasks-page-client";
-import { getTasks } from '@/app/tasks/actions';
-import { getUsers } from '@/app/users/actions';
-import { getProjects, getProject } from '@/app/projects/actions';
+import { getTasks } from '@/app/(dashboard)/tasks/actions';
+import { getUsers } from '@/app/(dashboard)/users/actions';
+import { getProjects, getProject } from '@/app/(dashboard)/projects/actions';
 import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';

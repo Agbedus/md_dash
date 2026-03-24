@@ -63,7 +63,7 @@ const TopNav = ({ user }: TopNavProps) => {
       <nav className="h-16 md:h-24 px-4 md:px-8 flex items-center justify-between md:sticky md:top-0 z-40 bg-zinc-950/80 backdrop-blur-xl md:bg-zinc-950/50 md:backdrop-blur-xl border-b border-white/5 md:border-none">
         <div className="flex items-center gap-6 flex-1">
           {/* Mobile Logo */}
-          <Link href="/" className="md:hidden flex items-center gap-2">
+          <Link href={user ? "/dashboard" : "/"} className="md:hidden flex items-center gap-2">
              <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/5">
                <Image 
                  src="/logo.svg" 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { OfficeLocation } from '@/types/attendance';
-import { createOfficeLocation, updateOfficeLocation } from '@/app/attendance/actions';
+import { createOfficeLocation, updateOfficeLocation } from '@/app/(dashboard)/attendance/actions';
 import { FiMapPin, FiPlus, FiCheck, FiMap, FiX } from 'react-icons/fi';
 import { toast } from '@/lib/toast';
 import PolicyEditor from './policy-editor';

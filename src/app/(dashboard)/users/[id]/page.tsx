@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
-import { getUsers, getUserTimeLogs } from '@/app/users/actions';
-import { getTasks } from '@/app/tasks/actions';
-import { getTimeOffRequests } from '@/app/time-off/actions';
+import { getUsers, getUserTimeLogs } from '@/app/(dashboard)/users/actions';
+import { getTasks } from '@/app/(dashboard)/tasks/actions';
+import { getTimeOffRequests } from '@/app/(dashboard)/time-off/actions';
 import { getActivityData } from '@/app/lib/dashboard-actions';
 import { auth } from '@/auth';
 import UserDetailClient from '@/components/ui/users/user-detail-client';

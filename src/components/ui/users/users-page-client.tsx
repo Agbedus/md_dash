@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { User } from '@/types/user';
 import { FiSearch, FiEdit2, FiTrash2, FiX, FiCheck, FiClock, FiChevronRight, FiSun } from 'react-icons/fi';
-import { updateUser, deleteUser, getUsers } from '@/app/users/actions';
+import { updateUser, deleteUser, getUsers } from '@/app/(dashboard)/users/actions';
 import { useOptimistic, useTransition } from 'react';
 import type { TimeOffRequest } from '@/types/time-off';
 

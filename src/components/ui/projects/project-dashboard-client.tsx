@@ -17,8 +17,8 @@ import Link from 'next/link';
 import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import TaskCard from '@/components/ui/tasks/task-card';
 import NoteCard from '@/components/ui/notes/note-card';
-import { updateTask, deleteTask } from '@/app/tasks/actions';
-import { updateNote, deleteNote } from '@/app/notes/actions';
+import { updateTask, deleteTask } from '@/app/(dashboard)/tasks/actions';
+import { updateNote, deleteNote } from '@/app/(dashboard)/notes/actions';
 
 interface ProjectDashboardClientProps {
     project: Project;

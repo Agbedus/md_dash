@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useTransition } from 'react';
 import type { OfficeLocation, AttendancePolicy } from '@/types/attendance';
-import { getAttendancePolicy, updateAttendancePolicy } from '@/app/attendance/actions';
+import { getAttendancePolicy, updateAttendancePolicy } from '@/app/(dashboard)/attendance/actions';
 import { FiSettings, FiCheck } from 'react-icons/fi';
 import { toast } from '@/lib/toast';
 

@@ -10,7 +10,7 @@ import { format, differenceInSeconds, parseISO, differenceInDays } from 'date-fn
 import { motion } from 'framer-motion';
 import { ActivityHeatmap } from '@/components/ui/client-charts';
 import type { TimeOffRequest } from '@/types/time-off';
-import { approveTimeOffRequest, rejectTimeOffRequest } from '@/app/time-off/actions';
+import { approveTimeOffRequest, rejectTimeOffRequest } from '@/app/(dashboard)/time-off/actions';
 import { toast } from '@/lib/toast';
 
 interface TimeLog {

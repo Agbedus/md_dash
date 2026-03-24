@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { FiCheckSquare, FiCheckCircle, FiClock, FiAlertCircle, FiCheck } from "react-icons/fi";
 import { Task } from "@/types/task";
-import { batchUpdateTaskStatus } from '@/app/tasks/actions';
+import { batchUpdateTaskStatus } from '@/app/(dashboard)/tasks/actions';
 import { Sparkline } from "@/components/ui/sparkline";
 import { format, subDays, isSameDay } from 'date-fns';
 import { toast } from '@/lib/toast';

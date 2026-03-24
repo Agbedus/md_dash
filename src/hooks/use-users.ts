@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { getUsers } from '@/app/users/actions';
+import { getUsers } from '@/app/(dashboard)/users/actions';
 import { User } from '@/types/user';
 
 export function useUsers(initialUsers?: User[]) {

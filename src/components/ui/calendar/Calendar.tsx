@@ -17,7 +17,7 @@ import { useUsers } from "@/hooks/use-users";
 import { useProjects } from "@/hooks/use-projects";
 import { useTimeOff } from "@/hooks/use-time-off";
 import { useCalendarData } from "@/hooks/use-calendar-data";
-import CalendarLoading from "@/app/calendar/loading";
+import CalendarLoading from "@/app/(dashboard)/calendar/loading";
 import TimezoneClocks from "./TimezoneClocks";
 import type { Task } from "@/types/task";
 import type { User } from "@/types/user";

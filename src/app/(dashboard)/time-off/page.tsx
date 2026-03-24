@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import { getTimeOffRequests } from '@/app/time-off/actions';
-import { getUsers } from '@/app/users/actions';
+import { getTimeOffRequests } from '@/app/(dashboard)/time-off/actions';
+import { getUsers } from '@/app/(dashboard)/users/actions';
 import TimeOffAdminClient from '@/components/ui/time-off/time-off-admin-client';
 
 export default async function TimeOffPage() {

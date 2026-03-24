@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { getEvents } from '@/app/calendar/actions';
+import { getEvents } from '@/app/(dashboard)/calendar/actions';
 import { CalendarEvent } from '@/types/calendar';
 
 export function useEvents(initialEvents?: CalendarEvent[]) {

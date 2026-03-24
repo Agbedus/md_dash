@@ -7,11 +7,15 @@ export default auth((req) => {
     const { nextUrl } = req;
     const isLoggedIn = !!req.auth?.user;
     const isAuthRoute = nextUrl.pathname.startsWith('/login') || nextUrl.pathname.startsWith('/register');
-    const isPublicRoute = nextUrl.pathname.startsWith('/api') || nextUrl.pathname.startsWith('/_next') || nextUrl.pathname.startsWith('/static') || nextUrl.pathname.includes('.');
+    
+    // Public routes that don't require login
+    const isLandingPage = nextUrl.pathname === '/';
+    const isWiki = nextUrl.pathname.startsWith('/wiki');
+    const isPublicRoute = isLandingPage || isWiki || nextUrl.pathname.startsWith('/api') || nextUrl.pathname.startsWith('/_next') || nextUrl.pathname.startsWith('/static') || nextUrl.pathname.includes('.');
 
     if (isAuthRoute) {
         if (isLoggedIn) {
-            return Response.redirect(new URL('/', nextUrl));
+            return Response.redirect(new URL('/dashboard', nextUrl));
         }
         return;
     }
@@ -29,7 +33,7 @@ export default auth((req) => {
     if (nextUrl.pathname.startsWith('/users')) {
         const hasAccess = req.auth?.user?.roles?.some(role => ['super_admin', 'manager'].includes(role));
         if (!hasAccess) {
-             return Response.redirect(new URL('/', nextUrl));
+             return Response.redirect(new URL('/dashboard', nextUrl));
         }
     }
 });

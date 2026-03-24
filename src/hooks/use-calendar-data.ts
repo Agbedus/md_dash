@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { getCalendarData } from '@/app/calendar/actions';
+import { getCalendarData } from '@/app/(dashboard)/calendar/actions';
 import { User } from '@/types/user';
 
 export function useCalendarData(initialData?: any, users: User[] = []) {

@@ -8,8 +8,8 @@ import { FiEdit2, FiTrash2, FiClock, FiCheck, FiX, FiDollarSign } from 'react-ic
 import { format } from 'date-fns';
 import { CustomDatePicker } from '@/components/ui/inputs/custom-date-picker';
 import { CustomNumberInput } from '@/components/ui/inputs/custom-number-input';
-import { createProject, updateProject, deleteProject } from '@/app/projects/actions';
-import { updateTask, deleteTask, createTask } from '@/app/tasks/actions';
+import { createProject, updateProject, deleteProject } from '@/app/(dashboard)/projects/actions';
+import { updateTask, deleteTask, createTask } from '@/app/(dashboard)/tasks/actions';
 import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import TaskCard from '@/components/ui/tasks/task-card';
 import { FiChevronRight, FiChevronDown, FiPlus, FiPieChart } from 'react-icons/fi';

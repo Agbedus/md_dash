@@ -116,7 +116,7 @@ const Sidebar = ({ user }: SidebarProps) => {
   /* ---------------- Menus ---------------- */
 
   const mainMenuItems = [
-    { href: "/", icon: FiHome, label: "Dashboard", color: "text-blue-400" },
+    { href: "/dashboard", icon: FiHome, label: "Dashboard", color: "text-blue-400" },
     { href: "/tasks", icon: FiCheckSquare, label: "Tasks", color: "text-purple-400" },
     { href: "/projects", icon: FiBriefcase, label: "Projects", color: "text-pink-400" },
     { href: "/notes", icon: FiFileText, label: "Notes", color: "text-yellow-400" },

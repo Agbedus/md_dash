@@ -36,7 +36,7 @@ export default function AttendancePageClient({
     const tabs: { id: TabId; label: string; icon: React.ElementType; visible: boolean }[] = [
         { id: 'my', label: 'My Attendance', icon: FiUser, visible: true },
         { id: 'team', label: 'Team', icon: FiUsers, visible: isManager },
-        { id: 'admin', label: 'Settings', icon: FiSettings, visible: isAdmin },
+        { id: 'admin', label: 'Settings', icon: FiSettings, visible: isManager },
     ];
 
     return (

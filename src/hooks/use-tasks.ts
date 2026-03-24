@@ -1,5 +1,5 @@
 import useSWRInfinite from 'swr/infinite';
-import { getTasks } from '@/app/tasks/actions';
+import { getTasks } from '@/app/(dashboard)/tasks/actions';
 import { Task } from '@/types/task';
 import { User } from "@/types/user";
 

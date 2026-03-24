@@ -5,8 +5,8 @@ import {
     getMyAttendanceHistory,
     getTeamAttendanceToday,
     getOfficeLocations,
-} from '@/app/attendance/actions';
-import { getUsers } from '@/app/users/actions';
+} from '@/app/(dashboard)/attendance/actions';
+import { getUsers } from '@/app/(dashboard)/users/actions';
 import AttendancePageClient from '@/components/ui/attendance/attendance-page-client';
 
 export default async function AttendancePage() {
@@ -25,7 +25,7 @@ export default async function AttendancePage() {
 
     // Conditionally fetch manager/admin data
     const teamToday = isManager ? await getTeamAttendanceToday() : [];
-    const officeLocations = isAdmin ? await getOfficeLocations() : [];
+    const officeLocations = await getOfficeLocations();
 
     return (
         <div className="px-4 py-8 max-w-[1600px] mx-auto min-h-screen">

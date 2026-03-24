@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@keyframes pulse-ring {
+  0% { transform: scale(0.5); opacity: 0.5; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -14,138 +23,82 @@
   }
 }
 
-.animate-spinner {
-  animation: spinner 1.2s linear infinite;
-}
-
 :root {
-  /* Richer dark theme palette */
-  --background: #09090b; /* Zinc 950 */
-  --foreground: #fafafa; /* Zinc 50 */
-
-  /* Brighter Pastel Highlights (Level 300) */
-  --pastel-blue: #67e8f9; /* Cyan 300 */
-  --pastel-purple: #c4b5fd; /* Violet 300 */
-  --pastel-indigo: #a5b4fc; /* Indigo 300 */
-  --pastel-emerald: #6ee7b7; /* Emerald 300 */
-  --pastel-rose: #fda4af; /* Rose 300 */
-  --pastel-amber: #fcd34d; /* Amber 300 */
-  --pastel-yellow: #fef08a; /* Yellow 200 */
-  --pastel-orange: #fb923c; /* Orange 400ish */
-  --pastel-pink: #f472b6; /* Pink 400ish */
-  --pastel-teal: #2dd4bf; /* Teal 400ish */
-  --pastel-lime: #a3e635; /* Lime 400ish */
-  --pastel-cyan: #22d3ee; /* Cyan 400ish */
-
-  /* Custom glassmorphism variables */
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  background-attachment: fixed;
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Glassmorphism Utilities */
-.glass {
-  background: var(--glass-bg);
+/* Custom Utilities */
+.noise {
+  position: relative;
+}
+
+.noise::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bg-logo-gradient {
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+}
+
+.bg-logo-gradient-light {
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.01);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-}
-
-.glass-hover:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.15);
+.gradient-border-button {
+  position: relative;
+  background: #fff;
+  color: #000;
   transition: all 0.3s ease;
 }
 
-/* Micro-interactions */
-.hover-scale {
-  transition: transform 0.2s ease;
-}
-.hover-scale:hover {
-  transform: scale(1.05);
-}
-.hover-scale:active {
-  transform: scale(0.95);
-}
-
-.hover-glow {
-  transition:
-    border-color 0.3s ease,
-    background-color 0.3s ease,
-    transform 0.2s ease;
-}
-.hover-glow:hover {
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  background-color: rgba(255, 255, 255, 0.05);
-  transform: translateY(-2px);
+.gradient-border-button::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(to right, #6366f1, #10b981);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
 }
 
-/* Scrollbar styling: hide visible scrollbars globally while preserving scroll behavior */
-/* Firefox */
-html,
-body,
-* {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+.gradient-border-button:hover::before {
+  opacity: 1;
 }
 
-/* WebKit browsers (Chrome, Safari) */
-*::-webkit-scrollbar {
-  width: 0px;
-  height: 0px;
-  background: transparent;
+.premium-shadow {
+  box-shadow: 0 0 50px -12px rgba(99, 102, 241, 0.25);
 }
 
-/* Utility class for hiding scrollbars on specific elements */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-@layer utilities {
-  .pulse-soft {
-    animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-}
-
-@keyframes pulse-soft {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(0.98);
-  }
+.tracking-tightest {
+  letter-spacing: -0.05em;
 }

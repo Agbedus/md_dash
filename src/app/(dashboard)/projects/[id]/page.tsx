@@ -1,10 +1,10 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { getProject, getProjects } from '@/app/projects/actions';
-import { getTasks } from '@/app/tasks/actions';
-import { getNotes } from '@/app/notes/actions';
-import { getClients } from '@/app/clients/actions';
-import { getUsers } from '@/app/users/actions';
+import { getProject, getProjects } from '@/app/(dashboard)/projects/actions';
+import { getTasks } from '@/app/(dashboard)/tasks/actions';
+import { getNotes } from '@/app/(dashboard)/notes/actions';
+import { getClients } from '@/app/(dashboard)/clients/actions';
+import { getUsers } from '@/app/(dashboard)/users/actions';
 import ProjectDashboardClient from '@/components/ui/projects/project-dashboard-client';
 
 interface ProjectDashboardPageProps {

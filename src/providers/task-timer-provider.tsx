@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Task } from '@/types/task';
-import { startTaskTimer, pauseTaskTimer, stopTaskTimer as stopTaskTimerAction } from '@/app/tasks/actions';
+import { startTaskTimer, pauseTaskTimer, stopTaskTimer as stopTaskTimerAction } from '@/app/(dashboard)/tasks/actions';
 import { toast } from '@/lib/toast';
 
 interface TaskTimerContextType {
