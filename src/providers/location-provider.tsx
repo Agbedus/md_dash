@@ -41,6 +41,47 @@ function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: num
     return R * c;
 }
 
+function getAccuratePosition(timeoutMs = 15000, desiredAccuracy = 35): Promise<GeolocationPosition> {
+    return new Promise((resolve, reject) => {
+        let watchId: number;
+        let bestPosition: GeolocationPosition | null = null;
+        let timeoutId: NodeJS.Timeout;
+
+        const cleanup = () => {
+            navigator.geolocation.clearWatch(watchId);
+            clearTimeout(timeoutId);
+        };
+
+        watchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                if (!bestPosition || pos.coords.accuracy < bestPosition.coords.accuracy) {
+                    bestPosition = pos;
+                }
+                if (pos.coords.accuracy <= desiredAccuracy) {
+                    cleanup();
+                    resolve(pos);
+                }
+            },
+            (err) => {
+                if (!bestPosition) {
+                    cleanup();
+                    reject(err);
+                }
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: timeoutMs }
+        );
+
+        timeoutId = setTimeout(() => {
+            cleanup();
+            if (bestPosition) {
+                resolve(bestPosition);
+            } else {
+                reject(new Error("Timeout waiting for location"));
+            }
+        }, timeoutMs);
+    });
+}
+
 export function LocationProvider({ 
     children,
     initialRecord 
@@ -315,52 +356,60 @@ export function LocationProvider({
                 setIsLoading(false);
                 return;
             }
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const { latitude, longitude, accuracy } = position.coords;
-                    const offices = officesRef.current;
-                    if (!offices || offices.length === 0) {
-                        toast.error('No office locations configured.');
-                        setIsLoading(false);
-                        return;
-                    }
-
-                    let validOfficeId: number | null = null;
-                    for (const office of offices) {
-                        const dist = getDistanceInMeters(latitude, longitude, office.latitude, office.longitude);
-                        if (dist <= office.in_office_radius_meters) {
-                            validOfficeId = office.id;
-                            break;
-                        }
-                    }
-
-                    if (validOfficeId === null) {
-                        toast.error('Not in the office geofence.');
-                        setIsLoading(false);
-                        return;
-                    }
-
-                    const result = await updateLocation(latitude, longitude, accuracy, validOfficeId || undefined);
-                    if (result.success && result.record) {
-                        setPresenceState(result.record.presence_state);
-                        setAttendanceState(result.record.attendance_state);
-                        setClockInTime(result.record.clock_in);
-                        setClockOutTime(result.record.clock_out);
-                        setLastUpdate(new Date());
-                        mutate('my-attendance-today');
-                        mutate('team-attendance-today');
-                        toast.success('Clocked in!');
-                    } else {
-                        toast.error(result.error || 'Failed to clock in');
-                    }
+            toast.loading("Acquiring accurate GPS signal...", { id: 'gps-lock' });
+            try {
+                const position = await getAccuratePosition(15000, 35);
+                toast.dismiss('gps-lock');
+                const { latitude, longitude, accuracy } = position.coords;
+                
+                if (accuracy > 50) {
+                    toast.error('GPS signal too weak. Please step outside.');
                     setIsLoading(false);
-                },
-                (error) => {
-                    toast.error('GPS error.');
+                    return;
+                }
+
+                const offices = officesRef.current;
+                if (!offices || offices.length === 0) {
+                    toast.error('No office locations configured.');
                     setIsLoading(false);
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
+                    return;
+                }
+
+                let validOfficeId: number | null = null;
+                for (const office of offices) {
+                    const dist = getDistanceInMeters(latitude, longitude, office.latitude, office.longitude);
+                    // stricter geofence check incorporating accuracy
+                    if (dist + (accuracy * 0.5) <= office.in_office_radius_meters) {
+                        validOfficeId = office.id;
+                        break;
+                    }
+                }
+
+                if (validOfficeId === null) {
+                    toast.error('Not strictly in the office geofence.');
+                    setIsLoading(false);
+                    return;
+                }
+
+                const result = await updateLocation(latitude, longitude, accuracy, validOfficeId || undefined);
+                if (result.success && result.record) {
+                    setPresenceState(result.record.presence_state);
+                    setAttendanceState(result.record.attendance_state);
+                    setClockInTime(result.record.clock_in);
+                    setClockOutTime(result.record.clock_out);
+                    setLastUpdate(new Date());
+                    mutate('my-attendance-today');
+                    mutate('team-attendance-today');
+                    toast.success('Clocked in!');
+                } else {
+                    toast.error(result.error || 'Failed to clock in');
+                }
+                setIsLoading(false);
+            } catch (error) {
+                toast.dismiss('gps-lock');
+                toast.error('GPS error or timeout.');
+                setIsLoading(false);
+            }
         } catch {
             setIsLoading(false);
         }
@@ -374,38 +423,39 @@ export function LocationProvider({
                 setIsLoading(false);
                 return;
             }
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const { latitude, longitude, accuracy } = position.coords;
-                    const offices = officesRef.current;
-                    let resolvedId: number | undefined;
-                    if (offices.length > 0) {
-                        const inOffice = offices.find(o => 
-                            getDistanceInMeters(latitude, longitude, o.latitude, o.longitude) <= o.in_office_radius_meters
-                        );
-                        resolvedId = inOffice?.id || offices[0].id;
-                    }
+            toast.loading("Acquiring accurate GPS signal...", { id: 'gps-lock' });
+            try {
+                const position = await getAccuratePosition(15000, 35);
+                toast.dismiss('gps-lock');
+                const { latitude, longitude, accuracy } = position.coords;
+                const offices = officesRef.current;
+                let resolvedId: number | undefined;
+                if (offices.length > 0) {
+                    const inOffice = offices.find(o => 
+                        getDistanceInMeters(latitude, longitude, o.latitude, o.longitude) <= o.in_office_radius_meters
+                    );
+                    resolvedId = inOffice?.id || offices[0].id;
+                }
 
-                    const result = await updateLocation(latitude, longitude, accuracy, resolvedId);
-                    if (result.success && result.record) {
-                        setPresenceState(result.record.presence_state);
-                        setAttendanceState(result.record.attendance_state);
-                        setClockInTime(result.record.clock_in);
-                        setClockOutTime(result.record.clock_out);
-                        setLastUpdate(new Date());
-                        mutate('my-attendance-today');
-                        mutate('team-attendance-today');
-                        toast.success('Clocked out!');
-                    } else {
-                        toast.error(result.error || 'Failed to clock out');
-                    }
-                    setIsLoading(false);
-                },
-                () => {
-                    setIsLoading(false);
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
+                const result = await updateLocation(latitude, longitude, accuracy, resolvedId);
+                if (result.success && result.record) {
+                    setPresenceState(result.record.presence_state);
+                    setAttendanceState(result.record.attendance_state);
+                    setClockInTime(result.record.clock_in);
+                    setClockOutTime(result.record.clock_out);
+                    setLastUpdate(new Date());
+                    mutate('my-attendance-today');
+                    mutate('team-attendance-today');
+                    toast.success('Clocked out!');
+                } else {
+                    toast.error(result.error || 'Failed to clock out');
+                }
+                setIsLoading(false);
+            } catch (error) {
+                toast.dismiss('gps-lock');
+                toast.error('GPS error or timeout.');
+                setIsLoading(false);
+            }
         } catch {
             setIsLoading(false);
         }
