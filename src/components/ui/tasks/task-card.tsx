@@ -220,11 +220,11 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                             type="checkbox" 
                             checked={qaRequired}
                             onChange={(e) => setQaRequired(e.target.checked)}
-                            className="peer h-4 w-4 appearance-none rounded border border-white/5 bg-white/[0.03] checked:bg-purple-500/40 checked:border-purple-400 transition-all"
+                            className="peer h-4 w-4 appearance-none rounded border border-white/5 bg-white/[0.03] checked:bg-[var(--pastel-purple)]/40 checked:border-[var(--pastel-purple)] transition-all"
                         />
-                        <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-purple-400 opacity-0 peer-checked:opacity-100 transition-opacity" />
+                        <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-[var(--pastel-purple)] opacity-0 peer-checked:opacity-100 transition-opacity" />
                     </div>
-                    <span className="text-[11px] font-bold text-zinc-500 group-hover:text-purple-400 transition-colors uppercase tracking-wider">QA</span>
+                    <span className="text-[11px] font-bold text-zinc-500 group-hover:text-[var(--pastel-purple)] transition-colors uppercase tracking-wider">QA</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer group">
                     <div className="relative flex items-center">
@@ -232,11 +232,11 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                             type="checkbox" 
                             checked={reviewRequired}
                             onChange={(e) => setReviewRequired(e.target.checked)}
-                            className="peer h-4 w-4 appearance-none rounded border border-white/5 bg-white/[0.03] checked:bg-blue-500/40 checked:border-blue-400 transition-all"
+                            className="peer h-4 w-4 appearance-none rounded border border-white/5 bg-white/[0.03] checked:bg-[var(--pastel-indigo)]/40 checked:border-[var(--pastel-indigo)] transition-all"
                         />
-                        <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-blue-400 opacity-0 peer-checked:opacity-100 transition-opacity" />
+                        <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-[var(--pastel-indigo)] opacity-0 peer-checked:opacity-100 transition-opacity" />
                     </div>
-                    <span className="text-[11px] font-bold text-zinc-500 group-hover:text-blue-400 transition-colors uppercase tracking-wider">Review</span>
+                    <span className="text-[11px] font-bold text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors uppercase tracking-wider">Review</span>
                 </label>
             </div>
           </td>
@@ -382,10 +382,10 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
         <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
             <div className="flex items-center gap-2">
                 {task.qa_required && (
-                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-wider">QA</span>
+                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--pastel-purple)]/10 text-[var(--pastel-purple)] border border-[var(--pastel-purple)]/20 uppercase tracking-wider">QA</span>
                 )}
                 {task.review_required && (
-                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-wider">Review</span>
+                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border border-[var(--pastel-indigo)]/20 uppercase tracking-wider">Review</span>
                 )}
                 {!task.qa_required && !task.review_required && <span className="text-zinc-600">-</span>}
             </div>
@@ -449,9 +449,9 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                 : task.status === 'IN_PROGRESS'
                 ? 'bg-[var(--pastel-blue)]/10 text-[var(--pastel-blue)] border-[var(--pastel-blue)]/20'
                 : task.status === 'QA'
-                ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                ? 'bg-[var(--pastel-purple)]/10 text-[var(--pastel-purple)] border-[var(--pastel-purple)]/20'
                 : task.status === 'REVIEW'
-                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                ? 'bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border-[var(--pastel-indigo)]/20'
                 : 'bg-white/[0.03] text-zinc-400 border-white/5'
             }`}
           >

@@ -57,7 +57,6 @@ export async function createAnnouncement(data: AnnouncementCreate) {
             return { success: false, error: "Failed to create announcement" };
         }
 
-        revalidatePath('/');
         revalidateTag('announcements', 'max');
         return { success: true, data: await response.json() as Announcement };
     } catch (error) {
@@ -88,7 +87,6 @@ export async function updateAnnouncement(id: string, data: AnnouncementUpdate) {
             return { success: false, error: "Failed to update announcement" };
         }
 
-        revalidatePath('/');
         revalidateTag('announcements', 'max');
         return { success: true, data: await response.json() as Announcement };
     } catch (error) {
@@ -117,7 +115,6 @@ export async function deleteAnnouncement(id: string) {
             return { success: false, error: "Failed to delete announcement" };
         }
 
-        revalidatePath('/');
         revalidateTag('announcements', 'max');
         return { success: true };
     } catch (error) {

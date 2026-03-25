@@ -112,9 +112,9 @@ export async function SummaryStatsSection() {
                     <div className="mt-2 lg:mt-4">
                         <p className="text-[11px] lg:text-xs text-zinc-500 font-medium uppercase tracking-wider mb-0.5 lg:mb-1">{stat.label}</p>
                         <div className="flex items-baseline justify-between">
-                            <p className="text-xl lg:text-3xl font-bold text-white leading-none">{stat.value}</p>
+                            <p className="text-xl lg:text-3xl font-bold font-numbers text-white leading-none">{stat.value}</p>
                             {i !== 0 && (
-                                <div className={`text-[11px] lg:text-[11px] font-bold ${stat.color} bg-white/[0.03] px-1.5 py-0.5 rounded-full`}>
+                                <div className={`text-[11px] lg:text-[11px] font-bold font-numbers ${stat.color} bg-white/[0.03] px-1.5 py-0.5 rounded-full`}>
                                    +{(i * 7 + 4) % 15}%
                                 </div>
                             )}
@@ -180,7 +180,7 @@ export async function StatsOverviewSection() {
                       </div>
                     )}
                   </div>
-                  <span className="text-sm font-bold text-white">
+                  <span className="text-sm font-bold font-numbers text-white">
                     {stat.value}
                   </span>
                 </div>
@@ -201,7 +201,7 @@ export async function StatsOverviewSection() {
                   className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/5"
                 >
                   <span className="text-sm text-zinc-400">{stat.name}</span>
-                  <span className="text-sm font-bold text-white">
+                  <span className="text-sm font-bold font-numbers text-white">
                     {stat.value}
                   </span>
                 </div>
@@ -480,7 +480,7 @@ export async function UnitLoadSection() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-zinc-300 font-medium truncate">{user.name}</span>
-                  <span className="text-xs font-bold text-white ml-2">{user.activeTasks}</span>
+                  <span className="text-xs font-bold font-numbers text-white ml-2">{user.activeTasks}</span>
                 </div>
                 <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
                   <div
@@ -528,7 +528,7 @@ export async function PriorityMatrixSection() {
         {data.hasCritical && (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20">
             <FiAlertTriangle className="text-[11px] text-[var(--pastel-rose)]" />
-            <span className="text-[11px] font-bold text-[var(--pastel-rose)]">{data.criticalCount} CRITICAL</span>
+            <span className="text-[11px] font-bold font-numbers text-[var(--pastel-rose)]">{data.criticalCount} CRITICAL</span>
           </div>
         )}
       </div>
@@ -562,7 +562,7 @@ export async function PriorityMatrixSection() {
             })()}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold text-white">{data.total}</span>
+            <span className="text-2xl font-bold font-numbers text-white">{data.total}</span>
             <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Active</span>
           </div>
         </div>
@@ -572,7 +572,7 @@ export async function PriorityMatrixSection() {
             <div key={i} className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full" style={{ background: COLORS[seg.name] || seg.color }} />
               <span className="text-[11px] text-zinc-400">{seg.name}</span>
-              <span className="text-[11px] font-bold text-white">{seg.value}</span>
+              <span className="text-[11px] font-bold font-numbers text-white">{seg.value}</span>
             </div>
           ))}
         </div>
@@ -610,7 +610,7 @@ export async function TemporalBurnRateSection() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-zinc-400 font-medium">Estimated Hours</span>
-            <span className="text-sm font-bold text-white">{data.estimatedHours}h</span>
+            <span className="text-sm font-bold font-numbers text-white">{data.estimatedHours}h</span>
           </div>
           <div className="h-3 bg-white/[0.04] rounded-full overflow-hidden">
             <div className="h-full rounded-full bg-[var(--pastel-indigo)]/60 transition-all duration-700" style={{ width: '100%' }} />
@@ -621,7 +621,7 @@ export async function TemporalBurnRateSection() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-zinc-400 font-medium">Actual Hours Logged</span>
-            <span className="text-sm font-bold text-white">{data.actualHours}h</span>
+            <span className="text-sm font-bold font-numbers text-white">{data.actualHours}h</span>
           </div>
           <div className="h-3 bg-white/[0.04] rounded-full overflow-hidden">
             <div
@@ -638,9 +638,9 @@ export async function TemporalBurnRateSection() {
         <div className="flex items-center justify-between pt-2 border-t border-white/5">
           <div className="flex items-center gap-1.5">
             <FiActivity className="text-xs text-zinc-500" />
-            <span className="text-[11px] text-zinc-500">{data.projectCount} active projects</span>
+            <span className="text-[11px] text-zinc-500"><span className="font-numbers">{data.projectCount}</span> active projects</span>
           </div>
-          <div className={`text-sm font-bold ${sc.color}`}>
+          <div className={`text-sm font-bold font-numbers ${sc.color}`}>
             {data.burnRatio}% burn
           </div>
         </div>
@@ -792,11 +792,11 @@ export async function OperationVelocitySection() {
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-sm font-bold text-white">{totalClosed}</p>
-            <p className="text-[10px] text-zinc-500">14d total</p>
+            <p className="text-sm font-bold font-numbers text-white">{totalClosed}</p>
+            <p className="text-[10px] text-zinc-500"><span className="font-numbers">14</span>d total</p>
           </div>
           <div className="text-right">
-            <p className="text-sm font-bold text-[var(--pastel-teal)]">{avgPerDay}</p>
+            <p className="text-sm font-bold font-numbers text-[var(--pastel-teal)]">{avgPerDay}</p>
             <p className="text-[10px] text-zinc-500">avg/day</p>
           </div>
         </div>

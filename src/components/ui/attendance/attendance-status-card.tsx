@@ -33,8 +33,8 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
     //           3. Initial server record
     const currentPresence = manualPresence || liveRecord?.presence_state || initialRecord?.presence_state || 'OUT_OF_OFFICE';
     const currentAttendance = manualAttendance || liveRecord?.attendance_state || initialRecord?.attendance_state || 'NOT_CLOCKED_IN';
-    const clockInTime = manualClockInTime || liveRecord?.clock_in || initialRecord?.clock_in;
-    const clockOutTime = manualClockOutTime || liveRecord?.clock_out || initialRecord?.clock_out;
+    const clockInTime = manualClockInTime || liveRecord?.clock_in_at || liveRecord?.clock_in || initialRecord?.clock_in_at || initialRecord?.clock_in;
+    const clockOutTime = manualClockOutTime || liveRecord?.clock_out_at || liveRecord?.clock_out || initialRecord?.clock_out_at || initialRecord?.clock_out;
     const pColors = presenceStateColors[currentPresence];
     const aColors = attendanceStateColors[currentAttendance];
 

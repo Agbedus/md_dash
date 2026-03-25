@@ -111,10 +111,10 @@ export async function updateLocation(
         // Transform API response to match AttendanceRecord type if needed
         const record: AttendanceRecord = {
             id: data.id || 0,
-            user_id: '', // Not returned in location-update summary
-            date: new Date().toISOString().split('T')[0],
-            clock_in: data.clock_in_at || null,
-            clock_out: data.clock_out_at || null,
+            user_id: '',
+            work_date: new Date().toISOString().split('T')[0],
+            clock_in_at: data.clock_in_at || null,
+            clock_out_at: data.clock_out_at || null,
             presence_state: data.presence_state,
             attendance_state: data.attendance_state,
             total_hours: null,

@@ -4,12 +4,18 @@ export type AttendanceState = 'NOT_CLOCKED_IN' | 'CLOCKED_IN' | 'CLOCKED_OUT';
 export type AttendanceRecord = {
     id: number;
     user_id: string;
-    date: string;
-    clock_in: string | null;
-    clock_out: string | null;
-    presence_state: PresenceState;
+    office_location_id?: number;
+    work_date: string;              // "YYYY-MM-DD" from the backend
+    date?: string;                  // alias kept for backward compat
+    clock_in_at: string | null;     // ISO timestamp from backend
+    clock_in?: string | null;       // alias
+    clock_out_at: string | null;    // ISO timestamp from backend
+    clock_out?: string | null;      // alias
     attendance_state: AttendanceState;
-    total_hours: number | null;
+    presence_state?: PresenceState; // derived, may not be on the record
+    first_seen_in_office_at?: string | null;
+    last_seen_in_office_at?: string | null;
+    total_hours?: number | null;    // computed on frontend
     created_at?: string | null;
     updated_at?: string | null;
     // Hydrated on frontend

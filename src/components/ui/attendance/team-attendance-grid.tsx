@@ -120,11 +120,11 @@ export default function TeamAttendanceGrid({ initialRecords, users }: Props) {
                                 <div className="flex items-center justify-between pt-3 border-t border-white/5">
                                     <div className="flex items-center gap-1.5 text-xs text-zinc-500" suppressHydrationWarning>
                                         <FiClock className="text-[10px]" />
-                                        {r.clock_in
-                                            ? new Date(r.clock_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                        {(r.clock_in_at || r.clock_in)
+                                            ? new Date((r.clock_in_at || r.clock_in)!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                                             : 'Not clocked in'}
-                                        {r.clock_out && (
-                                            <> — {new Date(r.clock_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
+                                        {(r.clock_out_at || r.clock_out) && (
+                                            <> — {new Date((r.clock_out_at || r.clock_out)!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
                                         )}
                                     </div>
                                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${aColors.bg} ${aColors.text}`}>

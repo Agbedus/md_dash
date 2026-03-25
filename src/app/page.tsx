@@ -41,6 +41,26 @@ export default function LandingPage() {
     const zoomRef = React.useRef<HTMLDivElement>(null);
     const screensRef = React.useRef<HTMLDivElement>(null);
 
+    React.useEffect(() => {
+        fetch('/api/auth/session')
+            .then(res => {
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    return res.json();
+                } else {
+                    return null;
+                }
+            })
+            .then(session => {
+                if (!session) return;
+                const searchParams = new URLSearchParams(window.location.search);
+                if (Object.keys(session).length > 0 && searchParams.get('home') !== 'true') {
+                    window.location.href = '/dashboard';
+                }
+            })
+            .catch(err => console.error('Session check failed:', err));
+    }, []);
+
     React.useLayoutEffect(() => {
         const ctx = gsap.context(() => {
             const tl = gsap.timeline({

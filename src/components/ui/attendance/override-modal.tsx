@@ -12,11 +12,15 @@ interface Props {
 }
 
 export default function OverrideModal({ record, onClose, onOverride }: Props) {
+    const clockInSource = record.clock_in_at || record.clock_in;
+    const clockOutSource = record.clock_out_at || record.clock_out;
+    const dateSource = record.work_date || record.date || '';
+
     const [clockIn, setClockIn] = useState(
-        record.clock_in ? new Date(record.clock_in).toTimeString().slice(0, 5) : ''
+        clockInSource ? new Date(clockInSource).toTimeString().slice(0, 5) : ''
     );
     const [clockOut, setClockOut] = useState(
-        record.clock_out ? new Date(record.clock_out).toTimeString().slice(0, 5) : ''
+        clockOutSource ? new Date(clockOutSource).toTimeString().slice(0, 5) : ''
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,9 +30,8 @@ export default function OverrideModal({ record, onClose, onOverride }: Props) {
 
         try {
             // Convert time inputs to full ISO strings using the record date
-            const dateStr = record.date;
-            const clockInISO = clockIn ? `${dateStr}T${clockIn}:00` : null;
-            const clockOutISO = clockOut ? `${dateStr}T${clockOut}:00` : null;
+            const clockInISO = clockIn ? `${dateSource}T${clockIn}:00` : null;
+            const clockOutISO = clockOut ? `${dateSource}T${clockOut}:00` : null;
 
             await onOverride(record.id, clockInISO, clockOutISO);
             toast.success('Attendance overridden successfully', {
@@ -51,7 +54,7 @@ export default function OverrideModal({ record, onClose, onOverride }: Props) {
                     <div>
                         <h3 className="text-lg font-bold text-white">Override Attendance</h3>
                         <p className="text-xs text-zinc-500 mt-0.5">
-                            {record.userName || 'User'} · {new Date(record.date).toLocaleDateString()}
+                            {record.userName || 'User'} · {dateSource ? new Date(dateSource + (dateSource.includes('T') ? '' : 'T00:00:00')).toLocaleDateString() : 'Today'}
                         </p>
                     </div>
                     <button

@@ -53,16 +53,16 @@ const CircularProgress = ({ percentage, size = 32 }: { percentage: number; size?
 export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardProps) {
   const [isDeleting, setIsDeleting] = React.useState(false);
   const statusColors = {
-    planning: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    in_progress: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    on_hold: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+    planning: "bg-[var(--pastel-blue)]/10 text-[var(--pastel-blue)] border-[var(--pastel-blue)]/20",
+    in_progress: "bg-[var(--pastel-amber)]/10 text-[var(--pastel-amber)] border-[var(--pastel-amber)]/20",
+    completed: "bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20",
+    on_hold: "bg-white/[0.03] text-zinc-400 border-white/5",
   };
 
   const priorityColors = {
     low: "text-zinc-400",
-    medium: "text-amber-400",
-    high: "text-rose-400",
+    medium: "text-[var(--pastel-amber)]",
+    high: "text-[var(--pastel-rose)]",
   };
 
   return (

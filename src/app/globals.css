@@ -26,6 +26,13 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --pastel-indigo: #818cf8;
+  --pastel-emerald: #34d399;
+  --pastel-blue: #60a5fa;
+  --pastel-purple: #c084fc;
+  --pastel-rose: #fb7185;
+  --pastel-amber: #fbbf24;
+  --pastel-teal: #2dd4bf;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -41,7 +48,22 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 /* Custom Utilities */
+.font-numbers {
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
 .noise {
   position: relative;
 }

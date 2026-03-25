@@ -62,16 +62,16 @@ const noteTypeIcons: Record<Note['type'], React.ElementType> = {
 };
 
 const noteTypeColors: Record<Note['type'], string> = {
-    note: 'text-blue-400',
-    checklist: 'text-green-400',
-    todo: 'text-purple-400',
-    journal: 'text-yellow-400',
-    meeting: 'text-indigo-400',
-    idea: 'text-pink-400',
-    link: 'text-red-400',
-    code: 'text-cyan-400',
-    bookmark: 'text-orange-400',
-    sketch: 'text-teal-400',
+    note: 'text-[var(--pastel-blue)]',
+    checklist: 'text-[var(--pastel-emerald)]',
+    todo: 'text-[var(--pastel-purple)]',
+    journal: 'text-[var(--pastel-amber)]',
+    meeting: 'text-[var(--pastel-indigo)]',
+    idea: 'text-[var(--pastel-rose)]',
+    link: 'text-[var(--pastel-rose)]',
+    code: 'text-[var(--pastel-teal)]',
+    bookmark: 'text-[var(--pastel-amber)]',
+    sketch: 'text-[var(--pastel-teal)]',
 };
 
 const formatPriority = (p: Note['priority'] | undefined): string =>
@@ -158,18 +158,18 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
 
     const priorityBgColorClass = (priority: Note['priority']) => {
         switch (priority) {
-            case 'high': return 'bg-red-400/10';
-            case 'medium': return 'bg-yellow-400/10';
-            case 'low': return 'bg-emerald-400/10';
+            case 'high': return 'bg-[var(--pastel-rose)]/10';
+            case 'medium': return 'bg-[var(--pastel-amber)]/10';
+            case 'low': return 'bg-[var(--pastel-emerald)]/10';
             default: return 'bg-zinc-400/10';
         }
     };
     
     const priorityTextColorClass = (priority: Note['priority']) => {
         switch (priority) {
-            case 'high': return 'text-red-400';
-            case 'medium': return 'text-yellow-400';
-            case 'low': return 'text-emerald-400';
+            case 'high': return 'text-[var(--pastel-rose)]';
+            case 'medium': return 'text-[var(--pastel-amber)]';
+            case 'low': return 'text-[var(--pastel-emerald)]';
             default: return 'text-zinc-400';
         }
     };
