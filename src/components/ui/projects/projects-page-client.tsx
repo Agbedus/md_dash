@@ -538,7 +538,7 @@ function PortfolioStatCard({ icon: Icon, color, label, value, subValue, trend }:
                 <div>
                     <p className="text-[11px] lg:text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5 lg:mb-1 truncate">{label}</p>
                     <div className="flex flex-col lg:flex-row lg:items-baseline gap-0.5 lg:gap-2">
-                        <span className="text-lg lg:text-xl font-medium text-white uppercase tracking-tight">{value}</span>
+                        <span className="text-lg lg:text-xl font-medium font-numbers text-white uppercase tracking-tight">{value}</span>
                         <span className="text-[11px] lg:text-[11px] font-bold text-zinc-600 uppercase tracking-wider truncate">{subValue}</span>
                     </div>
                 </div>

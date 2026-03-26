@@ -276,12 +276,12 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
                                 <FiSun className="w-3 h-3 text-amber-400" />
                                 <div className="flex gap-1.5">
                                     {approved > 0 && (
-                                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-numbers">
                                             {approved} approved
                                         </span>
                                     )}
                                     {pending > 0 && (
-                                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 font-numbers">
                                             {pending} pending
                                         </span>
                                     )}

@@ -162,7 +162,7 @@ export default function TimeOffAdminClient({ initialRequests, users }: TimeOffAd
                                 <FiSun className="w-4 h-4" />
                             </div>
                             <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1">{label}</p>
-                            <p className="text-3xl font-medium text-white">{value}</p>
+                            <p className="text-3xl font-medium font-numbers text-white">{value}</p>
                         </motion.div>
                     );
                 })}
@@ -287,7 +287,7 @@ export default function TimeOffAdminClient({ initialRequests, users }: TimeOffAd
                                             </td>
 
                                             {/* Days */}
-                                            <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-zinc-300">
+                                            <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-zinc-300 font-numbers">
                                                 {days}d
                                             </td>
 

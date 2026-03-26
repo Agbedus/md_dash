@@ -77,7 +77,7 @@ export function UserLeaderboard({ tasks, users }: UserLeaderboardProps) {
             <div>
               <p className="text-[11px] lg:text-xs font-bold text-white uppercase tracking-tight truncate max-w-[80px] lg:max-w-none">{user.fullName || user.email.split('@')[0]}</p>
               <p className="text-[11px] lg:text-[11px] text-zinc-500 font-medium uppercase tracking-wider mt-0.5 whitespace-nowrap">
-                <span className="text-white font-bold">{user.completedCount}</span> Tasks
+                <span className="text-white font-bold font-numbers">{user.completedCount}</span> Tasks
               </p>
             </div>
           </div>

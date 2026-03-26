@@ -120,7 +120,7 @@ export function TaskSummarySection({ tasks }: TaskSummarySectionProps) {
               </div>
             </div>
             <div className="text-left lg:text-right mt-auto">
-              <p className="text-xl lg:text-4xl font-medium text-white leading-none tracking-tight">{stat.value}</p>
+              <p className="text-xl lg:text-4xl font-medium font-numbers text-white leading-none tracking-tight">{stat.value}</p>
             </div>
           </div>
         ))}
