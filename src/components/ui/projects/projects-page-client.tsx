@@ -21,6 +21,8 @@ import { toast } from '@/lib/toast';
 import { useUsers } from '@/hooks/use-users';
 import { useClients } from '@/hooks/use-clients';
 import { useNotes } from '@/hooks/use-notes';
+import { useTasks } from '@/hooks/use-tasks';
+import { Task } from '@/types/task';
 import ProjectsLoading from '@/app/(dashboard)/projects/loading';
 
 interface ProjectsPageClientProps {
@@ -28,13 +30,15 @@ interface ProjectsPageClientProps {
   initialUsers?: User[];
   initialClients?: Client[];
   initialNotes?: Note[];
+  initialTasks?: Task[];
 }
 
 export default function ProjectsPageClient({ 
   initialProjects = [], 
   initialUsers = [], 
   initialClients = [], 
-  initialNotes = [] 
+  initialNotes = [],
+  initialTasks = []
 }: ProjectsPageClientProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -51,6 +55,8 @@ export default function ProjectsPageClient({
   const { users } = useUsers(initialUsers);
   const { clients } = useClients({ initialClients });
   const { notes } = useNotes({ initialNotes });
+  // Use a high limit to ensure we get all tasks for progress calculation
+  const { tasks: allTasks, isLoading: tasksLoading } = useTasks({ users, initialTasks, limit: 1000 });
 
   // Only show skeleton if we have no data and are loading
   const isLoading = projectsLoading && serverProjects.length === 0;
@@ -72,6 +78,26 @@ export default function ProjectsPageClient({
     }
   );
 
+  // Combine projects with their tasks for accurate completion tracking
+  const projectsWithTasks = useMemo(() => {
+    return optimisticProjects.map(project => {
+      // Find tasks for this project from the pool
+      const linkedTasks = allTasks.filter(task => Number(task.projectId) === project.id);
+      
+      // If we found tasks in allTasks, use them. 
+      // Otherwise, if allTasks is currently empty (e.g. during a re-fetch) 
+      // but the project object itself has tasks (from initial server load), keep those.
+      const tasksToUse = (linkedTasks.length === 0 && project.tasks && project.tasks.length > 0) 
+        ? project.tasks 
+        : linkedTasks;
+
+      return {
+        ...project,
+        tasks: tasksToUse
+      };
+    });
+  }, [optimisticProjects, allTasks]);
+
   // Calculate trends for Portfolio Intelligence
   const trends = useMemo(() => {
     const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
@@ -89,20 +115,20 @@ export default function ProjectsPageClient({
     };
 
     return {
-      active: getTrend(optimisticProjects, 'in_progress'),
-      completed: getTrend(optimisticProjects, 'completed'),
-      total: getTrend(optimisticProjects),
+      active: getTrend(projectsWithTasks, 'in_progress'),
+      completed: getTrend(projectsWithTasks, 'completed'),
+      total: getTrend(projectsWithTasks),
     };
-  }, [optimisticProjects]);
+  }, [projectsWithTasks]);
 
   const filteredProjects = useMemo(() => {
-    return optimisticProjects.filter(project => {
+    return projectsWithTasks.filter(project => {
       const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             (project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
       const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [optimisticProjects, searchQuery, statusFilter]);
+  }, [projectsWithTasks, searchQuery, statusFilter]);
 
   const handleCreate = async (formData: FormData) => {
     const newProject = createOptimisticProject(formData);
@@ -220,27 +246,27 @@ export default function ProjectsPageClient({
           <PortfolioStatCard 
             icon={FiActivity} 
             label="Active Maneuvers" 
-            value={optimisticProjects.filter(p => p.status === 'in_progress').length.toString()} 
-            subValue={`${optimisticProjects.length} Total`}
+            value={projectsWithTasks.filter(p => p.status === 'in_progress').length.toString()} 
+            subValue={`${projectsWithTasks.length} Total`}
             color="indigo"
             trend={trends.active}
           />
           <PortfolioStatCard 
             icon={FiDollarSign} 
             label="Resource Purity" 
-            value={`$${optimisticProjects.reduce((acc, p) => acc + (p.spent || 0), 0) > 1000000 
-              ? (optimisticProjects.reduce((acc, p) => acc + (p.spent || 0), 0) / 1000000).toFixed(1) + 'M'
-              : optimisticProjects.reduce((acc, p) => acc + (p.spent || 0), 0).toLocaleString()}`} 
-            subValue={`of $${optimisticProjects.reduce((acc, p) => acc + (p.budget || 0), 0) > 1000000
-              ? (optimisticProjects.reduce((acc, p) => acc + (p.budget || 0), 0) / 1000000).toFixed(1) + 'M'
-              : optimisticProjects.reduce((acc, p) => acc + (p.budget || 0), 0).toLocaleString()} Cap`}
+            value={`$${projectsWithTasks.reduce((acc, p) => acc + (p.spent || 0), 0) > 1000000 
+              ? (projectsWithTasks.reduce((acc, p) => acc + (p.spent || 0), 0) / 1000000).toFixed(1) + 'M'
+              : projectsWithTasks.reduce((acc, p) => acc + (p.spent || 0), 0).toLocaleString()}`} 
+            subValue={`of $${projectsWithTasks.reduce((acc, p) => acc + (p.budget || 0), 0) > 1000000
+              ? (projectsWithTasks.reduce((acc, p) => acc + (p.budget || 0), 0) / 1000000).toFixed(1) + 'M'
+              : projectsWithTasks.reduce((acc, p) => acc + (p.budget || 0), 0).toLocaleString()} Cap`}
             color="emerald"
             trend={trends.total}
           />
           <PortfolioStatCard 
             icon={FiCheckSquare} 
             label="Mission Success" 
-            value={optimisticProjects.filter(p => p.status === 'completed').length.toString()} 
+            value={projectsWithTasks.filter(p => p.status === 'completed').length.toString()} 
             subValue="Completed"
             color="amber"
             trend={trends.completed}
@@ -248,7 +274,7 @@ export default function ProjectsPageClient({
           <PortfolioStatCard 
             icon={FiTrendingUp} 
             label="Tactical Velocity" 
-            value={`${(optimisticProjects.filter(p => p.status === 'completed').length / (optimisticProjects.length || 1) * 10).toFixed(1)}x`} 
+            value={`${(projectsWithTasks.filter(p => p.status === 'completed').length / (projectsWithTasks.length || 1) * 10).toFixed(1)}x`} 
             subValue="Output Index"
             color="rose"
             trend={trends.total}
@@ -265,8 +291,8 @@ export default function ProjectsPageClient({
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {['planning', 'in_progress', 'completed', 'on_hold'].map((status) => {
-                      const count = optimisticProjects.filter(p => p.status === status).length;
-                      const percentage = (count / (optimisticProjects.length || 1)) * 100;
+                      const count = projectsWithTasks.filter(p => p.status === status).length;
+                      const percentage = (count / (projectsWithTasks.length || 1)) * 100;
                       const colors = {
                           planning: 'bg-zinc-500',
                           in_progress: 'bg-indigo-500',
@@ -296,7 +322,7 @@ export default function ProjectsPageClient({
                   Tactical Priority
               </h3>
               <div className="space-y-4">
-                  {optimisticProjects.filter(p => p.priority === 'high').slice(0, 3).map(p => (
+                  {projectsWithTasks.filter(p => p.priority === 'high').slice(0, 3).map(p => (
                       <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-rose-500/5 border border-rose-500/10">
                           <div className="flex flex-col">
                               <span className="text-[11px] font-medium text-white uppercase tracking-tight truncate max-w-[120px]">{p.name}</span>
@@ -305,7 +331,7 @@ export default function ProjectsPageClient({
                           <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider bg-white/[0.03] px-2 py-0.5 rounded border border-white/5">{p.status.replace('_', ' ')}</span>
                       </div>
                   ))}
-                  {optimisticProjects.filter(p => p.priority === 'high').length === 0 && (
+                  {projectsWithTasks.filter(p => p.priority === 'high').length === 0 && (
                       <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider text-center py-4">No critical assets detected</p>
                   )}
               </div>
@@ -398,7 +424,7 @@ export default function ProjectsPageClient({
             users={users}
             clients={clients}
             notes={notes}
-            projects={optimisticProjects}
+            projects={projectsWithTasks}
             onClose={() => setSelectedProject(null)}
           />
         </div>

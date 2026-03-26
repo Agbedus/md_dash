@@ -80,15 +80,7 @@ export default function TeamAttendanceGrid({ initialRecords, users }: Props) {
                         const pState = r.presence_state || (r.attendance_state === 'CLOCKED_IN' ? 'IN_OFFICE' : 'OUT_OF_OFFICE');
                         const aState = r.attendance_state || 'NOT_CLOCKED_IN';
                         
-                        // Refine pState for better UX: If clocked in but backend says OUT_OF_OFFICE, 
-                        // it's likely they are in a grace period or GPS hasn't confirmed return yet.
-                        // We'll show TEMPORARILY_OUT as a "soft" state.
-                        let displayPState = pState;
-                        if (r.attendance_state === 'CLOCKED_IN' && pState === 'OUT_OF_OFFICE') {
-                            displayPState = 'TEMPORARILY_OUT';
-                        }
-
-                        const pColors = presenceStateColors[displayPState as PresenceState] || presenceStateColors['OUT_OF_OFFICE'];
+                        const pColors = presenceStateColors[pState as PresenceState] || presenceStateColors['OUT_OF_OFFICE'];
                         const aColors = attendanceStateColors[aState as AttendanceState] || attendanceStateColors['NOT_CLOCKED_IN'];
                         return (
                             <div

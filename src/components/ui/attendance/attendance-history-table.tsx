@@ -71,17 +71,17 @@ export default function AttendanceHistoryTable({ records }: { records: Attendanc
                                     <td className="px-4 lg:px-6 py-3 text-zinc-400 whitespace-nowrap" suppressHydrationWarning>
                                         {formatTime(clockOut)}
                                     </td>
-                                    <td className="px-4 lg:px-6 py-3 whitespace-nowrap" suppressHydrationWarning>
+                                    <td className="px-4 lg:px-6 py-3 whitespace-nowrap">
                                         {firstSeen ? (
-                                            <span className="inline-flex items-center gap-1 text-zinc-400">
+                                            <span className="inline-flex items-center gap-1 text-zinc-400" suppressHydrationWarning>
                                                 <FiEye className="text-[10px] text-emerald-500/60" />
                                                 {formatTime(firstSeen)}
                                             </span>
                                         ) : '—'}
                                     </td>
-                                    <td className="px-4 lg:px-6 py-3 whitespace-nowrap" suppressHydrationWarning>
+                                    <td className="px-4 lg:px-6 py-3 whitespace-nowrap">
                                         {lastSeen ? (
-                                            <span className="inline-flex items-center gap-1 text-zinc-400">
+                                            <span className="inline-flex items-center gap-1 text-zinc-400" suppressHydrationWarning>
                                                 <FiEye className="text-[10px] text-amber-500/60" />
                                                 {formatTime(lastSeen)}
                                             </span>

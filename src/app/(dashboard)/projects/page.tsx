@@ -23,5 +23,11 @@ export default async function ProjectsPage() {
     tasks: allTasks.filter((task: Task) => task.projectId === project.id)
   }));
   
-  return <ProjectsPageClient initialProjects={projectsWithTasks} initialUsers={allUsers} initialClients={allClients} initialNotes={allNotes} />;
+  return <ProjectsPageClient 
+    initialProjects={projectsWithTasks} 
+    initialUsers={allUsers} 
+    initialClients={allClients} 
+    initialNotes={allNotes}
+    initialTasks={allTasks}
+  />;
 }

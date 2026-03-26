@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSWRConfig } from 'swr';
-import { updateLocation, getOfficeLocations } from '@/app/(dashboard)/attendance/actions';
+import { updateLocation, getOfficeLocations, clockOutManual } from '@/app/(dashboard)/attendance/actions';
 import { toast } from '@/lib/toast';
 import type { PresenceState, AttendanceState, AttendancePolicy, OfficeLocation, AttendanceRecord } from '@/types/attendance';
 
@@ -20,7 +20,7 @@ interface LocationContextType {
     clockOutTime: string | null;
     toggleTracking: () => void;
     manualClockIn: () => Promise<void>;
-    manualClockOut: () => Promise<void>;
+    manualClockOut: (force?: boolean) => Promise<{ success?: boolean; confirmRequired?: boolean }>;
     isLoading: boolean;
 }
 
@@ -93,7 +93,17 @@ export function LocationProvider({
     const { mutate } = useSWRConfig();
     const [isTracking, setIsTracking] = useState(false);
     const [isSupported, setIsSupported] = useState(true);
-    const [presenceState, setPresenceState] = useState<PresenceState | null>(initialRecord?.presence_state || null);
+
+    // Policy-aligned initial presence: if clocked in but no presence_state on the initial record,
+    // assume IN_OFFICE since the backend auto-clocks in when IN_OFFICE is first confirmed.
+    const deriveInitialPresence = (record: AttendanceRecord | null | undefined): PresenceState | null => {
+        if (!record) return null;
+        if (record.presence_state) return record.presence_state;
+        if (record.attendance_state === 'CLOCKED_IN') return 'IN_OFFICE';
+        return null;
+    };
+
+    const [presenceState, setPresenceState] = useState<PresenceState | null>(deriveInitialPresence(initialRecord));
     const [attendanceState, setAttendanceState] = useState<AttendanceState | null>(initialRecord?.attendance_state || null);
     const [clockInTime, setClockInTime] = useState<string | null>(initialRecord?.clock_in_at || initialRecord?.clock_in || null);
     const [clockOutTime, setClockOutTime] = useState<string | null>(initialRecord?.clock_out_at || initialRecord?.clock_out || null);
@@ -410,7 +420,7 @@ export function LocationProvider({
                     }
                 }
 
-                const result = await updateLocation(latitude, longitude, accuracy, validOfficeId || undefined);
+                const result = await updateLocation(latitude, longitude, accuracy, validOfficeId || undefined, true);
                 if (result.success && result.record) {
                     setPresenceState(result.record.presence_state ?? null);
                     setAttendanceState(result.record.attendance_state);
@@ -439,51 +449,44 @@ export function LocationProvider({
         }
     }, [mutate, isWithinWindow]);
 
-    const manualClockOut = useCallback(async () => {
+    const manualClockOut = useCallback(async (force = false) => {
         setIsLoading(true);
         try {
-            if (!navigator.geolocation) {
-                toast.error('Geolocation not supported');
+            // Check if user is still in office before clocking out
+            if (!force && presenceState === 'IN_OFFICE') {
                 setIsLoading(false);
-                return;
+                return { confirmRequired: true };
             }
-            toast.loading("Acquiring accurate GPS signal...", { id: 'gps-lock' });
-            try {
-                const position = await getAccuratePosition(15000, 35);
-                toast.dismiss('gps-lock');
-                const { latitude, longitude, accuracy } = position.coords;
-                const offices = officesRef.current;
-                let resolvedId: number | undefined;
-                if (offices.length > 0) {
-                    const inOffice = offices.find(o => 
-                        getDistanceInMeters(latitude, longitude, o.latitude, o.longitude) <= o.in_office_radius_meters
-                    );
-                    resolvedId = inOffice?.id || offices[0].id;
-                }
 
-                const result = await updateLocation(latitude, longitude, accuracy, resolvedId);
-                if (result.success && result.record) {
-                    setPresenceState(result.record.presence_state ?? null);
-                    setAttendanceState(result.record.attendance_state);
-                    setClockInTime(result.record.clock_in_at || result.record.clock_in || null);
-                    setClockOutTime(result.record.clock_out_at || result.record.clock_out || null);
-                    setLastUpdate(new Date());
-                    mutate('my-attendance-today');
-                    mutate('team-attendance-today');
-                    toast.success('Clocked out!');
-                } else {
-                    toast.error(result.error || 'Failed to clock out');
-                }
-                setIsLoading(false);
-            } catch (error) {
-                toast.dismiss('gps-lock');
-                toast.error('GPS error or timeout.');
-                setIsLoading(false);
+            toast.loading("Clocking out...", { id: 'clock-out' });
+            
+            const result = await clockOutManual();
+            
+            toast.dismiss('clock-out');
+            if (result.success && result.record) {
+                setPresenceState(result.record.presence_state ?? null);
+                setAttendanceState(result.record.attendance_state);
+                setClockInTime(result.record.clock_in_at || result.record.clock_in || null);
+                setClockOutTime(result.record.clock_out_at || result.record.clock_out || null);
+                setLastUpdate(new Date());
+                mutate('my-attendance-today');
+                mutate('team-attendance-today');
+                toast.success('Clocked out successfully!');
+                
+                setIsTracking(false);
+                localStorage.setItem(STORAGE_KEY, 'false');
+            } else {
+                toast.error(result.error || 'Failed to clock out');
             }
-        } catch {
             setIsLoading(false);
+            return { success: result.success };
+        } catch {
+            toast.dismiss('clock-out');
+            toast.error('An unexpected error occurred while clocking out.');
+            setIsLoading(false);
+            return { success: false };
         }
-    }, [mutate]);
+    }, [mutate, presenceState]);
 
     const contextValue = React.useMemo(() => ({
         isTracking,

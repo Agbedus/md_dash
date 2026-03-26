@@ -28,11 +28,40 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
         isLoading,
     } = useLocation();
 
+    const [showConfirm, setShowConfirm] = React.useState(false);
+
+    const handleClockOut = async () => {
+        const result = await manualClockOut();
+        if (result?.confirmRequired) {
+            setShowConfirm(true);
+        } else {
+            setShowConfirm(false);
+        }
+    };
+
+    const handleConfirmClockOut = async () => {
+        await manualClockOut(true);
+        setShowConfirm(false);
+    };
+
     // Priority: 1. Manual/Local state derived from last action
     //           2. Live SWR data
     //           3. Initial server record
-    const currentPresence = manualPresence || liveRecord?.presence_state || initialRecord?.presence_state || 'OUT_OF_OFFICE';
+    const rawPresence = manualPresence || liveRecord?.presence_state || initialRecord?.presence_state || null;
     const currentAttendance = manualAttendance || liveRecord?.attendance_state || initialRecord?.attendance_state || 'NOT_CLOCKED_IN';
+
+    // Policy-aligned presence derivation:
+    // If we have an explicit presence state, use it.
+    // If clocked in but no presence state is set (e.g., manual clock-in or GPS grace period),
+    // default to IN_OFFICE rather than the misleading OUT_OF_OFFICE.
+    let currentPresence: import('@/types/attendance').PresenceState;
+    if (rawPresence) {
+        currentPresence = rawPresence;
+    } else if (currentAttendance === 'CLOCKED_IN') {
+        currentPresence = 'IN_OFFICE';
+    } else {
+        currentPresence = 'OUT_OF_OFFICE';
+    }
     const clockInTime = manualClockInTime || liveRecord?.clock_in_at || liveRecord?.clock_in || initialRecord?.clock_in_at || initialRecord?.clock_in;
     const clockOutTime = manualClockOutTime || liveRecord?.clock_out_at || liveRecord?.clock_out || initialRecord?.clock_out_at || initialRecord?.clock_out;
     const pColors = presenceStateColors[currentPresence];
@@ -117,9 +146,25 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
                             <FiLogIn className="text-base" />
                             {isLoading ? 'Locating...' : 'Clock In'}
                         </button>
+                    ) : showConfirm ? (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2">
+                            <button
+                                onClick={handleConfirmClockOut}
+                                disabled={isLoading}
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-rose-500 text-white hover:bg-rose-600 transition-all duration-200"
+                            >
+                                Confirm Clock Out
+                            </button>
+                            <button
+                                onClick={() => setShowConfirm(false)}
+                                className="px-3 py-2.5 rounded-xl text-xs font-medium bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </div>
                     ) : (
                         <button
-                            onClick={manualClockOut}
+                            onClick={handleClockOut}
                             disabled={isLoading}
                             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-400 hover:bg-rose-500/25 transition-all duration-200 disabled:opacity-50"
                         >

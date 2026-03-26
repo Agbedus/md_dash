@@ -72,6 +72,7 @@ export async function updateLocation(
     longitude: number,
     accuracy: number,
     officeLocationId?: number,
+    isManual: boolean = false,
 ) {
     const headers = await getAuthHeaders();
     if (!headers) return { success: false, error: "Unauthorized" };
@@ -97,6 +98,7 @@ export async function updateLocation(
                 accuracy_meters: accuracy,
                 office_location_id: resolvedOfficeId,
                 recorded_at: new Date().toISOString(),
+                is_manual: isManual,
             }),
         });
 
@@ -126,6 +128,45 @@ export async function updateLocation(
         return { success: true, record };
     } catch (error) {
         console.error("Error updating location:", error);
+        return { success: false, error: "Network error" };
+    }
+}
+
+export async function clockOutManual() {
+    const headers = await getAuthHeaders();
+    if (!headers) return { success: false, error: "Unauthorized" };
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/attendance/clock-out`, {
+            method: 'POST',
+            headers,
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("clockOutManual:", res.status, errorText);
+            return { success: false, error: `API Error ${res.status}: ${errorText}` };
+        }
+
+        const data = await res.json();
+        
+        const record: AttendanceRecord = {
+            id: data.id || 0,
+            user_id: '',
+            work_date: new Date().toISOString().split('T')[0],
+            clock_in_at: data.clock_in_at || null,
+            clock_out_at: data.clock_out_at || null,
+            presence_state: data.presence_state,
+            attendance_state: data.attendance_state,
+            total_hours: null,
+            created_at: null,
+            updated_at: null,
+        };
+
+        revalidateTag('attendance-my', 'max');
+        return { success: true, record };
+    } catch (error) {
+        console.error("Error manual clock out:", error);
         return { success: false, error: "Network error" };
     }
 }

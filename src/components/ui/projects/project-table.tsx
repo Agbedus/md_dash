@@ -13,6 +13,7 @@ import { updateTask, deleteTask, createTask } from '@/app/(dashboard)/tasks/acti
 import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import TaskCard from '@/components/ui/tasks/task-card';
 import { FiChevronRight, FiChevronDown, FiPlus, FiPieChart } from 'react-icons/fi';
+import { TaskDonutChart } from './task-donut-chart';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/lib/toast';
 
@@ -158,51 +159,14 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
     high: "text-rose-400",
   };
 
-  const calculateCompletion = (project: Project) => {
-    if (!project.tasks || project.tasks.length === 0) return 0;
-    const completed = project.tasks.filter(t => t.status === 'DONE').length;
-    return (completed / project.tasks.length) * 100;
+  const getTaskStats = (project: Project) => {
+    const total = project.tasks?.length || 0;
+    const done = project.tasks?.filter(t => t.status === 'DONE').length || 0;
+    const inProgress = project.tasks?.filter(t => ['IN_PROGRESS', 'REVIEW', 'QA'].includes(t.status)).length || 0;
+    const todo = total - done - inProgress;
+    return { total, done, inProgress, todo };
   };
 
-  const CircularProgress = ({ percentage, size = 32, status }: { percentage: number; size?: number; status: Project['status'] }) => {
-    const radius = (size / 2) - 2;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (percentage / 100) * circumference;
-    
-    const colorClass = 
-      status === 'completed' ? 'text-[var(--pastel-emerald)]' : 
-      status === 'in_progress' ? 'text-[var(--pastel-blue)]' : 
-      'text-zinc-500';
-
-    return (
-      <div className="relative inline-flex items-center justify-center shrink-0">
-        <svg width={size} height={size} className="transform -rotate-90">
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke="currentColor"
-            strokeWidth="2.5"
-            fill="transparent"
-            className="text-white/5"
-          />
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke="currentColor"
-            strokeWidth="2.5"
-            fill="transparent"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            className={`${colorClass} transition-all duration-700 ease-in-out`}
-            strokeLinecap="round"
-          />
-        </svg>
-        <span className="absolute text-[11px] font-medium text-white/90">{Math.round(percentage)}%</span>
-      </div>
-    );
-  };
 
   return (
     <div className="w-full space-y-4">
@@ -384,7 +348,7 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                   </div>
                 </td>
                 <td className="px-6 py-3 text-center">
-                    <CircularProgress percentage={calculateCompletion(project)} size={32} status={project.status} />
+                    <TaskDonutChart {...getTaskStats(project)} size={40} />
                 </td>
                 <td className="px-6 py-3">
                   {project.key && (
@@ -394,12 +358,12 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
                   )}
                 </td>
                 <td className="px-6 py-3">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium uppercase tracking-wider border ${statusColors[project.status]}`}>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium uppercase tracking-wider border whitespace-nowrap ${statusColors[project.status]}`}>
                     {statusMapping[project.status]}
                   </span>
                 </td>
                 <td className="px-6 py-3">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium uppercase tracking-wider border ${
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium uppercase tracking-wider border whitespace-nowrap ${
                     project.priority === 'high' ? 'bg-[var(--pastel-rose)]/10 text-[var(--pastel-rose)] border-[var(--pastel-rose)]/20 shadow-[0_0_15px_rgba(244,63,94,0.1)]' :
                     project.priority === 'medium' ? 'bg-[var(--pastel-amber)]/10 text-[var(--pastel-amber)] border-[var(--pastel-amber)]/20' :
                     'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20'

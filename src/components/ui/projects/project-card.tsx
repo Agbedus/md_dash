@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import Link from 'next/link';
 import { FiCheckSquare } from 'react-icons/fi';
+import { TaskDonutChart } from './task-donut-chart';
 
 import { User } from '@/types/user';
 
@@ -15,40 +16,6 @@ interface ProjectCardProps {
   onDelete: (project: Project) => void;
 }
 
-const CircularProgress = ({ percentage, size = 32 }: { percentage: number; size?: number }) => {
-  const radius = (size / 2) - 2;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
-
-  return (
-    <div className="relative inline-flex items-center justify-center shrink-0">
-      <svg width={size} height={size} className="transform -rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="currentColor"
-          strokeWidth="3"
-          fill="transparent"
-          className="text-white/10"
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="currentColor"
-          strokeWidth="3"
-          fill="transparent"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          className="text-indigo-500 transition-all duration-500"
-          strokeLinecap="round"
-        />
-      </svg>
-      <span className="absolute text-[11px] font-bold text-white">{Math.round(percentage)}%</span>
-    </div>
-  );
-};
 
 export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardProps) {
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -69,11 +36,11 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
     <div className="group relative bg-zinc-900/30 hover:bg-zinc-900/50 border border-white/5 hover:border-white/5 rounded-xl lg:rounded-2xl p-4 lg:p-5 transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-1">
       <div className="flex justify-between items-start mb-2 lg:mb-3">
         <div className="flex items-center gap-2">
-          <div className={`px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-lg text-[11px] lg:text-xs font-medium border ${statusColors[project.status]}`}>
+          <div className={`px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-lg text-[11px] lg:text-xs font-medium border whitespace-nowrap ${statusColors[project.status]}`}>
             {statusMapping[project.status]}
           </div>
           {project.key && (
-            <div className="px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-lg text-[11px] lg:text-xs font-mono text-zinc-500 bg-white/[0.03] border border-white/5">
+            <div className="px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-lg text-[11px] lg:text-xs font-mono text-zinc-500 bg-white/[0.03] border border-white/5 whitespace-nowrap">
               {project.key}
             </div>
           )}
@@ -81,9 +48,10 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
         <div className="flex items-center gap-2 lg:gap-3">
           {(() => {
             const total = project.tasks?.length || 0;
-            const completed = project.tasks?.filter(t => t.status === 'DONE').length || 0;
-            const percentage = total > 0 ? (completed / total) * 100 : 0;
-            return <CircularProgress percentage={percentage} size={32} />;
+            const done = project.tasks?.filter(t => t.status === 'DONE').length || 0;
+            const inProgress = project.tasks?.filter(t => ['IN_PROGRESS', 'REVIEW', 'QA'].includes(t.status)).length || 0;
+            const todo = total - done - inProgress;
+            return <TaskDonutChart total={total} done={done} inProgress={inProgress} todo={todo} size={32} />;
           })()}
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
@@ -142,7 +110,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
             if (!project.tags || !Array.isArray(project.tags)) return null;
             
             return project.tags.slice(0, 3).map((tag: string, idx: number) => (
-              <span key={idx} className="px-1.5 py-0.5 rounded-md text-[11px] lg:text-[11px] bg-white/[0.03] text-zinc-400 border border-white/5">
+              <span key={idx} className="px-1.5 py-0.5 rounded-md text-[11px] lg:text-[11px] bg-white/[0.03] text-zinc-400 border border-white/5 whitespace-nowrap">
                 {tag}
               </span>
             ));
@@ -196,7 +164,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
               <span>{format(new Date(project.endDate), "MMM d")}</span>
             </div>
           )}
-          <div className={`flex items-center gap-1.5 ${priorityColors[project.priority]}`}>
+          <div className={`flex items-center gap-1.5 whitespace-nowrap ${priorityColors[project.priority]}`}>
             <FiClock className="w-3.5 h-3.5" />
             <span className="capitalize">{priorityMapping[project.priority]}</span>
           </div>

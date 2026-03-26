@@ -382,10 +382,10 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
         <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
             <div className="flex items-center gap-2">
                 {task.qa_required && (
-                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--pastel-purple)]/10 text-[var(--pastel-purple)] border border-[var(--pastel-purple)]/20 uppercase tracking-wider">QA</span>
+                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--pastel-purple)]/10 text-[var(--pastel-purple)] border border-[var(--pastel-purple)]/20 uppercase tracking-wider whitespace-nowrap">QA</span>
                 )}
                 {task.review_required && (
-                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border border-[var(--pastel-indigo)]/20 uppercase tracking-wider">Review</span>
+                    <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border border-[var(--pastel-indigo)]/20 uppercase tracking-wider whitespace-nowrap">Review</span>
                 )}
                 {!task.qa_required && !task.review_required && <span className="text-zinc-600">-</span>}
             </div>
@@ -414,7 +414,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
         </td>
         <td className="px-6 py-4 text-xs whitespace-nowrap hidden sm:table-cell">
           <span
-            className={`px-3 py-1 inline-flex text-[11px] font-bold rounded-lg border uppercase tracking-wider ${
+            className={`px-3 py-1 inline-flex text-[11px] font-bold rounded-lg border uppercase tracking-wider whitespace-nowrap ${
               task.priority === 'high'
                 ? 'bg-[var(--pastel-rose)]/10 text-[var(--pastel-rose)] border-[var(--pastel-rose)]/20 pulse-soft'
                 : task.priority === 'medium'
@@ -434,7 +434,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
         </td>
         <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap hidden md:table-cell">
             {task.projectId ? (
-                <span className="text-[var(--pastel-indigo)] font-bold uppercase tracking-tight text-[11px] bg-[var(--pastel-indigo)]/5 px-2 py-0.5 rounded-md border border-[var(--pastel-indigo)]/10">
+                <span className="text-[var(--pastel-indigo)] font-bold uppercase tracking-tight text-[11px] bg-[var(--pastel-indigo)]/5 px-2 py-0.5 rounded-md border border-[var(--pastel-indigo)]/10 whitespace-nowrap">
                     {projects.find(p => p.id === task.projectId)?.name}
                 </span>
             ) : (
@@ -443,7 +443,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
         </td>
         <td className="px-6 py-4 text-xs whitespace-nowrap">
           <span
-            className={`px-3 py-1 inline-flex text-[11px] font-bold rounded-lg border uppercase tracking-wider ${
+            className={`px-3 py-1 inline-flex text-[11px] font-bold rounded-lg border uppercase tracking-wider whitespace-nowrap ${
               task.status === 'DONE'
                 ? 'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20'
                 : task.status === 'IN_PROGRESS'
