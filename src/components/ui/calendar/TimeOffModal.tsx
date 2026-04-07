@@ -78,22 +78,22 @@ export default function TimeOffModal({ open, onClose, onCreated }: TimeOffModalP
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
             onClick={handleBackdropClick}
         >
-            <div className="glass w-full max-w-lg mx-4 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+            <div className="bg-background/80 backdrop-blur-md w-full max-w-lg mx-4 rounded-2xl border border-card-border overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-card-border bg-foreground/[0.02]">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                             <FiCalendar className="w-4 h-4 text-amber-400" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-medium text-white">Request Time Off</h2>
-                            <p className="text-xs text-zinc-500">Submit a request for approval</p>
+                            <h2 className="text-lg font-medium text-foreground">Request Time Off</h2>
+                            <p className="text-xs text-text-secondary">Submit a request for approval</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-colors">
+                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-foreground/[0.06] text-(--text-muted) hover:text-foreground transition-colors">
                         <FiX className="w-5 h-5" />
                     </button>
                 </div>
@@ -102,7 +102,7 @@ export default function TimeOffModal({ open, onClose, onCreated }: TimeOffModalP
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     {/* Type */}
                     <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Type</label>
+                        <label className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">Type</label>
                         <div className="grid grid-cols-2 gap-2">
                             {TIME_OFF_TYPES.map(t => (
                                 <button
@@ -112,7 +112,7 @@ export default function TimeOffModal({ open, onClose, onCreated }: TimeOffModalP
                                     className={`p-3 rounded-xl border text-left transition-all ${
                                         type === t.value
                                             ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-                                            : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200'
+                                            : 'bg-foreground/[0.02] border-card-border text-(--text-muted) hover:bg-foreground/[0.04] hover:text-foreground'
                                     }`}
                                 >
                                     <div className="text-xs font-bold">{t.label}</div>
@@ -125,7 +125,7 @@ export default function TimeOffModal({ open, onClose, onCreated }: TimeOffModalP
                     {/* Date Range */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Start Date</label>
+                            <label className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">Start Date</label>
                             <CustomDatePicker
                                 value={startDate}
                                 onChange={setStartDate}
@@ -134,7 +134,7 @@ export default function TimeOffModal({ open, onClose, onCreated }: TimeOffModalP
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">End Date</label>
+                            <label className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">End Date</label>
                             <CustomDatePicker
                                 value={endDate}
                                 onChange={setEndDate}
@@ -146,7 +146,7 @@ export default function TimeOffModal({ open, onClose, onCreated }: TimeOffModalP
 
                     {/* Justification */}
                     <div className="space-y-2">
-                        <label className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
+                        <label className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
                             Justification {requiresJustification && <span className="text-amber-400">*</span>}
                         </label>
                         <textarea
@@ -154,7 +154,7 @@ export default function TimeOffModal({ open, onClose, onCreated }: TimeOffModalP
                             onChange={e => setJustification(e.target.value)}
                             placeholder={requiresJustification ? "Required for this type..." : "Optional reason..."}
                             rows={3}
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-xl px-3 py-2 text-white placeholder:text-zinc-600 text-sm resize-none focus:outline-none focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                            className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-3 py-2 text-foreground placeholder:text-text-secondary text-sm resize-none focus:outline-none focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/20 transition-all"
                         />
                     </div>
 
@@ -163,7 +163,7 @@ export default function TimeOffModal({ open, onClose, onCreated }: TimeOffModalP
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/5 text-zinc-400 hover:text-white hover:bg-white/[0.06] text-sm font-medium transition-all"
+                            className="px-4 py-2 rounded-xl bg-foreground/[0.03] border border-card-border text-(--text-muted) hover:text-foreground hover:bg-foreground/[0.06] text-sm font-medium transition-all"
                         >
                             Cancel
                         </button>

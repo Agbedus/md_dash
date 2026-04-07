@@ -58,15 +58,15 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ stats }) => {
           key={idx}
           className={`glass p-5 rounded-2xl border ${item.border} ${item.bg} flex items-center gap-4 transition-all hover:scale-[1.02]`}
         >
-          <div className="p-3 rounded-xl bg-zinc-900/50">{item.icon}</div>
+          <div className="p-3 rounded-xl bg-background/50 border border-card-border">{item.icon}</div>
           <div>
-            <p className="text-sm font-medium text-zinc-400">{item.label}</p>
+            <p className="text-sm font-medium text-(--text-muted)">{item.label}</p>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-white tracking-tight">
+              <span className="text-2xl font-bold text-foreground tracking-tight">
                 {item.value}
               </span>
               {item.total !== undefined && (
-                <span className="text-xs text-zinc-500">/ {item.total}</span>
+                <span className="text-xs text-(--text-muted)">/ {item.total}</span>
               )}
             </div>
           </div>

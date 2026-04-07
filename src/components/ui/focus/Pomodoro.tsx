@@ -209,7 +209,7 @@ export default function Pomodoro() {
         {/* Controls beneath the circle */}
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-6">
-            <button title={isRunning ? 'Pause' : 'Start'} onClick={startPause} className="p-6 rounded-full bg-rose-500 hover:bg-rose-600 text-white shadow-lg">
+            <button title={isRunning ? 'Pause' : 'Start'} onClick={startPause} className="p-6 rounded-full bg-rose-500 hover:bg-rose-600 text-white ">
               {isRunning ? <FiPause size={26} /> : <FiPlay size={26} />}
             </button>
 

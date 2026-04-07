@@ -17,15 +17,16 @@ const ProductivityChart = ({ data }: { data: Array<{ name: string; productivity:
             <stop offset="95%" stopColor="var(--pastel-indigo)" stopOpacity={0}/>
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
-        <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-        <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+        <XAxis dataKey="name" stroke="var(--chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
+        <YAxis stroke="var(--chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
         <Tooltip
           contentStyle={{
-            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'var(--tooltip-bg)',
+            border: '1px solid var(--tooltip-border)',
             borderRadius: '0.75rem',
-            fontSize: '12px'
+            fontSize: '12px',
+            backdropFilter: 'blur(8px)',
           }}
           itemStyle={{ padding: '2px 0' }}
         />

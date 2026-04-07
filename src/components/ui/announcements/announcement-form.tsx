@@ -54,24 +54,24 @@ export const AnnouncementForm = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setIsAdminFormOpen(false)}
-          className="absolute inset-0 bg-black/60 backdrop-blur-md"
+          className="absolute inset-0 bg-black/40 backdrop-blur-md"
         />
         
         <motion.div
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          className="relative w-full max-w-lg bg-zinc-900 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl"
+          className="relative w-full max-w-lg bg-card border border-card-border rounded-[2.5rem] overflow-hidden "
         >
           <div className="p-8 space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-white italic flex items-center gap-3">
+              <h3 className="text-xl font-bold text-foreground italic flex items-center gap-3">
                 <HiSpeakerphone className="text-[var(--pastel-yellow)]" />
                 New Broadcast
               </h3>
               <button 
                 onClick={() => setIsAdminFormOpen(false)}
-                className="p-2 hover:bg-white/[0.05] rounded-xl text-zinc-500 hover:text-white transition-all"
+                className="p-2 hover:bg-foreground/[0.05] rounded-xl text-text-muted hover:text-foreground transition-all"
               >
                 <FiX size={20} />
               </button>
@@ -79,7 +79,7 @@ export const AnnouncementForm = () => {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2 ml-1">
                   Announcement Title
                 </label>
                 <input
@@ -87,28 +87,28 @@ export const AnnouncementForm = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="What's the big news?"
-                  className="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[var(--pastel-yellow)]/30 transition-all font-medium"
+                  className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--pastel-yellow)]/30 transition-all font-medium"
                   required
                   disabled={loading || success}
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2 ml-1">
+                <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2 ml-1">
                   Announcement Message
                 </label>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Keep it concise and clear..."
-                  className="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[var(--pastel-yellow)]/30 transition-all min-h-[120px] font-medium resize-none"
+                  className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-[var(--pastel-yellow)]/30 transition-all min-h-[120px] font-medium resize-none"
                   required
                   disabled={loading || success}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1 ml-1">
+                <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1 ml-1">
                   Classification
                 </label>
                 <div className="grid grid-cols-5 gap-2">
@@ -119,8 +119,8 @@ export const AnnouncementForm = () => {
                       onClick={() => setType(t)}
                       className={`py-3 px-1 rounded-2xl border text-[9px] font-bold uppercase tracking-tight transition-all flex flex-col items-center gap-1.5 ${
                         type === t 
-                          ? 'bg-white/10 border-white/20 text-white shadow-inner' 
-                          : 'bg-white/0 border-white/5 text-zinc-500 hover:bg-white/[0.02]'
+                          ? 'bg-foreground/10 border-foreground/20 text-foreground ' 
+                          : 'bg-transparent border-card-border text-text-muted hover:bg-foreground/[0.02]'
                       }`}
                     >
                       {t === 'info' && <FiInfo size={16} className="text-blue-400" />}
@@ -152,7 +152,7 @@ export const AnnouncementForm = () => {
                 <button
                   type="submit"
                   disabled={loading || success || !title.trim() || !content.trim()}
-                  className="px-8 py-3 bg-[var(--pastel-yellow)] hover:bg-[#ffe666] text-black text-xs font-bold rounded-2xl transition-all shadow-lg hover:shadow-[var(--pastel-yellow)]/20 disabled:opacity-50 disabled:hover:shadow-none flex items-center gap-2 hover:-translate-y-0.5 active:translate-y-0"
+                  className="px-8 py-3 bg-[var(--pastel-yellow)] hover:bg-[#ffe666] text-black text-xs font-bold rounded-2xl transition-all  hover:-[var(--pastel-yellow)]/20 disabled:opacity-50 disabled:hover: flex items-center gap-2 hover:-translate-y-0.5 active:translate-y-0"
                 >
                   {loading ? (
                     <>

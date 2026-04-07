@@ -47,7 +47,7 @@ export function MobileNav({ setIsCommandOpen }: { setIsCommandOpen: (open: boole
             <div className={`md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
             
             <div className={`md:hidden fixed bottom-20 right-4 z-50 transition-all duration-300 transform ${isMenuOpen ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-10 opacity-0 scale-95 pointer-events-none'}`}>
-                <div className="w-56 bg-zinc-900 border border-white/5 rounded-2xl shadow-2xl overflow-hidden max-h-[60vh] overflow-y-auto">
+                <div className="w-56 bg-zinc-900 border border-white/5 rounded-2xl  overflow-hidden max-h-[60vh] overflow-y-auto">
                     <div className="flex flex-col">
                         {secondaryItems.map((item, index) => (
                             <Link 

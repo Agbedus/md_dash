@@ -251,7 +251,7 @@ export default function Calendar({ initialDate, initialView = "month", initialEv
         hideViewSwitcher={isGanttForced}
       />
 
-      <div className="flex-1 glass rounded-2xl border border-white/5 overflow-hidden">
+      <div className="flex-1 bg-card rounded-2xl border border-card-border overflow-hidden">
         {isGanttForced ? (
           <GanttGrid
             date={currentDate}

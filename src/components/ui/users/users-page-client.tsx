@@ -138,47 +138,47 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-10">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Team Intelligence</h1>
-          <p className="text-zinc-400 text-lg">Cross-functional team coordination & role management.</p>
+          <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">Team Intelligence</h1>
+          <p className="text-text-muted text-lg">Cross-functional team coordination & role management.</p>
         </div>
       </div>
 
       {/* Search & Actions */}
       <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-10">
         <div className="relative w-full lg:w-96 group">
-          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--pastel-indigo)] transition-colors"/>
+          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-[var(--pastel-indigo)] transition-colors"/>
           <input
             type="text"
             placeholder="Search team members..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-11 pl-10 pr-4 bg-white/[0.03] border border-white/5 rounded-xl focus:outline-none focus:bg-white/[0.06] focus:border-white/5 text-white placeholder:text-zinc-600 transition-all text-sm"
+            className="w-full h-11 pl-10 pr-4 bg-foreground/[0.03] border border-card-border rounded-xl focus:outline-none focus:bg-foreground/[0.06] focus:border-card-border text-foreground placeholder:text-text-muted/50 transition-all text-sm"
           />
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="glass rounded-2xl overflow-hidden border border-white/5">
+      <div className="bg-card rounded-2xl overflow-hidden border border-card-border">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-white/5 bg-white/[0.03]">
-                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Member</th>
-                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Access Interface</th>
-                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Assigned Roles</th>
-                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">System ID</th>
-                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Time Off</th>
-                <th scope="col" className="px-6 py-4 text-right text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Productivity</th>
+              <tr className="border-b border-card-border bg-foreground/[0.03]">
+                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Member</th>
+                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Access Interface</th>
+                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Assigned Roles</th>
+                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">System ID</th>
+                <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Time Off</th>
+                <th scope="col" className="px-6 py-4 text-right text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Productivity</th>
                 {(canEdit || canDelete) && (
-                  <th scope="col" className="px-6 py-4 text-right text-[11px] font-bold text-zinc-500 uppercase tracking-wider whitespace-nowrap">Operations</th>
+                  <th scope="col" className="px-6 py-4 text-right text-[11px] font-bold text-text-muted uppercase tracking-wider whitespace-nowrap">Operations</th>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-card-border">
               {filteredUsers.map((user) => {
                 const isEditing = editingId === user.id;
                 return (
-                <tr key={user.id} className={`transition-colors ${isEditing ? 'bg-white/[0.02]' : 'hover:bg-white/[0.03] cursor-pointer group'}`}>
+                <tr key={user.id} className={`transition-colors ${isEditing ? 'bg-foreground/[0.02]' : 'hover:bg-foreground/[0.02] cursor-pointer group'}`}>
                   {/* Name */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
@@ -189,7 +189,7 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
                               alt={user.fullName || 'User'}
                               width={40}
                               height={40}
-                              className="rounded-full object-cover border border-white/5"
+                              className="rounded-full object-cover border border-card-border"
                             />
                           ) : (
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
@@ -202,22 +202,22 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
                             type="text" 
                             value={editForm.fullName || ''} 
                             onChange={e => setEditForm({...editForm, fullName: e.target.value})}
-                            className="bg-white/[0.03] border border-white/5 rounded px-2 py-1 text-white text-sm w-full"
+                            className="bg-foreground/[0.03] border border-card-border rounded px-2 py-1 text-foreground text-sm w-full focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                           />
                       ) : (
-                        <div className="text-sm font-medium text-white">{user.fullName || 'Unknown User'}</div>
+                        <div className="text-sm font-bold text-foreground">{user.fullName || 'Unknown User'}</div>
                       )}
                     </div>
                   </td>
 
                   {/* Email */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
                     {isEditing ? (
                         <input 
                             type="email" 
                             value={editForm.email || ''} 
                             onChange={e => setEditForm({...editForm, email: e.target.value})}
-                            className="bg-white/[0.03] border border-white/5 rounded px-2 py-1 text-white text-sm w-full"
+                            className="bg-foreground/[0.03] border border-card-border rounded px-2 py-1 text-foreground text-sm w-full focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                         />
                     ) : user.email}
                   </td>
@@ -227,12 +227,12 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
                     {isEditing ? (
                         <div className="flex flex-wrap gap-2">
                             {AVAILABLE_ROLES.map(role => (
-                                <label key={role} className="flex items-center gap-1 text-xs text-zinc-300 cursor-pointer">
+                                <label key={role} className="flex items-center gap-1 text-xs text-text-muted cursor-pointer">
                                     <input 
                                         type="checkbox" 
                                         checked={editForm.roles?.includes(role)}
                                         onChange={e => handleRoleChange(role, e.target.checked)}
-                                        className="rounded border-white/5 bg-white/[0.03]"
+                                        className="rounded border-card-border bg-foreground/[0.03] text-indigo-500 focus:ring-indigo-500/20"
                                     />
                                     <span className="capitalize">{role.replace('_', ' ')}</span>
                                 </label>
@@ -241,7 +241,7 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
                     ) : (
                         <div className="flex flex-wrap gap-1">
                             {user.roles?.map(role => (
-                                <span key={role} className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/[0.06] text-zinc-300 capitalize border border-white/5">
+                                <span key={role} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight bg-foreground/[0.06] text-text-muted border border-card-border">
                                 {role.replace('_', ' ')}
                                 </span>
                             ))}
@@ -250,17 +250,17 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
                   </td>
 
                   {/* Avatar URL */}
-                   <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
+                   <td className="px-6 py-4 whitespace-nowrap text-sm text-text-muted">
                     {isEditing ? (
                         <input 
                             type="text" 
                             value={editForm.avatarUrl || ''} 
                             onChange={e => setEditForm({...editForm, avatarUrl: e.target.value})}
-                            className="bg-white/[0.03] border border-white/5 rounded px-2 py-1 text-white text-sm w-full"
+                            className="bg-foreground/[0.03] border border-card-border rounded px-2 py-1 text-foreground text-sm w-full focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                             placeholder="https://..."
                         />
                     ) : (
-                        <span className="truncate max-w-[150px] block" title={user.avatarUrl || ''}>{user.avatarUrl || '-'}</span>
+                        <span className="truncate max-w-[150px] block opacity-50" title={user.avatarUrl || ''}>{user.avatarUrl || '-'}</span>
                     )}
                   </td>
 
@@ -314,14 +314,14 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
                             <>
                                 <button
                                     onClick={saveUser}
-                                    className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-emerald-400 hover:text-emerald-300 transition-colors"
+                                    className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-emerald-500 hover:text-emerald-400 transition-colors"
                                     title="Save"
                                 >
                                     <FiCheck className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={cancelEditing}
-                                    className="p-1.5 rounded-lg hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-colors"
+                                    className="p-1.5 rounded-lg hover:bg-foreground/[0.06] text-text-muted hover:text-foreground transition-colors"
                                     title="Cancel"
                                 >
                                     <FiX className="w-4 h-4" />
@@ -330,9 +330,9 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
                         ) : (
                             <>
                                 {canEdit && (
-                                <button
+                                 <button
                                     onClick={() => startEditing(user)}
-                                    className="p-1.5 rounded-lg hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-colors"
+                                    className="p-1.5 rounded-lg hover:bg-foreground/[0.06] text-text-muted hover:text-foreground transition-colors"
                                     title="Edit"
                                 >
                                     <FiEdit2 className="w-4 h-4" />
@@ -341,7 +341,7 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
                                 {canDelete && (
                                 <button
                                     onClick={() => handleDelete(user)}
-                                    className="p-1.5 rounded-lg hover:bg-rose-500/10 text-zinc-400 hover:text-rose-400 transition-colors"
+                                    className="p-1.5 rounded-lg hover:bg-rose-500/10 text-text-muted hover:text-rose-400 transition-colors"
                                     title="Delete"
                                 >
                                     <FiTrash2 className="w-4 h-4" />

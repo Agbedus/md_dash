@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect, useMemo, useOptimistic } from 'react';
 import { 
     FiPlus, FiGrid, FiList, FiFileText, FiCheckSquare, 
-    FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiSearch
+    FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiSearch, FiFolder
 } from 'react-icons/fi';
 import { createNote, updateNote, deleteNote, getUsers } from '@/app/(dashboard)/notes/actions';
 import { getTasks } from '@/app/(dashboard)/tasks/actions';
@@ -214,39 +214,39 @@ export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNo
     }
 
     return (
-        <div className="flex flex-col h-screen px-4 py-8 max-w-[1600px] mx-auto text-white">
+        <div className="flex flex-col h-screen px-4 py-8 max-w-[1600px] mx-auto text-foreground">
             {/* Non-scrolling Header */}
             <div>
                 {/* Page Header */}
                 <div className="mb-6 md:mb-10">
-                    <h1 className="text-2xl md:text-4xl font-bold text-white mb-2 tracking-tight">Notes</h1>
-                    <p className="text-zinc-400 text-sm md:text-lg">Create, organize, and manage your notes.</p>
+                    <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-2 tracking-tight">Notes</h1>
+                    <p className="text-text-muted text-sm md:text-lg">Create, organize, and manage your notes.</p>
                 </div>
 
                 {/* Controls Bar */}
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
                     <div className="relative flex-1 md:flex-none md:w-64 hidden md:block">
-                        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                         <input
                             type="text"
                             placeholder="Search notes..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/5 rounded-xl focus:outline-none focus:bg-white/[0.06] focus:border-white/5 text-white placeholder:text-zinc-600 transition-all"
+                            className="w-full pl-10 pr-4 py-2.5 bg-foreground/[0.03] border border-card-border rounded-xl focus:outline-none focus:bg-foreground/[0.06] focus:border-card-border text-foreground placeholder:text-text-muted/50 transition-all"
                         />
                     </div>
                     
                     <div className="flex items-center gap-3 md:gap-4 ml-auto">
-                        <div className="flex items-center space-x-1 bg-white/[0.03] p-1 rounded-xl border border-white/5">
-                            <button onClick={() => setViewMode('grid')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Grid view">
+                        <div className="flex items-center space-x-1 bg-foreground/[0.03] p-1 rounded-xl border border-card-border">
+                            <button onClick={() => setViewMode('grid')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-card text-foreground border border-card-border' : 'text-text-muted hover:text-foreground'}`} title="Grid view">
                                 <FiGrid className="w-4 h-4 md:w-5 md:h-5" />
                             </button>
-                            <button onClick={() => setViewMode('table')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`} title="Table view">
+                            <button onClick={() => setViewMode('table')} className={`p-1.5 md:p-2 rounded-lg transition-all hover-scale ${viewMode === 'table' ? 'bg-card text-foreground border border-card-border' : 'text-text-muted hover:text-foreground'}`} title="Table view">
                                 <FiList className="w-4 h-4 md:w-5 md:h-5" />
                             </button>
                         </div>
 
-                        <button onClick={() => setIsModalOpen(true)} className="flex items-center px-3 md:px-5 py-2 md:py-2.5 border border-white/5 text-xs md:text-sm font-medium text-white rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-all hover-scale">
+                        <button onClick={() => setIsModalOpen(true)} className="flex items-center px-3 md:px-5 py-2 md:py-2.5 border border-card-border text-xs md:text-sm font-medium text-foreground rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] hover:border-foreground/10 transition-all hover-scale">
                             <FiPlus className="mr-1 md:mr-2" />
                             <span className="hidden sm:inline">Add new note</span>
                             <span className="sm:hidden">Add</span>
@@ -257,8 +257,9 @@ export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNo
                 <div className="flex overflow-x-auto scrollbar-hide gap-2 mb-6 md:mb-8 pb-2">
                     <button
                         onClick={() => setFilterType('all')}
-                        className={`px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-all hover-scale whitespace-nowrap flex-shrink-0 ${filterType === 'all' ? 'bg-white text-black' : 'bg-white/[0.06] text-zinc-300 hover:bg-white/20'}`}>
-                        All Notes
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all hover-scale whitespace-nowrap flex-shrink-0 ${filterType === 'all' ? 'bg-foreground text-background' : 'bg-foreground/[0.03] text-text-muted border border-card-border hover:bg-foreground/[0.06] hover:text-foreground'}`}>
+                        <FiFolder className={filterType === 'all' ? 'text-background' : 'text-text-muted'} />
+                        <span>All Notes</span>
                     </button>
                     {noteTypes.map(type => {
                         const Icon = noteTypeIcons[type] || FiFileText;
@@ -266,9 +267,9 @@ export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNo
                             <button 
                                 key={type} 
                                 onClick={() => setFilterType(type)} 
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs md:text-sm font-medium transition-all hover-scale whitespace-nowrap flex-shrink-0 ${filterType === type ? 'bg-white text-black' : 'bg-white/[0.06] text-zinc-300 hover:bg-white/20'}`}>
-                                {Icon && <Icon className={`${filterType === type ? 'text-black' : (noteTypeColors[type] || 'text-zinc-400')}`} />}
-                                <span>{type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-tight transition-all hover-scale whitespace-nowrap flex-shrink-0 border ${filterType === type ? 'bg-foreground text-background border-foreground' : 'bg-foreground/[0.03] text-text-muted border-card-border hover:bg-foreground/[0.06] hover:text-foreground'}`}>
+                                {Icon && <Icon className={`${filterType === type ? 'text-background' : (noteTypeColors[type] || 'text-text-muted')}`} />}
+                                <span>{type}</span>
                             </button>
                         );
                     })}
@@ -311,19 +312,19 @@ export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNo
                         })}
                     </div>
                 ) : (
-                    <div className="glass rounded-2xl">
+                    <div className="glass rounded-2xl border border-card-border overflow-hidden">
                         <table className="w-full border-collapse">
                             <caption className="sr-only">Notes table</caption>
                             <thead>
-                                <tr className="border-b border-white/5 bg-white/[0.03]">
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Title</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Content</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Priority</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Type</th>
-                                    <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">Actions</th>
+                                <tr className="border-b border-card-border bg-foreground/[0.03]">
+                                    <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider">Title</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider">Content</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider">Priority</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-[11px] font-bold text-text-muted uppercase tracking-wider">Type</th>
+                                    <th scope="col" className="px-6 py-4 text-right text-[11px] font-bold text-text-muted uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/5">
+                            <tbody className="divide-y divide-card-border">
                                 {filteredNotes.map((note) => (
                                     <NoteCard key={note.id} note={note} onNoteUpdate={handleUpdate} onNoteDelete={handleDelete} onEdit={(n)=>{ setEditingNote(n); setIsModalOpen(true); }} availableUsers={availableUsers} viewMode="table" searchQuery={searchQuery} />
                                 ))}

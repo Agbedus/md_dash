@@ -28,18 +28,18 @@ interface WeekGridProps {
 const HOURS = eachHourOfInterval({ start: startOfDay(new Date()), end: endOfDay(new Date()) }).slice(0, 24);
 
 const COLOR_PALETTE = [
-    { bg: 'bg-indigo-500', border: 'border-indigo-400', text: 'text-indigo-50', shadow: 'shadow-indigo-500/20' },
-    { bg: 'bg-emerald-500', border: 'border-emerald-400', text: 'text-emerald-50', shadow: 'shadow-emerald-500/20' },
-    { bg: 'bg-rose-500', border: 'border-rose-400', text: 'text-rose-50', shadow: 'shadow-rose-500/20' },
-    { bg: 'bg-amber-500', border: 'border-amber-400', text: 'text-amber-50', shadow: 'shadow-amber-500/20' },
-    { bg: 'bg-sky-500', border: 'border-sky-400', text: 'text-sky-50', shadow: 'shadow-sky-500/20' },
-    { bg: 'bg-purple-500', border: 'border-purple-400', text: 'text-purple-50', shadow: 'shadow-purple-500/20' },
-    { bg: 'bg-fuchsia-500', border: 'border-fuchsia-400', text: 'text-fuchsia-50', shadow: 'shadow-fuchsia-500/20' },
-    { bg: 'bg-teal-500', border: 'border-teal-400', text: 'text-teal-50', shadow: 'shadow-teal-500/20' },
-    { bg: 'bg-orange-500', border: 'border-orange-400', text: 'text-orange-50', shadow: 'shadow-orange-500/20' },
-    { bg: 'bg-blue-500', border: 'border-blue-400', text: 'text-blue-50', shadow: 'shadow-blue-500/20' },
-    { bg: 'bg-lime-500', border: 'border-lime-400', text: 'text-lime-50', shadow: 'shadow-lime-500/20' },
-    { bg: 'bg-pink-500', border: 'border-pink-400', text: 'text-pink-50', shadow: 'shadow-pink-500/20' },
+    { bg: 'bg-indigo-500', border: 'border-indigo-400', text: 'text-indigo-50' },
+    { bg: 'bg-emerald-500', border: 'border-emerald-400', text: 'text-emerald-50' },
+    { bg: 'bg-rose-500', border: 'border-rose-400', text: 'text-rose-50' },
+    { bg: 'bg-amber-500', border: 'border-amber-400', text: 'text-amber-50' },
+    { bg: 'bg-sky-500', border: 'border-sky-400', text: 'text-sky-50' },
+    { bg: 'bg-purple-500', border: 'border-purple-400', text: 'text-purple-50' },
+    { bg: 'bg-fuchsia-500', border: 'border-fuchsia-400', text: 'text-fuchsia-50' },
+    { bg: 'bg-teal-500', border: 'border-teal-400', text: 'text-teal-50' },
+    { bg: 'bg-orange-500', border: 'border-orange-400', text: 'text-orange-50' },
+    { bg: 'bg-blue-500', border: 'border-blue-400', text: 'text-blue-50' },
+    { bg: 'bg-lime-500', border: 'border-lime-400', text: 'text-lime-50' },
+    { bg: 'bg-pink-500', border: 'border-pink-400', text: 'text-pink-50' },
 ];
 
 function getColorForId(id: string) {
@@ -90,18 +90,18 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
   });
 
   return (
-    <div className="glass rounded-2xl overflow-hidden flex flex-col h-full">
+    <div className="bg-card rounded-2xl overflow-hidden flex flex-col h-full border border-card-border">
       {/* Headers */}
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-white/5 bg-white/[0.03] flex-shrink-0">
-        <div className="px-2 py-2 text-right pr-3 border-r border-white/5 flex items-center justify-end">
-            <span className="text-[10px] font-black text-zinc-600 uppercase">GMT</span>
+      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-card-border bg-foreground/[0.05] flex-shrink-0">
+        <div className="px-2 py-2 text-right pr-3 border-r border-card-border flex items-center justify-end">
+            <span className="text-[10px] font-black text-text-secondary uppercase">GMT</span>
         </div>
         {days.map((d) => (
-          <div key={d.toISOString()} className="px-3 py-2 text-center border-r border-white/5 last:border-r-0">
-            <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">{format(d, "EEE")}</div>
+          <div key={d.toISOString()} className="px-3 py-2 text-center border-r border-card-border last:border-r-0">
+            <div className="text-[10px] font-black text-(--text-muted) uppercase tracking-widest mb-1">{format(d, "EEE")}</div>
             <div className={`
               inline-flex h-8 w-8 items-center justify-center rounded-xl text-sm font-black
-              ${isSameDay(d, new Date()) ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20" : "text-zinc-300"}
+              ${isSameDay(d, new Date()) ? "bg-indigo-500 text-white" : "text-foreground"}
             `}>
               {format(d, "d")}
             </div>
@@ -110,9 +110,9 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
       </div>
 
       {/* Spanning Events (All Day / Projects Area) */}
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-white/5 bg-white/[0.01] relative flex-shrink-0">
-          <div className="border-r border-white/5 bg-zinc-950/20 flex items-center justify-center">
-            <FiBriefcase className="text-zinc-600 w-3 h-3" />
+      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-card-border bg-background/50 relative flex-shrink-0">
+          <div className="border-r border-card-border bg-background/50 flex items-center justify-center">
+            <FiBriefcase className="text-(--text-muted) w-3 h-3" />
           </div>
           <div className="col-span-7 py-2 relative min-h-[40px] flex flex-col gap-1 px-1">
               {spanningEvents.map(e => {
@@ -146,8 +146,8 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
                             <div 
                                 onClick={(ev) => { ev.stopPropagation(); onEventClick?.(e); }}
                                 className={`
-                                    h-full px-2 flex items-center gap-2 rounded-lg border shadow-sm cursor-pointer transition-all hover:brightness-110 active:scale-[0.98]
-                                    ${barColor.bg} ${barColor.border} ${barColor.shadow}
+                                    h-full px-2 flex items-center gap-2 rounded-lg border cursor-pointer transition-all hover:brightness-110 active:scale-[0.98]
+                                    ${barColor.bg} ${barColor.border}
                                     ${!isStarting ? 'rounded-l-none border-l-0' : ''}
                                     ${!isEnding ? 'rounded-r-none border-r-0' : ''}
                                 `}
@@ -163,18 +163,18 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
                 );
               })}
               {spanningEvents.length === 0 && (
-                  <div className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest text-center py-1">No multi-day projects this week</div>
+                  <div className="text-[9px] font-bold text-text-secondary uppercase tracking-widest text-center py-1">No multi-day projects this week</div>
               )}
           </div>
       </div>
 
       {/* Hourly Grid */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="grid grid-cols-[60px_repeat(7,1fr)] bg-zinc-950/30 min-h-full">
+        <div className="grid grid-cols-[60px_repeat(7,1fr)] bg-background/50 min-h-full">
           {/* Time labels */}
-          <div className="flex flex-col border-r border-white/5 bg-white/[0.02]">
+          <div className="flex flex-col border-r border-card-border bg-foreground/[0.05]">
             {HOURS.map((h, i) => (
-              <div key={i} className="h-16 border-b border-white/5 text-[10px] text-right pr-2 pt-2 text-zinc-500 font-black uppercase tracking-tighter">
+              <div key={i} className="h-16 border-b border-card-border text-[10px] text-right pr-2 pt-2 text-(--text-muted) font-black uppercase tracking-tighter">
                 {format(h, "HH:00")}
               </div>
             ))}
@@ -183,7 +183,7 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
           {/* Day columns */}
           {days.map((d) => {
             return (
-              <div key={d.toISOString()} className="flex flex-col border-r border-white/5 last:border-r-0 relative">
+              <div key={d.toISOString()} className="flex flex-col border-r border-card-border last:border-r-0 relative">
                 {HOURS.map((h, i) => {
                   const slotStart = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h.getHours(), 0, 0, 0);
                   const slotEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h.getHours(), 59, 59, 999);
@@ -203,7 +203,7 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
                       role="button"
                       tabIndex={0}
                       onClick={() => onSelectDateTime?.(slotStart)}
-                      className="h-16 border-b border-white/5 hover:bg-white/[0.02] text-left p-1 transition-colors group/slot overflow-hidden"
+                      className="h-16 border-b border-card-border hover:bg-foreground/[0.05] text-left p-1 transition-colors group/slot overflow-hidden"
                     >
                       {slotEvents.length > 0 && (
                         <div className="h-full w-full flex flex-col gap-1">
@@ -217,7 +217,7 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
                                 <div
                                     role="button"
                                     onClick={(ev) => { ev.stopPropagation(); onEventClick?.(e); }}
-                                    className={`truncate text-[9px] px-1.5 py-1 rounded-lg border ${c.border} bg-white/[0.06] hover:bg-white/20 flex items-center gap-1.5 transition-colors cursor-pointer w-full leading-tight`}
+                                    className={`truncate text-[9px] px-1.5 py-1 rounded-lg border ${c.border} bg-foreground/[0.05] hover:bg-foreground/[0.1] flex items-center gap-1.5 transition-colors cursor-pointer w-full leading-tight`}
                                 >
                                     {isTask ? (
                                         <FiCheckCircle className={`h-2.5 w-2.5 ${c.text}`} />

@@ -199,22 +199,22 @@ export default function EventDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-6"
+      className="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm p-0 md:p-6"
       role="dialog"
       aria-modal="true"
       onClick={handleBackdropClick}
     >
-      <div className="w-full md:max-w-3xl bg-slate-950/40 backdrop-blur-2xl border border-white/5 rounded-t-2xl md:rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="w-full md:max-w-3xl bg-background/80 backdrop-blur-md border border-card-border rounded-t-2xl md:rounded-2xl -[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex-none px-5 py-3 border-b border-white/5 flex items-center justify-between bg-white/[0.03]">
-          <div className="text-slate-100 font-bold tracking-tight truncate pr-4 text-sm">
+        <div className="flex-none px-5 py-3 border-b border-card-border flex items-center justify-between bg-foreground/[0.05]">
+          <div className="text-foreground font-bold tracking-tight truncate pr-4 text-sm">
             {isEditing ? "Edit Event" : event.title.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim()}
           </div>
           <Tooltip content="Close">
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/[0.06] text-slate-400 hover:text-white transition-colors"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-lg hover:bg-foreground/[0.05] text-(--text-muted) hover:text-foreground transition-colors"
             >
               <FiX className="h-4 w-4" />
             </button>
@@ -230,11 +230,11 @@ export default function EventDetailModal({
               <div className="flex flex-col gap-4">
                  {/* Timing */}
                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 h-7 w-7 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-purple-400 shrink-0">
+                    <div className="mt-0.5 h-7 w-7 rounded-full bg-foreground/[0.05] border border-card-border flex items-center justify-center text-purple-400 shrink-0">
                       <FiCalendar className="h-3.5 w-3.5" />
                     </div>
                     <div>
-                        <div className="text-sm font-medium text-slate-200">
+                        <div className="text-sm font-medium text-foreground">
                             {event.allDay ? (
                                 <span>{format(new Date(event.start), "EEEE, MMMM d, yyyy")}</span>
                             ) : (
@@ -243,7 +243,7 @@ export default function EventDetailModal({
                                 </span>
                             )}
                         </div>
-                        <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
+                        <div className="text-xs text-text-secondary mt-0.5 flex items-center gap-2">
                             {event.allDay ? "All Day" : "Formatted Time"}
                             {event.recurrence && event.recurrence !== 'none' && (
                                 <span className="text-purple-400 font-semibold uppercase tracking-wider text-[11px] bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20">
@@ -258,16 +258,16 @@ export default function EventDetailModal({
                   {event.isTimeOff && (
                     <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             <FiCoffee className="w-3 h-3 text-amber-400" /> Type
                           </div>
-                          <div className="text-sm font-bold text-slate-200 uppercase tracking-tight">
+                          <div className="text-sm font-bold text-foreground uppercase tracking-tight">
                             {event.timeOffType || 'Vacation'}
                           </div>
                         </div>
-                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             {event.timeOffStatus === 'approved' ? <FiCheckCircle className="w-3 h-3 text-emerald-400" /> : <FiClock className="w-3 h-3 text-amber-400" />} Status
                           </div>
                           <div className={`text-sm font-bold uppercase tracking-tight ${event.timeOffStatus === 'approved' ? 'text-emerald-400' : 'text-amber-400'}`}>
@@ -277,11 +277,11 @@ export default function EventDetailModal({
                       </div>
                       
                       {event.timeOffJustification && (
-                        <div className="p-4 bg-white/[0.03] border border-white/5 rounded-xl">
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <div className="p-4 bg-foreground/[0.05] border border-card-border rounded-xl">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-2 flex items-center gap-1.5">
                             <FiEdit2 className="w-3 h-3" /> Justification
                           </div>
-                          <div className="text-sm text-slate-300 leading-relaxed italic">
+                          <div className="text-sm text-foreground leading-relaxed italic">
                             &ldquo;{event.timeOffJustification}&rdquo;
                           </div>
                         </div>
@@ -293,27 +293,27 @@ export default function EventDetailModal({
                   {event.isProject && (
                     <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             <FiTrello className="w-3 h-3 text-indigo-400" /> Key / Client
                           </div>
-                          <div className="text-sm font-bold text-slate-200">
+                          <div className="text-sm font-bold text-foreground">
                             {event.projectKey || 'N/A'} {event.projectClient ? `• ${event.projectClient}` : ''}
                           </div>
                         </div>
-                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             <FiFlag className="w-3 h-3 text-rose-400" /> Priority
                           </div>
-                          <div className="text-sm font-bold text-slate-200 uppercase tracking-tight">
+                          <div className="text-sm font-bold text-foreground uppercase tracking-tight">
                             {event.projectPriority || 'Medium'}
                           </div>
                         </div>
                       </div>
 
                       {event.projectBudget && (
-                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-between">
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl flex items-center justify-between">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest flex items-center gap-1.5">
                             <FiDollarSign className="w-3 h-3 text-emerald-400" /> Project Budget
                           </div>
                           <div className="text-sm font-black text-emerald-400 tracking-tighter">
@@ -328,36 +328,36 @@ export default function EventDetailModal({
                   {event.isTask && (
                     <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             <FiCheckCircle className="w-3 h-3 text-indigo-400" /> Status
                           </div>
-                          <div className="text-sm font-bold text-slate-200 uppercase tracking-tight">
+                          <div className="text-sm font-bold text-foreground uppercase tracking-tight">
                             {event.taskStatus || 'Todo'}
                           </div>
                         </div>
-                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
                             <FiFlag className="w-3 h-3 text-rose-400" /> Priority
                           </div>
-                          <div className="text-sm font-bold text-slate-200 uppercase tracking-tight">
+                          <div className="text-sm font-bold text-foreground uppercase tracking-tight">
                             {event.taskPriority || 'Medium'}
                           </div>
                         </div>
                       </div>
 
                       {event.taskAssignees && event.taskAssignees.length > 0 && (
-                        <div className="p-3 bg-white/[0.03] border border-white/5 rounded-xl">
-                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
+                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-2 flex items-center gap-1.5">
                             <FiUsers className="w-3 h-3" /> Assignees
                           </div>
                           <div className="flex flex-wrap gap-2">
                              {event.taskAssignees.map((u, i) => (
-                               <div key={i} className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+                               <div key={i} className="flex items-center gap-2 px-2 py-1 bg-foreground/[0.05] rounded-lg border border-card-border">
                                  <div className="h-4 w-4 bg-indigo-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white uppercase">
                                    {u.fullName?.charAt(0) || u.email?.charAt(0)}
                                  </div>
-                                 <span className="text-[10px] text-slate-300 font-medium">{u.fullName || u.email}</span>
+                                 <span className="text-[10px] text-foreground font-medium">{u.fullName || u.email}</span>
                                </div>
                              ))}
                           </div>
@@ -371,12 +371,12 @@ export default function EventDetailModal({
                       {/* Location */}
                       {event.location && (
                           <div className="flex items-start gap-3">
-                              <div className="mt-0.5 h-7 w-7 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-purple-400 shrink-0">
+                              <div className="mt-0.5 h-7 w-7 rounded-full bg-foreground/[0.05] border border-card-border flex items-center justify-center text-purple-400 shrink-0">
                                 <FiMapPin className="h-3.5 w-3.5" />
                               </div>
                               <div>
-                                  <div className="text-sm text-slate-300">{event.location}</div>
-                                  <div className="text-xs text-slate-500 mt-0.5">Location</div>
+                                  <div className="text-sm text-foreground">{event.location}</div>
+                                  <div className="text-xs text-text-secondary mt-0.5">Location</div>
                               </div>
                           </div>
                       )}
@@ -384,36 +384,36 @@ export default function EventDetailModal({
                       {/* Attendees */}
                       {event.attendees && event.attendees.length > 0 && (
                           <div className="flex items-start gap-3">
-                              <div className="mt-0.5 h-7 w-7 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-purple-400 shrink-0">
+                              <div className="mt-0.5 h-7 w-7 rounded-full bg-foreground/[0.05] border border-card-border flex items-center justify-center text-purple-400 shrink-0">
                                 <FiUsers className="h-3.5 w-3.5" />
                               </div>
                               <div>
                                   <div className="flex flex-wrap gap-2">
                                       {event.attendees.map((email, idx) => (
-                                          <span key={idx} className="px-2 py-1 text-xs bg-white/[0.03] text-slate-300 rounded-md border border-white/5">
+                                          <span key={idx} className="px-2 py-1 text-xs bg-foreground/[0.05] text-foreground rounded-md border border-card-border">
                                               {email.trim()}
                                           </span>
                                       ))}
                                   </div>
-                                  <div className="text-xs text-slate-500 mt-1">Attendees</div>
+                                  <div className="text-xs text-text-secondary mt-1">Attendees</div>
                               </div>
                           </div>
                       )}
 
                       {/* Description */}
                       {event.description && (
-                          <div className="bg-white/[0.03] rounded-xl border border-white/5 p-4 mt-2">
-                              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-2">
+                          <div className="bg-foreground/[0.05] rounded-xl border border-card-border p-4 mt-2">
+                              <div className="text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-2 flex items-center gap-2">
                                   <FiEdit2 className="h-3 w-3" /> Description
                               </div>
-                              <div className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">
+                              <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                                   {event.description}
                               </div>
                           </div>
                       )}
                       
                       {/* Metadata Badge Row */}
-                      <div className="flex flex-wrap gap-3 mt-4 border-t border-white/5 pt-4">
+                      <div className="flex flex-wrap gap-3 mt-4 border-t border-card-border pt-4">
                           <Tooltip content="Event Status" position="bottom">
                               <div className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide border inline-flex items-center gap-1.5 cursor-help ${
                                   event.status === 'confirmed' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
@@ -430,14 +430,14 @@ export default function EventDetailModal({
                           </Tooltip>
                           
                           <Tooltip content="Visibility" position="bottom">
-                              <div className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-800 border border-slate-700 text-slate-400 inline-flex items-center gap-1.5 cursor-help">
+                              <div className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-background/50 border border-card-border text-(--text-muted) inline-flex items-center gap-1.5 cursor-help">
                                   {event.privacy === 'private' ? <FiLock className="h-2.5 w-2.5" /> : <FiGlobe className="h-2.5 w-2.5" />}
                                   {event.privacy || 'Public'}
                               </div>
                           </Tooltip>
 
                           <Tooltip content="Color Code" position="bottom">
-                              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-800 border border-slate-700 text-slate-400 cursor-help">
+                              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-background/50 border border-card-border text-(--text-muted) cursor-help">
                                   <div className="h-2 w-2 rounded-full ring-1 ring-white/20" style={{backgroundColor: event.color || '#6366f1'}} />
                                   <span className="opacity-70">Color</span>
                               </div>
@@ -453,32 +453,32 @@ export default function EventDetailModal({
           {isEditing && (
             <form id="edit-event-form" onSubmit={handleUpdate} className="space-y-4">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Title</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Title</label>
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all font-medium"
+                    className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all font-medium"
                     placeholder="Event title"
                     required
                   />
                 </div>
                 
                 <div className="flex items-center gap-4 py-1">
-                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/5 hover:border-white/5 transition-colors">
+                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-foreground/[0.05] border border-card-border hover:border-card-border transition-colors">
                       <input 
                         type="checkbox" 
                         id="edit-allday" 
                         checked={allDay} 
                         onChange={(e) => setAllDay(e.target.checked)}
-                        className="rounded border-slate-600 bg-slate-700 text-purple-500 focus:ring-purple-500/50 focus:ring-offset-0 h-3.5 w-3.5"
+                        className="rounded border-card-border bg-background/50 text-purple-500 focus:ring-purple-500/50 focus:ring-offset-0 h-3.5 w-3.5"
                       />
-                      <label htmlFor="edit-allday" className="text-xs font-medium text-slate-300 cursor-pointer select-none">All day event</label>
+                      <label htmlFor="edit-allday" className="text-xs font-medium text-foreground cursor-pointer select-none">All day event</label>
                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Start</label>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Start</label>
                         <CustomDatePicker
                             value={start}
                             onChange={(date) => {
@@ -491,7 +491,7 @@ export default function EventDetailModal({
                         />
                     </div>
                     <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">End</label>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">End</label>
                         <CustomDatePicker
                             value={end}
                             onChange={(date) => {
@@ -507,30 +507,30 @@ export default function EventDetailModal({
                 </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Location</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Location</label>
                     <input
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
+                        className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
                     />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Organizer</label>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Organizer</label>
                         <input
                             value={organizer}
                             onChange={(e) => setOrganizer(e.target.value)}
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
+                            className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
                             placeholder="Host name"
                         />
                     </div>
                     <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Attendees</label>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Attendees</label>
                         <input
                             value={attendees}
                             onChange={(e) => setAttendees(e.target.value)}
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
+                            className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
                             placeholder="Emails, comma separated"
                         />
                     </div>
@@ -538,11 +538,11 @@ export default function EventDetailModal({
 
                 <div className="grid grid-cols-2 gap-3">
                      <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Status</label>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Status</label>
                         <select 
                             value={status} 
                             onChange={(e) => setStatus(e.target.value as any)}
-                            className="w-full bg-slate-950/40 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                            className="w-full bg-background/50 border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/30"
                         >
                             <option value="tentative">Tentative</option>
                             <option value="confirmed">Confirmed</option>
@@ -550,11 +550,11 @@ export default function EventDetailModal({
                         </select>
                      </div>
                      <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Recurrence</label>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Recurrence</label>
                         <select 
                             value={recurrence} 
                             onChange={(e) => setRecurrence(e.target.value as any)}
-                            className="w-full bg-slate-950/40 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                            className="w-full bg-background/50 border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/30"
                         >
                             <option value="none">None</option>
                             <option value="daily">Daily</option>
@@ -566,11 +566,11 @@ export default function EventDetailModal({
                 </div>
                 
                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Privacy</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Privacy</label>
                     <select 
                         value={privacy} 
                         onChange={(e) => setPrivacy(e.target.value as any)}
-                        className="w-full bg-slate-950/40 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                        className="w-full bg-background/50 border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/30"
                     >
                         <option value="public">Public</option>
                         <option value="private">Private</option>
@@ -579,15 +579,15 @@ export default function EventDetailModal({
                  </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Color</label>
-                    <div className="flex flex-wrap gap-2 p-2 bg-white/[0.03] rounded-lg border border-white/5">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Color</label>
+                    <div className="flex flex-wrap gap-2 p-2 bg-foreground/[0.05] rounded-lg border border-card-border">
                         {(["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"] as const).map((c) => (
                         <button
                             type="button"
                             key={c}
                             onClick={() => setColor(c)}
                             className={`h-5 w-5 rounded-full border-2 transition-all duration-300 ${
-                            color === c ? "border-white scale-125 shadow-sm shadow-white/20" : "border-transparent opacity-60 hover:opacity-100 hover:scale-110"
+                            color === c ? "border-white scale-125" : "border-transparent opacity-60 hover:opacity-100 hover:scale-110"
                             }`}
                             style={{ backgroundColor: c }}
                         />
@@ -596,16 +596,16 @@ export default function EventDetailModal({
                 </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 ml-1">Description</label>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Description</label>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all custom-scrollbar min-h-[80px] resize-none"
+                        className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all custom-scrollbar min-h-[80px] resize-none"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 ml-1 flex items-center gap-1.5">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1.5 ml-1 flex items-center gap-1.5">
                         <FiBell className="text-purple-400" /> Reminders
                     </label>
                     <div className="flex flex-wrap gap-1.5 mb-2">
@@ -622,34 +622,34 @@ export default function EventDetailModal({
                         ))}
                     </div>
                     
-                    <div className="flex flex-wrap items-end gap-2 p-2 bg-white/[0.03] border border-white/5 rounded-lg">
+                    <div className="flex flex-wrap items-end gap-2 p-2 bg-foreground/[0.05] border border-card-border rounded-lg">
                         <div className="flex-1 min-w-[50px]">
-                        <label className="block text-[11px] uppercase font-bold tracking-wider text-slate-500 mb-1 ml-0.5">Days</label>
+                        <label className="block text-[11px] uppercase font-bold tracking-wider text-text-secondary mb-1 ml-0.5">Days</label>
                         <CustomNumberInput
                             value={rDays}
                             onChange={(val) => setRDays(Number(val) || 0)}
                             min={0}
-                            className="bg-zinc-950/40"
+                            className="bg-background/50"
                         />
                         </div>
                         <div className="flex-1 min-w-[50px]">
-                        <label className="block text-[11px] uppercase font-bold tracking-wider text-slate-500 mb-1 ml-0.5">Hrs</label>
+                        <label className="block text-[11px] uppercase font-bold tracking-wider text-text-secondary mb-1 ml-0.5">Hrs</label>
                         <CustomNumberInput
                             value={rHours}
                             onChange={(val) => setRHours(Number(val) || 0)}
                             min={0}
                             max={23}
-                            className="bg-zinc-950/40"
+                            className="bg-background/50"
                         />
                         </div>
                         <div className="flex-1 min-w-[50px]">
-                        <label className="block text-[11px] uppercase font-bold tracking-wider text-slate-500 mb-1 ml-0.5">Mins</label>
+                        <label className="block text-[11px] uppercase font-bold tracking-wider text-text-secondary mb-1 ml-0.5">Mins</label>
                         <CustomNumberInput
                             value={rMinutes}
                             onChange={(val) => setRMinutes(Number(val) || 0)}
                             min={0}
                             max={59}
-                            className="bg-zinc-950/40"
+                            className="bg-background/50"
                         />
                         </div>
                         <button
@@ -659,7 +659,7 @@ export default function EventDetailModal({
                             setReminders((prev) => [...prev, { days: rDays, hours: rHours, minutes: rMinutes }]);
                             setRDays(0); setRHours(0); setRMinutes(0);
                         }}
-                        className="h-6 px-3 inline-flex items-center gap-1 text-[11px] font-bold rounded bg-white/[0.06] text-white border border-white/5 hover:bg-white/20 transition-all active:scale-95"
+                        className="h-6 px-3 inline-flex items-center gap-1 text-[11px] font-bold rounded bg-foreground/[0.05] text-foreground border border-card-border hover:bg-foreground/[0.1] transition-all active:scale-95"
                         >
                         <FiPlus className="h-3 w-3" /> Add
                         </button>
@@ -671,14 +671,14 @@ export default function EventDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex-none p-3 border-t border-white/5 bg-white/[0.03] flex items-center justify-between">
+        <div className="flex-none p-3 border-t border-card-border bg-foreground/[0.05] flex items-center justify-between">
             {isEditing ? (
                 <>
                     <Tooltip content="Delete Event">
                         <button
                             type="button"
                             onClick={handleDelete}
-                            className="group h-8 w-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/5 hover:bg-rose-500/10 hover:border-rose-500/20 text-slate-400 hover:text-rose-400 transition-all"
+                            className="group h-8 w-8 flex items-center justify-center rounded-lg bg-foreground/[0.05] border border-card-border hover:bg-rose-500/10 hover:border-rose-500/20 text-(--text-muted) hover:text-rose-400 transition-all"
                         >
                             <FiTrash2 className="h-3.5 w-3.5" />
                         </button>
@@ -689,7 +689,7 @@ export default function EventDetailModal({
                             <button
                                 type="button"
                                 onClick={() => setIsEditing(false)}
-                                className="group h-8 w-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] hover:border-white/5 text-slate-400 hover:text-white transition-all"
+                                className="group h-8 w-8 flex items-center justify-center rounded-lg bg-foreground/[0.05] border border-card-border hover:bg-foreground/[0.1] hover:border-card-border text-(--text-muted) hover:text-foreground transition-all"
                             >
                                 <FiX className="h-3.5 w-3.5" />
                             </button>
@@ -700,7 +700,7 @@ export default function EventDetailModal({
                                 type="submit"
                                 form="edit-event-form"
                                 disabled={submitting}
-                                className="group h-8 w-8 flex items-center justify-center rounded-lg bg-purple-600 text-white hover:bg-purple-500 shadow-lg shadow-purple-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                                className="group h-8 w-8 flex items-center justify-center rounded-lg bg-purple-600 text-white hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 <FiCheck className="h-3.5 w-3.5" />
                             </button>
@@ -714,10 +714,10 @@ export default function EventDetailModal({
                             type="button"
                             onClick={handleDelete}
                             disabled={event.isProject || event.isTask || event.isTimeOff}
-                            className={`group h-8 w-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/5 transition-all ${
+                            className={`group h-8 w-8 flex items-center justify-center rounded-lg bg-foreground/[0.05] border border-card-border transition-all ${
                                 (event.isProject || event.isTask || event.isTimeOff) 
                                 ? 'opacity-20 cursor-not-allowed grayscale' 
-                                : 'hover:bg-rose-500/10 hover:border-rose-500/20 text-slate-400 hover:text-rose-400'
+                                : 'hover:bg-rose-500/10 hover:border-rose-500/20 text-(--text-muted) hover:text-rose-400'
                             }`}
                         >
                             <FiTrash2 className="h-3.5 w-3.5" />
@@ -731,8 +731,8 @@ export default function EventDetailModal({
                             disabled={event.isProject || event.isTask || event.isTimeOff}
                             className={`group h-8 w-8 flex items-center justify-center rounded-lg border transition-all ${
                                 (event.isProject || event.isTask || event.isTimeOff)
-                                ? 'bg-white/[0.02] border-white/5 text-slate-600 cursor-not-allowed'
-                                : 'bg-white/[0.06] hover:bg-white/20 text-white border-white/5 shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]'
+                                ? 'bg-foreground/[0.02] border-card-border text-text-secondary cursor-not-allowed'
+                                : 'bg-foreground/[0.06] hover:bg-foreground/[0.1] text-foreground border-card-border'
                             }`}
                         >
                             <FiEdit2 className="h-3.5 w-3.5" />

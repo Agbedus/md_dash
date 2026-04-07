@@ -22,7 +22,7 @@ export function Tooltip({ content, children, position = 'top', className = "", s
 
       {children}
       <div 
-        className={`absolute ${positionClasses[position]} hidden group-hover:block whitespace-nowrap rounded-md bg-slate-900 border border-slate-700 px-2 py-1 text-[11px] items-center font-medium text-slate-200 shadow-xl z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-200`}
+        className={`absolute ${positionClasses[position]} hidden group-hover:block whitespace-nowrap rounded-md bg-slate-900 border border-slate-700 px-2 py-1 text-[11px] items-center font-medium text-slate-200  z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-200`}
       >
         {content}
       </div>

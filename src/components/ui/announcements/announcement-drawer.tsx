@@ -52,11 +52,11 @@ export const AnnouncementDrawer = () => {
 
   const getTypeStyles = (type: string) => {
     switch (type) {
-      case 'success': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
-      case 'warning': return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
-      case 'error': return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
-      case 'critical': return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
-      default: return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+      case 'success': return 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+      case 'warning': return 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20';
+      case 'error': return 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20';
+      case 'critical': return 'text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20';
+      default: return 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20';
     }
   };
 
@@ -79,7 +79,7 @@ export const AnnouncementDrawer = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
           />
 
           {/* Drawer */}
@@ -89,22 +89,22 @@ export const AnnouncementDrawer = () => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-zinc-950 border-l border-white/5 z-[70] shadow-2xl flex flex-col"
+            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-background border-l border-card-border z-[70]  flex flex-col"
           >
             {/* Header */}
-            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-zinc-900/50">
+            <div className="p-6 border-b border-card-border flex justify-between items-center bg-card/50 backdrop-blur-md">
               <div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-3 italic">
+                <h2 className="text-xl font-bold text-foreground flex items-center gap-3 italic tracking-tight">
                   <HiSpeakerphone className="text-[var(--pastel-yellow)]" />
                   Announcements
                 </h2>
-                <p className="text-xs text-zinc-500 mt-1 font-medium uppercase tracking-widest">System-Wide Broadcasts</p>
+                <p className="text-[10px] text-text-muted mt-1 font-bold uppercase tracking-[0.2em]">System-Wide Broadcasts</p>
               </div>
               <button 
                 onClick={() => setIsDrawerOpen(false)}
-                className="p-2 hover:bg-white/[0.05] rounded-xl text-zinc-400 hover:text-white transition-all"
+                className="p-2.5 hover:bg-foreground/5 rounded-xl text-text-muted hover:text-foreground transition-all border border-transparent hover:border-card-border"
               >
-                <FiX size={16} />
+                <FiX size={18} />
               </button>
             </div>
 
@@ -112,7 +112,7 @@ export const AnnouncementDrawer = () => {
             <AnnouncementForm />
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto px-0 py-2 space-y-px custom-scrollbar">
+            <div className="flex-1 overflow-y-auto px-0 py-2 space-y-px custom-scrollbar bg-background">
               {sortedAnnouncements.length > 0 ? (
                 sortedAnnouncements.map((announcement) => (
                   <motion.div 
@@ -120,7 +120,7 @@ export const AnnouncementDrawer = () => {
                     layout
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="group relative flex items-start gap-4 p-5 hover:bg-white/[0.03] transition-all border-b border-white/5 last:border-0"
+                    className="group relative flex items-start gap-4 p-6 hover:bg-foreground/[0.03] transition-all border-b border-card-border last:border-0"
                   >
                     {/* Creator Avatar with Dynamic Fetching */}
                     <CreatorAvatar 
@@ -130,9 +130,9 @@ export const AnnouncementDrawer = () => {
                       className="mt-1"
                     />
 
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="text-sm font-bold text-white truncate group-hover:text-[var(--pastel-yellow)] transition-colors pr-6">
+                    <div className="flex-1 min-w-0 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-sm font-bold text-foreground truncate group-hover:text-[var(--pastel-yellow)] transition-colors pr-8">
                           {announcement.title}
                         </h3>
                         
@@ -142,21 +142,21 @@ export const AnnouncementDrawer = () => {
                               e.stopPropagation();
                               deleteAnnouncement(announcement.id);
                             }}
-                            className="absolute top-4 right-4 p-1.5 text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            className="absolute top-5 right-5 p-2 text-text-muted hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100 border border-transparent hover:border-rose-500/20"
                             title="Delete Announcement"
                           >
-                            <FiTrash2 size={13} />
+                            <FiTrash2 size={14} />
                           </button>
                         )}
                       </div>
                       
-                      <p className="text-xs text-zinc-400 leading-relaxed font-medium line-clamp-3">
+                      <p className="text-sm text-text-muted font-medium line-clamp-4 leading-relaxed">
                         {announcement.content}
                       </p>
 
-                      <div className="mt-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                          <HiSpeakerphone size={12} className="text-zinc-600" />
+                      <div className="pt-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-[10px] text-text-muted font-bold uppercase tracking-widest">
+                          <FiClock size={12} className="text-text-muted" />
                           <span>
                             {(() => {
                               try {
@@ -169,7 +169,7 @@ export const AnnouncementDrawer = () => {
                           </span>
                         </div>
 
-                        <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-widest ${getTypeStyles(announcement.type || 'info')}`}>
+                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-bold uppercase tracking-[0.15em] ${getTypeStyles(announcement.type || 'info')}`}>
                            {getTypeIcon(announcement.type || 'info')}
                            <span>{announcement.type || 'info'}</span>
                         </div>
@@ -178,38 +178,38 @@ export const AnnouncementDrawer = () => {
                   </motion.div>
                 ))
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-20">
-                  <FiMessageSquare size={48} className="mb-4 text-zinc-700" />
-                  <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest">No active announcements</p>
-                  <p className="text-xs text-zinc-600 mt-2">Check back later for system updates</p>
+                <div className="h-full flex flex-col items-center justify-center text-center py-32">
+                  <FiMessageSquare size={48} className="mb-6 text-text-muted opacity-20" />
+                  <p className="text-xs font-bold text-text-muted uppercase tracking-[0.2em]">No active broadcasts</p>
+                  <p className="text-[11px] text-text-muted mt-2 font-medium uppercase tracking-widest">Check back later for system updates</p>
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-white/5 bg-zinc-950/80 backdrop-blur-md flex items-center justify-between">
+            <div className="p-5 border-t border-card-border bg-card/80 backdrop-blur-md flex items-center justify-between">
               {/* Minimal Add Button (Style from task table) */}
               <button
                 onClick={() => setIsAdminFormOpen(true)}
-                className="flex items-center gap-2 p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/10 text-xs text-zinc-400 hover:text-white transition-all duration-200 group"
+                className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border hover:border-[var(--pastel-yellow)]/30 text-xs text-text-muted hover:text-foreground transition-all duration-300 group"
                 title="Post New Announcement"
               >
-                <div className="p-1.5 rounded-lg bg-white/[0.03] group-hover:bg-white/[0.06] transition-colors border border-white/5">
-                  <FiPlus className="w-4 h-4 text-[var(--pastel-yellow)]" />
+                <div className="p-1.5 rounded-lg bg-foreground/[0.03] group-hover:bg-foreground/[0.06] transition-colors border border-card-border">
+                  <FiPlus className="w-3.5 h-3.5 text-[var(--pastel-yellow)]" />
                 </div>
-                <span className="font-bold uppercase tracking-[0.15em] text-[9px] mr-1">New Broadcast</span>
+                <span className="font-bold uppercase tracking-[0.2em] text-[9px]">New Broadcast</span>
               </button>
 
               {/* Info Tooltip */}
               <div className="relative group">
-                <button className="p-2.5 text-zinc-500 hover:text-white transition-colors bg-white/[0.03] rounded-xl border border-white/5 hover:bg-white/[0.06]">
-                  <FiInfo size={16} />
+                <button className="p-3 text-text-muted hover:text-foreground transition-colors bg-foreground/[0.03] rounded-2xl border border-card-border hover:bg-foreground/[0.06] hover:border-card-border">
+                  <FiInfo size={18} />
                 </button>
-                <div className="absolute bottom-full right-0 mb-3 w-64 p-4 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-[80]">
-                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest leading-relaxed">
+                <div className="absolute bottom-full right-0 mb-4 w-72 p-5 bg-card border border-card-border rounded-3xl  opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-[80]">
+                  <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest leading-relaxed">
                     Stay updated with the latest platform news. All broadcasts are strictly for internal system purposes.
                   </p>
-                  <div className="absolute bottom-[-6px] right-4 w-3 h-3 bg-zinc-900 border-r border-b border-white/10 rotate-45" />
+                  <div className="absolute bottom-[-6px] right-5 w-3 h-3 bg-card border-r border-b border-card-border rotate-45" />
                 </div>
               </div>
             </div>

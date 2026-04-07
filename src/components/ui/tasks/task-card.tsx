@@ -149,13 +149,13 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
       }
     };
 
-    const rowClasses = "border-b border-white/5";
+    const rowClasses = "border-b border-card-border";
 
     const variants = {
        initial: { opacity: 0, y: 10 },
        animate: { opacity: 1, y: 0 },
        exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
-       hover: { scale: 1.002, backgroundColor: "rgba(255, 255, 255, 0.03)" }
+       hover: { scale: 1.002, backgroundColor: "rgba(var(--foreground-rgb), 0.05)" }
     };
 
     return isEditing ? (
@@ -167,7 +167,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
         className={rowClasses} 
         ref={ref}
       >
-        <td className="px-4 py-2 text-xs font-medium text-white whitespace-nowrap sticky left-0 z-10 bg-zinc-950/90 backdrop-blur-md border-r border-white/5">
+        <td className="px-4 py-2 text-xs font-bold text-foreground whitespace-nowrap sticky left-0 z-10 bg-card/95 backdrop-blur-md border-r border-card-border">
           <form
             ref={formRef}
             id={`update-${task.id}`}
@@ -175,7 +175,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
             method="post"
             style={{ display: "none" }}
           ></form>
-          <input className="text-white" form={`update-${task.id}`} type="hidden" name="id" value={task.id} />
+          <input className="text-foreground" form={`update-${task.id}`} type="hidden" name="id" value={task.id} />
           <input form={`update-${task.id}`} type="hidden" name="qa_required" value={task.qa_required ? 'true' : 'false'} />
           <input form={`update-${task.id}`} type="hidden" name="review_required" value={task.review_required ? 'true' : 'false'} />
           {task.depends_on_id && <input form={`update-${task.id}`} type="hidden" name="depends_on_id" value={task.depends_on_id} />}
@@ -188,20 +188,20 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
               name="name"
               defaultValue={task.name}
               disabled={isUpdating}
-              className="w-full bg-white/[0.06] border border-white/5 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs transition-all disabled:opacity-50"
+              className="w-full bg-foreground/[0.06] border border-card-border rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-foreground placeholder:text-text-muted/50 text-xs transition-all disabled:opacity-50"
             />
           </td>
-          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap bg-zinc-900/50">
+          <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap bg-foreground/[0.02]">
             <input
               form={`update-${task.id}`}
               type="text"
               name="description"
               defaultValue={task.description || ''}
               disabled={isUpdating}
-              className="w-full bg-white/[0.06] border border-white/5 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white placeholder:text-zinc-600 text-xs transition-all disabled:opacity-50"
+              className="w-full bg-foreground/[0.06] border border-card-border rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-foreground placeholder:text-text-muted/50 text-xs transition-all disabled:opacity-50"
             />
           </td>
-          <td className="px-4 py-2 text-[11px] text-zinc-400 whitespace-nowrap min-w-[120px] bg-zinc-900/50">
+          <td className="px-4 py-2 text-[11px] text-text-muted whitespace-nowrap min-w-[120px] bg-foreground/[0.02]">
             <CustomDatePicker
                 value={dueDate}
                 onChange={setDueDate}
@@ -212,7 +212,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                 disabled={isUpdating}
             />
           </td>
-          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap bg-zinc-900/50">
+          <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap bg-foreground/[0.02]">
             <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2 cursor-pointer group">
                     <div className="relative flex items-center">
@@ -220,11 +220,11 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                             type="checkbox" 
                             checked={qaRequired}
                             onChange={(e) => setQaRequired(e.target.checked)}
-                            className="peer h-4 w-4 appearance-none rounded border border-white/5 bg-white/[0.03] checked:bg-[var(--pastel-purple)]/40 checked:border-[var(--pastel-purple)] transition-all"
+                            className="peer h-4 w-4 appearance-none rounded border border-card-border bg-foreground/[0.03] checked:bg-[var(--pastel-purple)]/40 checked:border-[var(--pastel-purple)] transition-all"
                         />
                         <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-[var(--pastel-purple)] opacity-0 peer-checked:opacity-100 transition-opacity" />
                     </div>
-                    <span className="text-[11px] font-bold text-zinc-500 group-hover:text-[var(--pastel-purple)] transition-colors uppercase tracking-wider">QA</span>
+                    <span className="text-[11px] font-bold text-text-muted group-hover:text-[var(--pastel-purple)] transition-colors uppercase tracking-wider">QA</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer group">
                     <div className="relative flex items-center">
@@ -232,15 +232,15 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                             type="checkbox" 
                             checked={reviewRequired}
                             onChange={(e) => setReviewRequired(e.target.checked)}
-                            className="peer h-4 w-4 appearance-none rounded border border-white/5 bg-white/[0.03] checked:bg-[var(--pastel-indigo)]/40 checked:border-[var(--pastel-indigo)] transition-all"
+                            className="peer h-4 w-4 appearance-none rounded border border-card-border bg-foreground/[0.03] checked:bg-[var(--pastel-indigo)]/40 checked:border-[var(--pastel-indigo)] transition-all"
                         />
                         <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-[var(--pastel-indigo)] opacity-0 peer-checked:opacity-100 transition-opacity" />
                     </div>
-                    <span className="text-[11px] font-bold text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors uppercase tracking-wider">Review</span>
+                    <span className="text-[11px] font-bold text-text-muted group-hover:text-[var(--pastel-indigo)] transition-colors uppercase tracking-wider">Review</span>
                 </label>
             </div>
           </td>
-          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap min-w-[180px] bg-zinc-900/50">
+          <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap min-w-[180px] bg-foreground/[0.03]">
             <Combobox
               options={projects.flatMap(p => p.tasks || []).filter(t => t.id !== task.id).map(t => ({ value: t.id, label: t.name }))}
               value={dependsOn || ''}
@@ -249,35 +249,35 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
               className="w-full"
             />
           </td>
-          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
+          <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap">
               {/* Owner cannot be changed during edit, just display it */}
              {task.owner ? (
                 <div className="flex items-center gap-2">
                      {task.owner.avatarUrl ? (
                         <Image src={task.owner.avatarUrl} alt={task.owner.fullName || ''} width={20} height={20} className="w-5 h-5 rounded-full" />
                     ) : (
-                        <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[11px] text-white">
+                        <div className="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[11px] text-white shadow-sm">
                             {(task.owner.fullName || task.owner.email || '?')[0].toUpperCase()}
                         </div>
                     )}
-                    <span className="text-xs">{task.owner.fullName || task.owner.email}</span>
+                    <span className="text-xs text-foreground">{task.owner.fullName || task.owner.email}</span>
                 </div>
-            ) : <span className="text-xs text-zinc-600">-</span>}
+            ) : <span className="text-xs text-text-muted">-</span>}
           </td>
-          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap">
+          <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap">
             <select
               form={`update-${task.id}`}
               name="priority"
               defaultValue={task.priority}
               disabled={isUpdating}
-              className="w-full bg-white/[0.03] border border-white/5 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white text-xs appearance-none cursor-pointer transition-all disabled:opacity-50"
+              className="w-full bg-foreground/[0.03] border border-card-border rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-foreground text-xs appearance-none cursor-pointer transition-all disabled:opacity-50"
             >
-              <option value="low" className="bg-zinc-900">Low</option>
-              <option value="medium" className="bg-zinc-900">Medium</option>
-              <option value="high" className="bg-zinc-900">High</option>
+              <option value="low" className="bg-card">Low</option>
+              <option value="medium" className="bg-card">Medium</option>
+              <option value="high" className="bg-card">High</option>
             </select>
           </td>
-          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap min-w-[200px]">
+          <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap min-w-[200px]">
             <Combobox
               options={users.map(u => ({ value: u.id, label: u.fullName || u.email, subLabel: u.email }))}
               value={selectedAssignees}
@@ -289,7 +289,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
             />
           </td>
           {!hideProject && (
-            <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap min-w-[150px]">
+            <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap min-w-[150px]">
               <Combobox
                 options={projects.map(p => ({ value: p.id, label: p.name, subLabel: p.key || undefined }))}
                 value={selectedProject || ''}
@@ -324,7 +324,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
               </div>
             ) : <span>-</span>}
           </td>
-          <td className="px-4 py-2 text-xs font-medium text-right whitespace-nowrap sticky right-0 z-10 bg-zinc-950/90 backdrop-blur-md border-l border-white/5">
+          <td className="px-4 py-2 text-xs font-bold text-right whitespace-nowrap sticky right-0 z-10 bg-card/95 backdrop-blur-md border-l border-card-border">
             <div className="flex items-center justify-end space-x-2">
                 <button
                     type="button"
@@ -359,27 +359,27 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
         className={`${rowClasses} transition-colors group items-center`} 
         ref={ref}
       >
-        <td className="px-6 py-4 text-xs font-medium text-white whitespace-nowrap flex items-center sticky left-0 z-10 bg-zinc-950/90 backdrop-blur-md border-r border-white/5">
+        <td className="px-6 py-4 text-xs font-bold text-foreground whitespace-nowrap flex items-center sticky left-0 z-10 bg-card/90 backdrop-blur-md border-r border-card-border">
           <div className="relative flex items-center shrink-0">
             <input
               type="checkbox"
               checked={task.status === "DONE"}
               onChange={() => { void handleStatusToggle(); }}
-              className="peer h-4 w-4 cursor-pointer appearance-none rounded-md border border-white/5 bg-white/[0.03] checked:border-[var(--pastel-emerald)] checked:bg-[var(--pastel-emerald)]/20 transition-all hover:border-[var(--pastel-emerald)]/50 focus:outline-none ring-offset-zinc-950 focus:ring-2 focus:ring-[var(--pastel-emerald)]/20"
+              className="peer h-4 w-4 cursor-pointer appearance-none rounded-md border border-card-border bg-foreground/[0.03] checked:border-[var(--pastel-emerald)] checked:bg-[var(--pastel-emerald)]/20 transition-all hover:border-[var(--pastel-emerald)]/50 focus:outline-none ring-offset-background focus:ring-2 focus:ring-[var(--pastel-emerald)]/20"
             />
             <FiCheck className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[var(--pastel-emerald)] opacity-0 peer-checked:opacity-100 transition-opacity w-3 h-3" />
           </div>
-          <span className={`ml-4 truncate max-w-[250px] font-bold tracking-tight ${task.status === "DONE" ? "line-through text-zinc-500" : "text-zinc-100"}`}>
+          <span className={`ml-4 truncate max-w-[250px] font-bold tracking-tight ${task.status === "DONE" ? "line-through text-text-muted" : "text-foreground"}`}>
             {task.name}
           </span>
         </td>
-        <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap max-w-[300px] truncate hidden lg:table-cell">
-          {task.description || <span className="text-zinc-600 italic">No description</span>}
+        <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap max-w-[300px] truncate hidden lg:table-cell">
+          {task.description || <span className="text-text-muted/50 italic">No description</span>}
         </td>
-        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
-          {task.dueDate ? format(new Date(task.dueDate as string), "MMM dd, yyyy") : <span className="text-zinc-600">-</span>}
+        <td className="px-6 py-4 text-xs text-text-muted whitespace-nowrap">
+          {task.dueDate ? format(new Date(task.dueDate as string), "MMM dd, yyyy") : <span className="text-text-muted/50">-</span>}
         </td>
-        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
+        <td className="px-6 py-4 text-xs text-text-muted whitespace-nowrap">
             <div className="flex items-center gap-2">
                 {task.qa_required && (
                     <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--pastel-purple)]/10 text-[var(--pastel-purple)] border border-[var(--pastel-purple)]/20 uppercase tracking-wider whitespace-nowrap">QA</span>
@@ -387,18 +387,18 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                 {task.review_required && (
                     <span className="px-2 py-0.5 text-[11px] font-bold rounded-md bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border border-[var(--pastel-indigo)]/20 uppercase tracking-wider whitespace-nowrap">Review</span>
                 )}
-                {!task.qa_required && !task.review_required && <span className="text-zinc-600">-</span>}
+                {!task.qa_required && !task.review_required && <span className="text-text-muted/50">-</span>}
             </div>
         </td>
-        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap">
+        <td className="px-6 py-4 text-xs text-text-muted whitespace-nowrap">
             {task.depends_on_id ? (
                 <div className="flex items-center gap-2 text-[11px] font-bold text-amber-400 cursor-help" title={`Requires Task ID: ${task.depends_on_id}`}>
                     <FiClock className="w-3 h-3" />
                     <span>Req #{task.depends_on_id}</span>
                 </div>
-            ) : <span className="text-zinc-600">-</span>}
+            ) : <span className="text-text-muted/30">-</span>}
         </td>
-        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap hidden md:table-cell">
+        <td className="px-6 py-4 text-xs text-text-muted whitespace-nowrap hidden md:table-cell">
             {task.owner ? (
                 <div className="flex items-center gap-2">
                      {task.owner.avatarUrl ? (
@@ -408,9 +408,9 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                             {(task.owner.fullName || task.owner.email || '?')[0].toUpperCase()}
                         </div>
                     )}
-                    <span className="text-xs">{task.owner.fullName || task.owner.email}</span>
+                    <span className="text-xs text-foreground font-bold">{task.owner.fullName || task.owner.email}</span>
                 </div>
-            ) : <span className="text-xs text-zinc-600">-</span>}
+            ) : <span className="text-xs text-text-muted/30">-</span>}
         </td>
         <td className="px-6 py-4 text-xs whitespace-nowrap hidden sm:table-cell">
           <span
@@ -425,20 +425,20 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
             {task.priority}
           </span>
         </td>
-        <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap hidden lg:table-cell">
+        <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap hidden lg:table-cell">
             {displayAssignees.length > 0 ? (
                 <UserAvatarGroup users={displayAssignees} size="xs" limit={3} />
             ) : (
-                <span className="text-zinc-600 italic">Unassigned</span>
+                <span className="text-text-muted/30 italic">Unassigned</span>
             )}
         </td>
-        <td className="px-6 py-4 text-xs text-zinc-400 whitespace-nowrap hidden md:table-cell">
+        <td className="px-6 py-4 text-xs text-text-muted whitespace-nowrap hidden md:table-cell">
             {task.projectId ? (
                 <span className="text-[var(--pastel-indigo)] font-bold uppercase tracking-tight text-[11px] bg-[var(--pastel-indigo)]/5 px-2 py-0.5 rounded-md border border-[var(--pastel-indigo)]/10 whitespace-nowrap">
                     {projects.find(p => p.id === task.projectId)?.name}
                 </span>
             ) : (
-                <span className="text-zinc-600 italic">No Project</span>
+                <span className="text-text-muted/30 italic">No Project</span>
             )}
         </td>
         <td className="px-6 py-4 text-xs whitespace-nowrap">
@@ -452,7 +452,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                 ? 'bg-[var(--pastel-purple)]/10 text-[var(--pastel-purple)] border-[var(--pastel-purple)]/20'
                 : task.status === 'REVIEW'
                 ? 'bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border-[var(--pastel-indigo)]/20'
-                : 'bg-white/[0.03] text-zinc-400 border-white/5'
+                : 'bg-foreground/[0.03] text-text-muted border-card-border'
             }`}
           >
             {task.status.replace(/_/g, ' ')}
@@ -463,27 +463,27 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
           {hasActiveTimer ? (
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[11px] font-medium text-emerald-400 uppercase tracking-wider">Active</span>
+              <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Active</span>
               {totalHours > 0 && (
-                <span className="text-[11px] text-zinc-500 ml-1">+{totalHours.toFixed(1)}h</span>
+                <span className="text-[11px] text-text-muted ml-1">+{totalHours.toFixed(1)}h</span>
               )}
             </div>
           ) : totalHours > 0 ? (
             <div className="flex items-center gap-1.5">
-              <FiClock className="w-3 h-3 text-zinc-600" />
-              <span className="font-medium text-white tabular-nums">{totalHours.toFixed(1)}h</span>
+              <FiClock className="w-3.5 h-3.5 text-text-muted" />
+              <span className="font-medium text-foreground tabular-nums">{totalHours.toFixed(1)}h</span>
             </div>
           ) : (
-            <span className="text-zinc-600">-</span>
+            <span className="text-text-muted/50">-</span>
           )}
         </td>
-        <td className="px-4 py-2 text-xs font-medium text-right whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity sticky right-0 z-10 bg-zinc-950/90 backdrop-blur-md border-l border-white/5">
+        <td className="px-4 py-2 text-xs font-bold text-right whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity sticky right-0 z-10 bg-card/95 backdrop-blur-md border-l border-card-border">
           <div className="flex items-center justify-end space-x-1">
             {canUserWorkOnTask(currentUser, task) && (
               <button
                 type="button"
                 onClick={() => startTimer(task)}
-                className={`p-1.5 rounded-lg transition-all ${activeTask?.id === task.id ? 'bg-indigo-500/20 text-indigo-400' : 'text-zinc-500 hover:text-white hover:bg-white/[0.06]'}`}
+                className={`p-1.5 rounded-lg transition-all ${activeTask?.id === task.id ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.06] border border-transparent hover:border-card-border'}`}
                 title="Work on Mission"
               >
                 <FiPlay className={`w-3.5 h-3.5 ${activeTask?.id === task.id ? 'fill-current' : ''}`} />
@@ -493,7 +493,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                 type="button"
                 onClick={onEdit}
                 disabled={task.id < 0}
-                className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                className="p-1.5 text-text-muted hover:text-foreground hover:bg-foreground/[0.06] rounded-lg border border-transparent hover:border-card-border transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed"
                 title={task.id < 0 ? "Saving..." : "Edit"}
             >
                 <FiEdit2 className="w-3.5 h-3.5" />
@@ -523,10 +523,10 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                 <button 
                   type="submit" 
                   disabled={task.id < 0 || isDeleting}
-                  className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed" 
+                  className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/20 transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed" 
                   title={task.id < 0 ? "Saving..." : "Delete"}
                 >
-                    {isDeleting ? <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-red-400"></div> : <FiTrash2 className="w-3.5 h-3.5" />}
+                    {isDeleting ? <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-red-500"></div> : <FiTrash2 className="w-3.5 h-3.5" />}
                 </button>
             </form>
           </div>

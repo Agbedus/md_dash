@@ -205,7 +205,7 @@ export function CustomDatePicker({
               width: `${coords.width}px`,
               maxWidth: '320px'
             }}
-            className={`z-[9999] bg-zinc-900 border border-white/5 rounded-xl shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100 ${
+            className={`z-[9999] bg-zinc-900 border border-white/5 rounded-xl  overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100 ${
                 openUpward ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'
               }`}
           >
@@ -257,7 +257,7 @@ export function CustomDatePicker({
                       className={`
                         h-8 w-full rounded-lg flex items-center justify-center text-xs transition-all relative
                         ${!isCurrentMonth ? 'text-zinc-600' : 'text-zinc-300'}
-                        ${isSelected ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20' : 'hover:bg-white/[0.06] hover:text-white'}
+                        ${isSelected ? 'bg-indigo-600 text-white font-bold  -indigo-500/20' : 'hover:bg-white/[0.06] hover:text-white'}
                         ${isTodayDate && !isSelected ? 'border border-indigo-500/30 text-indigo-400' : ''}
                         disabled:opacity-20 disabled:cursor-not-allowed
                       `}

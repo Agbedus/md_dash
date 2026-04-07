@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { useRouter } from 'next/navigation';
 import { useSWRConfig } from 'swr';
 import { updateLocation, getOfficeLocations, clockOutManual } from '@/app/(dashboard)/attendance/actions';
+import { getDistanceInMeters } from '@/lib/distance-utils';
 import { toast } from '@/lib/toast';
 import type { PresenceState, AttendanceState, AttendancePolicy, OfficeLocation, AttendanceRecord } from '@/types/attendance';
 
@@ -22,24 +23,14 @@ interface LocationContextType {
     manualClockIn: () => Promise<void>;
     manualClockOut: (force?: boolean) => Promise<{ success?: boolean; confirmRequired?: boolean }>;
     isLoading: boolean;
+    refreshLocation: () => Promise<void>;
+    location: { latitude: number; longitude: number; accuracy: number | null } | null;
+    officeLocation: { latitude: number; longitude: number } | null;
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
-function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
-    const R = 6371e3; // metres
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-    return R * c;
-}
 
 function getAccuratePosition(timeoutMs = 15000, desiredAccuracy = 35): Promise<GeolocationPosition> {
     return new Promise((resolve, reject) => {
@@ -109,22 +100,23 @@ export function LocationProvider({
     const [clockOutTime, setClockOutTime] = useState<string | null>(initialRecord?.clock_out_at || initialRecord?.clock_out || null);
     const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [location, setLocation] = useState<{ latitude: number; longitude: number; accuracy: number | null } | null>(null);
+    const [officeLocationState, setOfficeLocationState] = useState<{ latitude: number; longitude: number } | null>(null);
     
     // Config Caching (Pre-fetched on mount)
     const officesRef = useRef<OfficeLocation[]>([]);
     const policiesRef = useRef<Record<number, AttendancePolicy>>({});
     const [isInitialized, setIsInitialized] = useState(false);
 
-    // Update refs to match initial state to avoid redundant mutations on first background check
     useEffect(() => {
         if (initialRecord) {
             attendanceStateRef.current = initialRecord.attendance_state;
+            presenceStateRef.current = deriveInitialPresence(initialRecord);
         }
     }, [initialRecord]);
     
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
-    const firstSeenInNewStateRef = useRef<{ state: PresenceState; time: number } | null>(null);
-    const confirmedPresenceRef = useRef<PresenceState | null>(null);
+    const presenceStateRef = useRef<PresenceState | null>(null);
     const attendanceStateRef = useRef<AttendanceState | null>(null); // To avoid dependency loop in callbacks
 
     // 1. Initial Data Load (Secondary to main page data)
@@ -133,6 +125,9 @@ export function LocationProvider({
             try {
                 const offices = await getOfficeLocations();
                 officesRef.current = offices;
+                if (offices.length > 0) {
+                    setOfficeLocationState({ latitude: offices[0].latitude, longitude: offices[0].longitude });
+                }
                 
                 // Fetch policies for all offices to have them ready
                 const { getAttendancePolicy } = await import('@/app/(dashboard)/attendance/actions');
@@ -191,11 +186,13 @@ export function LocationProvider({
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const { latitude, longitude, accuracy } = position.coords;
+                    setLocation({ latitude, longitude, accuracy });
                     
-                    // ── GATE 1: Reject highly inaccurate readings entirely ──
-                    // The backend also rejects accuracy > 50m, so don't waste a network call
-                    if (accuracy > 50) {
-                        console.log(`[LocationProvider] Skipping ping — accuracy ${accuracy.toFixed(0)}m is too poor`);
+                    // ── GATE 1: Reject highly inaccurate readings for automatic transitions ──
+                    // The backend strictly ignores accuracy > 30m for auto-state changes.
+                    // If we're tracking a manual action later, we'll allow a more lenient gate.
+                    if (accuracy > 30) {
+                        console.log(`[LocationProvider] Skipping state evaluation — accuracy ${accuracy.toFixed(0)}m is too noisy`);
                         resolve();
                         return;
                     }
@@ -222,13 +219,12 @@ export function LocationProvider({
                     }
                     
                     if (activeOffice) {
-                        // Use accuracy-adjusted distance: the real position could be
-                        // up to (accuracy * 0.5) meters further away than reported
-                        const effectiveDistance = bestDistance + (accuracy * 0.5);
+                        const effectiveDistance = bestDistance; // accuracy-adjusted check happens later if needed
                         
+                        // Strict Geofence Check based on Office Config
                         if (effectiveDistance <= activeOffice.in_office_radius_meters) {
                             rawZone = 'IN_OFFICE';
-                        } else if (bestDistance <= activeOffice.temporarily_out_radius_meters) {
+                        } else if (bestDistance <= (activeOffice.temporarily_out_radius_meters || activeOffice.in_office_radius_meters * 2.5)) {
                             rawZone = 'TEMPORARILY_OUT';
                         } else {
                             rawZone = 'OUT_OF_OFFICE';
@@ -238,79 +234,38 @@ export function LocationProvider({
                         resolvedId = offices[0].id;
                     }
 
-                    // ── 2. Use Cached Policy for grace period logic ──
-                    const policy = activeOffice ? policiesRef.current[activeOffice.id] : null;
-                    
-                    // ── 3. Apply Stable Evidence Rules ──
-                    // Without a valid policy, do NOT confirm any zone change locally.
-                    // Let the backend be the sole authority.
-                    let confirmedZone = confirmedPresenceRef.current;
-                    let forceUpdate = false;
-
-                    if (policy) {
-                        const now = Date.now();
-                        
-                        if (rawZone !== confirmedZone) {
-                            // Start or continue accumulating evidence for this new zone
-                            if (!firstSeenInNewStateRef.current || firstSeenInNewStateRef.current.state !== rawZone) {
-                                firstSeenInNewStateRef.current = { state: rawZone, time: now };
-                            }
-
-                            const elapsedMins = (now - firstSeenInNewStateRef.current.time) / 60000;
-                            let requiredMins = 0;
-
-                            if (rawZone === 'IN_OFFICE') {
-                                requiredMins = policy.return_to_office_confirmation_minutes;
-                            } else if (rawZone === 'TEMPORARILY_OUT') {
-                                requiredMins = policy.temporarily_out_grace_minutes;
-                            } else if (rawZone === 'OUT_OF_OFFICE') {
-                                requiredMins = policy.out_of_office_grace_minutes;
-                            }
-
-                            // Additional guard: For transitioning TO IN_OFFICE,
-                            // require tighter accuracy (< 30m) to avoid false clock-ins
-                            if (rawZone === 'IN_OFFICE' && accuracy > 30) {
-                                // Don't accumulate evidence with noisy readings for IN_OFFICE
-                                console.log(`[LocationProvider] Ignoring IN_OFFICE candidate — accuracy ${accuracy.toFixed(0)}m too poor for confirmation`);
-                            } else if (elapsedMins >= requiredMins) {
-                                const prevState = confirmedPresenceRef.current;
-                                confirmedPresenceRef.current = rawZone;
-                                confirmedZone = rawZone;
-                                firstSeenInNewStateRef.current = null;
-                                
-                                if (prevState !== null && prevState !== rawZone) {
-                                    forceUpdate = true;
-                                }
-                            }
-                        } else {
-                            // Zone matches confirmed state — reset evidence tracker
-                            firstSeenInNewStateRef.current = null;
-                        }
-                    }
-                    // If no policy, don't touch confirmedPresenceRef — let the backend response drive it
-
-                    // ── 4. Sync with Backend ──
+                    // ── 2. Sync with Backend ──
                     const result = await updateLocation(latitude, longitude, accuracy, resolvedId);
                     if (result.success && result.record) {
                         const prevAtt = attendanceStateRef.current;
                         const newAtt = result.record.attendance_state;
                         
+                        const prevPres = presenceStateRef.current;
+                        const newPres = result.record.presence_state ?? null;
+                        
                         attendanceStateRef.current = newAtt;
-                        // Always trust the backend's response for presence state
-                        setPresenceState(result.record.presence_state ?? null);
+                        presenceStateRef.current = newPres;
+                        
+                        let forceUpdate = false;
+                        if (prevPres !== null && prevPres !== newPres) {
+                            forceUpdate = true;
+                        }
+
+                        // Always trust the backend's response for definitive state
+                        setPresenceState(newPres);
                         setAttendanceState(newAtt);
                         setClockInTime(result.record.clock_in_at || result.record.clock_in || null);
                         setClockOutTime(result.record.clock_out_at || result.record.clock_out || null);
                         setLastUpdate(new Date());
                         
                         mutate('my-attendance-today');
-                        mutate('team-attendance-today');
                         
                         if (prevAtt && prevAtt !== newAtt) {
+                            mutate('team-attendance-today');
                             if (newAtt === 'CLOCKED_IN') {
-                                toast.success('Confirmed in office — Clocked in!');
+                                toast.success('Confirmed in office!');
                             } else if (newAtt === 'CLOCKED_OUT') {
-                                toast.info('Confirmed away — Clocked out.');
+                                toast.info('Attendance finalized.');
                             }
                         } else if (forceUpdate) {
                             mutate('team-attendance-today');
@@ -375,8 +330,9 @@ export function LocationProvider({
                 toast.dismiss('gps-lock');
                 const { latitude, longitude, accuracy } = position.coords;
                 
-                if (accuracy > 50) {
-                    toast.error('GPS signal too weak. Please step outside.');
+                // Manual Accuracy Gate: Lenient up to 100m for intended actions
+                if (accuracy > 100) {
+                    toast.error('GPS signal too unstable for secure clock-in.');
                     setIsLoading(false);
                     return;
                 }
@@ -391,8 +347,8 @@ export function LocationProvider({
                 let validOfficeId: number | null = null;
                 for (const office of offices) {
                     const dist = getDistanceInMeters(latitude, longitude, office.latitude, office.longitude);
-                    // stricter geofence check incorporating accuracy
-                    if (dist + (accuracy * 0.5) <= office.in_office_radius_meters) {
+                    // strict geofence check
+                    if (dist <= office.in_office_radius_meters) {
                         validOfficeId = office.id;
                         break;
                     }
@@ -404,17 +360,17 @@ export function LocationProvider({
                     return;
                 }
 
-                // ── Policy time-window check (workday hours) ──
+                // ── Policy time-window check (Arrival Windows for Manual Action) ──
                 const policy = policiesRef.current[validOfficeId];
                 if (policy) {
                     const inWindow = isWithinWindow(
-                        policy.work_start_time as string | null,
-                        policy.work_end_time as string | null
+                        policy.check_in_open_time as string | null,
+                        policy.check_in_close_time as string | null
                     );
                     if (!inWindow) {
-                        const openStr = policy.work_start_time || '—';
-                        const closeStr = policy.work_end_time || '—';
-                        toast.error(`Clock-in is only allowed during work hours (${openStr} – ${closeStr}).`);
+                        const openStr = policy.check_in_open_time || '—';
+                        const closeStr = policy.check_in_close_time|| '—';
+                        toast.error(`The arrival window is currently closed (${openStr} – ${closeStr}).`);
                         setIsLoading(false);
                         return;
                     }
@@ -488,6 +444,32 @@ export function LocationProvider({
         }
     }, [mutate, presenceState]);
 
+    const refreshLocation = useCallback(async () => {
+        setIsLoading(true);
+        toast.loading("Acquiring high-precision GPS...", { id: 'gps-sync' });
+        try {
+            const position = await getAccuratePosition(15000, 35);
+            toast.dismiss('gps-sync');
+            const { latitude, longitude, accuracy } = position.coords;
+            setLocation({ latitude, longitude, accuracy });
+            
+            // Sync with backend
+            const offices = officesRef.current;
+            const resolvedId = offices.length > 0 ? offices[0].id : undefined;
+            await updateLocation(latitude, longitude, accuracy, resolvedId);
+            
+            setLastUpdate(new Date());
+            mutate('my-attendance-today');
+            mutate('team-attendance-today');
+            toast.success('Position Synchronized');
+        } catch (err) {
+            toast.dismiss('gps-sync');
+            toast.error('Sync Timeout — poor signal');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [mutate]);
+
     const contextValue = React.useMemo(() => ({
         isTracking,
         isSupported,
@@ -500,6 +482,9 @@ export function LocationProvider({
         manualClockIn,
         manualClockOut,
         isLoading,
+        refreshLocation,
+        location,
+        officeLocation: officeLocationState,
     }), [
         isTracking,
         isSupported,
@@ -511,7 +496,10 @@ export function LocationProvider({
         toggleTracking,
         manualClockIn,
         manualClockOut,
-        isLoading
+        isLoading,
+        refreshLocation,
+        location,
+        officeLocationState
     ]);
 
     return (

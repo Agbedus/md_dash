@@ -65,7 +65,7 @@ export const CreatorAvatar: React.FC<CreatorAvatarProps> = ({
           alt={name}
           width={size}
           height={size}
-          className="rounded-full border border-white/10 object-cover w-full h-full shadow-sm"
+          className="rounded-full border border-card-border object-cover w-full h-full "
         />
       </div>
     );
@@ -73,12 +73,12 @@ export const CreatorAvatar: React.FC<CreatorAvatarProps> = ({
 
   return (
     <div 
-      className={`rounded-full flex items-center justify-center font-bold border border-white/10 flex-shrink-0 transition-all ${className} ${isLoading ? 'animate-pulse' : ''}`}
+      className={`rounded-full flex items-center justify-center font-bold border border-card-border flex-shrink-0 transition-all ${className} ${isLoading ? 'animate-pulse' : ''}`}
       style={{ 
         width: size, 
         height: size, 
         fontSize: Math.max(8, size * 0.4),
-        backgroundColor: isLoading ? '#3f3f46' : bgColor,
+        backgroundColor: isLoading ? 'var(--card)' : bgColor,
         color: '#18181b', // zinc-900 (darker text for pastel backgrounds)
         textShadow: '0 0 1px rgba(255,255,255,0.3)'
       }}

@@ -30,6 +30,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { logout } from "@/app/lib/actions";
 import { AboutModal } from "./about-modal";
 import { useState } from "react";
+import { ThemeToggle } from "./theme-toggle";
 
 interface SidebarProps {
   user?: {
@@ -89,12 +90,12 @@ const Sidebar = ({ user }: SidebarProps) => {
   /* ---------- Header ---------- */
 
   const headerClass = `
-    h-20 flex items-center border-b border-white/5 transition-all duration-300
+    h-20 flex items-center border-b border-sidebar-border transition-all duration-300
     ${isSidebarCollapsed ? "justify-center px-0" : "justify-start px-6"}
   `;
 
   const headerInnerClass = `
-    flex items-center w-full
+    flex items-center w-full gap-2
     ${isExpandedMobile || isExpandedDesktop ? "justify-between" : "justify-center"}
   `;
 
@@ -106,12 +107,12 @@ const Sidebar = ({ user }: SidebarProps) => {
 
   // Mobile: smaller padding, Desktop: normal padding
   const baseLinkClasses =
-    "flex items-center py-1.5 md:py-2 rounded-lg transition-all duration-200 font-light text-sm hover:bg-white/[0.03] hover:text-white whitespace-nowrap";
+    "flex items-center py-1.5 md:py-2 rounded-lg transition-all duration-200 font-light text-sm hover:bg-foreground/[0.05] hover:text-foreground whitespace-nowrap";
 
   const activeLinkClasses =
-    "bg-white/[0.06] text-white border border-white/5 font-medium";
+    "bg-foreground/[0.07] text-foreground border border-card-border font-medium";
 
-  const inactiveLinkClasses = "text-zinc-400";
+  const inactiveLinkClasses = "text-text-muted";
 
   /* ---------------- Menus ---------------- */
 
@@ -149,13 +150,13 @@ const Sidebar = ({ user }: SidebarProps) => {
 
   return (
     <div
-      className={`glass border-r border-white/5 transition-all duration-300 hidden md:flex flex-col h-full ${widthClass}`}
+      className={`glass border-r border-sidebar-border transition-all duration-300 hidden md:flex flex-col h-full ${widthClass}`}
     >
       {/* ---------- Header ---------- */}
       <div className={headerClass}>
         <div className={headerInnerClass}>
           <div className="flex items-center">
-            <div className="w-10 h-10 p-1 bg-white/[0.03] rounded-lg border border-white/5 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 p-1 bg-foreground/[0.04] rounded-lg border border-card-border flex items-center justify-center shrink-0">
               <Image 
                 src="/logo.svg" 
                 alt="MD Logo" 
@@ -166,23 +167,29 @@ const Sidebar = ({ user }: SidebarProps) => {
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              if (typeof window !== "undefined" && window.innerWidth < 768) {
-                setIsMobileExpanded(!isMobileExpanded);
-              } else {
-                setIsDesktopCollapsed(!isDesktopCollapsed);
-              }
-            }}
-            className={`p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-400 hover:text-white shrink-0 ${isSidebarCollapsed ? "" : "ml-2"}`}
-            title={isExpandedDesktop ? "Collapse Sidebar" : "Expand Sidebar"}
-          >
-            {isExpandedMobile || isExpandedDesktop ? (
-              <FiChevronLeft size={18} />
-            ) : (
-              <FiChevronRight size={18} />
+          <div className="flex items-center gap-1 ml-auto">
+            {!isSidebarCollapsed && (
+              <ThemeToggle minimal />
             )}
-          </button>
+
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined" && window.innerWidth < 768) {
+                  setIsMobileExpanded(!isMobileExpanded);
+                } else {
+                  setIsDesktopCollapsed(!isDesktopCollapsed);
+                }
+              }}
+              className={`p-2 hover:bg-foreground/[0.05] rounded-lg transition-colors text-text-muted hover:text-foreground shrink-0`}
+              title={isExpandedDesktop ? "Collapse Sidebar" : "Expand Sidebar"}
+            >
+              {isExpandedMobile || isExpandedDesktop ? (
+                <FiChevronLeft size={18} />
+              ) : (
+                <FiChevronRight size={18} />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -192,14 +199,14 @@ const Sidebar = ({ user }: SidebarProps) => {
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           className={`w-full flex items-center justify-between px-6 mb-2 group/header focus:outline-none ${!contentVisibilityClass.includes('hidden') ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <h3 className={`text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ${contentVisibilityClass}`}>
+          <h3 className={`text-[11px] font-semibold text-text-muted uppercase tracking-wider ${contentVisibilityClass}`}>
             Menu
           </h3>
           <motion.div
             initial={false}
             animate={{ rotate: isMenuOpen ? 0 : -90 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className={`${contentVisibilityClass} text-zinc-600 group-hover/header:text-zinc-400`}
+            className={`${contentVisibilityClass} text-text-muted opacity-60 group-hover/header:opacity-100`}
           >
             <FiChevronDown size={14} />
           </motion.div>
@@ -226,14 +233,14 @@ const Sidebar = ({ user }: SidebarProps) => {
           onClick={() => setIsToolsOpen(!isToolsOpen)}
           className={`w-full flex items-center justify-between px-6 mt-6 mb-2 group/header focus:outline-none ${!contentVisibilityClass.includes('hidden') ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <h3 className={`text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ${contentVisibilityClass}`}>
+          <h3 className={`text-[11px] font-semibold text-text-muted uppercase tracking-wider ${contentVisibilityClass}`}>
             Tools
           </h3>
           <motion.div
             initial={false}
             animate={{ rotate: isToolsOpen ? 0 : -90 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className={`${contentVisibilityClass} text-zinc-600 group-hover/header:text-zinc-400`}
+            className={`${contentVisibilityClass} text-text-muted opacity-60 group-hover/header:opacity-100`}
           >
             <FiChevronDown size={14} />
           </motion.div>
@@ -270,14 +277,14 @@ const Sidebar = ({ user }: SidebarProps) => {
           onClick={() => setIsSystemOpen(!isSystemOpen)}
           className={`w-full flex items-center justify-between px-6 mt-6 mb-2 group/header focus:outline-none ${!contentVisibilityClass.includes('hidden') ? 'cursor-pointer' : 'cursor-default'}`}
         >
-          <h3 className={`text-[11px] font-semibold text-zinc-500 uppercase tracking-wider ${contentVisibilityClass}`}>
+          <h3 className={`text-[11px] font-semibold text-text-muted uppercase tracking-wider ${contentVisibilityClass}`}>
             System
           </h3>
           <motion.div
             initial={false}
             animate={{ rotate: isSystemOpen ? 0 : -90 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className={`${contentVisibilityClass} text-zinc-600 group-hover/header:text-zinc-400`}
+            className={`${contentVisibilityClass} text-text-muted opacity-60 group-hover/header:opacity-100`}
           >
             <FiChevronDown size={14} />
           </motion.div>
@@ -299,7 +306,7 @@ const Sidebar = ({ user }: SidebarProps) => {
                   onClick={() => setIsAboutOpen(true)}
                   className={`${baseLinkClasses} ${inactiveLinkClasses} ${itemAlignmentClass} ${iconSpacingClass} w-full`}
                 >
-                  <FiInfo className={`flex-shrink-0 ${iconSizeClass} text-zinc-400`} />
+                  <FiInfo className={`flex-shrink-0 ${iconSizeClass} text-text-muted`} />
                   <span className={contentVisibilityClass}>About Platform</span>
                 </button>
               </nav>
@@ -309,7 +316,7 @@ const Sidebar = ({ user }: SidebarProps) => {
       </div>
 
       {/* ---------- Footer ---------- */}
-      <div className="py-3 border-t border-white/5 space-y-3">
+      <div className="py-3 border-t border-sidebar-border space-y-3">
         {user && (
           <div className={`flex items-center ${itemAlignmentClass} py-2`}>
             <div className="relative w-8 h-8">
@@ -328,8 +335,8 @@ const Sidebar = ({ user }: SidebarProps) => {
             </div>
 
             <div className={`ml-3 overflow-hidden ${contentVisibilityClass}`}>
-              <p className="text-sm text-white truncate">{user.name}</p>
-              <p className="text-xs text-zinc-500 capitalize">
+              <p className="text-sm text-foreground font-medium truncate">{user.name}</p>
+              <p className="text-xs text-text-muted capitalize">
                 {user.roles?.[0]?.replace("_", " ") || "Member"}
               </p>
             </div>
@@ -338,14 +345,14 @@ const Sidebar = ({ user }: SidebarProps) => {
 
         <button
           onClick={() => logout()}
-          className={`flex items-center w-full py-2 rounded-xl text-zinc-400 hover:bg-red-500/10 hover:text-red-400 ${itemAlignmentClass} ${iconSpacingClass}`}
+          className={`flex items-center w-full py-2 rounded-xl text-text-muted hover:bg-red-500/10 hover:text-red-400 ${itemAlignmentClass} ${iconSpacingClass}`}
         >
           <FiLogOut className={iconSizeClass} />
           <span className={contentVisibilityClass}>Sign Out</span>
         </button>
 
         <div className={`py-2 flex items-center ${isSidebarCollapsed ? "justify-center" : "justify-between px-6"}`}>
-            <span className={`text-[11px] font-medium text-zinc-600 uppercase tracking-wider leading-none ${contentVisibilityClass}`}>
+            <span className={`text-[11px] font-medium text-text-muted uppercase tracking-wider leading-none ${contentVisibilityClass}`}>
                 v{version}
             </span>
             <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] font-medium text-amber-500 uppercase tracking-wider leading-none">
@@ -358,6 +365,7 @@ const Sidebar = ({ user }: SidebarProps) => {
             onClose={() => setIsAboutOpen(false)} 
             version={version} 
         />
+
       </div>
     </div>
   );

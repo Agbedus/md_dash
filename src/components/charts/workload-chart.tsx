@@ -19,12 +19,17 @@ export function WorkloadChart({ data }: { data: any[] }) {
           dataKey="name" 
           axisLine={false} 
           tickLine={false} 
-          tick={{ fill: '#71717a', fontSize: 10 }}
+          tick={{ fill: 'var(--chart-axis)', fontSize: 10 }}
         />
         <Tooltip 
-          contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-          itemStyle={{ color: '#fafafa', fontSize: '12px' }}
-          cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+          contentStyle={{ 
+            backgroundColor: 'var(--tooltip-bg)', 
+            border: '1px solid var(--tooltip-border)', 
+            borderRadius: '12px',
+            backdropFilter: 'blur(8px)',
+          }}
+          itemStyle={{ color: 'var(--foreground)', fontSize: '12px' }}
+          cursor={{ fill: 'var(--chart-grid)' }}
         />
         <Bar dataKey="tasks" radius={[6, 6, 0, 0]}>
           {data.map((entry, index) => (

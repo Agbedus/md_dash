@@ -56,23 +56,23 @@ function timeOffClasses(status?: string) {
 
 export default function DayGrid({ date, events = [], onSelectDateTime, onEventClick, onEventDelete }: DayGridProps) {
   return (
-    <div className="glass rounded-2xl overflow-hidden">
+    <div className="bg-card rounded-2xl overflow-hidden">
       <div className="overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[60px_1fr] border-b border-white/5 bg-white/[0.03]">
-          <div className="px-2 py-2 text-right pr-3 border-r border-white/5">&nbsp;</div>
+        <div className="grid grid-cols-[60px_1fr] border-b border-card-border bg-foreground/[0.05]">
+          <div className="px-2 py-2 text-right pr-3 border-r border-card-border">&nbsp;</div>
           <div className="px-3 py-2 text-center uppercase tracking-wide">
-            <div className="text-xs font-bold text-zinc-500 mb-1">{format(date, "EEE")}</div>
-            <div className="text-white text-sm font-medium">{format(date, "MMMM d, yyyy")}</div>
+            <div className="text-xs font-bold text-(--text-muted) mb-1">{format(date, "EEE")}</div>
+            <div className="text-foreground text-sm font-medium">{format(date, "MMMM d, yyyy")}</div>
           </div>
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-[60px_1fr] bg-zinc-950/30">
+        <div className="grid grid-cols-[60px_1fr] bg-background/50">
           {/* Time labels */}
-          <div className="flex flex-col border-r border-white/5 bg-white/[0.02]">
+          <div className="flex flex-col border-r border-card-border bg-foreground/[0.05]">
             {HOURS.map((h, i) => (
-              <div key={i} className="h-16 border-b border-white/5 text-[11px] text-right pr-2 pt-2 text-zinc-500 font-medium">
+              <div key={i} className="h-16 border-b border-card-border text-[11px] text-right pr-2 pt-2 text-(--text-muted) font-medium">
                 {format(h, "HH:00")}
               </div>
             ))}
@@ -100,7 +100,7 @@ export default function DayGrid({ date, events = [], onSelectDateTime, onEventCl
                   role="button"
                   tabIndex={0}
                   onClick={() => onSelectDateTime?.(slotStart)}
-                  className="h-16 border-b border-white/5 hover:bg-white/[0.02] text-left p-1 transition-colors group/slot overflow-hidden"
+                  className="h-16 border-b border-card-border hover:bg-foreground/[0.05] text-left p-1 transition-colors group/slot overflow-hidden"
                 >
                   {slotEvents.length > 0 && (
                     <div className="h-full w-full flex gap-1 overflow-x-auto no-scrollbar">
@@ -121,7 +121,7 @@ export default function DayGrid({ date, events = [], onSelectDateTime, onEventCl
                             <div
                                 role="button"
                                 onClick={(ev) => { ev.stopPropagation(); onEventClick?.(e); }}
-                                className={`h-full truncate text-[10px] px-2 py-1.5 rounded-xl border ${c.border} bg-white/[0.04] hover:bg-white/[0.08] flex flex-col justify-center gap-0.5 transition-all cursor-pointer w-full group/card active:scale-[0.98]`}
+                                className={`h-full truncate text-[10px] px-2 py-1.5 rounded-xl border ${c.border} bg-foreground/[0.05] hover:bg-foreground/[0.05] flex flex-col justify-center gap-0.5 transition-all cursor-pointer w-full group/card active:scale-[0.98]`}
                             >
                                 <div className="flex items-center gap-1.5">
                                     {isTask ? (
@@ -132,7 +132,7 @@ export default function DayGrid({ date, events = [], onSelectDateTime, onEventCl
                                     <span className={`font-black uppercase tracking-tight ${c.text} truncate mb-0.5`}>{e.title}</span>
                                 </div>
                                 {slotEvents.length <= 3 && (
-                                    <div className="flex items-center gap-2 opacity-40 text-[8px] font-bold uppercase tracking-wider text-zinc-400">
+                                    <div className="flex items-center gap-2 opacity-40 text-[8px] font-bold uppercase tracking-wider text-text-secondary">
                                         <FiClock className="w-2 h-2" /> {format(new Date(e.start), 'HH:mm')}
                                     </div>
                                 )}

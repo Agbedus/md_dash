@@ -170,7 +170,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
             case 'high': return 'text-[var(--pastel-rose)]';
             case 'medium': return 'text-[var(--pastel-amber)]';
             case 'low': return 'text-[var(--pastel-emerald)]';
-            default: return 'text-zinc-400';
+            default: return 'text-text-muted';
         }
     };
     
@@ -185,7 +185,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
     const noteTags = getNoteTags();
     
     const TypeIcon = noteTypeIcons[note.type] || FiFileText;
-    const typeIconColorClass = noteTypeColors[note.type] || 'text-zinc-400';
+    const typeIconColorClass = noteTypeColors[note.type] || 'text-text-muted';
 
     const renderContent = (content: string) => {
         const sanitized = sanitizeHtml(content);
@@ -216,19 +216,19 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
 
     if (viewMode === 'grid') {
         return (
-            <div className={`glass rounded-2xl p-5 flex flex-col h-full hover-glow transition-all duration-300 ${isExpanded ? 'ring-2 ring-purple-500/50' : ''}`}>
+            <div className={`bg-card rounded-[32px] p-6 flex flex-col h-full border border-card-border hover:border-foreground/10 transition-all duration-500 hover:scale-[1.01] ${isExpanded ? 'ring-2 ring-indigo-500/30' : ''}`}>
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                         <div className="flex items-center gap-2 min-w-0">
-                            <h3 className="font-bold text-lg text-white tracking-tight truncate">
+                            <h3 className="font-bold text-lg text-foreground tracking-tight truncate">
                                 <TextHighlight text={note.title} highlight={searchQuery} />
                             </h3>
                             {note.task_id && (
                                 <FiLayers className="text-purple-400 flex-shrink-0" size={16} title="Associated with a task" />
                             )}
                         </div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
-                            <FiClock size={10} />
+                        <div className="flex items-center gap-1.5 text-[11px] text-text-muted font-bold tracking-tight uppercase">
+                            <FiClock className="w-3 h-3" />
                             <span suppressHydrationWarning>{note.updated_at ? new Date(note.updated_at).toLocaleDateString() : note.created_at ? new Date(note.created_at).toLocaleDateString() : 'No date'}</span>
                         </div>
                     </div>
@@ -236,7 +236,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                         {onToggleExpand && (
                             <button 
                                 onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
-                                className="text-zinc-500 hover:text-white transition-colors"
+                                className="text-text-muted hover:text-foreground transition-colors"
                                 title={isExpanded ? "Collapse" : "Expand"}
                             >
                                 {isExpanded ? <FiMinimize2 size={16} /> : <FiMaximize2 size={16} />}
@@ -251,19 +251,19 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                 </div>
 
                 {/* content area now flexes and scrolls internally */}
-                <div className="ql-snow text-sm text-zinc-400 overflow-y-auto notes-scroll flex-1">
+                <div className="ql-snow text-sm text-text-secondary overflow-y-auto notes-scroll flex-1">
                     <div className="ql-editor" dangerouslySetInnerHTML={{ __html: hasMounted ? renderContent(note.content || '') : '' }} />
                 </div>
 
                 <div className="mt-4">
                     <div className="flex flex-wrap gap-2 mb-3">
                         {noteTags.map((tag: string) => (
-                            <span key={tag} className="px-2.5 py-1 bg-white/[0.03] text-zinc-300 text-xs rounded-full">{tag}</span>
+                            <span key={tag} className="px-2.5 py-1 bg-foreground/[0.03] text-text-secondary text-[10px] font-bold uppercase tracking-wider rounded-lg border border-card-border">{tag}</span>
                         ))}
                     </div>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1.5 px-2 py-1 bg-white/[0.03] rounded-lg border border-white/5">
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-foreground/[0.03] rounded-lg border border-card-border">
                                 {note.is_pinned === 1 && (
                                     <div className="text-blue-400" title="Pinned">
                                         <FiMapPin size={12} className="fill-current" />
@@ -306,7 +306,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                 </div>
                                 
                                 {( (note.shared_with && note.shared_with.length > 0) || isSharing ) && (
-                                    <div className="flex items-center gap-1 border-l border-white/5 pl-3">
+                                    <div className="flex items-center gap-1 border-l border-card-border pl-3">
                                         {note.shared_with && note.shared_with.length > 0 && (
                                             <UserAvatarGroup 
                                                 users={note.shared_with.map(u => typeof u === 'string' ? { name: u } : u)} 
@@ -332,7 +332,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                         left: `${ownerCoords.left}px`,
                                         transform: 'translate(-50%, -100%)',
                                     }}
-                                    className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                                    className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg  animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
                                 >
                                     <div className="flex items-center gap-2">
                                         <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">
@@ -358,13 +358,13 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                 <button 
                                     onClick={() => setShowUserDropdown(!showUserDropdown)} 
                                     disabled={isSharing}
-                                    className={`p-2 rounded-xl transition-all ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'}`}
+                                    className={`p-2 rounded-xl transition-all ${isSharing ? 'text-text-muted cursor-not-allowed' : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.06]'}`}
                                     title="Add User"
                                 >
                                     <FiUserPlus size={16} />
                                 </button>
                                 {showUserDropdown && availableUsers.length > 0 && (
-                                    <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 rounded-2xl shadow-2xl p-2 border border-white/5 z-50">
+                                    <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 rounded-2xl  p-2 border border-white/5 z-50">
                                         <select
                                             value={selectedUser}
                                             onChange={(e) => setSelectedUser(e.target.value)}
@@ -399,7 +399,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
         );
     }
 
-    const rowClasses = "border-b border-white/5";
+    const rowClasses = "border-b border-card-border";
 
     return (
         <tr className={rowClasses}>
@@ -487,7 +487,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                         <FiUserPlus size={16} />
                     </button>
                     {showUserDropdown && availableUsers.length > 0 && (
-                        <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800 rounded-lg shadow-xl p-2 border border-slate-700 z-50">
+                        <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800 rounded-lg  p-2 border border-slate-700 z-50">
                             <select
                                 value={selectedUser}
                                 onChange={(e) => setSelectedUser(e.target.value)}
@@ -526,7 +526,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                             left: `${ownerCoords.left}px`,
                             transform: 'translate(-50%, -100%)',
                         }}
-                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg  animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
                     >
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">

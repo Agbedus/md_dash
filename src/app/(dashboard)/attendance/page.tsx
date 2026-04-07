@@ -4,6 +4,7 @@ import {
     getMyAttendanceToday,
     getMyAttendanceHistory,
     getTeamAttendanceToday,
+    getTeamAttendanceHistory,
     getOfficeLocations,
 } from '@/app/(dashboard)/attendance/actions';
 import { getUsers } from '@/app/(dashboard)/users/actions';
@@ -25,6 +26,7 @@ export default async function AttendancePage() {
 
     // Conditionally fetch manager/admin data
     const teamToday = isManager ? await getTeamAttendanceToday() : [];
+    const teamHistory = isAdmin ? await getTeamAttendanceHistory() : [];
     const officeLocations = await getOfficeLocations();
 
     return (
@@ -33,6 +35,7 @@ export default async function AttendancePage() {
                 myToday={myToday}
                 myHistory={myHistory}
                 teamToday={teamToday}
+                teamHistory={teamHistory}
                 officeLocations={officeLocations}
                 users={users}
                 isManager={isManager}

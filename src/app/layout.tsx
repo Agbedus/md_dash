@@ -33,6 +33,8 @@ import { LocationProvider } from '@/providers/location-provider';
 import { getMyAttendanceToday } from '@/app/(dashboard)/attendance/actions';
 import { CookiePopup } from '@/components/ui/cookie-popup';
 
+import { ThemeProvider } from "@/providers/theme-provider";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -43,33 +45,52 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                let theme = localStorage.getItem('md_platform_theme_preference');
+                let supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (!theme || theme === 'system') {
+                  document.documentElement.classList.add(supportDarkMode ? 'dark' : 'light');
+                } else {
+                  document.documentElement.classList.add(theme);
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
-        <TaskTimerProvider>
-          <LocationProvider initialRecord={initialAttendance}>
-            <div className="min-h-screen bg-zinc-950">
-              {children}
-            </div>
-            <TaskTimerUI />
-            <CookiePopup />
-          </LocationProvider>
-        </TaskTimerProvider>
+        <ThemeProvider>
+          <TaskTimerProvider>
+            <LocationProvider initialRecord={initialAttendance}>
+              <div className="min-h-screen bg-background transition-colors duration-300">
+                {children}
+              </div>
+              <TaskTimerUI />
+              <CookiePopup />
+            </LocationProvider>
+          </TaskTimerProvider>
+        </ThemeProvider>
         <Toaster 
           position="bottom-right" 
           toastOptions={{
             duration: 4000,
             style: {
-              background: 'rgba(24, 24, 27, 0.9)',
-              color: '#a1a1aa', // light grey (zinc-400)
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'var(--toast-bg)',
+              color: 'var(--toast-text)',
+              border: '1px solid var(--toast-border)',
               backdropFilter: 'blur(12px)',
               padding: '12px 20px',
               fontSize: '11px',
               fontWeight: '500',
               borderRadius: '16px',
               maxWidth: '420px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
             },
             success: {
               iconTheme: {

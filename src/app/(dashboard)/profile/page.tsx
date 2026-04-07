@@ -66,15 +66,15 @@ export default async function ProfilePage() {
                             src={user.image} 
                             alt={user.name || 'User'} 
                             fill
-                            className="rounded-full object-cover border-4 border-white/5 shadow-2xl"
+                            className="rounded-full object-cover border-4 border-white/5 "
                         />
                     </div>
                     ) : (
-                    <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-4xl lg:text-5xl font-bold shadow-2xl border-4 border-white/5">
+                    <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-4xl lg:text-5xl font-bold  border-4 border-white/5">
                         {(user.name || user.email || '?').charAt(0).toUpperCase()}
                     </div>
                     )}
-                    <div className="absolute bottom-2 right-2 p-2 rounded-full bg-emerald-500 border-4 border-zinc-900 shadow-xl" />
+                    <div className="absolute bottom-2 right-2 p-2 rounded-full bg-emerald-500 border-4 border-zinc-900 " />
                 </div>
 
                 <h2 className="text-2xl lg:text-3xl font-bold text-white mb-1">{user.name || 'User'}</h2>
@@ -116,7 +116,7 @@ export default async function ProfilePage() {
                         <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400"><FiActivity /></div>
                         <span className="text-sm text-zinc-300">Google Calendar</span>
                     </div>
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 -[0_0_8px_rgba(16,185,129,0.5)]" />
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-white/5">
                     <div className="flex items-center gap-3">

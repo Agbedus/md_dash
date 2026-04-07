@@ -47,17 +47,17 @@ function Column({ col, items, users, user, projects, columns, onMove, onDelete, 
       data-column={col}
       className={`glass rounded-2xl p-4 flex flex-col transition-all duration-300 ${
         isOver
-          ? 'bg-white/[0.06] ring-2 ring-indigo-500/50 shadow-[0_0_30px_rgba(99,102,241,0.1)]'
+          ? 'bg-white/[0.06] ring-2 ring-indigo-500/50 -[0_0_30px_rgba(99,102,241,0.1)]'
           : 'bg-zinc-900/10'
       } ${flash ? 'ring-2 ring-emerald-500/50 bg-emerald-500/10' : ''}`}
     >
       <div className="flex items-center justify-between mb-6 px-1">
         <div className="flex items-center gap-3">
-          <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${
-            col === 'DONE' ? 'bg-[var(--pastel-emerald)] shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 
-            col === 'IN_PROGRESS' ? 'bg-[var(--pastel-blue)] shadow-[0_0_10px_rgba(59,130,246,0.3)]' : 
-            col === 'QA' ? 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.3)]' :
-            col === 'REVIEW' ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]' :
+          <div className={`w-2.5 h-2.5 rounded-full  ${
+            col === 'DONE' ? 'bg-[var(--pastel-emerald)] -[0_0_10px_rgba(16,185,129,0.3)]' : 
+            col === 'IN_PROGRESS' ? 'bg-[var(--pastel-blue)] -[0_0_10px_rgba(59,130,246,0.3)]' : 
+            col === 'QA' ? 'bg-purple-500 -[0_0_10px_rgba(168,85,247,0.3)]' :
+            col === 'REVIEW' ? 'bg-blue-500 -[0_0_10px_rgba(59,130,246,0.3)]' :
             'bg-zinc-500'
           }`} />
           <h3 className="text-[11px] font-medium text-white/50 uppercase tracking-wider">
@@ -80,7 +80,7 @@ function Column({ col, items, users, user, projects, columns, onMove, onDelete, 
           {(items ?? []).map((task) => (
             <div
               key={task.id}
-              className={`rounded-xl transition-all duration-300 ${highlightedIds[String(task.id)] ? 'ring-2 ring-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : ''}`}
+              className={`rounded-xl transition-all duration-300 ${highlightedIds[String(task.id)] ? 'ring-2 ring-emerald-500 -[0_0_20px_rgba(16,185,129,0.2)]' : ''}`}
             >
               <KanbanCard
                 task={task}

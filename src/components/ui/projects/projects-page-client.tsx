@@ -216,13 +216,13 @@ export default function ProjectsPageClient({
       {/* Header Section */}
       <div className="hidden lg:flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-10">
         <div>
-          <h1 className="text-4xl font-medium text-white mb-2 tracking-tight uppercase">Strategic Portfolio</h1>
-          <p className="text-zinc-500 text-sm font-bold uppercase tracking-wider">Global project coordination & intelligence hub.</p>
+          <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight uppercase">Strategic Portfolio</h1>
+          <p className="text-text-muted text-sm font-bold uppercase tracking-wider">Global project coordination & intelligence hub.</p>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 h-11 px-6 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 text-sm font-bold text-white transition-all duration-300 hover-scale"
+            className="flex items-center gap-2 h-11 px-6 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border hover:border-foreground/10 text-sm font-bold text-foreground transition-all duration-300 hover-scale"
           >
             <FiPlus className="w-4 h-4" />
             <span>Initialize Mission</span>
@@ -231,10 +231,10 @@ export default function ProjectsPageClient({
       </div>
 
       <div className="md:hidden flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold text-white uppercase tracking-tight">Projects</h1>
+          <h1 className="text-xl font-bold text-foreground uppercase tracking-tight">Projects</h1>
            <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 h-9 px-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 text-xs font-bold text-white transition-all"
+            className="flex items-center gap-2 h-9 px-4 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border text-xs font-bold text-foreground transition-all"
           >
             <FiPlus className="w-3.5 h-3.5" />
             <span>New</span>
@@ -282,9 +282,9 @@ export default function ProjectsPageClient({
       </div>
 
       <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <div className="lg:col-span-2 glass rounded-2xl p-6 border border-white/5 bg-zinc-900/10">
+          <div className="lg:col-span-2 bg-card rounded-[32px] p-6 border border-card-border">
               <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-sm font-medium text-white uppercase tracking-wider flex items-center gap-3">
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-3">
                       <FiPie className="text-indigo-400" />
                       Status Intelligence
                   </h3>
@@ -300,12 +300,12 @@ export default function ProjectsPageClient({
                           on_hold: 'bg-amber-500'
                       };
                       return (
-                          <div key={status} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-2 group/status">
+                          <div key={status} className="p-3 rounded-xl bg-foreground/[0.03] border border-card-border space-y-2 group/status">
                               <div className="flex items-center justify-between">
-                                  <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider group-hover/status:text-zinc-300 transition-colors">{status.replace('_', ' ')}</span>
-                                  <span className="text-xs font-medium text-white">{count}</span>
+                                  <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider group-hover/status:text-foreground transition-colors">{status.replace('_', ' ')}</span>
+                                  <span className="text-xs font-bold text-foreground">{count}</span>
                               </div>
-                              <div className="w-full h-1 bg-white/[0.03] rounded-full overflow-hidden">
+                              <div className="w-full h-1 bg-foreground/[0.06] rounded-full overflow-hidden">
                                   <div className={`h-full ${colors[status as keyof typeof colors]} transition-all duration-1000 relative`} style={{ width: `${percentage}%` }}>
                                       <div className="absolute inset-0 bg-white/20 blur-[2px]" />
                                   </div>
@@ -316,8 +316,8 @@ export default function ProjectsPageClient({
               </div>
           </div>
 
-          <div className="glass rounded-2xl p-6 border border-white/5 bg-zinc-900/10">
-              <h3 className="text-sm font-medium text-white uppercase tracking-wider flex items-center gap-3 mb-6">
+          <div className="bg-card rounded-[32px] p-6 border border-card-border">
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-3 mb-6">
                   <FiActivity className="text-rose-400" />
                   Tactical Priority
               </h3>
@@ -325,14 +325,14 @@ export default function ProjectsPageClient({
                   {projectsWithTasks.filter(p => p.priority === 'high').slice(0, 3).map(p => (
                       <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-rose-500/5 border border-rose-500/10">
                           <div className="flex flex-col">
-                              <span className="text-[11px] font-medium text-white uppercase tracking-tight truncate max-w-[120px]">{p.name}</span>
+                              <span className="text-[11px] font-bold text-foreground uppercase tracking-tight truncate max-w-[120px]">{p.name}</span>
                               <span className="text-[11px] font-bold text-rose-400 uppercase tracking-wider">{p.key} critical</span>
                           </div>
-                          <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider bg-white/[0.03] px-2 py-0.5 rounded border border-white/5">{p.status.replace('_', ' ')}</span>
+                          <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider bg-foreground/[0.03] px-2 py-0.5 rounded border border-card-border">{p.status.replace('_', ' ')}</span>
                       </div>
                   ))}
                   {projectsWithTasks.filter(p => p.priority === 'high').length === 0 && (
-                      <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider text-center py-4">No critical assets detected</p>
+                      <p className="text-[11px] font-bold text-text-muted/30 uppercase tracking-wider text-center py-4">No critical assets detected</p>
                   )}
               </div>
           </div>
@@ -341,45 +341,45 @@ export default function ProjectsPageClient({
       <div className="flex items-center justify-between gap-4 mb-6 lg:mb-10 overflow-x-auto pb-2 scrollbar-hide">
         <div className="flex items-center gap-2 lg:gap-4 w-full lg:w-auto">
           <div className="relative flex-1 min-w-[140px] max-w-sm group">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5"/>
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5"/>
             <input
               type="text"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 lg:h-11 pl-8 pr-4 bg-white/[0.03] border border-white/5 rounded-xl focus:outline-none focus:bg-white/[0.06] focus:border-white/5 text-white placeholder:text-zinc-600 transition-all text-xs lg:text-sm"
+              className="w-full h-9 lg:h-11 pl-8 pr-4 bg-foreground/[0.03] border border-card-border rounded-xl focus:outline-none focus:bg-foreground/[0.06] focus:border-card-border text-foreground placeholder:text-text-muted/50 transition-all text-xs lg:text-sm"
             />
           </div>
           
           <div className="relative group flex-shrink-0">
-             <div className="h-9 lg:h-11 w-9 lg:w-44 bg-white/[0.03] border border-white/5 rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden">
-                <FiFilter className="text-zinc-500 group-hover:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5 lg:absolute lg:left-3.5 lg:top-1/2 lg:-translate-y-1/2 lg:z-10" />
+             <div className="h-9 lg:h-11 w-9 lg:w-44 bg-foreground/[0.03] border border-card-border rounded-xl flex items-center justify-center lg:justify-start lg:pl-3 relative overflow-hidden focus-within:bg-foreground/[0.06]">
+                <FiFilter className="text-text-muted group-hover:text-[var(--pastel-indigo)] transition-colors w-3.5 h-3.5 lg:absolute lg:left-3.5 lg:top-1/2 lg:-translate-y-1/2 lg:z-10" />
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="absolute inset-0 opacity-0 lg:opacity-100 lg:static lg:bg-transparent lg:border-none lg:pl-10 lg:pr-4 lg:w-full lg:h-full text-zinc-400 cursor-pointer lg:text-[11px] lg:font-bold lg:uppercase lg:tracking-wider appearance-none"
+                    className="absolute inset-0 opacity-0 lg:opacity-100 lg:static lg:bg-transparent lg:border-none lg:pl-10 lg:pr-4 lg:w-full lg:h-full text-text-muted cursor-pointer lg:text-[11px] lg:font-bold lg:uppercase lg:tracking-wider appearance-none focus:outline-none"
                 >
-                    <option value="all" className="bg-zinc-900">All Status</option>
-                    <option value="planning" className="bg-zinc-900">Planning</option>
-                    <option value="in_progress" className="bg-zinc-900">In Progress</option>
-                    <option value="completed" className="bg-zinc-900">Completed</option>
-                    <option value="on_hold" className="bg-zinc-900">On Hold</option>
+                    <option value="all" className="bg-card">All Status</option>
+                    <option value="planning" className="bg-card">Planning</option>
+                    <option value="in_progress" className="bg-card">In Progress</option>
+                    <option value="completed" className="bg-card">Completed</option>
+                    <option value="on_hold" className="bg-card">On Hold</option>
                 </select>
              </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-1 bg-white/[0.03] p-1 rounded-xl border border-white/5 h-9 lg:h-11 flex-shrink-0 ml-auto">
+        <div className="flex items-center space-x-1 bg-foreground/[0.03] p-1 rounded-xl border border-card-border h-9 lg:h-11 flex-shrink-0 ml-auto">
           <button
             onClick={() => setViewMode('list')}
-            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'list' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'list' ? 'bg-card text-foreground border border-card-border shadow-sm' : 'text-text-muted hover:text-foreground'}`}
             title="Table view"
           >
             <FiList className="w-4 h-4 lg:w-5 lg:h-5"/>
           </button>
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-white/[0.06] text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-card text-foreground border border-card-border shadow-sm' : 'text-text-muted hover:text-foreground'}`}
             title="Grid view"
           >
             <FiGrid className="w-4 h-4 lg:w-5 lg:h-5"/>
@@ -432,7 +432,7 @@ export default function ProjectsPageClient({
 
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-white/5 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl">
+          <div className="bg-zinc-900 border border-white/5 rounded-2xl w-full max-w-5xl overflow-hidden ">
             <div className="p-6 border-b border-white/5 flex justify-between items-center">
               <h2 className="text-xl font-bold text-white">Create New Project</h2>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-zinc-400 hover:text-white">×</button>
@@ -445,7 +445,7 @@ export default function ProjectsPageClient({
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 transition-all shadow-lg shadow-black/20 backdrop-blur-md"
+                  className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 transition-all  -black/20 backdrop-blur-md"
                   title="Cancel"
                 >
                   <FiX className="w-5 h-5" />
@@ -453,7 +453,7 @@ export default function ProjectsPageClient({
                 <button
                   type="submit"
                   disabled={isCreating}
-                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all shadow-lg shadow-emerald-500/10 backdrop-blur-md disabled:opacity-50"
+                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all  -emerald-500/10 backdrop-blur-md disabled:opacity-50"
                   title="Create Project"
                 >
                   {isCreating ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400"></div> : <FiCheck className="w-5 h-5" />}
@@ -466,7 +466,7 @@ export default function ProjectsPageClient({
 
       {editingProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-white/5 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl">
+          <div className="bg-zinc-900 border border-white/5 rounded-2xl w-full max-w-5xl overflow-hidden ">
             <div className="p-6 border-b border-white/5 flex justify-between items-center">
               <h2 className="text-xl font-bold text-white">Edit Project</h2>
               <button onClick={() => setEditingProject(null)} className="text-zinc-400 hover:text-white">×</button>
@@ -479,7 +479,7 @@ export default function ProjectsPageClient({
                 <button
                   type="button"
                   onClick={() => setEditingProject(null)}
-                  className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 transition-all shadow-lg shadow-black/20 backdrop-blur-md"
+                  className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 transition-all  -black/20 backdrop-blur-md"
                   title="Cancel"
                 >
                   <FiX className="w-5 h-5" />
@@ -487,7 +487,7 @@ export default function ProjectsPageClient({
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all shadow-lg shadow-emerald-500/10 backdrop-blur-md disabled:opacity-50"
+                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all  -emerald-500/10 backdrop-blur-md disabled:opacity-50"
                   title="Save Changes"
                 >
                   {isUpdating ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400"></div> : <FiCheck className="w-5 h-5" />}
@@ -503,10 +503,10 @@ export default function ProjectsPageClient({
 
 function PortfolioStatCard({ icon: Icon, color, label, value, subValue, trend }: { icon: any, color: 'indigo' | 'emerald' | 'amber' | 'rose', label: string, value: string, subValue: string, trend?: number[] }) {
     const colors = {
-        indigo: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20 shadow-indigo-500/10',
-        emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 shadow-emerald-500/10',
-        amber: 'text-amber-400 bg-amber-500/10 border-amber-500/20 shadow-amber-500/10',
-        rose: 'text-rose-400 bg-rose-500/10 border-rose-500/20 shadow-rose-500/10',
+        indigo: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20 -indigo-500/10',
+        emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 -emerald-500/10',
+        amber: 'text-amber-400 bg-amber-500/10 border-amber-500/20 -amber-500/10',
+        rose: 'text-rose-400 bg-rose-500/10 border-rose-500/20 -rose-500/10',
     };
 
     const sparkColors = {
@@ -517,10 +517,10 @@ function PortfolioStatCard({ icon: Icon, color, label, value, subValue, trend }:
     };
 
     return (
-        <div className="glass rounded-xl lg:rounded-2xl p-3 lg:p-5 border border-white/5 bg-zinc-900/10 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500 flex-shrink-0 min-w-[140px] lg:min-w-0">
+        <div className="bg-card rounded-xl lg:rounded-[32px] p-3 lg:p-5 border border-card-border relative overflow-hidden group hover:scale-[1.02] hover:border-foreground/10 transition-all duration-500 flex-shrink-0 min-w-[140px] lg:min-w-0">
             <div className="flex flex-col gap-2 lg:gap-4 relative z-10 h-full justify-between">
                 <div className="flex justify-between items-start">
-                    <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl flex items-center justify-center border transition-all duration-500 relative group-hover:shadow-[0_0_15px_rgba(0,0,0,0.2)] ${colors[color]}`}>
+                    <div className={`w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl flex items-center justify-center border transition-all duration-500 relative ${colors[color]}`}>
                         <div className="absolute inset-0 rounded-lg lg:rounded-xl bg-current opacity-10 blur-sm group-hover:opacity-20 transition-opacity" />
                         <Icon className="w-3.5 h-3.5 lg:w-4 lg:h-4 relative z-10" />
                     </div>
@@ -536,10 +536,10 @@ function PortfolioStatCard({ icon: Icon, color, label, value, subValue, trend }:
                     )}
                 </div>
                 <div>
-                    <p className="text-[11px] lg:text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-0.5 lg:mb-1 truncate">{label}</p>
+                    <p className="text-[11px] lg:text-[11px] font-bold text-text-muted uppercase tracking-wider mb-0.5 lg:mb-1 truncate">{label}</p>
                     <div className="flex flex-col lg:flex-row lg:items-baseline gap-0.5 lg:gap-2">
-                        <span className="text-lg lg:text-xl font-medium font-numbers text-white uppercase tracking-tight">{value}</span>
-                        <span className="text-[11px] lg:text-[11px] font-bold text-zinc-600 uppercase tracking-wider truncate">{subValue}</span>
+                        <span className="text-lg lg:text-xl font-medium font-numbers text-foreground uppercase tracking-tight">{value}</span>
+                        <span className="text-[11px] lg:text-[11px] font-bold text-text-muted/50 uppercase tracking-wider truncate">{subValue}</span>
                     </div>
                 </div>
             </div>

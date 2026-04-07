@@ -46,8 +46,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   return (
     <div className="px-4 py-8 max-w-[1600px] mx-auto">
       <div className="mb-10">
-        <h1 className="text-2xl lg:text-4xl font-bold text-white mb-2 tracking-tight">{greeting}, {userName}</h1>
-        <p className="text-zinc-400 text-sm lg:text-lg">Here is a summary of your day.</p>
+        <h1 className="text-2xl lg:text-4xl font-bold text-foreground mb-2 tracking-tight">{greeting}, {userName}</h1>
+        <p className="text-(--text-muted) text-sm lg:text-lg font-bold uppercase tracking-tight">Operational Intelligence Dashboard</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

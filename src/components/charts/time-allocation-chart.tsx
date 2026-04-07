@@ -16,9 +16,10 @@ const TimeAllocationChart = ({ data }: { data: Array<{ name: string; value: numb
       <PieChart>
         <Tooltip
           contentStyle={{
-            backgroundColor: 'rgba(30, 41, 59, 0.9)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'var(--tooltip-bg)',
+            border: '1px solid var(--tooltip-border)',
             borderRadius: '0.75rem',
+            backdropFilter: 'blur(8px)',
           }}
         />
         <Legend wrapperStyle={{ fontSize: '0.875rem' }} />

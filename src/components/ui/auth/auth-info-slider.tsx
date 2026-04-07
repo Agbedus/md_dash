@@ -92,7 +92,7 @@ export default function AuthInfoSlider() {
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`h-2.5 rounded-full transition-all duration-500 hover:bg-white/30 ${
-              index === currentSlide ? 'w-16 bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'w-4 bg-white/[0.06]'
+              index === currentSlide ? 'w-16 bg-emerald-500 -[0_0_20px_rgba(16,185,129,0.4)]' : 'w-4 bg-white/[0.06]'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

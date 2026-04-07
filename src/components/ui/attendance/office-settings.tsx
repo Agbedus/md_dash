@@ -10,7 +10,7 @@ import dynamic from 'next/dynamic';
 
 const MapComponent = dynamic(() => import('./office-map'), {
     ssr: false,
-    loading: () => <div className="w-full h-full min-h-[400px] rounded-2xl bg-white/[0.02] border border-white/5 animate-pulse flex items-center justify-center p-8 text-center text-zinc-500 text-sm">Loading visualizer...</div>
+    loading: () => <div className="w-full h-full min-h-[400px] rounded-2xl bg-background/50 border border-card-border animate-pulse flex items-center justify-center p-8 text-center text-(--text-muted) text-sm">Loading visualizer...</div>
 });
 
 export default function OfficeSettings({ initialLocations }: { initialLocations: OfficeLocation[] }) {
@@ -105,158 +105,152 @@ export default function OfficeSettings({ initialLocations }: { initialLocations:
         setIsSaving(false);
     };
 
-    const inputClass = "w-full px-3 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white text-sm focus:outline-none focus:border-sky-500/50 transition-colors";
-    const labelClass = "block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5";
+    const inputClass = "w-full px-3 py-1.5 rounded-lg bg-background/50 border border-card-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50 transition-all placeholder:text-text-muted/50";
+    const labelClass = "block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-0.5";
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {/* Sidebar */}
-            <div className="glass p-3 rounded-2xl border border-white/5 space-y-1.5 h-fit">
-                <h3 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-2 px-2">Offices</h3>
+            <div className="glass p-3 rounded-2xl border border-card-border space-y-2 h-fit">
+                <div className="flex items-center gap-2 px-2 mb-2">
+                    <FiMap className="text-emerald-500 w-3.5 h-3.5" />
+                    <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Nodes</h3>
+                </div>
                 
-                {locations.map(loc => (
-                    <button
-                        key={loc.id}
-                        onClick={() => handleSelect(loc.id)}
-                        className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-left transition-all ${
-                            selectedId === loc.id 
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                                : 'text-zinc-500 hover:text-white hover:bg-white/[0.04] border border-transparent'
-                        }`}
-                    >
-                        <FiMapPin className="text-xs shrink-0" />
-                        <span className="text-xs font-semibold truncate">{loc.name}</span>
-                    </button>
-                ))}
+                <div className="space-y-1">
+                    {locations.map(loc => (
+                        <button
+                            key={loc.id}
+                            onClick={() => handleSelect(loc.id)}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-all ${
+                                selectedId === loc.id 
+                                    ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' 
+                                    : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.05] border border-transparent'
+                            }`}
+                        >
+                            <FiMapPin className="w-3.5 h-3.5 shrink-0" />
+                            <span className="text-xs font-bold truncate">{loc.name}</span>
+                        </button>
+                    ))}
+                </div>
 
-                <div className="pt-2 mt-2 border-t border-white/5 pl-px pr-px">
+                <div className="pt-2 mt-2 border-t border-card-border">
                     <button
                         onClick={() => handleSelect('new')}
-                        className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                        className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all ${
                             selectedId === 'new'
-                                ? 'bg-white/[0.08] text-white border border-white/10'
-                                : 'text-zinc-400 hover:text-white bg-white/[0.02] border border-dashed border-white/10 hover:border-white/20'
+                                ? 'bg-foreground/[0.05] text-foreground border border-card-border'
+                                : 'text-text-muted hover:text-foreground bg-foreground/[0.02] border border-dashed border-card-border hover:border-foreground/20'
                         }`}
                     >
-                        <FiPlus className="text-sm" />
-                        Add New Office
+                        <FiPlus className="w-3.5 h-3.5" />
+                        New Node
                     </button>
                 </div>
             </div>
 
             {/* Content Area */}
-            <div className="md:col-span-3">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                    {/* Left side: Forms / Policy */}
-                    <div className="space-y-4">
-                        {/* Tabs for Details vs Policy */}
-                        {selectedId !== 'new' && (
-                            <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/5 w-fit">
-                                <button
-                                    onClick={() => setActiveRightTab('details')}
-                                    className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-                                        activeRightTab === 'details'
-                                            ? 'bg-white/[0.08] text-white border border-white/10'
-                                            : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
-                                    }`}
-                                >
-                                    Office Details
-                                </button>
-                                <button
-                                    onClick={() => setActiveRightTab('policy')}
-                                    className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-                                        activeRightTab === 'policy'
-                                            ? 'bg-white/[0.08] text-white border border-white/10'
-                                            : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
-                                    }`}
-                                >
-                                    Attendance Policy
-                                </button>
-                            </div>
-                        )}
+            <div className="md:col-span-3 space-y-6">
+                {/* Tabs for Details vs Policy */}
+                {selectedId !== 'new' && (
+                    <div className="flex gap-1 p-1 rounded-xl bg-card border border-card-border w-fit backdrop-blur-md">
+                        <button
+                            onClick={() => setActiveRightTab('details')}
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+                                activeRightTab === 'details'
+                                    ? 'bg-foreground/[0.08] text-foreground border border-card-border'
+                                    : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.03]'
+                            }`}
+                        >
+                            Configuration
+                        </button>
+                        <button
+                            onClick={() => setActiveRightTab('policy')}
+                            className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+                                activeRightTab === 'policy'
+                                    ? 'bg-foreground/[0.08] text-foreground border border-card-border'
+                                    : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.03]'
+                            }`}
+                        >
+                            Operational Policy
+                        </button>
+                    </div>
+                )}
 
-                        {activeRightTab === 'details' && (
-                            <div className="glass p-4 rounded-2xl border border-white/5">
-                                <h3 className="text-base font-bold text-white flex items-center gap-2 mb-4">
-                                    <FiMap className="text-emerald-400" />
-                                    {selectedId === 'new' ? 'Create Office Location' : 'Office Details'}
+                {activeRightTab === 'details' && (
+                    <div className="glass p-6 rounded-[32px] border border-card-border space-y-6">
+                        <div className="flex items-center gap-3 border-b border-card-border pb-4">
+                            <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                <FiMapPin className="w-4 h-4 text-emerald-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
+                                    {selectedId === 'new' ? 'Provision New Node' : 'Node Configuration'}
                                 </h3>
-                                
-                                <form onSubmit={handleSaveOffice} className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-3">
-                                        <div>
-                                            <label className={labelClass}>Office Name</label>
-                                            <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={inputClass} placeholder="Headquarters" required />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <label className={labelClass}>Latitude</label>
-                                                <input type="number" step="any" value={form.latitude} onChange={e => setForm(f => ({ ...f, latitude: e.target.value }))} className={inputClass} placeholder="5.6037" required />
-                                            </div>
-                                            <div>
-                                                <label className={labelClass}>Longitude</label>
-                                                <input type="number" step="any" value={form.longitude} onChange={e => setForm(f => ({ ...f, longitude: e.target.value }))} className={inputClass} placeholder="-0.1870" required />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-3 gap-3 border-t border-white/5 pt-3 mt-3">
-                                        <div>
-                                            <label className={labelClass}>In Office (m)</label>
-                                            <input type="number" value={form.in_office_radius_meters} onChange={e => setForm(f => ({ ...f, in_office_radius_meters: e.target.value }))} className={inputClass} required />
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>Temp Out (m)</label>
-                                            <input type="number" value={form.temporarily_out_radius_meters} onChange={e => setForm(f => ({ ...f, temporarily_out_radius_meters: e.target.value }))} className={inputClass} required />
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>Out Of Office (m)</label>
-                                            <input type="number" value={form.out_of_office_radius_meters} onChange={e => setForm(f => ({ ...f, out_of_office_radius_meters: e.target.value }))} className={inputClass} required />
-                                        </div>
-                                    </div>
-
-                                    <div className="pt-2 flex items-center gap-3">
-                                        <button
-                                            type="submit"
-                                            disabled={isSaving}
-                                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all disabled:opacity-50"
-                                        >
-                                            <FiCheck className="text-sm" />
-                                            {isSaving ? 'Saving...' : 'Save Office Details'}
-                                        </button>
-                                        {selectedId === 'new' && locations.length > 0 && (
-                                            <button
-                                                type="button"
-                                                onClick={() => handleSelect(locations[0].id)}
-                                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-all"
-                                            >
-                                                <FiX className="text-sm" />
-                                                Cancel
-                                            </button>
-                                        )}
-                                    </div>
-                                </form>
+                                <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-0.5">
+                                    Define geographical boundaries and naming.
+                                </p>
                             </div>
-                        )}
+                        </div>
+                        
+                        <form onSubmit={handleSaveOffice} className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="md:col-span-2">
+                                    <label className={labelClass}>Office Name</label>
+                                    <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={inputClass} placeholder="Headquarters" required />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Latitude</label>
+                                    <input type="number" step="any" value={form.latitude} onChange={e => setForm(f => ({ ...f, latitude: e.target.value }))} className={inputClass} placeholder="5.6037" required />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Longitude</label>
+                                    <input type="number" step="any" value={form.longitude} onChange={e => setForm(f => ({ ...f, longitude: e.target.value }))} className={inputClass} placeholder="-0.1870" required />
+                                </div>
+                            </div>
 
-                        {/* Policy Editor */}
-                        {activeRightTab === 'policy' && selectedId !== 'new' && (
-                            <PolicyEditor officeLocationId={selectedId} />
-                        )}
-                    </div>
+                            <div className="grid grid-cols-3 gap-4 p-4 bg-foreground/[0.02] rounded-2xl border border-card-border">
+                                <div>
+                                    <label className={labelClass}>Strict (m)</label>
+                                    <input type="number" value={form.in_office_radius_meters} onChange={e => setForm(f => ({ ...f, in_office_radius_meters: e.target.value }))} className={`${inputClass} font-numbers`} required />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Grace (m)</label>
+                                    <input type="number" value={form.temporarily_out_radius_meters} onChange={e => setForm(f => ({ ...f, temporarily_out_radius_meters: e.target.value }))} className={`${inputClass} font-numbers`} required />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>Exclusion (m)</label>
+                                    <input type="number" value={form.out_of_office_radius_meters} onChange={e => setForm(f => ({ ...f, out_of_office_radius_meters: e.target.value }))} className={`${inputClass} font-numbers`} required />
+                                </div>
+                            </div>
 
-                    {/* Right side: Map Visualization */}
-                    <div className="h-full min-h-[400px]">
-                        <MapComponent 
-                            latitude={parseFloat(form.latitude) || 0}
-                            longitude={parseFloat(form.longitude) || 0}
-                            inOfficeRadius={parseInt(form.in_office_radius_meters) || 0}
-                            temporarilyOutRadius={parseInt(form.temporarily_out_radius_meters) || 0}
-                            outOfOfficeRadius={parseInt(form.out_of_office_radius_meters) || 0}
-                            name={form.name}
-                        />
+                            <div className="pt-2 flex items-center gap-3">
+                                <button
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className="flex items-center gap-2 px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all disabled:opacity-50"
+                                >
+                                    <FiCheck className="w-3.5 h-3.5" />
+                                    {isSaving ? 'Synchronizing...' : 'Save Changes'}
+                                </button>
+                                {selectedId === 'new' && locations.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSelect(locations[0].id)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-foreground hover:bg-foreground/[0.05] transition-all"
+                                    >
+                                        <FiX className="w-3.5 h-3.5" />
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
+                        </form>
                     </div>
-                </div>
+                )}
+
+                {activeRightTab === 'policy' && selectedId !== 'new' && (
+                    <PolicyEditor officeLocationId={selectedId} />
+                )}
             </div>
         </div>
     );

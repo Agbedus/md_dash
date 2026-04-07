@@ -15,14 +15,14 @@ const VelocityChart = ({ data }: { data: Array<{ date: string; count: number }> 
         </defs>
         <XAxis 
           dataKey="date" 
-          stroke="#71717a" 
+          stroke="var(--chart-axis)" 
           fontSize={9} 
           tickLine={false} 
           axisLine={false}
           interval="preserveStartEnd"
         />
         <YAxis 
-          stroke="#71717a" 
+          stroke="var(--chart-axis)" 
           fontSize={9} 
           tickLine={false} 
           axisLine={false}
@@ -30,12 +30,13 @@ const VelocityChart = ({ data }: { data: Array<{ date: string; count: number }> 
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'var(--tooltip-bg)',
+            border: '1px solid var(--tooltip-border)',
             borderRadius: '0.75rem',
-            fontSize: '11px'
+            fontSize: '11px',
+            backdropFilter: 'blur(8px)',
           }}
-          labelStyle={{ color: '#94a3b8', fontSize: '10px' }}
+          labelStyle={{ color: 'var(--chart-axis)', fontSize: '10px' }}
           formatter={(value: any) => [`${value} tasks`, 'Closed']}
         />
         <Area 

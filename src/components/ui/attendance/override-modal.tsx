@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import type { AttendanceRecord } from '@/types/attendance';
 import { FiX, FiClock, FiCheck, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import { toast } from '@/lib/toast';
+import { CustomTimePicker } from '@/components/ui/inputs/custom-time-picker';
 
 interface Props {
     record: AttendanceRecord;
@@ -47,67 +48,65 @@ export default function OverrideModal({ record, onClose, onOverride }: Props) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative glass p-6 rounded-2xl border border-white/10 w-full max-w-md mx-4 shadow-2xl">
-                <div className="flex items-center justify-between mb-6">
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+            <div className="relative w-full md:max-w-md bg-card/95 backdrop-blur-2xl border border-card-border rounded-t-2xl md:rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-3 border-b border-card-border bg-foreground/[0.03]">
                     <div>
-                        <h3 className="text-lg font-bold text-white">Override Attendance</h3>
-                        <p className="text-xs text-zinc-500 mt-0.5">
-                            {record.userName || 'User'} · {dateSource ? new Date(dateSource + (dateSource.includes('T') ? '' : 'T00:00:00')).toLocaleDateString() : 'Today'}
+                        <h3 className="text-sm font-bold text-foreground tracking-tight">Manual Override</h3>
+                        <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-0.5">
+                            {record.userName || 'User'} · {dateSource ? new Date(dateSource + (dateSource.includes('T') ? '' : 'T00:00:00')).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Today'}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all"
+                        className="p-1.5 rounded-lg text-text-muted hover:text-foreground hover:bg-foreground/[0.06] transition-all"
                     >
-                        <FiX />
+                        <FiX className="w-4 h-4" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                        <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                            <FiClock className="inline mr-1" />
-                            Clock In Time
-                        </label>
-                        <input
-                            type="time"
-                            value={clockIn}
-                            onChange={e => setClockIn(e.target.value)}
-                            className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-sm focus:outline-none focus:border-sky-500/50 transition-colors"
-                        />
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                    <div className="grid grid-cols-1 gap-5">
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest ml-1">
+                                <FiClock className="inline mr-1.5 text-indigo-400" />
+                                Clock In Time
+                            </label>
+                            <CustomTimePicker
+                                value={clockIn}
+                                onChange={setClockIn}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest ml-1">
+                                <FiClock className="inline mr-1.5 text-rose-400" />
+                                Clock Out Time
+                            </label>
+                            <CustomTimePicker
+                                value={clockOut}
+                                onChange={setClockOut}
+                            />
+                        </div>
                     </div>
 
-                    <div>
-                        <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-                            <FiClock className="inline mr-1" />
-                            Clock Out Time
-                        </label>
-                        <input
-                            type="time"
-                            value={clockOut}
-                            onChange={e => setClockOut(e.target.value)}
-                            className="w-full px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-sm focus:outline-none focus:border-sky-500/50 transition-colors"
-                        />
-                    </div>
-
-                    <div className="flex gap-3 pt-2">
+                    <div className="flex items-center gap-3 pt-4 border-t border-card-border">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-400 bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all"
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-text-muted bg-foreground/[0.03] border border-card-border hover:bg-foreground/[0.06] hover:text-foreground transition-all"
                         >
-                            <FiX className="text-sm" />
-                            Cancel
+                            Terminate
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all disabled:opacity-50"
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all disabled:opacity-50"
                         >
-                            <FiCheck className="text-sm" />
-                            {isSubmitting ? 'Saving...' : 'Apply Override'}
+                            <FiCheck className="w-4 h-4" />
+                            {isSubmitting ? 'Syncing...' : 'Commit'}
                         </button>
                     </div>
                 </form>

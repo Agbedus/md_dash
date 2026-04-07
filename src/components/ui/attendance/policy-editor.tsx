@@ -5,6 +5,7 @@ import type { OfficeLocation, AttendancePolicy } from '@/types/attendance';
 import { getAttendancePolicy, updateAttendancePolicy } from '@/app/(dashboard)/attendance/actions';
 import { FiSettings, FiCheck } from 'react-icons/fi';
 import { toast } from '@/lib/toast';
+import { CustomTimePicker } from '@/components/ui/inputs/custom-time-picker';
 
 export default function PolicyEditor({ officeLocationId }: { officeLocationId: number }) {
     const [policy, setPolicy] = useState<AttendancePolicy | null>(null);
@@ -59,8 +60,8 @@ export default function PolicyEditor({ officeLocationId }: { officeLocationId: n
         setIsSaving(false);
     };
 
-    const inputClass = "w-full px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-white text-sm focus:outline-none focus:border-sky-500/50 transition-colors";
-    const labelClass = "block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5";
+    const inputClass = "w-full px-3 py-1.5 rounded-lg bg-foreground/[0.03] border border-card-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50 transition-all font-numbers placeholder:text-text-muted/50";
+    const labelClass = "block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-0.5";
 
     // Helper to strip :SS for HTML time input
     const toTimeValue = (val: string | null) => val ? val.substring(0, 5) : '';
@@ -68,155 +69,155 @@ export default function PolicyEditor({ officeLocationId }: { officeLocationId: n
     const fromTimeValue = (val: string) => `${val}:00`;
 
     return (
-        <div className="glass p-4 rounded-2xl border border-white/5">
-            <div className="flex items-center justify-between mb-4">
+        <div className="glass p-6 rounded-[32px] border border-card-border space-y-6">
+            <div className="flex items-center gap-3 border-b border-card-border pb-4">
+                <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                    <FiSettings className="w-4 h-4 text-indigo-400" />
+                </div>
                 <div>
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
-                        <FiSettings className="text-emerald-400" />
-                        Attendance Policy
-                    </h3>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">Configure operational windows and grace periods</p>
+                    <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Operational Policy</h3>
+                    <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest mt-0.5">Automations & Grace Thresholds</p>
                 </div>
             </div>
 
             {isPending ? (
                 <div className="space-y-4">
                     {[...Array(3)].map((_, i) => (
-                        <div key={i} className="h-10 bg-white/[0.03] rounded-xl animate-pulse" />
+                        <div key={i} className="h-12 bg-foreground/[0.02] rounded-2xl animate-pulse border border-card-border" />
                     ))}
                 </div>
             ) : (
-                <div className="space-y-5">
+                <div className="space-y-6">
                     {/* Automation Toggles */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex items-center justify-between p-4 rounded-2xl bg-foreground/[0.02] border border-card-border">
                             <div>
-                                <p className="text-sm font-medium text-white leading-tight">Auto Clock-In</p>
-                                <p className="text-[10px] text-zinc-600 mt-0.5">Automatic trigger</p>
+                                <p className="text-[10px] font-bold text-foreground uppercase tracking-wider">Auto Clock-In</p>
+                                <p className="text-[9px] text-text-muted font-bold uppercase tracking-tight mt-0.5 italic">Geofence Trigger</p>
                             </div>
                             <button
                                 onClick={() => setForm(f => ({ ...f, auto_clock_in: !f.auto_clock_in }))}
-                                className={`relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ${form.auto_clock_in ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                                className={`relative w-10 h-5 rounded-full transition-all duration-300 shrink-0 border ${form.auto_clock_in ? 'bg-emerald-500/20 border-emerald-500/50' : 'bg-input-bg border-card-border'}`}
                             >
-                                <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 ${form.auto_clock_in ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full transition-all duration-300 ${form.auto_clock_in ? 'translate-x-5 bg-emerald-400 -[0_0_10px_rgba(52,211,153,0.5)]' : 'bg-text-muted'}`} />
                             </button>
                         </div>
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                        <div className="flex items-center justify-between p-4 rounded-2xl bg-foreground/[0.02] border border-card-border">
                             <div>
-                                <p className="text-sm font-medium text-white leading-tight">Auto Clock-Out</p>
-                                <p className="text-[10px] text-zinc-600 mt-0.5">Automatic trigger</p>
+                                <p className="text-[10px] font-bold text-foreground uppercase tracking-wider">Auto Clock-Out</p>
+                                <p className="text-[9px] text-text-muted font-bold uppercase tracking-tight mt-0.5 italic">Geofence Trigger</p>
                             </div>
                             <button
                                 onClick={() => setForm(f => ({ ...f, auto_clock_out: !f.auto_clock_out }))}
-                                className={`relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ${form.auto_clock_out ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                                className={`relative w-10 h-5 rounded-full transition-all duration-300 shrink-0 border ${form.auto_clock_out ? 'bg-emerald-500/20 border-emerald-500/50' : 'bg-input-bg border-card-border'}`}
                             >
-                                <div className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200 ${form.auto_clock_out ? 'translate-x-5' : ''}`} />
+                                <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full transition-all duration-300 ${form.auto_clock_out ? 'translate-x-5 bg-emerald-400 -[0_0_10px_rgba(52,211,153,0.5)]' : 'bg-text-muted'}`} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Check-in Windows */}
-                    <div className="space-y-3">
-                        <h4 className="text-[11px] font-bold text-emerald-400/80 uppercase tracking-widest pl-1">Check-in Window</h4>
-                        <div className="grid grid-cols-2 gap-3 bg-white/[0.02] p-3 rounded-xl border border-white/5">
-                            <div>
-                                <label className={labelClass}>Window Opens</label>
-                                <input
-                                    type="time"
-                                    value={toTimeValue(form.check_in_open_time)}
-                                    onChange={e => setForm(f => ({ ...f, check_in_open_time: fromTimeValue(e.target.value) }))}
-                                    className={inputClass}
-                                />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Window Closes</label>
-                                <input
-                                    type="time"
-                                    value={toTimeValue(form.check_in_close_time)}
-                                    onChange={e => setForm(f => ({ ...f, check_in_close_time: fromTimeValue(e.target.value) }))}
-                                    className={inputClass}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Work Hours & Auto Clock-out */}
-                    <div className="space-y-3">
-                        <h4 className="text-[11px] font-bold text-emerald-400/80 uppercase tracking-widest pl-1">Workday & Automation</h4>
-                        <div className="grid grid-cols-3 gap-3 bg-white/[0.02] p-3 rounded-xl border border-white/5">
-                            <div>
-                                <label className={labelClass}>Work Start</label>
-                                <input
-                                    type="time"
-                                    value={toTimeValue(form.work_start_time)}
-                                    onChange={e => setForm(f => ({ ...f, work_start_time: fromTimeValue(e.target.value) }))}
-                                    className={inputClass}
-                                />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Work End</label>
-                                <input
-                                    type="time"
-                                    value={toTimeValue(form.work_end_time)}
-                                    onChange={e => setForm(f => ({ ...f, work_end_time: fromTimeValue(e.target.value) }))}
-                                    className={inputClass}
-                                />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Auto Clock-Out Time</label>
-                                <input
-                                    type="time"
-                                    value={toTimeValue(form.auto_clock_out_time)}
-                                    onChange={e => setForm(f => ({ ...f, auto_clock_out_time: fromTimeValue(e.target.value) }))}
-                                    className={inputClass}
-                                />
+                    {/* Windows & Thresholds */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                            <h4 className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                                <div className="w-1 h-1 rounded-full bg-indigo-500" />
+                                Synchronized Windows
+                            </h4>
+                            <div className="p-4 rounded-2xl bg-foreground/[0.02] border border-card-border space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className={labelClass}>Check-in Open</label>
+                                        <CustomTimePicker
+                                            value={toTimeValue(form.check_in_open_time)}
+                                            onChange={val => setForm(f => ({ ...f, check_in_open_time: fromTimeValue(val) }))}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Check-in Close</label>
+                                        <CustomTimePicker
+                                            value={toTimeValue(form.check_in_close_time)}
+                                            onChange={val => setForm(f => ({ ...f, check_in_close_time: fromTimeValue(val) }))}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className={labelClass}>Shift Start</label>
+                                        <CustomTimePicker
+                                            value={toTimeValue(form.work_start_time)}
+                                            onChange={val => setForm(f => ({ ...f, work_start_time: fromTimeValue(val) }))}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Shift End</label>
+                                        <CustomTimePicker
+                                            value={toTimeValue(form.work_end_time)}
+                                            onChange={val => setForm(f => ({ ...f, work_end_time: fromTimeValue(val) }))}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Grace Periods */}
-                    <div className="space-y-3">
-                        <h4 className="text-[11px] font-bold text-emerald-400/80 uppercase tracking-widest pl-1">Grace Periods (Minutes)</h4>
-                        <div className="grid grid-cols-3 gap-3 bg-white/[0.02] p-3 rounded-xl border border-white/5">
-                            <div>
-                                <label className={labelClass}>Temp Out</label>
-                                <input
-                                    type="number"
-                                    value={form.temporarily_out_grace_minutes}
-                                    onChange={e => setForm(f => ({ ...f, temporarily_out_grace_minutes: parseInt(e.target.value) || 0 }))}
-                                    className={inputClass}
-                                />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Out Of Office</label>
-                                <input
-                                    type="number"
-                                    value={form.out_of_office_grace_minutes}
-                                    onChange={e => setForm(f => ({ ...f, out_of_office_grace_minutes: parseInt(e.target.value) || 0 }))}
-                                    className={inputClass}
-                                />
-                            </div>
-                            <div>
-                                <label className={labelClass}>Return Confirm</label>
-                                <input
-                                    type="number"
-                                    value={form.return_to_office_confirmation_minutes}
-                                    onChange={e => setForm(f => ({ ...f, return_to_office_confirmation_minutes: parseInt(e.target.value) || 0 }))}
-                                    className={inputClass}
-                                />
+                        <div className="space-y-4">
+                            <h4 className="text-[9px] font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                                <div className="w-1 h-1 rounded-full bg-amber-500" />
+                                Grace Thresholds (Min)
+                            </h4>
+                            <div className="p-4 rounded-2xl bg-foreground/[0.02] border border-card-border space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className={labelClass}>Temp. Out</label>
+                                        <input
+                                            type="number"
+                                            value={form.temporarily_out_grace_minutes}
+                                            onChange={e => setForm(f => ({ ...f, temporarily_out_grace_minutes: parseInt(e.target.value) || 0 }))}
+                                            className={inputClass}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Exclusion</label>
+                                        <input
+                                            type="number"
+                                            value={form.out_of_office_grace_minutes}
+                                            onChange={e => setForm(f => ({ ...f, out_of_office_grace_minutes: parseInt(e.target.value) || 0 }))}
+                                            className={inputClass}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className={labelClass}>Return Pulse</label>
+                                        <input
+                                            type="number"
+                                            value={form.return_to_office_confirmation_minutes}
+                                            onChange={e => setForm(f => ({ ...f, return_to_office_confirmation_minutes: parseInt(e.target.value) || 0 }))}
+                                            className={inputClass}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Auto-Out</label>
+                                        <CustomTimePicker
+                                            value={toTimeValue(form.auto_clock_out_time)}
+                                            onChange={val => setForm(f => ({ ...f, auto_clock_out_time: fromTimeValue(val) }))}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Save */}
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-white bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 transition-all disabled:opacity-50"
-                    >
-                        <FiCheck className="text-sm" />
-                        {isSaving ? 'Saving...' : 'Update Policy'}
-                    </button>
+                    <div className="pt-2">
+                        <button
+                            onClick={handleSave}
+                            disabled={isSaving}
+                            className="flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all disabled:opacity-50"
+                        >
+                            <FiCheck className="w-3.5 h-3.5" />
+                            {isSaving ? 'Synchronizing...' : 'Commit Policy'}
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

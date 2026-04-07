@@ -187,7 +187,7 @@ export function Combobox({
               left: `${coords.left}px`,
               width: `${coords.width}px`,
             }}
-            className={`z-[9999] bg-zinc-900 border border-white/5 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${
+            className={`z-[9999] bg-zinc-900 border border-white/5 rounded-xl  overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${
               openUpward ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'
             }`}
           >

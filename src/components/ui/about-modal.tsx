@@ -11,92 +11,101 @@ interface AboutModalProps {
     version: string;
 }
 
+import { Portal } from "./portal";
+
 export function AboutModal({ isOpen, onClose, version }: AboutModalProps) {
-    if (!isOpen) return null;
-
     return (
-        <AnimatePresence>
-            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={onClose}
-                    className="absolute inset-0 bg-zinc-950/80 backdrop-blur-md"
-                />
-                
-                <motion.div
-                    initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                    className="relative w-full max-w-lg bg-zinc-900 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl"
-                >
-                    
-                    <button
-                        onClick={onClose}
-                        className="absolute top-6 right-6 p-2 rounded-xl hover:bg-white/[0.03] text-zinc-500 hover:text-white transition-all z-20"
-                    >
-                        <FiX className="w-5 h-5" />
-                    </button>
+        <Portal>
+            <AnimatePresence mode="wait">
+                {isOpen && (
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={onClose}
+                            className="absolute inset-0 bg-background/80 backdrop-blur-xl"
+                        />
+                        
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative w-full max-w-xl bg-card border border-card-border rounded-[3rem] overflow-hidden shadow-2xl shadow-black/50"
+                        >
+                            <button
+                                onClick={onClose}
+                                className="absolute top-8 right-8 p-2 rounded-2xl hover:bg-foreground/[0.05] text-text-muted hover:text-foreground transition-all z-20"
+                            >
+                                <FiX className="w-5 h-5" />
+                            </button>
 
-                    <div className="p-8 lg:p-10 text-center space-y-8">
-                        <div className="space-y-4">
-                            <div className="mx-auto w-24 h-24 rounded-3xl bg-white/[0.03] flex items-center justify-center border border-white/5">
-                                <Image 
-                                    src="/logo.svg" 
-                                    alt="MD Logo" 
-                                    width={64} 
-                                    height={64} 
-                                    className="w-12 h-12 object-contain"
-                                />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-medium text-white uppercase tracking-tight">MD Platform</h2>
-                                <div className="flex items-center justify-center gap-2 mt-3">
-                                    <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">Version</span>
-                                    <span className="px-2 py-0.5 rounded-full bg-indigo-500 text-white text-[11px] font-medium uppercase tracking-wider">{version}</span>
-                                    <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[11px] font-medium uppercase tracking-wider">Beta</span>
+                            <div className="p-10 lg:p-12 text-center space-y-10">
+                                <div className="space-y-6">
+                                    <div className="mx-auto w-28 h-28 rounded-[2rem] bg-foreground/[0.03] flex items-center justify-center border border-card-border relative group">
+                                        <div className="absolute inset-0 bg-indigo-500/10 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <Image 
+                                            src="/logo.svg" 
+                                            alt="MD Logo" 
+                                            width={72} 
+                                            height={72} 
+                                            className="w-14 h-14 object-contain relative z-10"
+                                        />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-3xl font-black text-foreground uppercase tracking-tight">MD Platform</h2>
+                                        <div className="flex items-center justify-center gap-2 mt-4 font-numbers">
+                                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted/50">Core Version</span>
+                                            <span className="px-3 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider">{version}</span>
+                                            <span className="px-3 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-black uppercase tracking-wider">Operational</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p className="text-text-muted text-base leading-relaxed max-w-md mx-auto font-medium">
+                                    A bespoke, secure, and intelligent productivity ecosystem designed for high-performance teams and strategic maneuvers.
+                                </p>
+
+                                <div className="grid grid-cols-3 gap-6 pt-2">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-14 h-14 rounded-2xl bg-foreground/[0.03] border border-card-border flex items-center justify-center text-indigo-400 group hover:bg-indigo-500/10 transition-colors">
+                                            <FiCpu className="w-6 h-6" />
+                                        </div>
+                                        <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Intelligent</span>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-14 h-14 rounded-2xl bg-foreground/[0.03] border border-card-border flex items-center justify-center text-emerald-400 group hover:bg-emerald-500/10 transition-colors">
+                                            <FiShield className="w-6 h-6" />
+                                        </div>
+                                        <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Secure</span>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-14 h-14 rounded-2xl bg-foreground/[0.03] border border-card-border flex items-center justify-center text-amber-400 group hover:bg-amber-500/10 transition-colors">
+                                            <FiHeart className="w-6 h-6" />
+                                        </div>
+                                        <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Bespoke</span>
+                                    </div>
+                                </div>
+
+                                <div className="pt-10 border-t border-card-border flex flex-col items-center gap-6">
+                                    <div className="flex items-center gap-8">
+                                        <a href="#" className="text-text-muted hover:text-foreground transition-all hover:scale-110"><FiGithub className="w-5 h-5" /></a>
+                                        <a href="#" className="text-text-muted hover:text-foreground transition-all hover:scale-110"><FiGlobe className="w-5 h-5" /></a>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">
+                                            © 2026 MD TECHNOLOGIES
+                                        </p>
+                                        <p className="text-[8px] font-bold text-text-muted/30 uppercase tracking-[0.2em]">
+                                            ALL RIGHTS RESERVED • SUPRA-LEVEL SECURITY ENFORCED
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <p className="text-zinc-400 text-sm leading-relaxed max-w-sm mx-auto">
-                            A bespoke, secure, and intelligent productivity ecosystem designed for high-performance teams and strategic maneuvers.
-                        </p>
-
-                        <div className="grid grid-cols-3 gap-4 pt-4">
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-indigo-400">
-                                    <FiCpu className="w-5 h-5" />
-                                </div>
-                                <span className="text-[11px] font-bold text-zinc-500 uppercase">Intelligent</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-emerald-400">
-                                    <FiShield className="w-5 h-5" />
-                                </div>
-                                <span className="text-[11px] font-bold text-zinc-500 uppercase">Secure</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-amber-400">
-                                    <FiHeart className="w-5 h-5" />
-                                </div>
-                                <span className="text-[11px] font-bold text-zinc-500 uppercase">Bespoke</span>
-                            </div>
-                        </div>
-
-                        <div className="pt-8 border-t border-white/5 flex flex-col items-center gap-4">
-                            <div className="flex items-center gap-6">
-                                <a href="#" className="text-zinc-500 hover:text-white transition-colors"><FiGithub className="w-5 h-5" /></a>
-                                <a href="#" className="text-zinc-500 hover:text-white transition-colors"><FiGlobe className="w-5 h-5" /></a>
-                            </div>
-                            <p className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider">
-                                © 2026 MD TECHNOLOGIES. ALL RIGHTS RESERVED.
-                            </p>
-                        </div>
+                        </motion.div>
                     </div>
-                </motion.div>
-            </div>
-        </AnimatePresence>
+                )}
+            </AnimatePresence>
+        </Portal>
     );
 }

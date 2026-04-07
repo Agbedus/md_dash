@@ -47,7 +47,7 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
         return {
           stripe: 'bg-[var(--pastel-emerald)]',
           tint: 'bg-[var(--pastel-emerald)]/[0.03]',
-          glow: 'group-hover:shadow-[0_0_30px_rgba(16,185,129,0.15)]',
+          glow: 'group-hover:-[0_0_30px_rgba(16,185,129,0.15)]',
           ring: 'group-hover:ring-[var(--pastel-emerald)]/20',
           gradient: 'from-[var(--pastel-emerald)]/10 to-transparent'
         };
@@ -55,7 +55,7 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
         return {
           stripe: 'bg-[var(--pastel-blue)]',
           tint: 'bg-[var(--pastel-blue)]/[0.03]',
-          glow: 'group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]',
+          glow: 'group-hover:-[0_0_30px_rgba(59,130,246,0.15)]',
           ring: 'group-hover:ring-[var(--pastel-blue)]/20',
           gradient: 'from-[var(--pastel-blue)]/10 to-transparent'
         };
@@ -63,7 +63,7 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
         return {
           stripe: 'bg-purple-500',
           tint: 'bg-purple-500/[0.03]',
-          glow: 'group-hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]',
+          glow: 'group-hover:-[0_0_30px_rgba(168,85,247,0.15)]',
           ring: 'group-hover:ring-purple-500/20',
           gradient: 'from-purple-500/10 to-transparent'
         };
@@ -71,7 +71,7 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
         return {
           stripe: 'bg-blue-500',
           tint: 'bg-blue-500/[0.03]',
-          glow: 'group-hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]',
+          glow: 'group-hover:-[0_0_30px_rgba(59,130,246,0.15)]',
           ring: 'group-hover:ring-blue-500/20',
           gradient: 'from-blue-500/10 to-transparent'
         };
@@ -79,7 +79,7 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
         return {
           stripe: 'bg-zinc-500',
           tint: 'bg-white/[0.02]',
-          glow: 'group-hover:shadow-[0_0_30px_rgba(255,255,255,0.05)]',
+          glow: 'group-hover:-[0_0_30px_rgba(255,255,255,0.05)]',
           ring: 'group-hover:ring-white/20',
           gradient: 'from-white/5 to-transparent'
         };
@@ -94,7 +94,7 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
       ref={setNodeRef}
       style={style}
       className={`group relative overflow-hidden rounded-2xl border border-white/5 ${styles.tint} transition-all duration-500 backdrop-blur-md cursor-grab active:cursor-grabbing ${
-        isDragging ? 'opacity-40 ring-2 ring-indigo-500/50 shadow-2xl scale-[1.02] z-50' : `hover:border-white/5 hover:-translate-y-1.5 ring-0 ${styles.ring} ${styles.glow}`
+        isDragging ? 'opacity-40 ring-2 ring-indigo-500/50  scale-[1.02] z-50' : `hover:border-white/5 hover:-translate-y-1.5 ring-0 ${styles.ring} ${styles.glow}`
       }`}
       {...attributes}
       {...listeners}
@@ -144,12 +144,12 @@ export default function KanbanCard({ task, users, user: currentUser, projects, c
 
         <div className="flex flex-wrap gap-2.5 mb-5">
           {project && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border border-[var(--pastel-indigo)]/20 shadow-sm">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-[var(--pastel-indigo)]/10 text-[var(--pastel-indigo)] border border-[var(--pastel-indigo)]/20 ">
               {project.name}
             </span>
           )}
           <span
-            className={`px-2.5 py-1 inline-flex text-[11px] font-bold rounded-lg border uppercase tracking-wider shadow-sm ${
+            className={`px-2.5 py-1 inline-flex text-[11px] font-bold rounded-lg border uppercase tracking-wider  ${
               task.priority === 'high'
                 ? 'bg-[var(--pastel-rose)]/10 text-[var(--pastel-rose)] border-[var(--pastel-rose)]/20 pulse-soft'
                 : task.priority === 'medium'

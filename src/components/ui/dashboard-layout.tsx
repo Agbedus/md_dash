@@ -48,7 +48,7 @@ export default function DashboardLayout({
     }}>
       <NotificationProvider user={user}>
         <AnnouncementProvider user={user}>
-          <div className="flex h-screen bg-zinc-950 overflow-hidden relative">
+          <div className="flex h-screen bg-background overflow-hidden relative">
             {/* Sidebar container */}
             <div className="z-30">
                 {sidebar}

@@ -207,7 +207,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
 
             <button
                 type="submit"
-                className="p-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105 transition-all duration-200 focus:outline-none active:scale-95"
+                className="p-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover: hover:-purple-500/20 hover:scale-105 transition-all duration-200 focus:outline-none active:scale-95"
                 aria-label="Send message"
                 title="Send"
             >

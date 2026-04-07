@@ -27,19 +27,19 @@ export default function Toolbar({
 }: ToolbarProps) {
   return (
     <div className="flex flex-col gap-6 mb-8">
-      <div className="glass p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-card p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-card-border">
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white/[0.03] rounded-xl border border-white/5 p-1">
-              <button onClick={onPrev} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
+          <div className="flex items-center bg-foreground/[0.05] rounded-xl border border-card-border p-1">
+              <button onClick={onPrev} className="p-2 rounded-lg text-(--text-muted) hover:text-foreground hover:bg-foreground/[0.06] transition-all">
               <FiChevronLeft className="h-4 w-4" />
               </button>
-              <button onClick={onNext} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all">
+              <button onClick={onNext} className="p-2 rounded-lg text-(--text-muted) hover:text-foreground hover:bg-foreground/[0.06] transition-all">
               <FiChevronRight className="h-4 w-4" />
               </button>
           </div>
           <button 
               onClick={onToday} 
-              className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/5 text-zinc-400 hover:text-white hover:bg-white/[0.06] text-sm font-medium transition-all"
+              className="px-4 py-2 rounded-xl bg-foreground/[0.05] border border-card-border text-(--text-muted) hover:text-foreground hover:bg-foreground/[0.06] text-sm font-medium transition-all"
           >
               Today
           </button>
@@ -63,20 +63,20 @@ export default function Toolbar({
           )}
         </div>
         
-        <div className="text-xl font-bold text-white tracking-tight">
+        <div className="text-xl font-bold text-foreground tracking-tight">
           {format(currentDate, "MMMM yyyy")}
         </div>
 
         {!hideViewSwitcher && (
-          <div className="flex items-center space-x-1 bg-white/[0.03] p-1 rounded-xl border border-white/5">
+          <div className="flex items-center space-x-1 bg-foreground/[0.05] p-1 rounded-xl border border-card-border">
             {(['month', 'week', 'day'] as const).map((v) => (
                 <button
                     key={v}
                     onClick={() => onChangeView?.(v)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         view === v 
-                        ? "bg-white/[0.06] text-white shadow-sm" 
-                        : "text-zinc-500 hover:text-zinc-300"
+                        ? "bg-foreground/[0.06] text-foreground" 
+                        : "text-(--text-muted) hover:text-foreground"
                     }`}
                 >
                     {v.charAt(0).toUpperCase() + v.slice(1)}
@@ -90,7 +90,7 @@ export default function Toolbar({
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-2">
           {/* Main Calendar Group */}
           <div className="flex flex-col gap-2.5">
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] px-1">Main Calendar</span>
+              <span className="text-[10px] font-black text-(--text-muted) uppercase tracking-[0.2em] px-1">Main Calendar</span>
               <div className="flex items-center gap-2">
                   <FilterToggle 
                     label="Events" 
@@ -107,11 +107,11 @@ export default function Toolbar({
               </div>
           </div>
 
-          <div className="hidden sm:block h-6 w-px bg-white/10 self-end mb-2" />
+          <div className="hidden sm:block h-6 w-px bg-card-border self-end mb-2" />
 
           {/* Timeline Group */}
           <div className="flex flex-col gap-2.5">
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] px-1">Timeline (Gantt)</span>
+              <span className="text-[10px] font-black text-(--text-muted) uppercase tracking-[0.2em] px-1">Timeline (Gantt)</span>
               <div className="flex items-center gap-2">
                   <FilterToggle 
                     label="Projects" 
@@ -134,10 +134,10 @@ export default function Toolbar({
 
 function FilterToggle({ label, active, onClick, color }: { label: string, active: boolean, onClick: () => void, color: 'indigo' | 'emerald' | 'purple' | 'amber' }) {
     const activeColors = {
-        indigo: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)]',
-        emerald: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]',
-        purple: 'bg-purple-500/10 border-purple-500/30 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.1)]',
-        amber: 'bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.1)]'
+        indigo: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400',
+        emerald: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+        purple: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
+        amber: 'bg-amber-500/10 border-amber-500/30 text-amber-400'
     };
 
     return (
@@ -147,7 +147,7 @@ function FilterToggle({ label, active, onClick, color }: { label: string, active
                 px-4 py-2 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all duration-300
                 ${active 
                     ? activeColors[color] 
-                    : 'bg-white/[0.02] border-white/5 text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04]'
+                    : 'bg-foreground/[0.02] border-card-border text-(--text-muted) hover:text-foreground hover:bg-foreground/[0.04]'
                 }
             `}
         >

@@ -87,7 +87,7 @@ export default function UserAvatarGroup({ users, limit = 3, size = 'md' }: UserA
                             left: `${coords.left}px`,
                             transform: 'translate(-50%, -100%)',
                         }}
-                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg shadow-2xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg  animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
                     >
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">

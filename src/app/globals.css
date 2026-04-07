@@ -9,74 +9,155 @@
   animation: pulse-ring 3s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
 }
 
+/* ── Tailwind theme token bridge ────────────────────────────────── */
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Map CSS variables → Tailwind utilities */
+  --color-background:   var(--background);
+  --color-foreground:   var(--foreground);
+  --color-card:         var(--card-bg);
+  --color-card-border:  var(--card-border);
+  --color-sidebar:      var(--sidebar-bg);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-border-subtle: var(--border-subtle);
+  --color-input-bg:     var(--input-bg);
+  --color-text-muted:   var(--text-muted);
+  --color-text-secondary: var(--text-secondary);
 }
 
 @keyframes spinner {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.15;
-  }
+  0%   { opacity: 1; }
+  100% { opacity: 0.15; }
 }
 
+/* ── Shared pastel palette (theme-agnostic) ────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --pastel-indigo: #818cf8;
-  --pastel-emerald: #34d399;
-  --pastel-blue: #60a5fa;
-  --pastel-purple: #c084fc;
-  --pastel-rose: #fb7185;
-  --pastel-amber: #fbbf24;
-  --pastel-teal: #2dd4bf;
+  --pastel-indigo:   #818cf8;
+  --pastel-emerald:  #34d399;
+  --pastel-blue:     #60a5fa;
+  --pastel-purple:   #c084fc;
+  --pastel-rose:     #fb7185;
+  --pastel-amber:    #fbbf24;
+  --pastel-teal:     #2dd4bf;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Light theme ───────────────────────────────────────────────── */
+/* Body: slate-50. Cards: white. Borders: slate-200. */
+.light {
+  color-scheme: light;
+
+  /* Page */
+  --background:       #f8fafc;   /* slate-50  */
+  --foreground:       #0f172a;   /* slate-900 — primary text */
+  --text-secondary:   #334155;   /* slate-700 — secondary text */
+  --text-muted:       #64748b;   /* slate-500 — captions / labels */
+
+  /* Cards / elevated containers */
+  --card-bg:          #ffffff;
+  --card-border:      #e2e8f0;   /* slate-200 */
+
+  /* Sidebar */
+  --sidebar-bg:       #ffffff;
+  --sidebar-border:   #e2e8f0;
+
+  /* Generic borders & inputs */
+  --border-subtle:    #e2e8f0;
+  --input-bg:         #f1f5f9;   /* slate-100 */
+
+  /* Charts & Tooltips */
+  --chart-grid:       rgba(0, 0, 0, 0.05);
+  --chart-axis:       #64748b;   /* slate-500 */
+  --tooltip-bg:       rgba(255, 255, 255, 0.9);
+  --tooltip-border:   rgba(0, 0, 0, 0.1);
+  --glass-bg:         rgba(255, 255, 255, 0.7);
+  --glass-border:     rgba(0, 0, 0, 0.05);
+
+  /* Toast */
+  --toast-bg:         rgba(255, 255, 255, 0.95);
+  --toast-text:       #334155;   /* slate-700 */
+  --toast-border:     rgba(0, 0, 0, 0.08);
+}
+
+/* ── Dark theme ────────────────────────────────────────────────── */
+/* Body: near-black (#09090b). Cards: zinc-900 (#18181b). Borders: white/8. */
+.dark {
+  color-scheme: dark;
+
+  /* Page */
+  --background:       #09090b;   /* zinc-950 */
+  --foreground:       #fafafa;   /* near-white */
+  --text-secondary:   #a1a1aa;   /* zinc-400 */
+  --text-muted:       #71717a;   /* zinc-500 */
+
+  /* Cards / elevated containers */
+  --card-bg:          rgba(24, 24, 27, 0.4);   /* zinc-900 at 40% opacity */
+  --card-border:      rgba(255, 255, 255, 0.08);
+
+  /* Sidebar */
+  --sidebar-bg:       #09090b;
+  --sidebar-border:   rgba(255, 255, 255, 0.08);
+
+  /* Generic borders & inputs */
+  --border-subtle:    rgba(255, 255, 255, 0.08);
+  --input-bg:         #27272a;   /* zinc-800 */
+
+  /* Charts & Tooltips */
+  --chart-grid:       rgba(255, 255, 255, 0.05);
+  --chart-axis:       #94a3b8;   /* slate-400 */
+  --tooltip-bg:       rgba(15, 23, 42, 0.9);
+  --tooltip-border:   rgba(255, 255, 255, 0.1);
+  --glass-bg:         rgba(24, 24, 27, 0.4);
+  --glass-border:     rgba(255, 255, 255, 0.08);
+
+  /* Toast */
+  --toast-bg:         rgba(24, 24, 27, 0.9);
+  --toast-text:       #a1a1aa;   /* zinc-400 */
+  --toast-border:     rgba(255, 255, 255, 0.08);
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { display: none; }
 * {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Custom Utilities */
+/* ── Custom utilities ──────────────────────────────────────────── */
 .font-numbers {
   font-family: var(--font-space-grotesk), sans-serif;
+}
+
+/* Glass card — works in dark only, degrades gracefully in light */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Sidebar glass: same token, different opacity tweak */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
 }
 
 .noise {
   position: relative;
 }
-
 .noise::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.05;
+  opacity: 0.04;
   pointer-events: none;
   z-index: 1;
 }
@@ -84,24 +165,16 @@ body {
 .bg-logo-gradient {
   background: radial-gradient(circle at center, rgba(99, 102, 241, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
 }
-
 .bg-logo-gradient-light {
   background: radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.01);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
 .gradient-border-button {
   position: relative;
-  background: #fff;
-  color: #000;
+  background: var(--card-bg);
+  color: var(--foreground);
   transition: all 0.3s ease;
 }
-
 .gradient-border-button::before {
   content: "";
   position: absolute;
@@ -112,14 +185,7 @@ body {
   opacity: 0.5;
   transition: opacity 0.3s ease;
 }
-
-.gradient-border-button:hover::before {
-  opacity: 1;
-}
-
-.premium-shadow {
-  box-shadow: 0 0 50px -12px rgba(99, 102, 241, 0.25);
-}
+.gradient-border-button:hover::before { opacity: 1; }
 
 .tracking-tightest {
   letter-spacing: -0.05em;

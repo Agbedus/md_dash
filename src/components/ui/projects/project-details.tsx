@@ -42,7 +42,7 @@ export function ProjectDetails({ project, users, clients, notes, projects, onClo
 
     return (
         <div className="fixed inset-y-0 right-0 w-full max-w-2xl z-[100] animate-in slide-in-from-right duration-500">
-            <div className="h-full bg-zinc-950/80 backdrop-blur-2xl border-l border-white/5 shadow-2xl flex flex-col">
+            <div className="h-full bg-zinc-950/80 backdrop-blur-2xl border-l border-white/5  flex flex-col">
                 {/* Header */}
                 <div className="p-8 border-b border-white/5 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-8 flex items-center gap-2">
@@ -60,7 +60,7 @@ export function ProjectDetails({ project, users, clients, notes, projects, onClo
 
                     <div className="flex items-center gap-3 mb-4">
                         <span className={`px-2.5 py-1 rounded-lg text-[11px] font-medium uppercase tracking-wider border ${
-                            project.status === 'completed' ? 'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]' :
+                            project.status === 'completed' ? 'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20 -[0_0_15px_rgba(16,185,129,0.1)]' :
                             project.status === 'in_progress' ? 'bg-[var(--pastel-blue)]/10 text-[var(--pastel-blue)] border-[var(--pastel-blue)]/20' :
                             'bg-white/[0.03] text-zinc-500 border-white/5'
                         }`}>

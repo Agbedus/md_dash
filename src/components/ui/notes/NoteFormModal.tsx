@@ -138,7 +138,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
             <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md transition-opacity duration-300" onClick={onClose} />
             
             {/* Modal Body */}
-            <div className={`relative w-full max-w-4xl max-h-[90vh] bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden border border-white/5 transition-all duration-300 transform ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`} onClick={e => e.stopPropagation()}>
+            <div className={`relative w-full max-w-4xl max-h-[90vh] bg-zinc-900 rounded-3xl  overflow-hidden border border-white/5 transition-all duration-300 transform ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`} onClick={e => e.stopPropagation()}>
                 <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col h-full max-h-[90vh]">
                     <div className="px-6 py-4 flex items-center justify-between border-b border-white/5 bg-white/[0.03]">
                         {/* Group 1: Selections */}
@@ -223,7 +223,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                             <button
                                 type="submit"
                                 disabled={isSaving}
-                                className="h-9 px-5 rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 transition-all disabled:opacity-50 flex items-center justify-center shadow-lg shadow-emerald-500/20 font-bold text-xs uppercase tracking-wider gap-2"
+                                className="h-9 px-5 rounded-xl text-white bg-emerald-600 hover:bg-emerald-500 transition-all disabled:opacity-50 flex items-center justify-center  -emerald-500/20 font-bold text-xs uppercase tracking-wider gap-2"
                                 title={initialNote ? 'Update Note' : 'Save Note'}
                             >
                                 <FiCheck size={18} />
@@ -332,7 +332,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                     background-color: #18181B !important; /* zinc-900 */
                     border: 1px solid rgba(255, 255, 255, 0.1) !important;
                     border-radius: 12px !important;
-                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4) !important;
+                    box-: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4) !important;
                     padding: 8px !important;
                     bottom: 100% !important;
                     top: auto !important;

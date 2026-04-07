@@ -194,6 +194,50 @@ export async function getTeamAttendanceToday(): Promise<AttendanceRecord[]> {
     }
 }
 
+export async function getTeamAttendanceHistory(): Promise<AttendanceRecord[]> {
+    const headers = await getAuthHeaders();
+    if (!headers) return [];
+
+    try {
+        // Since there's no direct "all history" endpoint in the spec,
+        // we'll fetch all users and then fetch history for each.
+        // However, for efficiency, we should check if /attendance/history exists first (as I added it).
+        // If it's returning empty, it might be the wrong endpoint.
+        
+        const res = await fetch(`${API_BASE_URL}/attendance/history`, {
+            method: 'GET',
+            headers,
+            next: { tags: ['attendance-team-history'], revalidate: 60 },
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) return data;
+        }
+
+        // Fallback: Get all users and fetch their history (limit to active users/staff for performance)
+        const usersRes = await fetch(`${API_BASE_URL}/users`, { headers });
+        if (!usersRes.ok) return [];
+        const users = await usersRes.json();
+        
+        // Fetch histories in parallel with a limit
+        const historyPromises = users.slice(0, 20).map((user: any) => 
+            getUserAttendanceHistory(String(user.id))
+        );
+        
+        const histories = await Promise.all(historyPromises);
+        return histories.flat().sort((a, b) => {
+            const dateA = new Date(a.work_date || a.date || 0).getTime();
+            const dateB = new Date(b.work_date || b.date || 0).getTime();
+            return dateB - dateA; // Newest first
+        });
+
+    } catch (error) {
+        console.error("Error fetching team attendance history:", error);
+        return [];
+    }
+}
+
 export async function getUserAttendanceHistory(userId: string): Promise<AttendanceRecord[]> {
     const headers = await getAuthHeaders();
     if (!headers) return [];

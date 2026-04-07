@@ -128,7 +128,7 @@ export default function LandingPage() {
                         <Link href="/login" className="text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-colors">Login</Link>
                         <Link 
                             href="#waitlist" 
-                            className="px-6 py-2.5 rounded-full bg-white text-zinc-950 text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                            className="px-6 py-2.5 rounded-full bg-white text-zinc-950 text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 -[0_0_20px_rgba(255,255,255,0.1)]"
                         >
                             Join Waiting List
                         </Link>
@@ -177,7 +177,7 @@ export default function LandingPage() {
                     >
                         <Link 
                             href="#waitlist" 
-                            className="w-full md:w-auto px-10 py-5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 group transition-all active:scale-95 shadow-[0_0_30px_rgba(79,70,229,0.4)] hover:shadow-[0_0_50px_rgba(79,70,229,0.5)] border border-indigo-400/30"
+                            className="w-full md:w-auto px-10 py-5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 group transition-all active:scale-95 -[0_0_30px_rgba(79,70,229,0.4)] hover:-[0_0_50px_rgba(79,70,229,0.5)] border border-indigo-400/30"
                         >
                             Explore Platform <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                         </Link>
@@ -192,7 +192,7 @@ export default function LandingPage() {
                     {/* Interface Showcase with GSAP Zoom */}
                     <div ref={containerRef} className="relative mt-20 pt-20 pb-40">
                         <div ref={zoomRef} className="relative mx-auto max-w-5xl">
-                            <div className="relative p-2 rounded-[2.5rem] glass-card border-white/10 premium-shadow overflow-hidden group">
+                            <div className="relative p-2 rounded-[2.5rem] glass-card border-white/10 premium- overflow-hidden group">
                                 <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                                 
                                 {/* Interface Content / Carousel */}
@@ -215,7 +215,7 @@ export default function LandingPage() {
                                                     }}
                                                     className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all relative z-40 ${
                                                         activeTab === tab 
-                                                        ? 'bg-white text-zinc-950 shadow-lg' 
+                                                        ? 'bg-white text-zinc-950 ' 
                                                         : 'text-zinc-500 hover:text-white'
                                                     }`}
                                                 >
@@ -259,13 +259,13 @@ export default function LandingPage() {
                             </div>
                             
                             {/* Floating Stats / Indicators */}
-                            <div className="absolute -top-6 -right-6 p-4 rounded-2xl bg-zinc-900 border border-white/10 shadow-2xl z-20 hidden md:block">
+                            <div className="absolute -top-6 -right-6 p-4 rounded-2xl bg-zinc-900 border border-white/10  z-20 hidden md:block">
                                 <div className="flex items-center gap-3">
                                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">System Live</span>
                                 </div>
                             </div>
-                            <div className="absolute -bottom-6 -left-6 p-4 rounded-2xl bg-zinc-900 border border-white/10 shadow-2xl z-20 hidden md:block">
+                            <div className="absolute -bottom-6 -left-6 p-4 rounded-2xl bg-zinc-900 border border-white/10  z-20 hidden md:block">
                                 <div className="flex items-center gap-3">
                                     <FiLock className="text-indigo-400" />
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">End-to-End Encrypted</span>
@@ -344,7 +344,7 @@ export default function LandingPage() {
                                     </ul>
                                 </div>
                                 <div className="flex-1 w-full relative">
-                                    <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-zinc-900 shadow-2xl group">
+                                    <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-zinc-900  group">
                                         <div className="absolute inset-0 bg-indigo-500/5 group-hover:bg-transparent transition-colors duration-700 z-10 pointer-events-none" />
                                         <Image 
                                             src={feature.image} 
@@ -437,7 +437,7 @@ export default function LandingPage() {
 
                         {/* Right Side: Big Card */}
                         <div className="lg:col-span-3 relative lg:pl-12 w-full">
-                            <div className="aspect-[4/3] rounded-[4rem] bg-zinc-900 border border-white/5 p-16 flex items-center justify-center relative overflow-hidden group shadow-[0_0_100px_rgba(99,102,241,0.15)]">
+                            <div className="aspect-[4/3] rounded-[4rem] bg-zinc-900 border border-white/5 p-16 flex items-center justify-center relative overflow-hidden group -[0_0_100px_rgba(99,102,241,0.15)]">
                                 <FiTarget className="text-[18rem] text-white/[0.02] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-[2000ms]" />
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="w-[30rem] h-[30rem] rounded-full border border-white/5 border-dashed animate-[spin_40s_linear_infinite]" />
@@ -446,7 +446,7 @@ export default function LandingPage() {
                                         {/* Pulse Rings */}
                                         <div className="absolute inset-0 rounded-full bg-indigo-500/20 blur-2xl animate-pulse-ring" />
                                         <div className="absolute inset-0 rounded-full bg-indigo-500/10 blur-[40px] animate-pulse-ring [animation-delay:1000ms]" />
-                                        <div className="relative p-12 rounded-full bg-indigo-500/10 border border-indigo-500/20 shadow-[0_0_60px_rgba(99,102,241,0.3)] z-10">
+                                        <div className="relative p-12 rounded-full bg-indigo-500/10 border border-indigo-500/20 -[0_0_60px_rgba(99,102,241,0.3)] z-10">
                                             <FiCpu className="text-8xl text-indigo-400" />
                                         </div>
                                     </div>
@@ -485,7 +485,7 @@ export default function LandingPage() {
                             viewport={{ once: true }}
                             className="p-12 rounded-[3rem] glass-card space-y-8 hover:border-indigo-500/30 transition-all duration-500 group"
                         >
-                            <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(79,70,229,0.1)]">
+                            <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:scale-110 transition-transform -[0_0_30px_rgba(79,70,229,0.1)]">
                                 <FiUsers className="text-3xl text-indigo-400" />
                             </div>
                             <div className="space-y-4">
@@ -503,7 +503,7 @@ export default function LandingPage() {
                             transition={{ delay: 0.2 }}
                             className="p-12 rounded-[3rem] glass-card space-y-8 hover:border-emerald-500/30 transition-all duration-500 group"
                         >
-                            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform -[0_0_30px_rgba(16,185,129,0.1)]">
                                 <FiGlobe className="text-3xl text-emerald-400" />
                             </div>
                             <div className="space-y-4">
@@ -536,7 +536,7 @@ export default function LandingPage() {
                             <input 
                                 type="email" 
                                 placeholder="Enter executive email" 
-                                className="w-full px-8 py-6 rounded-full bg-white/[0.03] border border-white/10 text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-all shadow-2xl"
+                                className="w-full px-8 py-6 rounded-full bg-white/[0.03] border border-white/10 text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500 focus:bg-white/[0.05] transition-all "
                             />
                             <button 
                                 type="submit" 

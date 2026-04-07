@@ -92,7 +92,7 @@ function SenderAvatar({ user, size = 'sm' }: { user: any, size?: 'xs' | 'sm' | '
               left: `${coords.left}px`,
               transform: 'translate(-50%, -100%)',
             }}
-            className="w-48 p-3 bg-zinc-900 border border-white/5 rounded-xl shadow-2xl z-[9999] animate-in fade-in slide-in-from-bottom-1 duration-200"
+            className="w-48 p-3 bg-zinc-900 border border-white/5 rounded-xl  z-[9999] animate-in fade-in slide-in-from-bottom-1 duration-200"
           >
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
@@ -198,7 +198,7 @@ export default function NotificationsPage() {
         </div>
       </div>
 
-      <div className="glass rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl flex flex-col md:flex-row flex-1 mb-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <div className="glass rounded-[2rem] overflow-hidden border border-white/5  flex flex-col md:flex-row flex-1 mb-12 -[0_20px_50px_rgba(0,0,0,0.5)]">
         {/* Leftmost Sidebar - Categories */}
         <div className="w-full md:w-20 lg:w-24 border-r border-white/5 flex md:flex-col bg-zinc-900/50 p-2 gap-2 overflow-x-auto md:overflow-x-hidden no-scrollbar">
           {tabs.map((tab) => (
@@ -225,7 +225,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* List Pane */}
-        <div className="w-full md:w-80 lg:w-96 border-r border-white/5 flex flex-col bg-zinc-900/30 shadow-inner">
+        <div className="w-full md:w-80 lg:w-96 border-r border-white/5 flex flex-col bg-zinc-900/30 ">
           <div className="p-4 border-b border-white/5 bg-white/[0.01]">
             <div className="relative group">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-emerald-500 transition-colors w-3.5 h-3.5" />
@@ -259,7 +259,7 @@ export default function NotificationsPage() {
                           {n.title}
                         </p>
                         {!n.is_read && (
-                          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse shrink-0 ml-2 mt-1" />
+                          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 -[0_0_8px_rgba(16,185,129,0.5)] animate-pulse shrink-0 ml-2 mt-1" />
                         )}
                       </div>
                       <p className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed font-medium">
@@ -321,10 +321,10 @@ export default function NotificationsPage() {
                     </div>
                   </div>
                   <div className="flex gap-1.5 shrink-0 pt-1">
-                    <button className="p-2 rounded-xl bg-white/[0.03] border border-white/5 text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-all active:scale-95 group shadow-xl">
+                    <button className="p-2 rounded-xl bg-white/[0.03] border border-white/5 text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-all active:scale-95 group ">
                       <FiShare2 size={14} className="group-hover:rotate-12 transition-transform" />
                     </button>
-                    <button className="p-2 rounded-xl bg-white/[0.03] border border-white/5 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all active:scale-95 group shadow-xl">
+                    <button className="p-2 rounded-xl bg-white/[0.03] border border-white/5 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all active:scale-95 group ">
                       <FiMaximize2 size={14} className="group-hover:scale-110 transition-transform" />
                     </button>
                   </div>
@@ -358,7 +358,7 @@ export default function NotificationsPage() {
                   </div>
 
                   <div className="mt-6 flex items-center gap-4">
-                    <div className={`h-1.5 w-1.5 rounded-full ${selectedNotification.is_read ? 'bg-zinc-700' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
+                    <div className={`h-1.5 w-1.5 rounded-full ${selectedNotification.is_read ? 'bg-zinc-700' : 'bg-emerald-500 -[0_0_8px_rgba(16,185,129,0.5)]'}`} />
                     <p className="text-[11px] font-medium text-zinc-600 uppercase tracking-wider">
                       Transmission Status: {selectedNotification.is_read ? 'VERIFIED' : 'PENDING_ACK'}
                     </p>
@@ -374,7 +374,7 @@ export default function NotificationsPage() {
                       <p className="text-[11px] font-mono text-zinc-400 truncate tracking-tight">{selectedNotification.recipient_id}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 bg-zinc-950/50 px-6 py-3 rounded-2xl border border-white/5 shadow-inner">
+                  <div className="flex items-center gap-4 bg-zinc-950/50 px-6 py-3 rounded-2xl border border-white/5 ">
                     <div className="flex items-center gap-3">
                       <FiTag className="text-emerald-500 w-3.5 h-3.5" /> 
                       <span className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">{selectedNotification.resource_type || 'General'}</span>
@@ -392,7 +392,7 @@ export default function NotificationsPage() {
             <div className="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-8 animate-in fade-in duration-700">
               <div className="relative">
                 <div className="absolute inset-0 bg-emerald-500/10 blur-[120px] rounded-full animate-pulse" />
-                <div className="relative w-48 h-48 rounded-[4.5rem] bg-zinc-900/80 border border-white/5 flex items-center justify-center text-zinc-800 shadow-2xl backdrop-blur-xl transform hover:scale-105 transition-transform duration-700 border-dashed">
+                <div className="relative w-48 h-48 rounded-[4.5rem] bg-zinc-900/80 border border-white/5 flex items-center justify-center text-zinc-800  backdrop-blur-xl transform hover:scale-105 transition-transform duration-700 border-dashed">
                   <FiInbox size={72} className="text-zinc-800" />
                 </div>
               </div>

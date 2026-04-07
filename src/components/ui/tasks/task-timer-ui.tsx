@@ -54,7 +54,7 @@ export function TaskTimerUI() {
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 1.05, opacity: 0, y: -30 }}
                         transition={{ duration: 0.5, ease: "circOut" }}
-                        className="w-full max-w-4xl glass border border-white/5 rounded-[40px] p-8 lg:p-16 shadow-[0_0_100px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col items-center text-center space-y-12"
+                        className="w-full max-w-4xl glass border border-white/5 rounded-[40px] p-8 lg:p-16 -[0_0_100px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col items-center text-center space-y-12"
                     >
                         {/* Header Section */}
                         <div className="space-y-4">
@@ -64,7 +64,7 @@ export function TaskTimerUI() {
                                 transition={{ delay: 0.2 }}
                                 className="flex items-center justify-center gap-2"
                             >
-                                <span className="px-4 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 text-[11px] font-medium uppercase tracking-wider border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+                                <span className="px-4 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 text-[11px] font-medium uppercase tracking-wider border border-indigo-500/20 -[0_0_20px_rgba(99,102,241,0.1)]">
                                     Active Focus Mode
                                 </span>
                             </motion.div>
@@ -73,7 +73,7 @@ export function TaskTimerUI() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
-                                className="text-4xl lg:text-7xl font-medium text-white tracking-tight leading-tight max-w-2xl mx-auto drop-shadow-lg"
+                                className="text-4xl lg:text-7xl font-medium text-white tracking-tight leading-tight max-w-2xl mx-auto "
                             >
                                 {activeTask.name}
                             </motion.h2>
@@ -96,7 +96,7 @@ export function TaskTimerUI() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.5, duration: 0.7 }}
-                                className="text-[120px] lg:text-[200px] font-medium text-white tracking-tight tabular-nums leading-none select-none filter blur-none group-hover:drop-shadow-[0_0_50px_rgba(255,255,255,0.15)] transition-all duration-700"
+                                className="text-[120px] lg:text-[200px] font-medium text-white tracking-tight tabular-nums leading-none select-none filter blur-none group-hover:-[0_0_50px_rgba(255,255,255,0.15)] transition-all duration-700"
                             >
                                 {formatTime(elapsedTime)}
                             </motion.div>
@@ -115,7 +115,7 @@ export function TaskTimerUI() {
                                 onClick={pauseTimer}
                                 className="group relative flex flex-col items-center gap-3 transition-all hover-scale"
                             >
-                                <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-3xl bg-zinc-900/50 border border-white/5 flex items-center justify-center group-hover:bg-amber-500 group-hover:border-amber-400 group-hover:scale-110 transition-all duration-500 shadow-xl group-hover:shadow-amber-500/20">
+                                <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-3xl bg-zinc-900/50 border border-white/5 flex items-center justify-center group-hover:bg-amber-500 group-hover:border-amber-400 group-hover:scale-110 transition-all duration-500  group-hover:-amber-500/20">
                                     <FiPause className="w-8 h-8 lg:w-10 lg:h-10 text-white transition-transform group-active:scale-95" />
                                 </div>
                                 <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider group-hover:text-amber-400 transition-colors">Break Time</span>
@@ -125,7 +125,7 @@ export function TaskTimerUI() {
                                 onClick={stopTimer}
                                 className="group relative flex flex-col items-center gap-3 transition-all hover-scale"
                             >
-                                <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-[32px] bg-rose-500/10 border border-rose-500/30 flex items-center justify-center group-hover:bg-rose-500 group-hover:border-rose-400 group-hover:scale-110 transition-all duration-500 shadow-2xl group-hover:shadow-rose-500/30">
+                                <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-[32px] bg-rose-500/10 border border-rose-500/30 flex items-center justify-center group-hover:bg-rose-500 group-hover:border-rose-400 group-hover:scale-110 transition-all duration-500  group-hover:-rose-500/30">
                                     <FiSquare className="w-10 h-10 lg:w-12 lg:h-12 text-rose-500 group-hover:text-white transition-transform group-active:scale-95" />
                                 </div>
                                 <span className="text-[11px] font-medium text-rose-500/80 uppercase tracking-wider group-hover:text-rose-400 transition-colors">Finish Mission</span>
@@ -141,7 +141,7 @@ export function TaskTimerUI() {
                                     exit={{ opacity: 0, scale: 1.5, y: -50 }}
                                     className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
                                 >
-                                    <div className="bg-indigo-600 text-white px-12 py-8 rounded-[40px] shadow-[0_0_80px_rgba(79,70,229,0.5)] flex flex-col items-center gap-4">
+                                    <div className="bg-indigo-600 text-white px-12 py-8 rounded-[40px] -[0_0_80px_rgba(79,70,229,0.5)] flex flex-col items-center gap-4">
                                         <div className="relative">
                                             <FiAward className="w-20 h-20 animate-bounce" />
                                             <motion.div 
@@ -184,7 +184,7 @@ export function TaskTimerUI() {
                 >
                     <button
                         onClick={resumeTimer}
-                        className="group flex items-center gap-3 h-12 pl-3 pr-2 rounded-2xl bg-zinc-900/95 border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.6)] hover:border-indigo-500/30 transition-all duration-300 backdrop-blur-2xl"
+                        className="group flex items-center gap-3 h-12 pl-3 pr-2 rounded-2xl bg-zinc-900/95 border border-white/5 -[0_8px_32px_rgba(0,0,0,0.6)] hover:border-indigo-500/30 transition-all duration-300 backdrop-blur-2xl"
                     >
                         {/* Pulse dot */}
                         <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import {
   getProductivityData,
   getTasksOverviewData,
@@ -55,18 +56,18 @@ const AvatarGroup = ({ users, total }: { users: any[], total: number }) => {
     return (
         <div className="flex -space-x-2 overflow-hidden">
             {users.map((user, i) => (
-                <div key={i} className="inline-block h-8 w-8 rounded-full ring-2 ring-[var(--background)] bg-zinc-800 overflow-hidden relative">
+                <div key={i} className="inline-block h-8 w-8 rounded-full ring-2 ring-background bg-background/50 border border-card-border overflow-hidden relative">
                     {user.image ? (
-                        <img src={user.image} alt={user.name} className="h-full w-full object-cover" />
+                        <Image src={user.image} alt={user.name} fill className="object-cover" />
                     ) : (
-                        <div className="h-full w-full flex items-center justify-center text-[11px] font-bold text-white bg-emerald-500/20">
+                        <div className="h-full w-full flex items-center justify-center text-[11px] font-bold text-foreground bg-emerald-500/20">
                             {user.name?.[0]?.toUpperCase()}
                         </div>
                     )}
                 </div>
             ))}
             {total > users.length && (
-                <div className="flex items-center justify-center h-8 w-8 rounded-full ring-2 ring-[var(--background)] bg-zinc-800 text-[11px] font-bold text-white">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full ring-2 ring-background bg-background/50 border border-card-border text-[11px] font-bold text-foreground">
                     +{total - users.length}
                 </div>
             )}
@@ -90,10 +91,10 @@ export async function SummaryStatsSection() {
             {statCards.map((stat, i) => (
                 <div 
                     key={i} 
-                    className={`glass p-3 lg:p-6 rounded-2xl border border-white/5 hover:border-white/5 transition-all duration-300 flex flex-col justify-between h-24 lg:h-40 group ${i === 0 ? 'col-span-2 lg:col-span-1' : 'col-span-1'}`}
+                    className={`bg-card p-3 lg:p-6 rounded-2xl border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col justify-between h-24 lg:h-40 group ${i === 0 ? 'col-span-2 lg:col-span-1' : 'col-span-1'}`}
                 >
                     <div className="flex justify-between items-start">
-                        <div className={`p-1.5 lg:p-3 rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-white/[0.06]`}>
+                        <div className={`p-1.5 lg:p-3 rounded-xl ${stat.bg} ${stat.color} transition-colors group-hover:bg-background/80`}>
                             <stat.icon className="text-sm lg:text-xl" />
                         </div>
                         {stat.users ? (
@@ -110,11 +111,11 @@ export async function SummaryStatsSection() {
                         )}
                     </div>
                     <div className="mt-2 lg:mt-4">
-                        <p className="text-[11px] lg:text-xs text-zinc-500 font-medium uppercase tracking-wider mb-0.5 lg:mb-1">{stat.label}</p>
+                        <p className="text-[11px] lg:text-[11px] text-(--text-muted) font-bold uppercase tracking-tight mb-0.5 lg:mb-1">{stat.label}</p>
                         <div className="flex items-baseline justify-between">
-                            <p className="text-xl lg:text-3xl font-bold font-numbers text-white leading-none">{stat.value}</p>
+                            <p className="text-xl lg:text-3xl font-bold font-numbers text-foreground leading-none">{stat.value}</p>
                             {i !== 0 && (
-                                <div className={`text-[11px] lg:text-[11px] font-bold font-numbers ${stat.color} bg-white/[0.03] px-1.5 py-0.5 rounded-full`}>
+                                <div className={`text-[11px] lg:text-[11px] font-bold font-numbers ${stat.color} bg-background/50 px-1.5 py-0.5 rounded-full`}>
                                    +{(i * 7 + 4) % 15}%
                                 </div>
                             )}
@@ -129,9 +130,9 @@ export async function SummaryStatsSection() {
 export async function ProductivitySection({ range }: { range?: string }) {
   const data = await getProductivityData(range);
   return (
-    <div className="col-span-1 lg:col-span-6 h-80 lg:h-96 glass p-4 lg:p-6 rounded-2xl flex flex-col group overflow-hidden relative border border-white/5 hover:border-white/5 transition-all duration-300">
+    <div className="col-span-1 lg:col-span-6 h-80 lg:h-96 bg-card p-4 lg:p-6 rounded-2xl flex flex-col group overflow-hidden relative border border-card-border hover:border-foreground/10 transition-all duration-300">
       <div className="flex justify-between items-center mb-4 lg:mb-6 shrink-0">
-        <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
+        <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">
           Productivity Trend
         </h2>
         <RangeFilter />
@@ -150,13 +151,13 @@ export async function StatsOverviewSection() {
   ]);
 
   return (
-    <div className="col-span-1 lg:col-span-3 h-80 lg:h-96 glass p-4 lg:p-6 rounded-2xl flex flex-col overflow-hidden relative border border-white/5 hover:border-white/5 transition-all duration-300">
-      <h2 className="text-lg lg:text-xl font-bold text-white mb-4 lg:mb-6 tracking-tight">
+    <div className="col-span-1 lg:col-span-3 h-80 lg:h-96 bg-card p-4 lg:p-6 rounded-2xl flex flex-col overflow-hidden relative border border-card-border hover:border-foreground/10 transition-all duration-300">
+      <h2 className="text-lg lg:text-xl font-bold text-foreground mb-4 lg:mb-6 tracking-tight">
         Overview
       </h2>
       <div className="flex-1 min-h-0 space-y-6 overflow-y-auto pr-1 custom-scrollbar">
         <div>
-          <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+          <h3 className="text-[10px] font-bold text-(--text-muted) uppercase tracking-tight mb-3">
             Tasks
           </h3>
           <div className="grid grid-cols-1 gap-2">
@@ -167,10 +168,10 @@ export async function StatsOverviewSection() {
               ) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/5"
+                  className="flex items-center justify-between p-2 rounded-xl bg-background/50 border border-card-border"
                 >
                   <div className="flex flex-col">
-                    <span className="text-sm text-zinc-400">{stat.name}</span>
+                    <span className="text-sm text-(--text-muted)">{stat.name}</span>
                     {stat.trend !== undefined && stat.trend !== 0 && (
                       <div
                         className={`flex items-center gap-1 text-[11px] font-bold ${stat.trend > 0 ? "text-emerald-400" : "text-rose-400"}`}
@@ -180,7 +181,7 @@ export async function StatsOverviewSection() {
                       </div>
                     )}
                   </div>
-                  <span className="text-sm font-bold font-numbers text-white">
+                  <span className="text-sm font-bold font-numbers text-foreground">
                     {stat.value}
                   </span>
                 </div>
@@ -190,7 +191,7 @@ export async function StatsOverviewSection() {
         </div>
 
         <div>
-          <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+          <h3 className="text-xs font-semibold text-(--text-muted) uppercase tracking-wider mb-3">
             Projects
           </h3>
           <div className="grid grid-cols-1 gap-2">
@@ -198,10 +199,10 @@ export async function StatsOverviewSection() {
               (stat: { name: string; value: number }, i: number) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] border border-white/5"
+                  className="flex items-center justify-between p-2 rounded-xl bg-background/50 border border-card-border"
                 >
-                  <span className="text-sm text-zinc-400">{stat.name}</span>
-                  <span className="text-sm font-bold font-numbers text-white">
+                  <span className="text-sm text-(--text-muted) font-medium">{stat.name}</span>
+                  <span className="text-sm font-bold font-numbers text-foreground">
                     {stat.value}
                   </span>
                 </div>
@@ -217,8 +218,8 @@ export async function StatsOverviewSection() {
 export async function WorkloadSection() {
   const data = await getWorkloadData();
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col h-80 lg:h-96">
-      <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight mb-3 lg:mb-4 shrink-0">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
+      <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight mb-3 lg:mb-4 shrink-0">
         Workload
       </h2>
       <div className="flex-1 w-full min-h-0">
@@ -231,8 +232,8 @@ export async function WorkloadSection() {
 export async function TimeAllocationSection() {
   const data = await getTimeAllocationData();
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
-      <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight mb-3 lg:mb-4 shrink-0">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
+      <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight mb-3 lg:mb-4 shrink-0">
         Time Allocation
       </h2>
       <div className="flex-1 w-full min-h-0">
@@ -246,12 +247,12 @@ export async function KeyTasksSection() {
   const keyTasks = await getKeyTasks();
 
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow h-80 lg:h-96 flex flex-col">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover:border-foreground/10 transition-all duration-300 border border-card-border h-80 lg:h-96 flex flex-col">
       <div className="flex justify-between items-center mb-4 lg:mb-6">
-        <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
+        <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">
           Key Tasks
         </h2>
-        <button className="text-zinc-400 hover:text-white transition-colors hover-scale">
+        <button className="text-(--text-muted) hover:text-foreground transition-colors hover-scale">
           <FiMoreHorizontal />
         </button>
       </div>
@@ -260,27 +261,27 @@ export async function KeyTasksSection() {
           keyTasks.map((task, i) => (
             <div
               key={i}
-              className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/5 transition-all cursor-pointer group"
+              className="flex items-start gap-2.5 p-2.5 rounded-xl bg-background/50 border border-card-border hover:bg-background/80 hover:border-foreground/10 transition-all cursor-pointer group"
             >
               <div className="shrink-0 w-2 h-2 mt-1.5 rounded-full bg-blue-400"></div>
               <div className="flex-1 min-w-0">
-                <span className="text-sm text-zinc-300 font-medium group-hover:text-white transition-colors block truncate">
+                <span className="text-sm text-(--text-muted) font-bold group-hover:text-foreground transition-colors block truncate">
                   {task.title}
                 </span>
                 <div className="flex items-center justify-between gap-2 mt-1.5">
-                  <span className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-semibold uppercase tracking-wider">
+                  <span className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-bold uppercase tracking-tight">
                     <FiActivity className="text-[11px]" />
                     {task.status}
                   </span>
                   <div className="flex items-center gap-1.5">
                     {task.priority && (
-                      <span className={`inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${task.priority === 'high' ? 'bg-rose-500/10 text-rose-400' : task.priority === 'medium' ? 'bg-amber-500/10 text-amber-400' : 'bg-zinc-500/10 text-zinc-400'}`}>
+                      <span className={`inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-tight ${task.priority === 'high' ? 'bg-rose-500/10 text-rose-400' : task.priority === 'medium' ? 'bg-amber-500/10 text-amber-400' : 'bg-background/50 text-(--text-muted)'}`}>
                         <FiZap className="text-[11px]" />
                         {task.priority}
                       </span>
                     )}
                     {task.dueDate && (
-                      <span className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md bg-zinc-500/10 text-zinc-400 font-medium">
+                      <span className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-md bg-background/50 text-(--text-muted) font-bold font-numbers">
                         <FiClock className="text-[11px]" />
                         {new Date(task.dueDate).toLocaleDateString()}
                       </span>
@@ -291,12 +292,12 @@ export async function KeyTasksSection() {
             </div>
           ))
         ) : (
-          <p className="text-zinc-500 text-center py-4">
+          <p className="text-(--text-muted) text-center py-4 font-bold text-[11px] uppercase tracking-tight">
             No key tasks at the moment
           </p>
         )}
       </div>
-      <button className="w-full mt-6 py-2.5 rounded-xl border border-white/5 text-zinc-400 text-sm font-medium hover:bg-white/[0.03] hover:text-white transition-all hover-scale">
+      <button className="w-full mt-6 py-2.5 rounded-xl border border-card-border text-(--text-muted) text-xs font-bold uppercase tracking-tight hover:bg-background/80 hover:text-foreground transition-all hover-scale">
         View All Tasks
       </button>
     </div>
@@ -307,14 +308,14 @@ export async function PrioritiesSection() {
   const priorities = await getAIPriorities();
 
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col h-80 lg:h-96">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
       <div className="flex justify-between items-center mb-4 lg:mb-6 shrink-0">
-        <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
+        <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">
           Today&apos;s Priorities
         </h2>
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/5">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-background/50 border border-card-border">
           <FiCpu className="text-[11px] text-[var(--pastel-indigo)]" />
-          <span className="text-[11px] font-bold text-[var(--pastel-indigo)] uppercase tracking-wider">
+          <span className="text-[11px] font-bold text-[var(--pastel-indigo)] uppercase tracking-tight">
             AI
           </span>
         </div>
@@ -324,8 +325,8 @@ export async function PrioritiesSection() {
           priorities.map((priority: any, i: number) => {
             const isHigh = priority.priority === "high";
             return (
-              <div key={i} className="group flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/5 transition-all hover:bg-white/[0.08]">
-                <div className={`mt-0.5 shrink-0 ${isHigh ? 'text-[var(--pastel-rose)]' : 'text-zinc-500'}`}>
+              <div key={i} className="group flex items-start gap-3 p-3 rounded-xl bg-background/50 border border-card-border hover:border-foreground/10 transition-all hover:bg-background/80">
+                <div className={`mt-0.5 shrink-0 ${isHigh ? 'text-[var(--pastel-rose)]' : 'text-(--text-muted)'}`}>
                   {isHigh ? (
                     <FiAlertCircle className="text-sm" />
                   ) : (
@@ -334,12 +335,12 @@ export async function PrioritiesSection() {
                 </div>
                 <div className="flex-1 overflow-hidden">
                   <h3
-                    className={`text-sm font-semibold truncate transition-colors ${isHigh ? "text-white" : "text-zinc-300 group-hover:text-white"}`}
+                    className={`text-sm font-bold truncate transition-colors ${isHigh ? "text-foreground" : "text-(--text-muted) group-hover:text-foreground"}`}
                   >
                     {priority.action}
                   </h3>
-                  <p className="text-[11px] text-zinc-500 leading-tight mt-0.5 flex items-center gap-1">
-                    <span className="font-medium">Why:</span> {priority.reason}
+                  <p className="text-[11px] text-(--text-muted) font-medium leading-tight mt-0.5 flex items-center gap-1">
+                    <span className="font-bold">Why:</span> {priority.reason}
                   </p>
                 </div>
               </div>
@@ -348,11 +349,11 @@ export async function PrioritiesSection() {
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
           <FiCheckCircle className="text-2xl mb-2 text-emerald-500" />
-            <p className="text-sm text-zinc-400">All caught up!</p>
+            <p className="text-sm text-(--text-muted) font-bold uppercase tracking-tight">All caught up!</p>
           </div>
         )}
       </div>
-      <button className="w-full mt-4 py-2 rounded-xl border border-white/5 text-zinc-400 text-xs font-semibold hover:bg-white/[0.03] hover:text-white transition-all hover-scale shrink-0">
+      <button className="w-full mt-4 py-2 rounded-xl border border-card-border text-(--text-muted) text-[11px] font-bold uppercase tracking-tight hover:bg-background/80 hover:text-foreground transition-all hover-scale shrink-0">
         Refresh AI Analysis
       </button>
     </div>
@@ -363,12 +364,12 @@ export async function RecentNotesSection() {
   const recentNotes = await getRecentNotes();
 
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-6 hover-glow h-80 lg:h-96 flex flex-col">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-6 border border-card-border hover:border-foreground/10 transition-all duration-300 h-80 lg:h-96 flex flex-col">
       <div className="flex justify-between items-center mb-4 lg:mb-6 shrink-0">
-        <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">
+        <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">
           Recent Notes
         </h2>
-        <button className="p-2 rounded-lg bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all hover-scale">
+        <button className="p-2 rounded-lg bg-background/50 text-(--text-muted) hover:text-foreground hover:bg-background/80 border border-card-border transition-all hover-scale">
           <FiPlus />
         </button>
       </div>
@@ -389,22 +390,22 @@ export async function RecentNotesSection() {
             return (
               <div
                 key={i}
-                className="p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/5 hover:bg-white/[0.07] transition-all cursor-pointer group"
+                className="p-4 rounded-xl bg-background/50 border border-card-border hover:border-foreground/10 hover:bg-background/80 transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-3 mb-2">
                   {React.createElement(icon, { className: color })}
-                  <h3 className="font-semibold text-zinc-300 group-hover:text-white transition-colors">
+                  <h3 className="font-bold text-(--text-muted) group-hover:text-foreground transition-colors truncate">
                     {note.title}
                   </h3>
                 </div>
-                <p className="text-xs text-zinc-500" suppressHydrationWarning>
+                <p className="text-[11px] text-(--text-muted) font-bold font-numbers" suppressHydrationWarning>
                   {timeAgo}
                 </p>
               </div>
             );
           })
         ) : (
-          <p className="text-zinc-500 text-center py-4 col-span-2">
+          <p className="text-(--text-muted) text-center py-4 col-span-2 font-bold uppercase tracking-tight text-[11px]">
             No recent notes
           </p>
         )}
@@ -416,8 +417,8 @@ export async function RecentNotesSection() {
 export async function ProjectProgressSection() {
   const data = await getProjectProgressData();
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-5 hover-glow flex flex-col h-80 lg:h-96">
-      <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight mb-3 lg:mb-4 shrink-0">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-5 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
+      <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight mb-3 lg:mb-4 shrink-0">
         Project Progress
       </h2>
       <div className="flex-1 w-full min-h-0">
@@ -430,17 +431,17 @@ export async function ProjectProgressSection() {
 // Static sections (no async data needed, but good to have as components)
 export function FocusModeSection() {
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 hover-glow flex flex-col justify-center items-center text-center relative overflow-hidden group h-80 lg:h-96">
-      <div className="p-4 rounded-full bg-white/[0.03] mb-4 border border-white/5 relative z-10">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col justify-center items-center text-center relative overflow-hidden group h-80 lg:h-96">
+      <div className="p-4 rounded-full bg-background/50 mb-4 border border-card-border relative z-10">
         <FiClock className="text-3xl text-[var(--pastel-indigo)]" />
       </div>
-      <h2 className="text-lg lg:text-xl font-bold text-white mb-2 relative z-10">
+      <h2 className="text-lg lg:text-xl font-bold text-foreground mb-2 relative z-10">
         Focus Mode
       </h2>
-      <p className="text-sm text-zinc-400 mb-6 relative z-10">
-        Block distractions and concentrate on your tasks.
+      <p className="text-sm text-(--text-muted) font-bold uppercase tracking-tight mb-6 relative z-10">
+        Block distractions and concentrate.
       </p>
-      <button className="relative z-10 px-6 py-2.5 rounded-xl bg-white/[0.06] border border-white/5 text-white font-medium hover:bg-white/20 transition-all duration-200 active:scale-95">
+      <button className="relative z-10 px-6 py-2.5 rounded-xl bg-background border border-card-border text-foreground font-bold uppercase tracking-tight hover:bg-background/80 transition-all duration-200 active:scale-95">
         Start Session
       </button>
     </div>
@@ -454,11 +455,11 @@ export async function UnitLoadSection() {
   const maxTasks = Math.max(...data.map(d => d.activeTasks), 1);
 
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
       <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
         <div>
-          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Resource Saturation</h2>
-          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Unit Load Distribution</p>
+          <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">Resource Saturation</h2>
+          <p className="text-[11px] text-(--text-muted) uppercase tracking-tight font-bold mt-0.5">Unit Load Distribution</p>
         </div>
         <div className="p-2 rounded-xl bg-[var(--pastel-blue)]/10">
           <FiUsers className="text-sm text-[var(--pastel-blue)]" />
@@ -468,21 +469,21 @@ export async function UnitLoadSection() {
         {data.length > 0 ? (
           data.map((user, i) => (
             <div key={i} className="flex items-center gap-3 group">
-              <div className="shrink-0 h-7 w-7 rounded-full bg-zinc-800 overflow-hidden ring-1 ring-white/10">
+              <div className="shrink-0 h-7 w-7 rounded-full bg-background/50 border border-card-border overflow-hidden ring-1 ring-background relative">
                 {user.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
+                  <Image src={user.avatar} alt={user.name} fill className="object-cover" />
                 ) : (
-                  <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-white bg-[var(--pastel-purple)]/20">
+                  <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-foreground bg-[var(--pastel-purple)]/20">
                     {user.name?.[0]?.toUpperCase()}
                   </div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-zinc-300 font-medium truncate">{user.name}</span>
-                  <span className="text-xs font-bold font-numbers text-white ml-2">{user.activeTasks}</span>
+                  <span className="text-xs text-(--text-muted) font-bold truncate">{user.name}</span>
+                  <span className="text-xs font-bold font-numbers text-foreground ml-2">{user.activeTasks}</span>
                 </div>
-                <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                <div className="h-1.5 bg-background/50 rounded-full overflow-hidden border border-card-border">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
@@ -500,8 +501,8 @@ export async function UnitLoadSection() {
           ))
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
-            <FiUsers className="text-2xl mb-2 text-zinc-500" />
-            <p className="text-sm text-zinc-400">No active assignments</p>
+            <FiUsers className="text-2xl mb-2 text-(--text-muted)" />
+            <p className="text-sm text-(--text-muted) font-bold uppercase tracking-tight">No active assignments</p>
           </div>
         )}
       </div>
@@ -519,11 +520,11 @@ export async function PriorityMatrixSection() {
   };
 
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
       <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
         <div>
-          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Threat Level</h2>
-          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Priority Matrix</p>
+          <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">Threat Level</h2>
+          <p className="text-[11px] text-(--text-muted) uppercase tracking-tight font-bold mt-0.5">Priority Matrix</p>
         </div>
         {data.hasCritical && (
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20">
@@ -539,7 +540,7 @@ export async function PriorityMatrixSection() {
             {(() => {
               let offset = 0;
               const total = data.segments.reduce((s, seg) => s + seg.value, 0);
-              if (total === 0) return <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10" />;
+              if (total === 0) return <circle cx="50" cy="50" r="40" fill="none" stroke="var(--chart-grid)" strokeWidth="10" />;
               return data.segments.map((seg, i) => {
                 const pct = (seg.value / total) * 100;
                 const dashArray = `${pct * 2.512} ${251.2 - pct * 2.512}`;
@@ -562,8 +563,8 @@ export async function PriorityMatrixSection() {
             })()}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold font-numbers text-white">{data.total}</span>
-            <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Active</span>
+            <span className="text-2xl font-bold font-numbers text-foreground">{data.total}</span>
+            <span className="text-[10px] text-(--text-muted) font-bold uppercase tracking-tight">Active</span>
           </div>
         </div>
         {/* Legend */}
@@ -571,8 +572,8 @@ export async function PriorityMatrixSection() {
           {data.segments.map((seg, i) => (
             <div key={i} className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full" style={{ background: COLORS[seg.name] || seg.color }} />
-              <span className="text-[11px] text-zinc-400">{seg.name}</span>
-              <span className="text-[11px] font-bold font-numbers text-white">{seg.value}</span>
+              <span className="text-[11px] text-(--text-muted) font-bold">{seg.name}</span>
+              <span className="text-[11px] font-bold font-numbers text-foreground">{seg.value}</span>
             </div>
           ))}
         </div>
@@ -594,25 +595,25 @@ export async function TemporalBurnRateSection() {
   const sc = statusConfig[data.status as keyof typeof statusConfig];
 
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
       <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
         <div>
-          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Temporal Burn Rate</h2>
-          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Chronological Efficiency</p>
+          <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">Temporal Burn Rate</h2>
+          <p className="text-[11px] text-(--text-muted) uppercase tracking-tight font-bold mt-0.5">Chronological Efficiency</p>
         </div>
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${sc.bg} border ${sc.border}`}>
           <FiTarget className={`text-[11px] ${sc.color}`} />
-          <span className={`text-[11px] font-bold ${sc.color}`}>{sc.label}</span>
+          <span className={`text-[11px] font-bold ${sc.color} uppercase tracking-tight`}>{sc.label}</span>
         </div>
       </div>
       <div className="flex-1 flex flex-col justify-center space-y-8">
         {/* Estimated Hours Bar */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-zinc-400 font-medium">Estimated Hours</span>
-            <span className="text-sm font-bold font-numbers text-white">{data.estimatedHours}h</span>
+            <span className="text-xs text-(--text-muted) font-bold">Estimated Hours</span>
+            <span className="text-sm font-bold font-numbers text-foreground">{data.estimatedHours}h</span>
           </div>
-          <div className="h-3 bg-white/[0.04] rounded-full overflow-hidden">
+          <div className="h-3 bg-background/50 rounded-full overflow-hidden border border-card-border">
             <div className="h-full rounded-full bg-[var(--pastel-indigo)]/60 transition-all duration-700" style={{ width: '100%' }} />
           </div>
         </div>
@@ -620,10 +621,10 @@ export async function TemporalBurnRateSection() {
         {/* Actual Hours Bar */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-zinc-400 font-medium">Actual Hours Logged</span>
-            <span className="text-sm font-bold font-numbers text-white">{data.actualHours}h</span>
+            <span className="text-xs text-(--text-muted) font-bold">Actual Hours Logged</span>
+            <span className="text-sm font-bold font-numbers text-foreground">{data.actualHours}h</span>
           </div>
-          <div className="h-3 bg-white/[0.04] rounded-full overflow-hidden">
+          <div className="h-3 bg-background/50 rounded-full overflow-hidden border border-card-border">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{
@@ -635,10 +636,10 @@ export async function TemporalBurnRateSection() {
         </div>
 
         {/* Stats footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/5">
+        <div className="flex items-center justify-between pt-2 border-t border-card-border">
           <div className="flex items-center gap-1.5">
-            <FiActivity className="text-xs text-zinc-500" />
-            <span className="text-[11px] text-zinc-500"><span className="font-numbers">{data.projectCount}</span> active projects</span>
+            <FiActivity className="text-xs text-(--text-muted)" />
+            <span className="text-[11px] text-(--text-muted) font-bold uppercase tracking-tight"><span className="font-numbers">{data.projectCount}</span> active projects</span>
           </div>
           <div className={`text-sm font-bold font-numbers ${sc.color}`}>
             {data.burnRatio}% burn
@@ -653,11 +654,11 @@ export async function CriticalBottlenecksSection() {
   const bottlenecks = await getCriticalBottlenecks();
 
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
       <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
         <div>
-          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Delayed Maneuvers</h2>
-          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Critical Bottlenecks</p>
+          <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">Delayed Maneuvers</h2>
+          <p className="text-[11px] text-(--text-muted) uppercase tracking-tight font-bold mt-0.5">Critical Bottlenecks</p>
         </div>
         <div className="p-2 rounded-xl bg-rose-500/10">
           <FiShield className="text-sm text-[var(--pastel-rose)]" />
@@ -666,31 +667,31 @@ export async function CriticalBottlenecksSection() {
       <div className="flex-1 min-h-0 space-y-2.5 overflow-y-auto pr-1 custom-scrollbar">
         {bottlenecks.length > 0 ? (
           bottlenecks.map((task, i) => (
-            <div key={i} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all group">
+            <div key={i} className="p-3 rounded-xl bg-background/50 border border-card-border hover:bg-background/80 hover:border-foreground/10 transition-all group">
               <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="text-sm text-zinc-300 font-medium group-hover:text-white transition-colors truncate flex-1">
+                <h3 className="text-sm text-(--text-muted) font-bold group-hover:text-foreground transition-colors truncate flex-1">
                   {task.title}
                 </h3>
-                <span className="shrink-0 inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-rose-500/15 text-[var(--pastel-rose)] font-bold border border-rose-500/20">
+                <span className="shrink-0 inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-rose-500/15 text-[var(--pastel-rose)] font-bold border border-rose-500/20 font-numbers">
                   <FiClock className="text-[10px]" />
                   {task.daysOverdue}d overdue
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+                <span className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-tight ${
                   task.priority === 'high' ? 'bg-rose-500/10 text-rose-400'
                   : task.priority === 'medium' ? 'bg-amber-500/10 text-amber-400'
-                  : 'bg-zinc-500/10 text-zinc-400'
+                  : 'bg-background/50 text-(--text-muted)'
                 }`}>
                   <FiZap className="text-[10px]" />
                   {task.priority}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-semibold uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-bold uppercase tracking-tight">
                   <FiActivity className="text-[10px]" />
                   {task.status.replace('_', ' ')}
                 </span>
                 {task.projectName && (
-                  <span className="text-[10px] text-zinc-500 truncate">
+                  <span className="text-[10px] text-(--text-muted) font-bold truncate">
                     {task.projectName}
                   </span>
                 )}
@@ -700,8 +701,7 @@ export async function CriticalBottlenecksSection() {
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
             <FiCheckCircle className="text-2xl mb-2 text-emerald-500" />
-            <p className="text-sm text-zinc-400">No overdue tasks!</p>
-            <p className="text-[11px] text-zinc-600 mt-1">All operations on schedule</p>
+            <p className="text-sm text-(--text-muted) font-bold uppercase tracking-tight">No overdue tasks!</p>
           </div>
         )}
       </div>
@@ -717,15 +717,15 @@ export async function LatestIntelligenceSection() {
     idea: 'bg-amber-500/10 text-amber-400',
     journal: 'bg-pink-500/10 text-pink-400',
     code: 'bg-purple-500/10 text-purple-400',
-    note: 'bg-zinc-500/10 text-zinc-400',
+    note: 'bg-background/50 text-(--text-muted)',
   };
 
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
       <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
         <div>
-          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Field Reports</h2>
-          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Latest Intelligence</p>
+          <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">Field Reports</h2>
+          <p className="text-[11px] text-(--text-muted) uppercase tracking-tight font-bold mt-0.5">Latest Intelligence</p>
         </div>
         <div className="p-2 rounded-xl bg-[var(--pastel-amber)]/10">
           <FiRadio className="text-sm text-[var(--pastel-amber)]" />
@@ -734,43 +734,43 @@ export async function LatestIntelligenceSection() {
       <div className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
         {intel.length > 0 ? (
           intel.map((note, i) => (
-            <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.07] transition-all cursor-pointer group">
+            <div key={i} className="p-4 rounded-xl bg-background/50 border border-card-border hover:bg-background/80 hover:border-foreground/10 transition-all cursor-pointer group">
               <div className="flex items-center gap-3 mb-2.5">
-                <div className="shrink-0 h-8 w-8 rounded-full bg-zinc-800 overflow-hidden ring-1 ring-white/10">
+                <div className="shrink-0 h-8 w-8 rounded-full bg-background/50 border border-card-border overflow-hidden ring-1 ring-background relative">
                   {note.authorAvatar ? (
-                    <img src={note.authorAvatar} alt={note.authorName} className="h-full w-full object-cover" />
+                    <Image src={note.authorAvatar} alt={note.authorName} fill className="object-cover" />
                   ) : (
-                    <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-white bg-[var(--pastel-indigo)]/20">
+                    <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-foreground bg-[var(--pastel-indigo)]/20">
                       {note.authorName?.[0]?.toUpperCase()}
                     </div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-zinc-300 group-hover:text-white transition-colors truncate">
+                  <h3 className="text-sm font-bold text-(--text-muted) group-hover:text-foreground transition-colors truncate">
                     {note.title}
                   </h3>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-zinc-500">{note.authorName}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-semibold uppercase tracking-wider ${typeColors[note.type] || typeColors.note}`}>
+                    <span className="text-[10px] text-(--text-muted) font-bold">{note.authorName}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-tight ${typeColors[note.type] || typeColors.note}`}>
                       {note.type}
                     </span>
                   </div>
                 </div>
                 {note.updatedAt && (
-                  <span className="text-[10px] text-zinc-600 shrink-0" suppressHydrationWarning>
+                  <span className="text-[10px] text-(--text-muted) shrink-0 font-bold font-numbers" suppressHydrationWarning>
                     {new Date(note.updatedAt).toLocaleDateString()}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
+              <p className="text-xs text-(--text-muted) font-medium leading-relaxed line-clamp-2">
                 {note.excerpt}
               </p>
             </div>
           ))
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
-            <FiFileText className="text-2xl mb-2 text-zinc-500" />
-            <p className="text-sm text-zinc-400">No recent briefings</p>
+            <FiFileText className="text-2xl mb-2 text-(--text-muted)" />
+            <p className="text-sm text-(--text-muted) font-bold uppercase tracking-tight">No recent briefings</p>
           </div>
         )}
       </div>
@@ -784,20 +784,20 @@ export async function OperationVelocitySection() {
   const avgPerDay = totalClosed > 0 ? (totalClosed / data.length).toFixed(1) : '0';
 
   return (
-    <div className="glass p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 hover-glow flex flex-col h-80 lg:h-96">
+    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
       <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
         <div>
-          <h2 className="text-lg lg:text-xl font-bold text-white tracking-tight">Momentum Tracker</h2>
-          <p className="text-[11px] text-zinc-500 uppercase tracking-wider font-medium mt-0.5">Operation Velocity</p>
+          <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">Momentum Tracker</h2>
+          <p className="text-[11px] text-(--text-muted) uppercase tracking-tight font-bold mt-0.5">Operation Velocity</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-sm font-bold font-numbers text-white">{totalClosed}</p>
-            <p className="text-[10px] text-zinc-500"><span className="font-numbers">14</span>d total</p>
+            <p className="text-sm font-bold font-numbers text-foreground">{totalClosed}</p>
+            <p className="text-[10px] text-(--text-muted) font-bold uppercase tracking-tight"><span className="font-numbers">14</span>d total</p>
           </div>
           <div className="text-right">
             <p className="text-sm font-bold font-numbers text-[var(--pastel-teal)]">{avgPerDay}</p>
-            <p className="text-[10px] text-zinc-500">avg/day</p>
+            <p className="text-[10px] text-(--text-muted) font-bold uppercase tracking-tight">avg/day</p>
           </div>
         </div>
       </div>
