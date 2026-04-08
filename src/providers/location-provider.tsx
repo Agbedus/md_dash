@@ -24,7 +24,7 @@ interface LocationContextType {
     clockOutTime: string | null;
     toggleTracking: () => void;
     manualClockIn: () => Promise<void>;
-    manualClockOut: (force?: boolean) => Promise<{ success?: boolean; confirmRequired?: boolean }>;
+    manualClockOut: (force?: boolean) => Promise<{ success?: boolean; confirmRequired?: boolean; message?: string }>;
     isLoading: boolean;
     isPolling: boolean;
     refreshLocation: () => Promise<void>;
@@ -458,23 +458,6 @@ export function LocationProvider({
         setIsLoading(true);
         try {
             const now = new Date();
-            // Note: Manual Clock-out uses cached data for rules as requested.
-            // Check nearest office from cache based on last known location or defaults
-            const offices = officesRef.current;
-            const office = offices.length > 0 ? offices[0] : null;
-            const policy = office ? policiesRef.current[office.id] : null;
-
-            // Pre-check Warnings (Logic-only confirmation)
-            if (!force) {
-                const inOffice = presenceState === 'IN_OFFICE';
-                const isDuringWorkday = policy ? isTimeInWindow(now, policy.work_start_time, policy.work_end_time) : false;
-
-                if (inOffice || isDuringWorkday) {
-                    setIsLoading(false);
-                    return { confirmRequired: true };
-                }
-            }
-
             // ── 2. Optimistic Update ──
             const previousAttendance = attendanceStateRef.current;
             const previousPresence = presenceStateRef.current;
@@ -493,7 +476,7 @@ export function LocationProvider({
 
             toast.loading("Clocking out...", { id: 'clock-out' });
             
-            const result = await clockOutManual();
+            const result = await clockOutManual(force);
             
             toast.dismiss('clock-out');
             if (result.success && result.record) {
@@ -508,6 +491,19 @@ export function LocationProvider({
                 mutate('my-attendance-today');
                 mutate('team-attendance-today');
                 toast.success('Clocked out successfully!');
+                setIsLoading(false);
+                return { success: true };
+            } else if (result.conflict) {
+                // Rollback
+                setAttendanceState(previousAttendance);
+                attendanceStateRef.current = previousAttendance;
+                setClockOutTime(previousClockOut);
+                setIsTracking(previousTracking);
+                localStorage.setItem(STORAGE_KEY, String(previousTracking));
+                if (previousTracking) startTracking();
+                
+                setIsLoading(false);
+                return { confirmRequired: true, message: result.error };
             } else {
                 // ── Rollback on Failure ──
                 setAttendanceState(previousAttendance);
@@ -521,16 +517,16 @@ export function LocationProvider({
                 if (previousTracking) startTracking();
 
                 toast.error(result.error || 'Failed to clock out');
+                setIsLoading(false);
+                return { success: false };
             }
-            setIsLoading(false);
-            return { success: result.success };
         } catch {
             toast.dismiss('clock-out');
             toast.error('An unexpected error occurred while clocking out.');
             setIsLoading(false);
             return { success: false };
         }
-    }, [mutate, presenceState, clockOutTime, isTracking, startTracking, stopTracking]);
+    }, [mutate, clockOutTime, isTracking, startTracking, stopTracking]);
 
     const refreshLocation = useCallback(async () => {
         setIsLoading(true);

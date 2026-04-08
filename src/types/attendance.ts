@@ -15,6 +15,7 @@ export type AttendanceRecord = {
     presence_state?: PresenceState; // derived, may not be on the record
     first_seen_in_office_at?: string | null;
     last_seen_in_office_at?: string | null;
+    total_seconds?: number;
     total_hours?: number | null;    // computed on frontend
     created_at?: string | null;
     updated_at?: string | null;

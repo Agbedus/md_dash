@@ -8,6 +8,8 @@ import AttendanceHistoryTable from './attendance-history-table';
 import TeamAttendanceGrid from './team-attendance-grid';
 import OfficeSettings from './office-settings';
 import { AttendanceMap } from './attendance-map';
+import useSWR from 'swr';
+import { getMyAttendanceHistory, getTeamAttendanceToday, getTeamAttendanceHistory } from '@/app/(dashboard)/attendance/actions';
 import { FiUser, FiUsers, FiSettings } from 'react-icons/fi';
 
 export interface AttendancePageClientProps {
@@ -36,6 +38,22 @@ export default function AttendancePageClient({
     currentUserId,
 }: AttendancePageClientProps) {
     const [activeTab, setActiveTab] = useState<TabId>('my');
+
+    // SWR Synchronization
+    const { data: liveMyHistory } = useSWR('my-attendance-history', getMyAttendanceHistory, {
+        fallbackData: myHistory,
+        revalidateOnFocus: true
+    });
+
+    const { data: liveTeamToday } = useSWR(isManager ? 'team-attendance-today' : null, getTeamAttendanceToday, {
+        fallbackData: teamToday,
+        revalidateOnFocus: true
+    });
+
+    const { data: liveTeamHistory } = useSWR(isAdmin ? 'team-attendance-history' : null, getTeamAttendanceHistory, {
+        fallbackData: teamHistory,
+        revalidateOnFocus: true
+    });
 
     const tabs: { id: TabId; label: string; icon: React.ElementType; visible: boolean }[] = [
         { id: 'my', label: 'My Attendance', icon: FiUser, visible: true },
@@ -87,7 +105,7 @@ export default function AttendancePageClient({
                                 <AttendanceMap officeLocations={officeLocations} />
                             </div>
                         </div>
-                        <AttendanceHistoryTable records={myHistory} />
+                        <AttendanceHistoryTable records={liveMyHistory || []} />
                     </motion.div>
                 )}
 
@@ -99,8 +117,8 @@ export default function AttendancePageClient({
                         exit={{ opacity: 0, y: -10 }}
                     >
                         <TeamAttendanceGrid
-                            initialRecords={teamToday}
-                            initialHistory={teamHistory}
+                            initialRecords={liveTeamToday || []}
+                            initialHistory={liveTeamHistory || []}
                             users={users}
                             isAdmin={isAdmin}
                         />

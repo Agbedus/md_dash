@@ -161,7 +161,7 @@ export async function updateLocation(
     }
 }
 
-export async function clockOutManual() {
+export async function clockOutManual(force = false) {
     const headers = await getAuthHeaders();
     if (!headers) return { success: false, error: "Unauthorized" };
 
@@ -177,13 +177,26 @@ export async function clockOutManual() {
         const res = await fetch(`${API_BASE_URL}/attendance/clock-out`, {
             method: 'POST',
             headers,
-            body: JSON.stringify({}),
+            body: JSON.stringify({ force }),
         });
 
         if (!res.ok) {
             const errorText = await res.text();
+            let errorMessage = errorText;
+            let isConflict = false;
+
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.detail || errorText;
+                isConflict = res.status === 409;
+            } catch (p) { /* ignore parse error */ }
+
             console.error("clockOutManual:", res.status, errorText);
-            return { success: false, error: `API Error ${res.status}: ${errorText}` };
+            return { 
+                success: false, 
+                conflict: isConflict, 
+                error: errorMessage 
+            };
         }
 
         const data = await res.json();

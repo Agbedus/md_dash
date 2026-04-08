@@ -2,13 +2,13 @@
 
 import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { fetchMyAttendanceLive } from '@/app/(dashboard)/attendance/actions';
 import type { AttendanceRecord } from '@/types/attendance';
 import { presenceStateLabels, presenceStateColors, attendanceStateLabels, attendanceStateColors } from '@/types/attendance';
 import { useLocation } from '@/providers/location-provider';
 import { getDistanceInMeters, formatDistance } from '@/lib/distance-utils';
-import { FiMapPin, FiClock, FiTarget, FiActivity, FiNavigation, FiZap, FiChevronDown, FiChevronUp, FiX } from 'react-icons/fi';
+import { FiMapPin, FiClock, FiTarget, FiActivity, FiNavigation, FiZap, FiChevronDown, FiChevronUp, FiX, FiCheck, FiAlertTriangle } from 'react-icons/fi';
 
 export default function AttendanceStatusCard({ record: initialRecord }: { record: AttendanceRecord | null }) {
     const [mounted, setMounted] = React.useState(false);
@@ -41,21 +41,43 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
         location,
         officeLocation,
     } = useLocation();
+    
+    const { mutate: globalMutate } = useSWRConfig();
 
     const [showConfirm, setShowConfirm] = React.useState(false);
+    const [confirmReason, setConfirmReason] = React.useState<string | null>(null);
+
+    const handleClockIn = async () => {
+        await manualClockIn();
+        
+        // Global Sync
+        globalMutate('my-attendance-today');
+        globalMutate('my-attendance-history');
+        globalMutate('team-attendance-today');
+        globalMutate('team-attendance-history');
+    };
 
     const handleClockOut = async () => {
         const result = await manualClockOut();
         if (result?.confirmRequired) {
+            setConfirmReason(result.message || "Manual override requested.");
             setShowConfirm(true);
         } else {
             setShowConfirm(false);
+            setConfirmReason(null);
         }
     };
 
     const handleConfirmClockOut = async () => {
         await manualClockOut(true);
         setShowConfirm(false);
+        setConfirmReason(null);
+        
+        // Global Sync
+        globalMutate('my-attendance-today');
+        globalMutate('my-attendance-history');
+        globalMutate('team-attendance-today');
+        globalMutate('team-attendance-history');
     };
 
     const rawPresence = manualPresence || liveRecord?.presence_state || initialRecord?.presence_state || null;
@@ -148,43 +170,77 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
             <div className="w-full z-10">
                 {currentAttendance !== 'CLOCKED_IN' ? (
                     <button
-                        onClick={manualClockIn}
+                        onClick={handleClockIn}
                         disabled={isLoading}
-                        className="group relative w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-emerald-500 text-background hover:bg-emerald-400 active:scale-[0.98] transition-all duration-300"
+                        className="group relative w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-emerald-500 text-emerald-950 hover:bg-emerald-400 active:scale-[0.96] transition-all duration-500 shadow-[0_8px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_12px_40px_rgba(16,185,129,0.4)]"
                     >
                         <FiClock className="w-4 h-4" />
                         <span className="text-base font-black uppercase tracking-wider italic leading-none">
                             {isLoading ? 'Relocating...' : 'Clock In'}
                         </span>
                     </button>
-                ) : showConfirm ? (
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={handleConfirmClockOut}
-                            disabled={isLoading}
-                            className="flex-1 py-3.5 rounded-2xl bg-rose-500 text-foreground font-black uppercase tracking-wider hover:bg-rose-600 active:scale-95 transition-all flex items-center justify-center gap-2"
-                        >
-                            <FiX className="w-4 h-4" />
-                            Confirm
-                        </button>
-                        <button
-                            onClick={() => setShowConfirm(false)}
-                            className="px-6 py-3.5 rounded-2xl bg-foreground/[0.03] border border-card-border text-text-muted text-[10px] font-bold uppercase tracking-widest hover:text-foreground transition-all"
-                        >
-                            Back
-                        </button>
-                    </div>
                 ) : (
-                    <button
-                        onClick={handleClockOut}
-                        disabled={isLoading}
-                        className="group w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-foreground/[0.03] border border-card-border text-foreground hover:bg-foreground/[0.06] active:scale-[0.98] transition-all duration-300"
-                    >
-                        <FiX className="w-4 h-4 group-hover:text-rose-400 transition-colors" />
-                        <span className="text-base font-black uppercase tracking-wider italic leading-none">
-                            {isLoading ? 'Syncing...' : 'Clock Out'}
-                        </span>
-                    </button>
+                    <div className="relative h-[60px] w-full">
+                        <AnimatePresence mode="wait">
+                            {!showConfirm ? (
+                                <motion.button
+                                    key="clock-out-btn"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    onClick={handleClockOut}
+                                    disabled={isLoading}
+                                    className="group w-full h-full flex items-center justify-center gap-3 rounded-2xl bg-foreground/[0.03] border border-card-border text-foreground hover:bg-foreground/[0.06] active:scale-[0.98] transition-all duration-300"
+                                >
+                                    <FiX className="w-4 h-4 group-hover:text-rose-400 transition-colors" />
+                                    <span className="text-base font-black uppercase tracking-wider italic leading-none">
+                                        {isLoading ? 'Syncing...' : 'Clock Out'}
+                                    </span>
+                                </motion.button>
+                            ) : (
+                                <motion.div
+                                    key="confirm-banner"
+                                    initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }}
+                                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                                    exit={{ opacity: 0, y: -10, filter: 'blur(10px)' }}
+                                    className="w-full h-full flex items-center justify-between gap-4 px-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 backdrop-blur-xl relative overflow-hidden group shadow-[0_0_30px_rgba(244,63,94,0.1)]"
+                                >
+                                    {/* Accent line */}
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-rose-500/50" />
+                                    
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <div className="p-2 rounded-lg bg-rose-500/20">
+                                            <FiAlertTriangle className="text-rose-400 w-4 h-4 animate-pulse" />
+                                        </div>
+                                        <p className="text-[11px] font-bold text-rose-300/90 leading-tight uppercase tracking-wide truncate pr-2">
+                                            {confirmReason || "Manual override required"}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <button
+                                            onClick={handleConfirmClockOut}
+                                            disabled={isLoading}
+                                            className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-[0_4px_12px_rgba(244,63,94,0.3)]"
+                                            title="Confirm Override"
+                                        >
+                                            <FiCheck className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowConfirm(false);
+                                                setConfirmReason(null);
+                                            }}
+                                            className="w-10 h-10 rounded-xl bg-foreground/5 border border-card-border text-text-muted flex items-center justify-center hover:text-foreground hover:bg-foreground/10 active:scale-90 transition-all"
+                                            title="Cancel"
+                                        >
+                                            <FiX className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 )}
             </div>
 
@@ -246,13 +302,20 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
                                 <div className="flex flex-col gap-0.5">
                                     <span className="text-[8px] font-bold text-text-muted uppercase tracking-tighter">Active Duty</span>
                                     <span className="text-xs font-numbers text-foreground font-medium tracking-tight">
-                                        {mounted && clockInTime ? (
+                                        {mounted ? (
                                             (() => {
-                                                const start = new Date(clockInTime);
-                                                const end = clockOutTime ? new Date(clockOutTime) : new Date();
-                                                const diffMs = end.getTime() - start.getTime();
-                                                const h = Math.floor(diffMs / 3600000);
-                                                const m = Math.floor((diffMs % 3600000) / 60000);
+                                                const cumulativeSeconds = liveRecord?.total_seconds || initialRecord?.total_seconds || 0;
+                                                let totalSec = cumulativeSeconds;
+                                                
+                                                if (currentAttendance === 'CLOCKED_IN' && clockInTime) {
+                                                    const start = new Date(clockInTime);
+                                                    const now = new Date();
+                                                    const sessionSec = Math.max(0, Math.floor((now.getTime() - start.getTime()) / 1000));
+                                                    totalSec += sessionSec;
+                                                }
+
+                                                const h = Math.floor(totalSec / 3600);
+                                                const m = Math.floor((totalSec % 3600) / 60);
                                                 return `${h}h ${m}m`;
                                             })()
                                         ) : '0h 0m'}
