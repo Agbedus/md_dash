@@ -10,7 +10,6 @@ import type { PresenceState, AttendanceState, AttendancePolicy, OfficeLocation, 
 
 const STORAGE_KEY = 'md_location_tracking_enabled';
 const CONFIG_CACHE_KEY = 'md_attendance_config_cache';
-const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
 const SYNC_THROTTLE_MS = 5 * 60 * 1000; // Throttle backend sync to once per 5 minutes unless state changes
 
 import { isTimeInWindow, isAfterTime, isBeforeTime, isWithinRadius } from '@/lib/attendance-utils';
@@ -127,59 +126,52 @@ export function LocationProvider({
     const presenceStateRef = useRef<PresenceState | null>(null);
     const attendanceStateRef = useRef<AttendanceState | null>(null); // To avoid dependency loop in callbacks
 
-    // 1. Initial Data Load with 6-hour caching
+    const syncConfiguration = useCallback(async (force = false) => {
+        try {
+            // If not forced, try to load from localStorage first for immediate UI hydration
+            const cached = localStorage.getItem(CONFIG_CACHE_KEY);
+            if (cached && !force) {
+                const { offices, policies } = JSON.parse(cached);
+                officesRef.current = offices;
+                policiesRef.current = policies;
+                if (offices.length > 0) {
+                    setOfficeLocationState({ latitude: offices[0].latitude, longitude: offices[0].longitude });
+                }
+                setIsInitialized(true);
+            }
+
+            console.log('[LocationProvider] Syncing configuration with server...');
+            const offices = await getOfficeLocations();
+            officesRef.current = offices;
+            if (offices.length > 0) {
+                setOfficeLocationState({ latitude: offices[0].latitude, longitude: offices[0].longitude });
+            }
+            
+            const { getAttendancePolicy } = await import('@/app/(dashboard)/attendance/actions');
+            const newPolicies: Record<number, AttendancePolicy> = {};
+            for (const office of offices) {
+                const p = await getAttendancePolicy(office.id);
+                if (p) newPolicies[office.id] = p;
+            }
+            policiesRef.current = newPolicies;
+            
+            // Update Cache
+            localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify({
+                offices,
+                policies: newPolicies,
+                timestamp: Date.now()
+            }));
+
+            setIsInitialized(true);
+        } catch (err) {
+            console.error('Failed to sync location config:', err);
+            setIsInitialized(true); 
+        }
+    }, []);
+
     useEffect(() => {
         const initData = async () => {
-            let configStale = true;
-            try {
-                // Check Cache and load immediately if available (even if stale)
-                const cached = localStorage.getItem(CONFIG_CACHE_KEY);
-                if (cached) {
-                    const { offices, policies, timestamp } = JSON.parse(cached);
-                    console.log('[LocationProvider] Loading cached attendance config immediately');
-                    officesRef.current = offices;
-                    policiesRef.current = policies;
-                    if (offices.length > 0) {
-                        setOfficeLocationState({ latitude: offices[0].latitude, longitude: offices[0].longitude });
-                    }
-                    setIsInitialized(true);
-                    
-                    const now = Date.now();
-                    if (now - timestamp < CACHE_DURATION) {
-                        configStale = false;
-                        console.log('[LocationProvider] Cache is fresh (6h window).');
-                    }
-                }
-
-                if (configStale) {
-                    console.log('[LocationProvider] Syncing configuration with server...');
-                    const offices = await getOfficeLocations();
-                    officesRef.current = offices;
-                    if (offices.length > 0) {
-                        setOfficeLocationState({ latitude: offices[0].latitude, longitude: offices[0].longitude });
-                    }
-                    
-                    const { getAttendancePolicy } = await import('@/app/(dashboard)/attendance/actions');
-                    const newPolicies: Record<number, AttendancePolicy> = {};
-                    for (const office of offices) {
-                        const p = await getAttendancePolicy(office.id);
-                        if (p) newPolicies[office.id] = p;
-                    }
-                    policiesRef.current = newPolicies;
-                    
-                    // Update Cache
-                    localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify({
-                        offices,
-                        policies: newPolicies,
-                        timestamp: Date.now()
-                    }));
-
-                    setIsInitialized(true);
-                }
-            } catch (err) {
-                console.error('Failed to initialize location config:', err);
-                setIsInitialized(true); 
-            }
+            await syncConfiguration();
         };
 
         // Check browser support and restore preference
@@ -195,7 +187,7 @@ export function LocationProvider({
         });
 
         initData();
-    }, []);
+    }, [syncConfiguration]);
 
 
     const handlePositionUpdate = useCallback(async (position: GeolocationPosition) => {
@@ -241,13 +233,16 @@ export function LocationProvider({
             setPresenceState(localPresence);
         }
 
-        // 3. Throttled Backend Sync
+        // 3. Dynamic Sync: Location + Configuration
         const timeSinceLastSync = Date.now() - lastSyncTimeRef.current;
         const shouldSync = stateChanged || timeSinceLastSync >= SYNC_THROTTLE_MS;
 
         if (shouldSync && accuracy <= 50) {
             setIsPolling(true);
             try {
+                // Ensure configuration is fresh
+                await syncConfiguration(true);
+                
                 const result = await updateLocation(latitude, longitude, accuracy, activeOffice.id);
                 if (result.success && result.record) {
                     const newAtt = result.record.attendance_state;
@@ -286,7 +281,7 @@ export function LocationProvider({
                 setIsPolling(false);
             }
         }
-    }, [isInitialized, mutate]);
+    }, [isInitialized, mutate, syncConfiguration]);
 
     const startTracking = useCallback(() => {
         if (!navigator.geolocation) return;
@@ -546,6 +541,9 @@ export function LocationProvider({
             const { latitude, longitude, accuracy } = position.coords;
             setLocation({ latitude, longitude, accuracy });
             
+            // Sync both configuration and location
+            await syncConfiguration(true);
+            
             // Sync with backend
             const offices = officesRef.current;
             const resolvedId = offices.length > 0 ? offices[0].id : undefined;
@@ -561,7 +559,7 @@ export function LocationProvider({
         } finally {
             setIsLoading(false);
         }
-    }, [mutate]);
+    }, [mutate, syncConfiguration]);
 
     const contextValue = React.useMemo(() => ({
         isTracking,
