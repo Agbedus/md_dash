@@ -2,36 +2,36 @@
 
 This document outlines the core validation and synchronization rules for the MD Platform Attendance System.
 
-## 1. Geofencing & Location Validation
+## 📡 Monitoring Strategy
 
-### Office Perimeter
-- **Default Radius**: 200 meters.
-- **Validation Source**: Front-end location calculation (Haversine formula) in the `LocationProvider`.
-- **Enforcement**: 
-    - **Automatic**: System triggers a check-in/out when entering or exiting the 200m perimeter.
-    - **Manual**: Users can only clock in manually if their current coordinates are validated within the 200m radius of the office location.
+*   **GPS Polling**: Active tracking occurs every **5 minutes** to maintain presence accuracy while preserving battery life.
+*   **Accuracy Jitter**: Readings with accuracy > 30m are ignored for automatic transitions to prevent phantom check-outs.
+*   **Infrastructure Caching**: Office locations and attendance policies are cached on the frontend for **6 hours** to ensure high performance and offline-ready rule evaluation.
 
-### GPS Accuracy Thresholds
-- **High Sensitivity**: < 50m accuracy required for automatic pings.
-- **Low Signal Handling**: If accuracy is > 100m, the system will mark the location as "Estimated" and may require manual confirmation for sensitive operations.
+## 🏢 Presence Zones (Radii)
 
-## 2. Clock-In / Clock-Out Workflows
+Zones are defined per office location with descriptive clarity:
+
+- **In-Office**: The strict geofence (e.g., 200m) where a user is considered present and can clock in.
+- **Tem-Out (Temporarily Out)**: The grace perimeter where a user's clock remains active, but they are flagged as stepped out.
+- **Out**: The boundary beyond which a user is considered out of office.
+
+## 🕒 Transition Rules
 
 ### Manual Clock-In
-- **Rule**: Must be within the designated office perimeter.
-- **Verification**: The front-end calculates the distance from the office *before* allowing the UI button to activate.
-- **Feedback**: Instant UI update upon successful API response.
+Validates the following before confirming:
+1.  **GPS Signal**: High-precision GPS lock confirmed.
+2.  **Proximity**: User must be within the **In-Office** radius.
+3.  **Arrival Window**: Current time must be between `check-in-open` and `check-in-close`.
+4.  **Auto-Out Protection**: Cannot clock in after the defined `auto-clock-out` time.
 
 ### Manual Clock-Out
-- **Rule**: Can be performed from any location.
-- **Optimization**: Redundant GPS accuracy and distance checks are bypassed for Clock-Out to ensure immediate feedback to the employee.
+Refined flow designed to prevent accidental data loss:
+1.  **Context Check**: Uses cached policy data to evaluate status.
+2.  **Active Warning**: If the user is still **In-Office** or the current shift (`work-start` to `work-end`) has not finished, a warning is triggered.
+3.  **User Confirmation**: An explicit confirmation is required to proceed with a clock-out during active periods.
 
-## 3. Real-time Synchronization
+## 🔄 Synchronization & Enforcement
 
-### UI State Management
-- **Optimistic Updates**: The UI assumes success and updates the primary status indicator immediately.
-- **SWR Mutations**: Successful actions trigger a global mutation on the `attendance/history` and `attendance/status` endpoints to refresh all dashboard components (History, Team Grid, TopNav).
-
-### Background Sync
-- All geolocation pings are queued and sent asynchronously to ensure the UI remains responsive even in low-data environments.
-- Logs of "Position Unavailable" are suppressed unless persistent over 30 seconds.
+- **Optimistic UX**: The frontend evaluates rules locally for immediate feedback.
+- **Multi-Layer Validation**: All rules are re-enforced at the Server Action / Backend layer to ensure data integrity regardless of client state.

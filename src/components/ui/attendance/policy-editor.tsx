@@ -22,6 +22,8 @@ export default function PolicyEditor({ officeLocationId }: { officeLocationId: n
         temporarily_out_grace_minutes: 5,
         out_of_office_grace_minutes: 10,
         return_to_office_confirmation_minutes: 2,
+        auto_clock_in_delay_minutes: 10,
+        presence_audit_interval_minutes: 15,
     });
 
     useEffect(() => {
@@ -43,6 +45,8 @@ export default function PolicyEditor({ officeLocationId }: { officeLocationId: n
                     temporarily_out_grace_minutes: p.temporarily_out_grace_minutes ?? 5,
                     out_of_office_grace_minutes: p.out_of_office_grace_minutes ?? 10,
                     return_to_office_confirmation_minutes: p.return_to_office_confirmation_minutes ?? 2,
+                    auto_clock_in_delay_minutes: p.auto_clock_in_delay_minutes ?? 10,
+                    presence_audit_interval_minutes: p.presence_audit_interval_minutes ?? 15,
                 });
             }
         });
@@ -200,6 +204,26 @@ export default function PolicyEditor({ officeLocationId }: { officeLocationId: n
                                         <CustomTimePicker
                                             value={toTimeValue(form.auto_clock_out_time)}
                                             onChange={val => setForm(f => ({ ...f, auto_clock_out_time: fromTimeValue(val) }))}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className={labelClass}>Auto-In Delay</label>
+                                        <input
+                                            type="number"
+                                            value={form.auto_clock_in_delay_minutes}
+                                            onChange={e => setForm(f => ({ ...f, auto_clock_in_delay_minutes: parseInt(e.target.value) || 0 }))}
+                                            className={inputClass}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={labelClass}>Audit Interval</label>
+                                        <input
+                                            type="number"
+                                            value={form.presence_audit_interval_minutes}
+                                            onChange={e => setForm(f => ({ ...f, presence_audit_interval_minutes: parseInt(e.target.value) || 0 }))}
+                                            className={inputClass}
                                         />
                                     </div>
                                 </div>

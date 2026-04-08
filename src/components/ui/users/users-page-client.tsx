@@ -138,7 +138,7 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-10">
         <div>
-          <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">Team Intelligence</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Team intelligence</h1>
           <p className="text-text-muted text-lg">Cross-functional team coordination & role management.</p>
         </div>
       </div>

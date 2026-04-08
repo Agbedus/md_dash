@@ -13,23 +13,23 @@ const AssistantCard: React.FC<CardProps> = ({ item, type }) => {
   const Icon = isNote ? FiFileText : FiCheckSquare;
 
   return (
-    <div className="glass rounded-xl p-4 border border-white/5 hover:bg-white/[0.03] transition-all duration-300 group cursor-pointer">
+    <div className="bg-card rounded-xl p-4 border border-card-border hover:bg-foreground/[0.03] transition-all duration-300 group cursor-pointer">
       <div className="flex items-center mb-2">
-        <div className="p-2 rounded-lg bg-white/[0.03] mr-3 group-hover:bg-white/[0.06] transition-colors">
+        <div className="p-2 rounded-lg bg-foreground/[0.03] mr-3 group-hover:bg-foreground/[0.06] transition-colors">
             <Icon className="text-purple-400 w-5 h-5" />
         </div>
-        <h3 className="font-semibold text-zinc-200 truncate group-hover:text-white transition-colors">
+        <h3 className="font-semibold text-foreground truncate group-hover:text-purple-400 transition-colors">
           {isNote ? (item as Note).title : (item as Task).name}
         </h3>
       </div>
       {'content' in item && item.content && (
         <div
-          className="text-sm text-zinc-400 prose prose-invert prose-sm line-clamp-3"
+          className="text-sm text-text-muted prose prose-sm line-clamp-3 dark:prose-invert"
           dangerouslySetInnerHTML={{ __html: item.content }}
         />
       )}
       {'description' in item && item.description && (
-        <p className="text-sm text-zinc-400 line-clamp-2">{item.description}</p>
+        <p className="text-sm text-text-muted line-clamp-2">{item.description}</p>
       )}
     </div>
   );

@@ -25,7 +25,7 @@ import Image from 'next/image';
 import { Portal } from '@/components/ui/portal';
 import { formatDistanceToNow } from 'date-fns';
 
-type Category = 'all' | 'tasks' | 'notes' | 'projects' | 'system';
+type Category = 'all' | 'tasks' | 'notes' | 'projects' | 'system' | 'attendance';
 
 interface TabItem {
   id: Category;
@@ -35,6 +35,7 @@ interface TabItem {
 
 const tabs: TabItem[] = [
   { id: 'all', label: 'All', icon: FiInbox },
+  { id: 'attendance', label: 'Attendance', icon: FiClock },
   { id: 'tasks', label: 'Tasks', icon: FiCheckCircle },
   { id: 'notes', label: 'Notes', icon: FiFileText },
   { id: 'projects', label: 'Projects', icon: FiLayers },
@@ -136,10 +137,11 @@ export default function NotificationsPage() {
       if (!matchesSearch) return false;
       if (activeTab === 'all') return true;
 
+      if (activeTab === 'attendance') return n.resource_type === 'attendance';
       if (activeTab === 'tasks') return n.resource_type === 'task' || n.title.toLowerCase().includes('task');
       if (activeTab === 'notes') return n.resource_type === 'note' || n.title.toLowerCase().includes('note');
       if (activeTab === 'projects') return n.resource_type === 'project' || n.title.toLowerCase().includes('project');
-      if (activeTab === 'system') return n.resource_type === 'system' || (!n.resource_type && !n.title.toLowerCase().match(/task|note|project/));
+      if (activeTab === 'system') return n.resource_type === 'system' || (!n.resource_type && !n.title.toLowerCase().match(/task|note|project|attendance/));
       
       return true;
     }).map(n => ({
@@ -169,10 +171,11 @@ export default function NotificationsPage() {
   const notificationStats = useMemo(() => {
     const stats = {
       all: notifications.length,
+      attendance: notifications.filter(n => n.resource_type === 'attendance').length,
       tasks: notifications.filter(n => n.resource_type === 'task').length,
       notes: notifications.filter(n => n.resource_type === 'note').length,
       projects: notifications.filter(n => n.resource_type === 'project').length,
-      system: notifications.filter(n => n.resource_type === 'system' || (!n.resource_type && !n.title.toLowerCase().match(/task|note|project/))).length,
+      system: notifications.filter(n => n.resource_type === 'system' || (!n.resource_type && !n.title.toLowerCase().match(/task|note|project|attendance/))).length,
     };
     return stats;
   }, [notifications]);

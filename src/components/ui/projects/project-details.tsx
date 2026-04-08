@@ -60,7 +60,7 @@ export function ProjectDetails({ project, users, clients, notes, projects, onClo
 
                     <div className="flex items-center gap-3 mb-4">
                         <span className={`px-2.5 py-1 rounded-lg text-[11px] font-medium uppercase tracking-wider border ${
-                            project.status === 'completed' ? 'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20 -[0_0_15px_rgba(16,185,129,0.1)]' :
+                            project.status === 'completed' ? 'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20' :
                             project.status === 'in_progress' ? 'bg-[var(--pastel-blue)]/10 text-[var(--pastel-blue)] border-[var(--pastel-blue)]/20' :
                             'bg-white/[0.03] text-zinc-500 border-white/5'
                         }`}>
@@ -144,8 +144,8 @@ export function ProjectDetails({ project, users, clients, notes, projects, onClo
                             </div>
                             
                             {projectTasks.length > 0 ? (
-                                <div className="glass rounded-2xl overflow-hidden border border-white/5">
-                                    <table className="w-full text-left text-sm">
+                                <div className="rounded-2xl overflow-x-auto border border-white/5 custom-scrollbar">
+                                    <table className="w-full text-left text-sm min-w-[800px]">
                                         <tbody className="divide-y divide-white/5">
                                             {projectTasks.map(task => (
                                                 <TaskCard 

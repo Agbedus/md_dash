@@ -142,13 +142,13 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
 
   return (
     <form onSubmit={handleSubmit} className="p-4">
-      <div className="glass p-2 relative flex flex-col w-full max-w-full rounded-3xl border border-white/5 transition-all duration-300 focus-within:border-white/5 focus-within:bg-white/[0.03]">
+      <div className="bg-card p-2 relative flex flex-col w-full max-w-full rounded-3xl border border-card-border transition-all duration-300 focus-within:bg-foreground/[0.02]">
         <input
           type="text"
           value={displayValue}
           onChange={(e) => { setBaseText(e.target.value); setInterimText(''); }}
           placeholder="Type a message or use voice..."
-          className="flex-grow bg-transparent text-white placeholder:text-zinc-500 px-4 py-3 rounded-full focus:outline-none"
+          className="flex-grow bg-transparent text-foreground placeholder:text-text-muted px-4 py-3 rounded-full focus:outline-none"
           aria-label="Message"
         />
 
@@ -170,7 +170,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
             <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all duration-200"
+                className="p-2 rounded-full text-text-muted hover:text-foreground hover:bg-foreground/[0.06] transition-all duration-200"
                 aria-label="Attach file"
                 title="Attach file"
             >
@@ -183,7 +183,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
                   const url = prompt('Enter URL to attach');
                   if (url) onSendMessage(url);
                 }}
-                className="p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all duration-200"
+                className="p-2 rounded-full text-text-muted hover:text-foreground hover:bg-foreground/[0.06] transition-all duration-200"
                 aria-label="Attach URL"
                 title="Attach URL"
             >
@@ -196,7 +196,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
                 <button
                     type="button"
                     onClick={toggleRecording}
-                    className={`p-2 rounded-full transition-all duration-200 ${isRecording ? 'bg-red-500/20 text-red-400 animate-pulse' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'}`}
+                    className={`p-2 rounded-full transition-all duration-200 ${isRecording ? 'bg-red-500/20 text-red-400 animate-pulse' : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.06]'}`}
                     aria-pressed={isRecording}
                     aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
                     title={isRecording ? 'Stop' : 'Voice'}

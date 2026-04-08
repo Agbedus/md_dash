@@ -13,7 +13,7 @@ export interface Notification {
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
-  resource_type?: 'task' | 'note' | 'project' | 'system' | null;
+  resource_type?: 'task' | 'note' | 'project' | 'system' | 'attendance' | null;
   resource_id?: string | null;
   is_read: boolean;
   created_at: string;

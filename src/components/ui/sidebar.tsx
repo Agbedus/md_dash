@@ -90,7 +90,7 @@ const Sidebar = ({ user }: SidebarProps) => {
   /* ---------- Header ---------- */
 
   const headerClass = `
-    h-20 flex items-center border-b border-sidebar-border transition-all duration-300
+    h-20 flex items-center border-b border-card-border transition-all duration-300
     ${isSidebarCollapsed ? "justify-center px-0" : "justify-start px-6"}
   `;
 

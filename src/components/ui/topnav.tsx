@@ -60,7 +60,7 @@ const TopNav = ({ user }: TopNavProps) => {
   return (
     <>
       <CommandMenu open={isCommandOpen} setOpen={setIsCommandOpen} />
-      <nav className="h-16 md:h-24 px-4 md:px-8 flex items-center justify-between md:sticky md:top-0 z-40 bg-background/80 backdrop-blur-md border-b border-card-border md:border-none">
+      <nav className="h-20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-card-border">
         <div className="flex items-center gap-6 flex-1">
           {/* Mobile Logo */}
           <Link href={user ? "/dashboard" : "/"} className="md:hidden flex items-center gap-2">
@@ -106,7 +106,7 @@ const TopNav = ({ user }: TopNavProps) => {
             </button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl">
+              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-background/95 border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl">
                 <div className="px-4 py-3 border-b border-card-border flex justify-between items-center">
                   <p className="text-sm font-bold text-foreground">Notifications</p>
                   {unreadCount > 0 && (
@@ -240,7 +240,7 @@ const TopNav = ({ user }: TopNavProps) => {
 
               {/* Dropdown Menu */}
               {isOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-card border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl">
+                  <div className="absolute right-0 mt-2 w-56 bg-background/95 border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl">
                       <div className="px-4 py-3 border-b border-card-border mb-2">
                           <p className="text-sm font-bold text-foreground truncate">{user.name || 'User'}</p>
                           <p className="text-xs text-text-muted font-medium truncate">{user.email}</p>

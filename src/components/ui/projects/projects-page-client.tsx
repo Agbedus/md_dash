@@ -216,7 +216,7 @@ export default function ProjectsPageClient({
       {/* Header Section */}
       <div className="hidden lg:flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-10">
         <div>
-          <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight uppercase">Strategic Portfolio</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Strategic portfolio</h1>
           <p className="text-text-muted text-sm font-bold uppercase tracking-wider">Global project coordination & intelligence hub.</p>
         </div>
         <div className="flex items-center gap-4">
@@ -231,7 +231,7 @@ export default function ProjectsPageClient({
       </div>
 
       <div className="md:hidden flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold text-foreground uppercase tracking-tight">Projects</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Projects</h1>
            <button
             onClick={() => setIsCreateModalOpen(true)}
             className="flex items-center gap-2 h-9 px-4 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border text-xs font-bold text-foreground transition-all"
@@ -372,14 +372,14 @@ export default function ProjectsPageClient({
         <div className="flex items-center space-x-1 bg-foreground/[0.03] p-1 rounded-xl border border-card-border h-9 lg:h-11 flex-shrink-0 ml-auto">
           <button
             onClick={() => setViewMode('list')}
-            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'list' ? 'bg-card text-foreground border border-card-border shadow-sm' : 'text-text-muted hover:text-foreground'}`}
+            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'list' ? 'bg-card text-foreground border border-card-border' : 'text-text-muted hover:text-foreground'}`}
             title="Table view"
           >
             <FiList className="w-4 h-4 lg:w-5 lg:h-5"/>
           </button>
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-card text-foreground border border-card-border shadow-sm' : 'text-text-muted hover:text-foreground'}`}
+            className={`p-1.5 lg:p-2 rounded-lg transition-all hover-scale ${viewMode === 'grid' ? 'bg-card text-foreground border border-card-border' : 'text-text-muted hover:text-foreground'}`}
             title="Grid view"
           >
             <FiGrid className="w-4 h-4 lg:w-5 lg:h-5"/>

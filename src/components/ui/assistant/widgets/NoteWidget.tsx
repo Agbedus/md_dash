@@ -20,24 +20,24 @@ export default function NoteWidget({ note }: NoteWidgetProps) {
   };
 
   return (
-    <div className="glass p-4 rounded-xl border border-white/5 hover:border-white/5 transition-all">
+    <div className="bg-card p-4 rounded-xl border border-card-border hover:bg-foreground/[0.02] transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <h4 className="font-semibold text-white truncate">{note.title}</h4>
-            <span className={`text-xs px-2 py-0.5 rounded-lg bg-white/[0.03] ${typeColor} font-medium whitespace-nowrap`}>
+            <h4 className="font-semibold text-foreground truncate">{note.title}</h4>
+            <span className={`text-xs px-2 py-0.5 rounded-lg bg-foreground/[0.03] ${typeColor} font-medium whitespace-nowrap`}>
               {note.type}
             </span>
           </div>
           
-          <p className="text-sm text-zinc-400 mb-3 line-clamp-3">
+          <p className="text-sm text-text-muted mb-3 line-clamp-3">
             {truncateContent(note.content)}
           </p>
           
           {note.tags && (
             <div className="flex flex-wrap gap-1 text-xs">
               {note.tags.split(',').map((tag, idx) => (
-                <span key={idx} className="px-2 py-0.5 rounded bg-white/[0.03] text-zinc-500">
+                <span key={idx} className="px-2 py-0.5 rounded bg-foreground/[0.03] text-text-muted">
                   #{tag.trim()}
                 </span>
               ))}

@@ -70,7 +70,7 @@ export default function ProjectDashboardClient({
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-foreground/[0.03] border border-card-border shadow-sm">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-foreground/[0.03] border border-card-border">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         <span className="text-[11px] font-medium text-foreground uppercase tracking-wider">Active System</span>
                     </div>
@@ -108,7 +108,7 @@ export default function ProjectDashboardClient({
                             <div className="w-full h-1 bg-foreground/[0.06] rounded-full overflow-hidden">
                                 <div 
                                     className={`h-full transition-all duration-1000 ${
-                                        taskProgress > 75 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 
+                                        taskProgress > 75 ? 'bg-emerald-500' : 
                                         taskProgress > 40 ? 'bg-indigo-500' : 'bg-amber-500'
                                     }`} 
                                     style={{ width: `${taskProgress}%` }} 
@@ -144,7 +144,7 @@ export default function ProjectDashboardClient({
                                     <div className="xl:col-span-2 space-y-6">
                                         {/* Row 1: Milestones & Risk */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="glass rounded-2xl p-6 border border-card-border bg-foreground/[0.02] flex flex-col gap-6 shadow-sm">
+                                            <div className="rounded-2xl p-6 border border-card-border bg-card flex flex-col gap-6">
                                                 <h3 className="text-[11px] font-medium text-foreground uppercase tracking-wider flex items-center gap-3">
                                                     <FiActivity className="text-indigo-500" />
                                                     Strategic Milestones
@@ -174,7 +174,7 @@ export default function ProjectDashboardClient({
                                                 </div>
                                             </div>
 
-                                            <div className="glass rounded-2xl p-6 border border-card-border bg-foreground/[0.02] flex flex-col gap-6 shadow-sm">
+                                            <div className="rounded-2xl p-6 border border-card-border bg-card flex flex-col gap-6">
                                                 <h3 className="text-[11px] font-medium text-foreground uppercase tracking-wider flex items-center gap-3">
                                                     <FiActivity className="text-amber-500" />
                                                     System Telemetry
@@ -199,7 +199,7 @@ export default function ProjectDashboardClient({
                                                 </button>
                                             </div>
                                             
-                                            <div className="glass rounded-2xl overflow-hidden border border-card-border bg-foreground/[0.02] shadow-sm">
+                                            <div className="rounded-2xl overflow-hidden border border-card-border bg-card">
                                                 <div className="overflow-x-auto">
                                                     <table className="w-full text-left">
                                                         <thead>
@@ -243,7 +243,7 @@ export default function ProjectDashboardClient({
 
                                         {/* Row 3: Project Intelligence */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div className="glass rounded-2xl p-6 border border-card-border bg-foreground/[0.02] flex flex-col gap-4 shadow-sm">
+                                            <div className="rounded-2xl p-6 border border-card-border bg-card flex flex-col gap-4">
                                                 <h3 className="text-[11px] font-medium text-foreground uppercase tracking-wider flex items-center gap-3">
                                                     <FiActivity className="text-rose-500" />
                                                     Activity Intel
@@ -255,7 +255,7 @@ export default function ProjectDashboardClient({
                                                     <ActivityItem user={users[1] || users[0]} action="posted briefing" target="Alpha Protocol Update" time="4h ago" />
                                                 </div>
                                             </div>
-                                            <div className="glass rounded-2xl p-6 border border-card-border bg-foreground/[0.02] flex flex-col gap-4 shadow-sm">
+                                            <div className="rounded-2xl p-6 border border-card-border bg-card flex flex-col gap-4">
                                                 <h3 className="text-[11px] font-medium text-foreground uppercase tracking-wider flex items-center gap-3">
                                                     <FiDollarSign className="text-emerald-500" />
                                                     Financial Telemetry
@@ -272,11 +272,11 @@ export default function ProjectDashboardClient({
                                                         </div>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-4">
-                                                        <div className="p-3 rounded-xl bg-foreground/[0.03] border border-card-border shadow-sm">
+                                                        <div className="p-3 rounded-xl bg-foreground/[0.03] border border-card-border">
                                                             <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1">Spent</p>
                                                             <p className="text-xs font-medium text-foreground">${(project.spent || 0).toLocaleString()}</p>
                                                         </div>
-                                                        <div className="p-3 rounded-xl bg-foreground/[0.03] border border-card-border shadow-sm">
+                                                        <div className="p-3 rounded-xl bg-foreground/[0.03] border border-card-border">
                                                             <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider mb-1">Available</p>
                                                             <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">${((project.budget || 0) - (project.spent || 0)).toLocaleString()}</p>
                                                         </div>
@@ -289,12 +289,12 @@ export default function ProjectDashboardClient({
                                     {/* Sidebar Intel Column */}
                                     <div className="space-y-6">
                                         {/* Client Briefing */}
-                                        <div className="glass rounded-2xl p-6 border border-card-border bg-foreground/[0.02] space-y-4 shadow-sm">
+                                        <div className="rounded-2xl p-6 border border-card-border bg-card space-y-4">
                                             <h3 className="text-[11px] font-medium text-foreground uppercase tracking-wider flex items-center gap-3">
                                                 <FiUsers className="text-indigo-500" />
                                                 Client Briefing
                                             </h3>
-                                            <div className="p-4 rounded-xl bg-foreground/[0.03] border border-card-border space-y-3 shadow-sm">
+                                            <div className="p-4 rounded-xl bg-foreground/[0.03] border border-card-border space-y-3">
                                                 <div>
                                                     <p className="text-[11px] font-medium text-text-muted uppercase tracking-wider mb-1">Entity</p>
                                                     <p className="text-sm font-medium text-foreground uppercase tracking-tight">{client ? client.companyName : 'Internal Asset'}</p>
@@ -313,7 +313,7 @@ export default function ProjectDashboardClient({
                                         </div>
 
                                         {/* Tactical Unit */}
-                                        <div className="glass rounded-2xl p-6 border border-card-border bg-foreground/[0.02] space-y-6 shadow-sm">
+                                        <div className="rounded-2xl p-6 border border-card-border bg-card space-y-6">
                                             <h3 className="text-[11px] font-medium text-foreground uppercase tracking-wider flex items-center gap-3">
                                                 <FiUsers className="text-rose-500" />
                                                 Tactical Unit
@@ -325,7 +325,7 @@ export default function ProjectDashboardClient({
                                                         <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-background" />
                                                     </div>
                                                 ))}
-                                                <button className="w-10 h-10 rounded-full border border-card-border border-dashed flex items-center justify-center text-text-muted hover:text-foreground hover:border-foreground hover:bg-foreground/[0.03] transition-all shadow-sm">
+                                                <button className="w-10 h-10 rounded-full border border-card-border border-dashed flex items-center justify-center text-text-muted hover:text-foreground hover:border-foreground hover:bg-foreground/[0.03] transition-all">
                                                     <FiPlus className="w-4 h-4" />
                                                 </button>
                                             </div>
@@ -335,7 +335,7 @@ export default function ProjectDashboardClient({
                                         </div>
 
                                         {/* System Logs */}
-                                        <div className="glass rounded-2xl p-6 border border-card-border bg-foreground/[0.02] space-y-4 shadow-sm">
+                                        <div className="rounded-2xl p-6 border border-card-border bg-card space-y-4">
                                             <h3 className="text-[11px] font-medium text-foreground uppercase tracking-wider flex items-center gap-3">
                                                 <FiActivity className="text-text-muted" />
                                                 System Logs
@@ -368,18 +368,18 @@ export default function ProjectDashboardClient({
                                         <p className="text-[11px] font-medium text-text-muted uppercase tracking-wider mt-2">{tasks.length} Active Maneuvers Identified</p>
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        <div className="flex bg-foreground/[0.03] p-1 rounded-2xl border border-card-border shadow-sm">
-                                            <button className="h-10 px-6 rounded-xl bg-card text-foreground shadow-sm border border-card-border text-[11px] font-medium uppercase tracking-wider transition-all">Table</button>
+                                        <div className="flex bg-foreground/[0.03] p-1 rounded-2xl border border-card-border">
+                                            <button className="h-10 px-6 rounded-xl bg-card text-foreground border border-card-border text-[11px] font-medium uppercase tracking-wider transition-all">Table</button>
                                             <button className="h-10 px-6 rounded-xl text-text-muted hover:text-foreground text-[11px] font-medium uppercase tracking-wider transition-all">Kanban</button>
                                         </div>
-                                        <button className="flex items-center gap-2 h-12 px-8 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border text-foreground text-[11px] font-medium uppercase tracking-wider transition-all shadow-sm">
+                                        <button className="flex items-center gap-2 h-12 px-8 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border text-foreground text-[11px] font-medium uppercase tracking-wider transition-all">
                                             <FiPlus className="w-4 h-4" />
                                             <span>Initialize</span>
                                         </button>
                                     </div>
                                 </div>
-                                <div className="glass rounded-2xl overflow-hidden border border-card-border bg-foreground/[0.02] shadow-sm">
-                                    <table className="w-full text-left">
+                                <div className="rounded-2xl border border-card-border bg-card overflow-x-auto custom-scrollbar shadow-none">
+                                    <table className="w-full text-left min-w-[1000px]">
                                         <tbody className="divide-y divide-card-border">
                                             {tasks.map(task => (
                                                 <TaskCard 
@@ -405,7 +405,7 @@ export default function ProjectDashboardClient({
                                         <h2 className="text-2xl font-medium text-foreground uppercase tracking-tight leading-none">Intelligence Hub</h2>
                                         <p className="text-[11px] font-medium text-text-muted uppercase tracking-wider mt-2">Classified briefings and metadata</p>
                                     </div>
-                                    <button className="flex items-center gap-2 h-12 px-8 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border text-foreground text-[11px] font-medium uppercase tracking-wider transition-all shadow-sm">
+                                    <button className="flex items-center gap-2 h-12 px-8 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border text-foreground text-[11px] font-medium uppercase tracking-wider transition-all">
                                         <FiPlus className="w-4 h-4" />
                                         <span>Log Note</span>
                                     </button>
@@ -423,7 +423,7 @@ export default function ProjectDashboardClient({
                                         </div>
                                     ))}
                                     {notes.length === 0 && (
-                                        <div className="col-span-full py-32 flex flex-col items-center gap-6 text-text-muted border border-card-border border-dashed rounded-2xl shadow-sm">
+                                        <div className="col-span-full py-32 flex flex-col items-center gap-6 text-text-muted border border-card-border border-dashed rounded-2xl">
                                             <FiFileText className="w-16 h-16 opacity-10" />
                                             <p className="text-xs font-medium uppercase tracking-wider">Vault is empty</p>
                                         </div>
@@ -440,8 +440,8 @@ export default function ProjectDashboardClient({
 
 function MilestoneItem({ label, status, date }: { label: string, status: 'completed' | 'active' | 'pending', date: string }) {
     const statusColors = {
-        completed: 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]',
-        active: 'bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.4)] animate-pulse',
+        completed: 'bg-emerald-500',
+        active: 'bg-indigo-500 animate-pulse',
         pending: 'bg-foreground/10'
     };
 
@@ -486,7 +486,7 @@ function NavButton({ active, onClick, icon: Icon, label }: { active: boolean, on
             onClick={onClick}
             className={`w-full flex items-center gap-4 px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
                 active 
-                    ? 'bg-card text-foreground border border-card-border shadow-sm' 
+                    ? 'bg-card text-foreground border border-card-border' 
                     : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.03] border border-transparent blur-[0.3px] hover:blur-none'
             }`}
         >
@@ -520,7 +520,7 @@ function StatCard({ icon: Icon, color, label, value, subValue }: { icon: any, co
     };
 
     return (
-        <div className="glass rounded-2xl p-5 border border-card-border bg-foreground/[0.02] relative overflow-hidden group hover:scale-[1.02] transition-all duration-500 shadow-sm">
+        <div className="rounded-2xl p-5 border border-card-border bg-card relative overflow-hidden group hover:scale-[1.02] transition-all duration-500">
             <div className={`absolute -top-10 -right-10 w-32 h-32 blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity ${colors[color].split(' ')[1]}`} />
             
             <div className="flex flex-col gap-4 relative z-10">

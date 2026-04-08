@@ -31,7 +31,7 @@ export function AboutModal({ isOpen, onClose, version }: AboutModalProps) {
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative w-full max-w-xl bg-card border border-card-border rounded-[3rem] overflow-hidden shadow-2xl shadow-black/50"
+                            className="relative w-full max-w-xl bg-card border border-card-border rounded-[3rem] overflow-hidden"
                         >
                             <button
                                 onClick={onClose}

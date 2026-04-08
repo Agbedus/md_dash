@@ -219,7 +219,7 @@ export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNo
             <div>
                 {/* Page Header */}
                 <div className="mb-6 md:mb-10">
-                    <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-2 tracking-tight">Notes</h1>
+                    <h1 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Notes</h1>
                     <p className="text-text-muted text-sm md:text-lg">Create, organize, and manage your notes.</p>
                 </div>
 

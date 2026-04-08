@@ -132,7 +132,7 @@ export default function ClientsPageClient({ initialClients = [] }: ClientsPageCl
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-10">
         <div>
-          <h1 className="text-4xl font-medium text-foreground mb-2 tracking-tight uppercase">Client Ecosystem</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Client ecosystem</h1>
           <p className="text-text-muted text-sm font-bold uppercase tracking-wider">Global company coordination & contact intelligence.</p>
         </div>
         <button

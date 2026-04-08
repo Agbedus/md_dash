@@ -12,7 +12,7 @@ export const AnnouncementDropdown = () => {
   const latestAnnouncements = announcements.slice(0, 5);
 
   return (
-    <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card border border-card-border rounded-2xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50">
+    <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-background/95 border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl">
       <div className="px-4 py-3 border-b border-card-border flex justify-between items-center">
         <div className="flex items-center gap-2">
           <FiMessageSquare className="text-[var(--pastel-yellow)]" size={16} />

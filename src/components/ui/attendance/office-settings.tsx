@@ -211,15 +211,15 @@ export default function OfficeSettings({ initialLocations }: { initialLocations:
 
                             <div className="grid grid-cols-3 gap-4 p-4 bg-foreground/[0.02] rounded-2xl border border-card-border">
                                 <div>
-                                    <label className={labelClass}>Strict (m)</label>
+                                    <label className={labelClass}>In-Office (m)</label>
                                     <input type="number" value={form.in_office_radius_meters} onChange={e => setForm(f => ({ ...f, in_office_radius_meters: e.target.value }))} className={`${inputClass} font-numbers`} required />
                                 </div>
                                 <div>
-                                    <label className={labelClass}>Grace (m)</label>
+                                    <label className={labelClass}>Tem-Out (m)</label>
                                     <input type="number" value={form.temporarily_out_radius_meters} onChange={e => setForm(f => ({ ...f, temporarily_out_radius_meters: e.target.value }))} className={`${inputClass} font-numbers`} required />
                                 </div>
                                 <div>
-                                    <label className={labelClass}>Exclusion (m)</label>
+                                    <label className={labelClass}>Out (m)</label>
                                     <input type="number" value={form.out_of_office_radius_meters} onChange={e => setForm(f => ({ ...f, out_of_office_radius_meters: e.target.value }))} className={`${inputClass} font-numbers`} required />
                                 </div>
                             </div>

@@ -26,13 +26,13 @@ export default function ProjectWidget({ project, taskCount }: ProjectWidgetProps
   }
 
   return (
-    <div className="glass p-4 rounded-xl border border-white/5 hover:border-white/5 transition-all">
+    <div className="bg-card p-4 rounded-xl border border-card-border hover:bg-foreground/[0.02] transition-all">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-white mb-2 truncate">{project.name}</h4>
+          <h4 className="font-semibold text-foreground mb-2 truncate">{project.name}</h4>
           
           {project.description && (
-            <p className="text-sm text-zinc-400 mb-3 line-clamp-2">{project.description}</p>
+            <p className="text-sm text-text-muted mb-3 line-clamp-2">{project.description}</p>
           )}
           
           <div className="flex flex-wrap gap-2 text-xs">
@@ -41,7 +41,7 @@ export default function ProjectWidget({ project, taskCount }: ProjectWidgetProps
             </span>
             
             {taskCount !== undefined && (
-              <span className="px-2 py-1 rounded-lg bg-white/[0.03] text-zinc-400">
+              <span className="px-2 py-1 rounded-lg bg-foreground/[0.03] text-text-muted">
                 {taskCount} task{taskCount !== 1 ? 's' : ''}
               </span>
             )}

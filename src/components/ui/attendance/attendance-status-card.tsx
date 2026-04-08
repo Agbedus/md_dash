@@ -35,7 +35,9 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
         manualClockIn,
         manualClockOut,
         isLoading,
+        isPolling,
         refreshLocation,
+        lastPulse,
         location,
         officeLocation,
     } = useLocation();
@@ -70,6 +72,7 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
 
     const clockInTime = manualClockInTime || liveRecord?.clock_in_at || liveRecord?.clock_in || initialRecord?.clock_in_at || initialRecord?.clock_in;
     const clockOutTime = manualClockOutTime || liveRecord?.clock_out_at || liveRecord?.clock_out || initialRecord?.clock_out_at || initialRecord?.clock_out;
+    const latestPulse = lastPulse || lastUpdate;
     const pColors = presenceStateColors[currentPresence];
     const aColors = attendanceStateColors[currentAttendance];
 
@@ -114,23 +117,29 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
                         onClick={refreshLocation}
                         disabled={isLoading}
                         title="Acquire Precision GPS"
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-text-muted hover:text-foreground bg-foreground/[0.03] border border-card-border hover:bg-foreground/[0.08] transition-all"
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+                            isPolling || isLoading 
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 animate-pulse' 
+                                : 'text-text-muted hover:text-foreground bg-foreground/[0.03] border border-card-border hover:bg-foreground/[0.08]'
+                        }`}
                     >
                         <FiTarget className={`text-xs ${isLoading ? 'animate-pulse text-emerald-500' : ''}`} />
                         Sync
                     </button>
                     {isSupported && (
-                        <button
-                            onClick={toggleTracking}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-widest transition-all ${
-                                isTracking 
-                                    ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' 
-                                    : 'bg-foreground/[0.03] border-card-border text-text-muted hover:text-foreground'
-                            }`}
-                        >
-                            <FiZap className={`w-3 h-3 ${isTracking ? 'animate-pulse text-emerald-400' : ''}`} />
-                            <span className="hidden sm:inline">GPS</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={toggleTracking}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-widest transition-all ${
+                                    isTracking 
+                                        ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' 
+                                        : 'bg-foreground/[0.03] border-card-border text-text-muted hover:text-foreground'
+                                }`}
+                            >
+                                <FiZap className={`w-3 h-3 ${isTracking ? 'animate-pulse text-emerald-400' : ''}`} />
+                                <span className="hidden sm:inline">GPS</span>
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -187,7 +196,7 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
                         Pulse
                     </span>
                     <p className="text-2xl font-numbers font-black text-foreground tracking-tighter" suppressHydrationWarning>
-                        {mounted && lastUpdate ? lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                        {mounted && latestPulse ? latestPulse.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                     </p>
                 </div>
                 
@@ -219,7 +228,7 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
                     className="w-full flex items-center justify-between text-[10px] font-bold text-text-muted uppercase tracking-widest hover:text-foreground transition-colors group px-1"
                 >
                     <span className="flex items-center gap-2">
-                        <div className={`w-1 h-1 rounded-full ${isLoading ? 'bg-emerald-500 animate-pulse' : 'bg-text-muted'}`} />
+                        <div className={`w-1 h-1 rounded-full ${isLoading || isPolling ? 'bg-emerald-500 animate-pulse' : 'bg-text-muted'}`} />
                         Telemetry Details
                     </span>
                     {showMetadata ? <FiChevronUp /> : <FiChevronDown />}

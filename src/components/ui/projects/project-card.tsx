@@ -33,7 +33,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
   };
 
   return (
-    <div className="group relative bg-card hover:bg-card border border-card-border rounded-xl lg:rounded-2xl p-4 lg:p-5 transition-all duration-300 hover:border-foreground/10 hover-glow-subtle">
+    <div className="group relative bg-card hover:bg-card border border-card-border rounded-xl lg:rounded-2xl p-4 lg:p-5 transition-all duration-300 hover:border-foreground/10">
       <div className="flex justify-between items-start mb-2 lg:mb-3">
         <div className="flex items-center gap-2">
           <div className={`px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-lg text-[11px] lg:text-xs font-medium border whitespace-nowrap ${statusColors[project.status]}`}>

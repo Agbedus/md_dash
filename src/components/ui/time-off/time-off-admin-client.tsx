@@ -132,8 +132,8 @@ export default function TimeOffAdminClient({ initialRequests, users }: TimeOffAd
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
                 <div>
-                    <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">
-                        Time Off Requests
+                    <h1 className="text-3xl font-bold text-foreground mb-2 tracking-tight">
+                        Time off requests
                     </h1>
                     <p className="text-text-muted text-lg">Review and manage team time-off requests.</p>
                 </div>

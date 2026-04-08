@@ -121,7 +121,7 @@ export default function WikiPage() {
                             <FiBookOpen className="text-xl text-emerald-400" />
                         </div>
                         <div className="flex flex-col">
-                            <h1 className="text-sm font-black text-foreground tracking-tight uppercase">Knowledge Base</h1>
+                            <h1 className="text-sm font-black text-foreground tracking-tight">Knowledge base</h1>
                             <span className="text-[9px] text-text-muted/50 font-bold uppercase tracking-widest mt-0.5">Platform Manual v1.4</span>
                         </div>
                     </div>
@@ -183,14 +183,14 @@ export default function WikiPage() {
                         <SectionHeader title="Infrastructure" icon={FiZap} color="text-[var(--pastel-yellow)]" />
                         
                         <article id="platform-vision" className="space-y-6">
-                            <h3 className="text-2xl font-bold text-foreground tracking-tight uppercase tracking-[0.05em]">Platform Philosophy</h3>
+                            <h3 className="text-2xl font-bold text-foreground tracking-tight tracking-[0.05em]">Platform philosophy</h3>
                             <p className="text-text-muted text-lg leading-relaxed font-medium">
                                 The platform serves as a high-density operational gateway, centralizing mission-critical workflows into a single intelligence environment. Unlike traditional ERP systems, it utilizes a <strong>privacy-first AI bridge</strong> to synthesize data without compromising institutional sovereignty.
                             </p>
                         </article>
 
                         <article id="technical-specs" className="space-y-12">
-                            <h3 className="text-xl font-bold text-foreground uppercase tracking-wider">Technical Specifications</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">Technical specifications</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <DocCard 
                                     title="Endpoint Compatibility" 
@@ -204,7 +204,7 @@ export default function WikiPage() {
                                 />
                             </div>
                             <div className="p-10 rounded-[3rem] bg-card border border-card-border">
-                                <h4 className="text-xs font-bold text-text-muted uppercase tracking-[0.2em] mb-6">Device Standards</h4>
+                                <h4 className="text-xs font-bold text-text-muted uppercase tracking-[0.2em] mb-6">Device standards</h4>
                                 <div className="space-y-6">
                                     <div className="flex justify-between items-center py-4 border-b border-card-border">
                                         <span className="text-sm font-bold text-text-muted uppercase tracking-widest">WebSocket Latency</span>
@@ -223,7 +223,7 @@ export default function WikiPage() {
                         </article>
 
                         <article id="security-auth" className="space-y-6">
-                            <h3 className="text-2xl font-bold text-foreground tracking-tight uppercase tracking-[0.05em]">Security & Privacy Protocols</h3>
+                            <h3 className="text-2xl font-bold text-foreground tracking-tight tracking-[0.05em]">Security & privacy protocols</h3>
                             <div className="p-12 rounded-[3.5rem] bg-indigo-500/[0.02] border border-indigo-500/10 space-y-8 group">
                                 <p className="text-text-muted text-base leading-relaxed font-medium">
                                     All communications are secured via TLS 1.3. User identity is managed through <strong>JSON Web Tokens (JWT)</strong>, with a strict 24-hour expiration policy and automatic refresh orchestration.
@@ -246,10 +246,10 @@ export default function WikiPage() {
 
                     {/* Attendance Guide */}
                     <section id="attendance-presence" className="space-y-20">
-                        <SectionHeader title="Presence Protocol" icon={FiMapPin} color="text-sky-400" />
+                        <SectionHeader title="Presence protocol" icon={FiMapPin} color="text-sky-400" />
                         
                         <article id="how-to-clock-in" className="space-y-8">
-                            <h4 className="text-xl font-bold text-foreground uppercase tracking-[0.1em]">User Attendance Manual</h4>
+                            <h4 className="text-xl font-bold text-foreground tracking-[0.1em]">User attendance manual</h4>
                             <div className="p-12 rounded-[3rem] bg-card border border-card-border space-y-10">
                                 <p className="text-text-muted text-base leading-relaxed font-medium">
                                     To maintain operational integrity, attendance must be logged through the platform&apos;s geofenced interface. The system automates verification but requires browser permission.
@@ -275,7 +275,7 @@ export default function WikiPage() {
                         </article>
 
                         <article id="geofencing-logic" className="space-y-6">
-                            <h3 className="text-xl font-bold text-foreground uppercase tracking-wider">Geofencing Constraints</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">Geofencing constraints</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="p-8 rounded-3xl bg-sky-500/[0.03] border border-sky-500/10 text-center">
                                     <span className="text-4xl font-bold text-sky-400 block mb-2 font-numbers">200m</span>
@@ -295,7 +295,7 @@ export default function WikiPage() {
                         </article>
 
                         <article id="admin-office-bounds" className="space-y-6">
-                            <h3 className="text-xl font-bold text-foreground uppercase tracking-wider">Admin: Regional Configuration</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">Admin: Regional configuration</h3>
                             <div className="p-10 rounded-[3rem] bg-foreground/[0.02] border border-card-border space-y-6">
                                 <p className="text-text-muted text-sm leading-relaxed font-medium">
                                     Administrators can modify office hubs via the **Office Settings** panel. Ensure coordinates are formatted in Decimal Degrees (DD).
@@ -316,10 +316,10 @@ export default function WikiPage() {
 
                     {/* Operations Mastery */}
                     <section id="operations-mastery" className="space-y-20">
-                        <SectionHeader title="Operational Dynamics" icon={FiBriefcase} color="text-emerald-400" />
+                        <SectionHeader title="Operational dynamics" icon={FiBriefcase} color="text-emerald-400" />
                         
                         <article id="kanban-mastery" className="space-y-8">
-                            <h3 className="text-xl font-bold text-foreground uppercase tracking-wider">Kanban Workflow Strategy</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">Kanban workflow strategy</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-6">
                                     <p className="text-text-muted text-sm leading-relaxed font-medium">
@@ -343,7 +343,7 @@ export default function WikiPage() {
                         </article>
 
                         <article id="task-dynamics" className="space-y-6">
-                            <h3 className="text-xl font-bold text-foreground uppercase tracking-wider">Priority & Weighting</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">Priority & weighting</h3>
                             <div className="p-10 rounded-[3rem] bg-card border border-card-border space-y-6">
                                 <p className="text-text-muted text-sm leading-relaxed font-medium">
                                     Priority level is more than just a label. It affects the AI mission briefing sorting and notification urgency. High priority tasks trigger immediate system-wide WebSocket pushes for managers.
@@ -354,17 +354,17 @@ export default function WikiPage() {
 
                     {/* AI Mission Control */}
                     <section id="ai-mission-control" className="space-y-20">
-                        <SectionHeader title="Intelligence Deck" icon={FiCpu} color="text-purple-400" />
+                        <SectionHeader title="Intelligence deck" icon={FiCpu} color="text-purple-400" />
                         
                         <article id="ai-briefing" className="space-y-8">
-                            <h3 className="text-xl font-bold text-foreground uppercase tracking-wider">Strategic Daily Briefings</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">Strategic daily briefings</h3>
                             <p className="text-text-muted text-base leading-relaxed font-medium">
                                 Each day, the platform synthesizes your upcoming tasks and past velocity to generate a natural language briefing. This briefing is processed locally, ensuring that private work details are never passed to external AI training sets.
                             </p>
                         </article>
 
                         <article id="local-llm-architecture" className="space-y-6">
-                            <h3 className="text-xl font-bold text-foreground uppercase tracking-wider">Local Processor (Ollama)</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">Local processor (Ollama)</h3>
                             <div className="p-10 rounded-[3rem] bg-purple-500/[0.05] border border-purple-500/20 space-y-6">
                                 <p className="text-text-muted text-sm leading-relaxed font-medium">
                                     The platform interfaces with <strong>Ollama</strong> running local-tier models (Llama 3 / Mistral). This direct-to-metal processing ensures that your intelligence deck remains offline and untouchable by third-party vectors.
@@ -379,17 +379,17 @@ export default function WikiPage() {
 
                     {/* System Broadcasts */}
                     <section id="announcements-system" className="space-y-20">
-                        <SectionHeader title="Communication Deck" icon={FiBell} color="text-pink-400" />
+                        <SectionHeader title="Communication deck" icon={FiBell} color="text-pink-400" />
                         
                         <article id="broadcast-protocol" className="space-y-6 text-foreground">
-                            <h3 className="text-xl font-bold text-foreground uppercase tracking-wider">Broadcast Protocol</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">Broadcast protocol</h3>
                             <p className="text-text-muted text-sm leading-relaxed font-medium">
                                 Announcements are pushed to all active clients via an operational WebSocket bridge. Broadcasts can be initiated by Managers and Super Admins only.
                             </p>
                         </article>
 
                         <article id="priority-alerts" className="space-y-6">
-                            <h3 className="text-xl font-bold text-foreground uppercase tracking-wider">Alert Priority Definitions</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">Alert priority definitions</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="p-6 rounded-3xl bg-pink-500/[0.03] border border-pink-500/10">
                                     <h5 className="text-xs font-bold text-pink-400 uppercase tracking-widest mb-2">Critical Alpha</h5>
@@ -415,7 +415,7 @@ const SectionHeader = ({ title, icon: Icon, color }: { title: string, icon: any,
         <div className={`w-16 h-16 rounded-ux flex items-center justify-center border bg-card  ${color.replace('text-', 'border-').replace('400', '400/10')}`}>
             <Icon className={`text-3xl ${color}`} />
         </div>
-        <h2 className="text-6xl font-bold text-foreground uppercase tracking-tight tracking-[-0.02em]">{title}</h2>
+        <h2 className="text-3xl font-bold text-foreground tracking-tight tracking-[-0.02em]">{title}</h2>
         <div className={`h-1.5 w-32 bg-gradient-to-r ${color.replace('text-', 'from-').replace('400', '500/50')} to-transparent rounded-full`} />
     </div>
 );

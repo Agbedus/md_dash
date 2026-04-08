@@ -48,6 +48,8 @@ export type AttendancePolicy = {
     temporarily_out_grace_minutes: number;
     out_of_office_grace_minutes: number;
     return_to_office_confirmation_minutes: number;
+    auto_clock_in_delay_minutes: number;
+    presence_audit_interval_minutes: number;
     created_at?: string | null;
     updated_at?: string | null;
 };

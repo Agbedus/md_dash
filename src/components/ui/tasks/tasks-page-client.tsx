@@ -257,7 +257,7 @@ export default function TasksPageClient({
     return (
         <div className="px-4 py-8 max-w-[1600px] mx-auto min-h-screen">
             <div className="hidden lg:block mb-10">
-                <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">Tasks</h1>
+                <h1 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Tasks</h1>
                 <p className="text-text-muted text-lg">Manage team work and track progress.</p>
             </div>
 

@@ -8,8 +8,12 @@ import { getDistanceInMeters } from '@/lib/distance-utils';
 import { toast } from '@/lib/toast';
 import type { PresenceState, AttendanceState, AttendancePolicy, OfficeLocation, AttendanceRecord } from '@/types/attendance';
 
-const INTERVAL_MS = 5 * 60 * 1000; // 5 minute polling as a background task
 const STORAGE_KEY = 'md_location_tracking_enabled';
+const CONFIG_CACHE_KEY = 'md_attendance_config_cache';
+const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
+const SYNC_THROTTLE_MS = 5 * 60 * 1000; // Throttle backend sync to once per 5 minutes unless state changes
+
+import { isTimeInWindow, isAfterTime, isBeforeTime, isWithinRadius } from '@/lib/attendance-utils';
 
 interface LocationContextType {
     isTracking: boolean;
@@ -23,7 +27,9 @@ interface LocationContextType {
     manualClockIn: () => Promise<void>;
     manualClockOut: (force?: boolean) => Promise<{ success?: boolean; confirmRequired?: boolean }>;
     isLoading: boolean;
+    isPolling: boolean;
     refreshLocation: () => Promise<void>;
+    lastPulse: Date | null;
     location: { latitude: number; longitude: number; accuracy: number | null } | null;
     officeLocation: { latitude: number; longitude: number } | null;
 }
@@ -103,10 +109,11 @@ export function LocationProvider({
     const [location, setLocation] = useState<{ latitude: number; longitude: number; accuracy: number | null } | null>(null);
     const [officeLocationState, setOfficeLocationState] = useState<{ latitude: number; longitude: number } | null>(null);
     
-    // Config Caching (Pre-fetched on mount)
     const officesRef = useRef<OfficeLocation[]>([]);
     const policiesRef = useRef<Record<number, AttendancePolicy>>({});
     const [isInitialized, setIsInitialized] = useState(false);
+    const [isPolling, setIsPolling] = useState(false);
+    const [lastPulse, setLastPulse] = useState<Date | null>(null);
 
     useEffect(() => {
         if (initialRecord) {
@@ -115,35 +122,63 @@ export function LocationProvider({
         }
     }, [initialRecord]);
     
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const watchIdRef = useRef<number | null>(null);
+    const lastSyncTimeRef = useRef<number>(0);
     const presenceStateRef = useRef<PresenceState | null>(null);
     const attendanceStateRef = useRef<AttendanceState | null>(null); // To avoid dependency loop in callbacks
 
-    // 1. Initial Data Load (Secondary to main page data)
+    // 1. Initial Data Load with 6-hour caching
     useEffect(() => {
         const initData = async () => {
+            let configStale = true;
             try {
-                const offices = await getOfficeLocations();
-                officesRef.current = offices;
-                if (offices.length > 0) {
-                    setOfficeLocationState({ latitude: offices[0].latitude, longitude: offices[0].longitude });
-                }
-                
-                // Fetch policies for all offices to have them ready
-                const { getAttendancePolicy } = await import('@/app/(dashboard)/attendance/actions');
-                
-                const newPolicies: Record<number, AttendancePolicy> = {};
-                for (const office of offices) {
-                    const p = await getAttendancePolicy(office.id);
-                    if (p) {
-                        newPolicies[office.id] = p;
+                // Check Cache and load immediately if available (even if stale)
+                const cached = localStorage.getItem(CONFIG_CACHE_KEY);
+                if (cached) {
+                    const { offices, policies, timestamp } = JSON.parse(cached);
+                    console.log('[LocationProvider] Loading cached attendance config immediately');
+                    officesRef.current = offices;
+                    policiesRef.current = policies;
+                    if (offices.length > 0) {
+                        setOfficeLocationState({ latitude: offices[0].latitude, longitude: offices[0].longitude });
+                    }
+                    setIsInitialized(true);
+                    
+                    const now = Date.now();
+                    if (now - timestamp < CACHE_DURATION) {
+                        configStale = false;
+                        console.log('[LocationProvider] Cache is fresh (6h window).');
                     }
                 }
-                policiesRef.current = newPolicies;
-                setIsInitialized(true);
+
+                if (configStale) {
+                    console.log('[LocationProvider] Syncing configuration with server...');
+                    const offices = await getOfficeLocations();
+                    officesRef.current = offices;
+                    if (offices.length > 0) {
+                        setOfficeLocationState({ latitude: offices[0].latitude, longitude: offices[0].longitude });
+                    }
+                    
+                    const { getAttendancePolicy } = await import('@/app/(dashboard)/attendance/actions');
+                    const newPolicies: Record<number, AttendancePolicy> = {};
+                    for (const office of offices) {
+                        const p = await getAttendancePolicy(office.id);
+                        if (p) newPolicies[office.id] = p;
+                    }
+                    policiesRef.current = newPolicies;
+                    
+                    // Update Cache
+                    localStorage.setItem(CONFIG_CACHE_KEY, JSON.stringify({
+                        offices,
+                        policies: newPolicies,
+                        timestamp: Date.now()
+                    }));
+
+                    setIsInitialized(true);
+                }
             } catch (err) {
-                console.error('Failed to pre-fetch location config:', err);
-                setIsInitialized(true); // Still allow tracking to attempt
+                console.error('Failed to initialize location config:', err);
+                setIsInitialized(true); 
             }
         };
 
@@ -162,148 +197,134 @@ export function LocationProvider({
         initData();
     }, []);
 
-    // Helper: Is current time within HH:MM:SS window?
-    const isWithinWindow = useCallback((start: string | null, end: string | null) => {
-        if (!start || !end) return true;
+
+    const handlePositionUpdate = useCallback(async (position: GeolocationPosition) => {
+        if (!isInitialized) return;
+        
+        const { latitude, longitude, accuracy } = position.coords;
         const now = new Date();
-        const [sH, sM, sS] = start.split(':').map(Number);
-        const [eH, eM, eS] = end.split(':').map(Number);
         
-        const startTime = new Date(now);
-        startTime.setHours(sH, sM, sS || 0);
+        // 1. Instant UI Update
+        setLocation({ latitude, longitude, accuracy });
+        setLastPulse(now);
+
+        const offices = officesRef.current;
+        if (!offices || offices.length === 0) return;
+
+        // 2. Instant Local Evaluation
+        let activeOffice: OfficeLocation | null = null;
+        let minDistance = Infinity;
         
-        const endTime = new Date(now);
-        endTime.setHours(eH, eM, eS || 0);
-        
-        return now >= startTime && now <= endTime;
-    }, []);
-
-    // Tracking logic (Purely background)
-    const sendLocation = useCallback(async () => {
-        if (!navigator.geolocation || !isInitialized) return;
-
-        return new Promise<void>((resolve) => {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const { latitude, longitude, accuracy } = position.coords;
-                    setLocation({ latitude, longitude, accuracy });
-                    
-                    // ── GATE 1: Reject highly inaccurate readings for automatic transitions ──
-                    // The backend strictly ignores accuracy > 30m for auto-state changes.
-                    // If we're tracking a manual action later, we'll allow a more lenient gate.
-                    if (accuracy > 30) {
-                        console.log(`[LocationProvider] Skipping state evaluation — accuracy ${accuracy.toFixed(0)}m is too noisy`);
-                        resolve();
-                        return;
-                    }
-
-                    // ── GATE 2: Must have offices configured ──
-                    const offices = officesRef.current;
-                    if (!offices || offices.length === 0) {
-                        resolve();
-                        return;
-                    }
-
-                    // ── 1. Find nearest office and compute accuracy-adjusted distance ──
-                    let resolvedId: number | undefined;
-                    let rawZone: PresenceState = 'OUT_OF_OFFICE';
-                    let activeOffice: OfficeLocation | null = null;
-                    let bestDistance = Infinity;
-                    
-                    for (const o of offices) {
-                        const dist = getDistanceInMeters(latitude, longitude, o.latitude, o.longitude);
-                        if (dist < bestDistance) {
-                            bestDistance = dist;
-                            activeOffice = o;
-                        }
-                    }
-                    
-                    if (activeOffice) {
-                        const effectiveDistance = bestDistance; // accuracy-adjusted check happens later if needed
-                        
-                        // Strict Geofence Check based on Office Config
-                        if (effectiveDistance <= activeOffice.in_office_radius_meters) {
-                            rawZone = 'IN_OFFICE';
-                        } else if (bestDistance <= (activeOffice.temporarily_out_radius_meters || activeOffice.in_office_radius_meters * 2.5)) {
-                            rawZone = 'TEMPORARILY_OUT';
-                        } else {
-                            rawZone = 'OUT_OF_OFFICE';
-                        }
-                        resolvedId = activeOffice.id;
-                    } else {
-                        resolvedId = offices[0].id;
-                    }
-
-                    // ── 2. Sync with Backend ──
-                    const result = await updateLocation(latitude, longitude, accuracy, resolvedId);
-                    if (result.success && result.record) {
-                        const prevAtt = attendanceStateRef.current;
-                        const newAtt = result.record.attendance_state;
-                        
-                        const prevPres = presenceStateRef.current;
-                        const newPres = result.record.presence_state ?? null;
-                        
-                        attendanceStateRef.current = newAtt;
-                        presenceStateRef.current = newPres;
-                        
-                        let forceUpdate = false;
-                        if (prevPres !== null && prevPres !== newPres) {
-                            forceUpdate = true;
-                        }
-
-                        // Always trust the backend's response for definitive state
-                        setPresenceState(newPres);
-                        setAttendanceState(newAtt);
-                        setClockInTime(result.record.clock_in_at || result.record.clock_in || null);
-                        setClockOutTime(result.record.clock_out_at || result.record.clock_out || null);
-                        setLastUpdate(new Date());
-                        
-                        mutate('my-attendance-today');
-                        
-                        if (prevAtt && prevAtt !== newAtt) {
-                            mutate('team-attendance-today');
-                            if (newAtt === 'CLOCKED_IN') {
-                                toast.success('Confirmed in office!');
-                            } else if (newAtt === 'CLOCKED_OUT') {
-                                toast.info('Attendance finalized.');
-                            }
-                        } else if (forceUpdate) {
-                            mutate('team-attendance-today');
-                        }
-                    }
-                    resolve();
-                },
-                (error) => {
-                    console.error('Geolocation error:', error.message);
-                    if (error.code === error.PERMISSION_DENIED) {
-                        toast.error('Location permission denied. Tracking disabled.');
-                        setIsTracking(false);
-                        localStorage.setItem(STORAGE_KEY, 'false');
-                    }
-                    resolve();
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-            );
-        });
-    }, [isInitialized, mutate]);
-
-    // Start/stop interval when tracking changes
-    useEffect(() => {
-        if (isTracking) {
-            // Fetch immediately when tracking is turned on, then poll every INTERVAL_MS
-            sendLocation();
-            intervalRef.current = setInterval(sendLocation, INTERVAL_MS);
-        } else {
-            // When tracking is turned off, just stop polling — keep all cached state
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
+        for (const o of offices) {
+            const dist = getDistanceInMeters(latitude, longitude, o.latitude, o.longitude);
+            if (dist < minDistance) {
+                minDistance = dist;
+                activeOffice = o;
             }
         }
-        return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-        };
-    }, [isTracking, sendLocation]);
+        
+        if (!activeOffice) return;
+
+        let localPresence: PresenceState = 'OUT_OF_OFFICE';
+        if (minDistance <= activeOffice.in_office_radius_meters) {
+            localPresence = 'IN_OFFICE';
+        } else if (minDistance <= (activeOffice.temporarily_out_radius_meters || activeOffice.in_office_radius_meters * 2.5)) {
+            localPresence = 'TEMPORARILY_OUT';
+        }
+
+        const prevPres = presenceStateRef.current;
+        const stateChanged = prevPres !== localPresence;
+        
+        if (stateChanged) {
+            console.log(`[LocationProvider] Instant transition: ${prevPres} -> ${localPresence}`);
+            presenceStateRef.current = localPresence;
+            setPresenceState(localPresence);
+        }
+
+        // 3. Throttled Backend Sync
+        const timeSinceLastSync = Date.now() - lastSyncTimeRef.current;
+        const shouldSync = stateChanged || timeSinceLastSync >= SYNC_THROTTLE_MS;
+
+        if (shouldSync && accuracy <= 50) {
+            setIsPolling(true);
+            try {
+                const result = await updateLocation(latitude, longitude, accuracy, activeOffice.id);
+                if (result.success && result.record) {
+                    const newAtt = result.record.attendance_state;
+                    const backendPres = result.record.presence_state ?? null;
+                    
+                    lastSyncTimeRef.current = Date.now();
+                    
+                    // Sync attendance state (always from backend)
+                    const prevAtt = attendanceStateRef.current;
+                    attendanceStateRef.current = newAtt;
+                    setAttendanceState(newAtt);
+                    
+                    // Sync presence state (confirming local guess)
+                    if (backendPres && backendPres !== localPresence) {
+                        console.log(`[LocationProvider] Backend correction: ${localPresence} -> ${backendPres}`);
+                        presenceStateRef.current = backendPres;
+                        setPresenceState(backendPres);
+                    }
+
+                    setClockInTime(result.record.clock_in_at || result.record.clock_in || null);
+                    setClockOutTime(result.record.clock_out_at || result.record.clock_out || null);
+                    setLastUpdate(new Date());
+                    
+                    mutate('my-attendance-today');
+                    if (prevAtt !== newAtt || (stateChanged && backendPres !== prevPres)) {
+                        mutate('team-attendance-today');
+                        if (prevAtt && prevAtt !== newAtt) {
+                            if (newAtt === 'CLOCKED_IN') toast.success('Confirmed in office!');
+                            else if (newAtt === 'CLOCKED_OUT') toast.info('Attendance finalized.');
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Backend sync failed:', err);
+            } finally {
+                setIsPolling(false);
+            }
+        }
+    }, [isInitialized, mutate]);
+
+    const startTracking = useCallback(() => {
+        if (!navigator.geolocation) return;
+        
+        if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+        }
+
+        watchIdRef.current = navigator.geolocation.watchPosition(
+            handlePositionUpdate,
+            (error) => {
+                console.error('Geolocation watch error:', error.message);
+                if (error.code === error.PERMISSION_DENIED) {
+                    toast.error('Location permission denied. Tracking disabled.');
+                    setIsTracking(false);
+                    localStorage.setItem(STORAGE_KEY, 'false');
+                }
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }, [handlePositionUpdate]);
+
+    const stopTracking = useCallback(() => {
+        if (watchIdRef.current !== null) {
+            navigator.geolocation.clearWatch(watchIdRef.current);
+            watchIdRef.current = null;
+        }
+    }, []);
+
+    // Start/stop watch when tracking changes
+    useEffect(() => {
+        if (isTracking) {
+            startTracking();
+        } else {
+            stopTracking();
+        }
+        return () => stopTracking();
+    }, [isTracking, startTracking, stopTracking]);
 
     const toggleTracking = useCallback(() => {
         const next = !isTracking;
@@ -360,38 +381,71 @@ export function LocationProvider({
                     return;
                 }
 
-                // ── Policy time-window check (Arrival Windows for Manual Action) ──
+                // ── Policy window checks ──
                 const policy = policiesRef.current[validOfficeId];
                 if (policy) {
-                    const inWindow = isWithinWindow(
-                        policy.check_in_open_time as string | null,
-                        policy.check_in_close_time as string | null
+                    const now = new Date();
+                    
+                    // 1. Arrival Window
+                    const inArrivalWindow = isTimeInWindow(
+                        now,
+                        policy.check_in_open_time,
+                        policy.check_in_close_time
                     );
-                    if (!inWindow) {
-                        const openStr = policy.check_in_open_time || '—';
-                        const closeStr = policy.check_in_close_time|| '—';
-                        toast.error(`The arrival window is currently closed (${openStr} – ${closeStr}).`);
+                    if (!inArrivalWindow) {
+                        toast.error(`Arrival window is closed (${policy.check_in_open_time?.slice(0,5)} - ${policy.check_in_close_time?.slice(0,5)}).`);
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    // 2. Auto-Out Check
+                    if (policy.auto_clock_out_time && isAfterTime(now, policy.auto_clock_out_time)) {
+                        toast.error(`Automatic checkout period has started (${policy.auto_clock_out_time.slice(0,5)}).`);
                         setIsLoading(false);
                         return;
                     }
                 }
 
+                // ── 3. Optimistic Update (Instant Feedback) ──
+                const previousAttendance = attendanceStateRef.current;
+                const previousPresence = presenceStateRef.current;
+                const previousClockIn = clockInTime;
+
+                setAttendanceState('CLOCKED_IN');
+                setPresenceState('IN_OFFICE');
+                attendanceStateRef.current = 'CLOCKED_IN';
+                presenceStateRef.current = 'IN_OFFICE';
+                setClockInTime(new Date().toISOString());
+                setLastUpdate(new Date());
+
                 const result = await updateLocation(latitude, longitude, accuracy, validOfficeId || undefined, true);
+                
                 if (result.success && result.record) {
+                    // Sync with backend confirmed record
                     setPresenceState(result.record.presence_state ?? null);
                     setAttendanceState(result.record.attendance_state);
-                    setClockInTime(result.record.clock_in_at || result.record.clock_in || null);
+                    attendanceStateRef.current = result.record.attendance_state;
+                    presenceStateRef.current = result.record.presence_state ?? null;
+                    
+                    const actualClockIn = result.record.clock_in_at || result.record.clock_in || null;
+                    setClockInTime(actualClockIn);
                     setClockOutTime(result.record.clock_out_at || result.record.clock_out || null);
-                    setLastUpdate(new Date());
+                    
                     mutate('my-attendance-today');
                     mutate('team-attendance-today');
-                    // Only show success if the backend actually confirmed CLOCKED_IN
+                    
                     if (result.record.attendance_state === 'CLOCKED_IN') {
                         toast.success('Clocked in!');
                     } else {
                         toast.info('Location updated, but clock-in was not confirmed by the server.');
                     }
                 } else {
+                    // ── Rollback on Failure ──
+                    setAttendanceState(previousAttendance);
+                    setPresenceState(previousPresence);
+                    attendanceStateRef.current = previousAttendance;
+                    presenceStateRef.current = previousPresence;
+                    setClockInTime(previousClockIn);
                     toast.error(result.error || 'Failed to clock in');
                 }
                 setIsLoading(false);
@@ -403,16 +457,44 @@ export function LocationProvider({
         } catch {
             setIsLoading(false);
         }
-    }, [mutate, isWithinWindow]);
+    }, [mutate, clockInTime]);
 
     const manualClockOut = useCallback(async (force = false) => {
         setIsLoading(true);
         try {
-            // Check if user is still in office before clocking out
-            if (!force && presenceState === 'IN_OFFICE') {
-                setIsLoading(false);
-                return { confirmRequired: true };
+            const now = new Date();
+            // Note: Manual Clock-out uses cached data for rules as requested.
+            // Check nearest office from cache based on last known location or defaults
+            const offices = officesRef.current;
+            const office = offices.length > 0 ? offices[0] : null;
+            const policy = office ? policiesRef.current[office.id] : null;
+
+            // Pre-check Warnings (Logic-only confirmation)
+            if (!force) {
+                const inOffice = presenceState === 'IN_OFFICE';
+                const isDuringWorkday = policy ? isTimeInWindow(now, policy.work_start_time, policy.work_end_time) : false;
+
+                if (inOffice || isDuringWorkday) {
+                    setIsLoading(false);
+                    return { confirmRequired: true };
+                }
             }
+
+            // ── 2. Optimistic Update ──
+            const previousAttendance = attendanceStateRef.current;
+            const previousPresence = presenceStateRef.current;
+            const previousClockOut = clockOutTime;
+            const previousTracking = isTracking;
+
+            setAttendanceState('CLOCKED_OUT');
+            attendanceStateRef.current = 'CLOCKED_OUT';
+            setClockOutTime(new Date().toISOString());
+            setLastUpdate(new Date());
+            
+            // Stop tracking immediately for snappy feel
+            setIsTracking(false);
+            localStorage.setItem(STORAGE_KEY, 'false');
+            stopTracking();
 
             toast.loading("Clocking out...", { id: 'clock-out' });
             
@@ -422,16 +504,27 @@ export function LocationProvider({
             if (result.success && result.record) {
                 setPresenceState(result.record.presence_state ?? null);
                 setAttendanceState(result.record.attendance_state);
+                attendanceStateRef.current = result.record.attendance_state;
+                presenceStateRef.current = result.record.presence_state ?? null;
+                
                 setClockInTime(result.record.clock_in_at || result.record.clock_in || null);
                 setClockOutTime(result.record.clock_out_at || result.record.clock_out || null);
-                setLastUpdate(new Date());
+                
                 mutate('my-attendance-today');
                 mutate('team-attendance-today');
                 toast.success('Clocked out successfully!');
-                
-                setIsTracking(false);
-                localStorage.setItem(STORAGE_KEY, 'false');
             } else {
+                // ── Rollback on Failure ──
+                setAttendanceState(previousAttendance);
+                setPresenceState(previousPresence);
+                attendanceStateRef.current = previousAttendance;
+                presenceStateRef.current = previousPresence;
+                setClockOutTime(previousClockOut);
+                
+                setIsTracking(previousTracking);
+                localStorage.setItem(STORAGE_KEY, String(previousTracking));
+                if (previousTracking) startTracking();
+
                 toast.error(result.error || 'Failed to clock out');
             }
             setIsLoading(false);
@@ -442,7 +535,7 @@ export function LocationProvider({
             setIsLoading(false);
             return { success: false };
         }
-    }, [mutate, presenceState]);
+    }, [mutate, presenceState, clockOutTime, isTracking, startTracking, stopTracking]);
 
     const refreshLocation = useCallback(async () => {
         setIsLoading(true);
@@ -482,7 +575,9 @@ export function LocationProvider({
         manualClockIn,
         manualClockOut,
         isLoading,
+        isPolling,
         refreshLocation,
+        lastPulse,
         location,
         officeLocation: officeLocationState,
     }), [
@@ -497,7 +592,9 @@ export function LocationProvider({
         manualClockIn,
         manualClockOut,
         isLoading,
+        isPolling,
         refreshLocation,
+        lastPulse,
         location,
         officeLocationState
     ]);
