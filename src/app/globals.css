@@ -25,6 +25,9 @@
   --color-input-bg:     var(--input-bg);
   --color-text-muted:   var(--text-muted);
   --color-text-secondary: var(--text-secondary);
+  
+  --color-skeleton-bg:     var(--skeleton-bg);
+  --color-skeleton-shimmer: var(--skeleton-shimmer);
 }
 
 @keyframes spinner {
@@ -78,6 +81,10 @@
   --toast-bg:         rgba(255, 255, 255, 0.95);
   --toast-text:       #334155;   /* slate-700 */
   --toast-border:     rgba(0, 0, 0, 0.08);
+
+  /* Skeleton */
+  --skeleton-bg:      #f1f5f9;                 /* slate-100 */
+  --skeleton-shimmer: rgba(255, 255, 255, 0.6);
 }
 
 /* ── Dark theme ────────────────────────────────────────────────── */
@@ -115,6 +122,10 @@
   --toast-bg:         rgba(24, 24, 27, 0.9);
   --toast-text:       #a1a1aa;   /* zinc-400 */
   --toast-border:     rgba(255, 255, 255, 0.08);
+
+  /* Skeleton */
+  --skeleton-bg:      rgba(255, 255, 255, 0.03);
+  --skeleton-shimmer: rgba(255, 255, 255, 0.08);
 }
 
 body {

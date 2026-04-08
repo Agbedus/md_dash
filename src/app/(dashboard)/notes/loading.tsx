@@ -29,7 +29,7 @@ export default function NotesLoading() {
       {/* Masonry Grid Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-grow overflow-hidden">
         {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-80 w-full rounded-2xl glass border border-white/5" />
+          <Skeleton key={i} className="h-80 w-full rounded-2xl glass border border-card-border" />
         ))}
       </div>
     </div>

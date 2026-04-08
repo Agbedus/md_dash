@@ -24,7 +24,7 @@ export default function ClientsLoading() {
         {/* Clients Grid Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="glass border border-white/5 rounded-2xl p-6 space-y-4 h-64">
+            <div key={i} className="glass border border-card-border rounded-2xl p-6 space-y-4 h-64">
               <div className="flex justify-between items-start">
                 <Skeleton className="h-10 w-10 rounded-xl" />
                 <Skeleton className="h-6 w-16 rounded-full" />
@@ -34,7 +34,7 @@ export default function ClientsLoading() {
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-5/6" />
               </div>
-              <div className="pt-4 border-t border-white/5 flex gap-3">
+              <div className="pt-4 border-t border-card-border flex gap-3">
                 <Skeleton className="h-8 w-8 rounded-lg" />
                 <Skeleton className="h-8 w-8 rounded-lg" />
               </div>

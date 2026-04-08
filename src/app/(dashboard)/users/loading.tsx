@@ -15,9 +15,9 @@ export default function UsersLoading() {
         </div>
 
         {/* Users List Skeleton */}
-        <div className="glass rounded-2xl overflow-hidden border border-white/5">
-          <div className="h-12 bg-white/[0.03] border-b border-white/5" />
-          <div className="divide-y divide-white/5">
+        <div className="glass rounded-2xl overflow-hidden border border-card-border">
+          <div className="h-12 bg-white/[0.03] border-b border-card-border" />
+          <div className="divide-y divide-border-subtle">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-20 bg-transparent px-4 py-4 flex items-center gap-4">
                 <div className="h-10 w-10 bg-white/[0.03] rounded-full" />

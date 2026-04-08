@@ -7,7 +7,7 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
 export function Skeleton({ className, ...props }: SkeletonProps) {
   return (
     <div 
-      className={`relative overflow-hidden bg-white/[0.03] rounded-lg ${className}`}
+      className={`relative overflow-hidden bg-skeleton-bg rounded-lg ${className}`}
       {...props}
     >
       <motion.div
@@ -20,7 +20,7 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
           ease: "linear",
         }}
         style={{
-          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
+          background: "linear-gradient(90deg, transparent, var(--skeleton-shimmer), transparent)",
         }}
       />
     </div>

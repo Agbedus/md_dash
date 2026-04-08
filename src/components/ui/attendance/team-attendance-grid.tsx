@@ -7,17 +7,20 @@ import { presenceStateLabels, presenceStateColors, attendanceStateLabels, attend
 import { fetchTeamAttendanceLive, overrideAttendance, getTeamAttendanceHistory } from '@/app/(dashboard)/attendance/actions';
 import OverrideModal from './override-modal';
 import TeamAttendanceTable from './team-attendance-table';
-import { FiUsers, FiEdit2, FiClock, FiRefreshCw } from 'react-icons/fi';
+import { FiUsers, FiEdit2, FiRefreshCw, FiMapPin } from 'react-icons/fi';
 import Image from 'next/image';
+import { useLocation } from '@/providers/location-provider';
+import { useMemo } from 'react';
 
 interface Props {
     initialRecords: AttendanceRecord[];
     initialHistory?: AttendanceRecord[];
     users: any[];
     isAdmin?: boolean;
+    currentUserId?: string;
 }
 
-export default function TeamAttendanceGrid({ initialRecords, initialHistory = [], users, isAdmin = false }: Props) {
+export default function TeamAttendanceGrid({ initialRecords, initialHistory = [], users, isAdmin = false, currentUserId }: Props) {
     const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
 
     const { data: records, mutate, isValidating } = useSWR(
@@ -39,6 +42,7 @@ export default function TeamAttendanceGrid({ initialRecords, initialHistory = []
         }
     );
 
+    const { presenceState: manualPresence } = useLocation();
     const teamRecords = records || [];
 
     // Hydrate with user info
@@ -95,7 +99,11 @@ export default function TeamAttendanceGrid({ initialRecords, initialHistory = []
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {hydratedRecords.map(record => {
-                    const pState = record.presence_state || (record.attendance_state === 'CLOCKED_IN' ? 'IN_OFFICE' : 'OUT_OF_OFFICE');
+                    const isMe = String(record.user_id) === String(currentUserId);
+                    // Use local presence for 'Me', otherwise use backend record presence
+                    const rawPresence = isMe ? (manualPresence || record.presence_state) : record.presence_state;
+                    
+                    const pState = rawPresence || (record.attendance_state === 'CLOCKED_IN' ? 'IN_OFFICE' : 'OUT_OF_OFFICE');
                     const aState = record.attendance_state || 'NOT_CLOCKED_IN';
                     
                     const pColors = presenceStateColors[pState as PresenceState] || presenceStateColors.OUT_OF_OFFICE;
@@ -104,87 +112,87 @@ export default function TeamAttendanceGrid({ initialRecords, initialHistory = []
                     return (
                         <div
                             key={record.id}
-                            className="bg-card p-4 rounded-2xl border border-card-border hover:border-foreground/[0.1] transition-all group relative overflow-hidden"
+                            className="bg-card p-5 rounded-[32px] border border-card-border hover:border-foreground/[0.1] transition-all group relative overflow-hidden"
                         >
                             {/* Glow effect on hover */}
-                            <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-opacity ${pColors.bg}`} />
+                            <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-10 transition-opacity ${pColors.bg}`} />
 
-                            <div className="flex items-start justify-between relative z-10">
-                                <div className="flex items-center gap-3">
+                            <div className="flex items-start justify-between relative z-10 w-full">
+                                <div className="flex items-center gap-4">
+                                    {/* Pulsing Avatar Indicator */}
                                     <div className="relative">
-                                        <div className="w-10 h-10 rounded-xl bg-foreground/[0.05] border border-card-border overflow-hidden">
+                                        <div className={`w-12 h-12 rounded-2xl ${pColors.bg} flex items-center justify-center transition-colors border border-card-border overflow-hidden`}>
                                             {record.userAvatar ? (
                                                 <Image 
                                                     src={record.userAvatar} 
                                                     alt={record.userName} 
-                                                    width={40} 
-                                                    height={40} 
-                                                    className="w-full h-full object-cover" 
+                                                    width={48} 
+                                                    height={48} 
+                                                    className="w-full h-full object-cover opacity-90" 
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-text-muted bg-[var(--pastel-indigo)]/20">
+                                                <div className="w-full h-full flex items-center justify-center text-sm font-black text-indigo-400">
                                                     {record.userName?.[0]?.toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
-                                        <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-card ${pColors.dot}`}>
+                                        <div className={`absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full ${pColors.dot} ring-4 ring-card`}>
                                             {record.attendance_state === 'CLOCKED_IN' && (
                                                 <div className={`absolute inset-0 rounded-full ${pColors.dot} animate-ping opacity-75`} />
                                             )}
                                         </div>
                                     </div>
-                                    <div>
-                                        <h4 className="text-sm font-bold text-foreground tracking-tight group-hover:text-indigo-500 transition-colors">
+
+                                    <div className="flex flex-col">
+                                        <h4 className="text-base font-bold text-foreground leading-none mb-1">
                                             {record.userName}
                                         </h4>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className={`text-[9px] font-bold uppercase tracking-wider ${pColors.text}`}>
-                                                {presenceStateLabels[pState as PresenceState]}
-                                            </span>
-                                            <span className="text-text-muted text-[8px]">•</span>
-                                            <span className={`text-[9px] font-bold uppercase tracking-wider ${aColors.text} opacity-80`}>
-                                                {attendanceStateLabels[aState as AttendanceState]}
-                                            </span>
-                                        </div>
+                                        <span className={`inline-flex items-center text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md ${aColors.bg} ${aColors.text} border border-card-border/50 w-fit`}>
+                                            {attendanceStateLabels[aState as AttendanceState]}
+                                        </span>
                                     </div>
                                 </div>
 
-                                {isAdmin && (
-                                    <button
-                                        onClick={() => setSelectedRecord(record)}
-                                        className="p-1.5 rounded-lg bg-foreground/[0.05] border border-card-border text-text-muted hover:text-indigo-500 hover:bg-indigo-500/10 transition-all opacity-0 group-hover:opacity-100"
-                                    >
-                                        <FiEdit2 className="w-3.5 h-3.5" />
-                                    </button>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    <h2 className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg ${pColors.bg} ${pColors.text} border border-card-border/50`}>
+                                        {presenceStateLabels[pState as PresenceState]}
+                                    </h2>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => setSelectedRecord(record)}
+                                            className="p-1.5 rounded-lg bg-foreground/[0.05] border border-card-border text-text-muted hover:text-indigo-500 hover:bg-indigo-500/10 transition-all"
+                                        >
+                                            <FiEdit2 className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="mt-4 flex items-center justify-between pt-3 border-t border-card-border relative z-10">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex flex-col">
-                                        <span className="text-[8px] font-bold text-text-muted uppercase tracking-tighter">In</span>
-                                        <span className="text-[10px] font-numbers text-text-secondary">
-                                            {record.clock_in_at ? new Date(record.clock_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[8px] font-bold text-text-muted uppercase tracking-tighter">Out</span>
-                                        <span className="text-[10px] font-numbers text-text-secondary">
-                                            {record.clock_out_at ? new Date(record.clock_out_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
-                                        </span>
-                                    </div>
+                            {/* LAYER 2: Metrics Strip (In, Out, Duty) - Minimalist Border Style */}
+                            <div className="mt-5 grid grid-cols-3 rounded-xl border border-card-border divide-x divide-card-border overflow-hidden relative z-10">
+                                <div className="flex flex-col items-center justify-center py-2.5">
+                                    <span className="text-[7px] font-black text-text-muted uppercase tracking-[0.2em] mb-1 opacity-60">In</span>
+                                    <span className="text-[10px] font-numbers font-bold text-foreground">
+                                        {record.clock_in_at ? new Date(record.clock_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '—'}
+                                    </span>
                                 </div>
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[8px] font-bold text-text-muted uppercase tracking-tighter">Duty Time</span>
-                                    <span className="text-[10px] font-numbers font-bold text-foreground bg-foreground/[0.05] px-1.5 py-0.5 rounded-md border border-card-border">
+                                <div className="flex flex-col items-center justify-center py-2.5">
+                                    <span className="text-[7px] font-black text-text-muted uppercase tracking-[0.2em] mb-1 opacity-60">Out</span>
+                                    <span className="text-[10px] font-numbers font-bold text-foreground">
+                                        {record.clock_out_at ? new Date(record.clock_out_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '—'}
+                                    </span>
+                                </div>
+                                <div className="flex flex-col items-center justify-center py-2.5">
+                                    <span className="text-[7px] font-black text-text-muted uppercase tracking-[0.2em] mb-1 opacity-60">Duty</span>
+                                    <span className="text-[10px] font-numbers font-bold text-indigo-500">
                                         {(() => {
                                             const start = record.clock_in_at ? new Date(record.clock_in_at) : null;
                                             const end = record.clock_out_at ? new Date(record.clock_out_at) : (record.attendance_state === 'CLOCKED_IN' ? new Date() : null);
-                                            if (!start || !end) return '0h 0m';
+                                            if (!start || !end) return '0h';
                                             const diffMs = end.getTime() - start.getTime();
                                             const h = Math.floor(diffMs / 3600000);
                                             const m = Math.floor((diffMs % 3600000) / 60000);
-                                            return `${h}h ${m}m`;
+                                            return h > 0 ? `${h}h ${m}m` : `${m}m`;
                                         })()}
                                     </span>
                                 </div>

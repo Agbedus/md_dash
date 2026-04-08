@@ -121,6 +121,7 @@ export default function AttendancePageClient({
                             initialHistory={liveTeamHistory || []}
                             users={users}
                             isAdmin={isAdmin}
+                            currentUserId={currentUserId}
                         />
                     </motion.div>
                 )}

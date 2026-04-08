@@ -11,14 +11,14 @@ export default function CalendarLoading() {
 
       <div className="space-y-6">
         {/* Toolbar Skeleton */}
-        <div className="flex justify-between items-center glass p-4 rounded-xl border border-white/5">
+        <div className="flex justify-between items-center glass p-4 rounded-xl border border-card-border">
           <div className="flex gap-2">
             <Skeleton className="h-10 w-10 rounded-lg" />
             <Skeleton className="h-10 w-10 rounded-lg" />
             <Skeleton className="h-10 w-32 rounded-lg" />
           </div>
           <Skeleton className="h-10 w-48 rounded-lg" />
-          <div className="flex gap-1 bg-white/[0.03] p-1 rounded-xl">
+          <div className="flex gap-1 bg-skeleton-bg p-1 rounded-xl">
             <Skeleton className="h-9 w-20 rounded-lg" />
             <Skeleton className="h-9 w-20 rounded-lg" />
             <Skeleton className="h-9 w-20 rounded-lg" />
@@ -26,7 +26,7 @@ export default function CalendarLoading() {
         </div>
 
         {/* Grid Skeleton */}
-        <div className="grid grid-cols-7 gap-px glass rounded-2xl overflow-hidden border border-white/5 bg-white/5">
+        <div className="grid grid-cols-7 gap-px glass rounded-2xl overflow-hidden border border-card-border bg-border-subtle">
           {[...Array(7)].map((_, i) => (
             <div key={`head-${i}`} className="h-12 bg-zinc-950/50 flex items-center justify-center">
               <Skeleton className="h-4 w-12 rounded" />
