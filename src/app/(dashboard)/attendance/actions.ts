@@ -29,6 +29,7 @@ async function getAuthHeaders() {
 function deduplicateAttendanceRecords(records: AttendanceRecord[]): AttendanceRecord[] {
     const map = new Map<string, AttendanceRecord>();
     
+    // Sort ascending for deduplication (latest wins within same day)
     const sorted = [...records].sort((a, b) => {
         const dateA = a.work_date || a.date || '';
         const dateB = b.work_date || b.date || '';
@@ -52,7 +53,12 @@ function deduplicateAttendanceRecords(records: AttendanceRecord[]): AttendanceRe
         map.set(key, record);
     });
     
-    return Array.from(map.values());
+    // Convert to array and sort descending (latest first)
+    return Array.from(map.values()).sort((a, b) => {
+        const dateA = a.work_date || a.date || '';
+        const dateB = b.work_date || b.date || '';
+        return dateB.localeCompare(dateA);
+    });
 }
 
 // ── Staff: My Attendance ────────────────────────────────────────────

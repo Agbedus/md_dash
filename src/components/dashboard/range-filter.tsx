@@ -1,34 +1,48 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+
+const RANGES = [
+  { value: '7d', label: '7D' },
+  { value: 'last_week', label: 'LW' },
+  { value: '30d', label: '30D' },
+  { value: '90d', label: '90D' },
+  { value: '1y', label: '1Y' },
+];
 
 export function RangeFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const currentRange = searchParams.get('range') || '7d';
 
-  const handleRangeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const range = e.target.value;
+  const handleRangeChange = (range: string) => {
     const params = new URLSearchParams(searchParams);
     if (range === '7d') {
       params.delete('range');
     } else {
       params.set('range', range);
     }
-    router.push(`/?${params.toString()}`, { scroll: false });
+    const queryString = params.toString();
+    const url = queryString ? `${pathname}?${queryString}` : pathname;
+    router.push(url, { scroll: false });
   };
 
   return (
-    <select 
-      value={currentRange}
-      onChange={handleRangeChange}
-      className="bg-white/[0.03] border border-white/5 text-zinc-400 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-white/5 transition-colors cursor-pointer hover:text-white"
-    >
-      <option value="7d">This Week</option>
-      <option value="last_week">Last Week</option>
-      <option value="30d">Last 30 Days</option>
-      <option value="90d">Last 90 Days</option>
-      <option value="1y">Last Year</option>
-    </select>
+    <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-xl border border-white/5">
+      {RANGES.map((range) => (
+        <button
+          key={range.value}
+          onClick={() => handleRangeChange(range.value)}
+          className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all duration-200 ${
+            currentRange === range.value
+              ? 'bg-white text-zinc-950 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
+              : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
+          }`}
+        >
+          {range.label}
+        </button>
+      ))}
+    </div>
   );
 }

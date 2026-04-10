@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef, startTransition } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSWRConfig } from 'swr';
 import { updateLocation, getOfficeLocations, clockOutManual } from '@/app/(dashboard)/attendance/actions';
@@ -99,7 +99,7 @@ export function LocationProvider({
         return null;
     };
 
-    const [presenceState, setPresenceState] = useState<PresenceState | null>(deriveInitialPresence(initialRecord));
+    const [confirmedPresenceState, setConfirmedPresenceState] = useState<PresenceState | null>(deriveInitialPresence(initialRecord));
     const [attendanceState, setAttendanceState] = useState<AttendanceState | null>(initialRecord?.attendance_state || null);
     const [clockInTime, setClockInTime] = useState<string | null>(initialRecord?.clock_in_at || initialRecord?.clock_in || null);
     const [clockOutTime, setClockOutTime] = useState<string | null>(initialRecord?.clock_out_at || initialRecord?.clock_out || null);
@@ -114,10 +114,37 @@ export function LocationProvider({
     const [isPolling, setIsPolling] = useState(false);
     const [lastPulse, setLastPulse] = useState<Date | null>(null);
 
+    // ── Local Presence Derivation ──
+    const presenceState = useMemo(() => {
+        if (!location || officesRef.current.length === 0) return confirmedPresenceState;
+
+        let activeOffice: OfficeLocation | null = null;
+        let minDistance = Infinity;
+        
+        for (const o of officesRef.current) {
+            const dist = getDistanceInMeters(location.latitude, location.longitude, o.latitude, o.longitude);
+            if (dist < minDistance) {
+                minDistance = dist;
+                activeOffice = o;
+            }
+        }
+        
+        if (!activeOffice) return confirmedPresenceState;
+
+        if (minDistance <= activeOffice.in_office_radius_meters) {
+            return 'IN_OFFICE';
+        } else if (minDistance <= (activeOffice.temporarily_out_radius_meters || activeOffice.in_office_radius_meters * 2.5)) {
+            return 'TEMPORARILY_OUT';
+        }
+        return 'OUT_OF_OFFICE';
+    }, [location, confirmedPresenceState]);
+
     useEffect(() => {
         if (initialRecord) {
             attendanceStateRef.current = initialRecord.attendance_state;
-            presenceStateRef.current = deriveInitialPresence(initialRecord);
+            const initPres = deriveInitialPresence(initialRecord);
+            presenceStateRef.current = initPres;
+            setConfirmedPresenceState(initPres);
         }
     }, [initialRecord]);
     
@@ -125,6 +152,11 @@ export function LocationProvider({
     const lastSyncTimeRef = useRef<number>(0);
     const presenceStateRef = useRef<PresenceState | null>(null);
     const attendanceStateRef = useRef<AttendanceState | null>(null); // To avoid dependency loop in callbacks
+
+    // Keep ref in sync for callbacks
+    useEffect(() => {
+        presenceStateRef.current = presenceState;
+    }, [presenceState]);
 
     const syncConfiguration = useCallback(async (force = false) => {
         try {
@@ -230,7 +262,7 @@ export function LocationProvider({
         if (stateChanged) {
             console.log(`[LocationProvider] Instant transition: ${prevPres} -> ${localPresence}`);
             presenceStateRef.current = localPresence;
-            setPresenceState(localPresence);
+            // setPresenceState was here; the useMemo handles UI update via setLocation above
         }
 
         // 3. Dynamic Sync: Location + Configuration
@@ -259,7 +291,7 @@ export function LocationProvider({
                     if (backendPres && backendPres !== localPresence) {
                         console.log(`[LocationProvider] Backend correction: ${localPresence} -> ${backendPres}`);
                         presenceStateRef.current = backendPres;
-                        setPresenceState(backendPres);
+                        setConfirmedPresenceState(backendPres);
                     }
 
                     setClockInTime(result.record.clock_in_at || result.record.clock_in || null);
@@ -407,7 +439,7 @@ export function LocationProvider({
                 const previousClockIn = clockInTime;
 
                 setAttendanceState('CLOCKED_IN');
-                setPresenceState('IN_OFFICE');
+                setConfirmedPresenceState('IN_OFFICE');
                 attendanceStateRef.current = 'CLOCKED_IN';
                 presenceStateRef.current = 'IN_OFFICE';
                 setClockInTime(new Date().toISOString());
@@ -417,7 +449,7 @@ export function LocationProvider({
                 
                 if (result.success && result.record) {
                     // Sync with backend confirmed record
-                    setPresenceState(result.record.presence_state ?? null);
+                    setConfirmedPresenceState(result.record.presence_state ?? null);
                     setAttendanceState(result.record.attendance_state);
                     attendanceStateRef.current = result.record.attendance_state;
                     presenceStateRef.current = result.record.presence_state ?? null;
@@ -437,7 +469,7 @@ export function LocationProvider({
                 } else {
                     // ── Rollback on Failure ──
                     setAttendanceState(previousAttendance);
-                    setPresenceState(previousPresence);
+                    setConfirmedPresenceState(previousPresence);
                     attendanceStateRef.current = previousAttendance;
                     presenceStateRef.current = previousPresence;
                     setClockInTime(previousClockIn);
@@ -480,7 +512,7 @@ export function LocationProvider({
             
             toast.dismiss('clock-out');
             if (result.success && result.record) {
-                setPresenceState(result.record.presence_state ?? null);
+                setConfirmedPresenceState(result.record.presence_state ?? null);
                 setAttendanceState(result.record.attendance_state);
                 attendanceStateRef.current = result.record.attendance_state;
                 presenceStateRef.current = result.record.presence_state ?? null;
@@ -507,7 +539,7 @@ export function LocationProvider({
             } else {
                 // ── Rollback on Failure ──
                 setAttendanceState(previousAttendance);
-                setPresenceState(previousPresence);
+                setConfirmedPresenceState(previousPresence);
                 attendanceStateRef.current = previousAttendance;
                 presenceStateRef.current = previousPresence;
                 setClockOutTime(previousClockOut);
