@@ -9,7 +9,7 @@ import { isTimeInWindow, isAfterTime, isWithinRadius } from '@/lib/attendance-ut
 const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
 const API_BASE_URL = `${BASE_URL}/api/v1`;
 
-// ── Helper ──────────────────────────────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────────────
 
 async function getAuthHeaders() {
     const session = await auth();
@@ -20,6 +20,39 @@ async function getAuthHeaders() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
     };
+}
+
+/**
+ * Deduplicates attendance records by user_id and work_date.
+ * Prioritizes: CLOCKED_IN > CLOCKED_OUT > NOT_CLOCKED_IN, then latest ID.
+ */
+function deduplicateAttendanceRecords(records: AttendanceRecord[]): AttendanceRecord[] {
+    const map = new Map<string, AttendanceRecord>();
+    
+    const sorted = [...records].sort((a, b) => {
+        const dateA = a.work_date || a.date || '';
+        const dateB = b.work_date || b.date || '';
+        if (dateA !== dateB) return dateA.localeCompare(dateB);
+        
+        const statusScore = (s: string) => {
+            if (s === 'CLOCKED_IN') return 3;
+            if (s === 'CLOCKED_OUT') return 2;
+            if (s === 'NOT_CLOCKED_IN') return 1;
+            return 0;
+        };
+        const scoreA = statusScore(a.attendance_state);
+        const scoreB = statusScore(b.attendance_state);
+        if (scoreA !== scoreB) return scoreA - scoreB;
+        
+        return (a.id || 0) - (b.id || 0);
+    });
+
+    sorted.forEach(record => {
+        const key = `${record.user_id}-${record.work_date || record.date}`;
+        map.set(key, record);
+    });
+    
+    return Array.from(map.values());
 }
 
 // ── Staff: My Attendance ────────────────────────────────────────────
@@ -39,7 +72,12 @@ export async function getMyAttendanceToday(): Promise<AttendanceRecord | null> {
             console.error("getMyAttendanceToday:", res.status, await res.text());
             return null;
         }
-        return await res.json();
+        
+        const data = await res.json();
+        if (Array.isArray(data)) {
+             return deduplicateAttendanceRecords(data)[0] || null;
+        }
+        return data;
     } catch (error) {
         console.error("Error fetching my attendance today:", error);
         return null;
@@ -60,7 +98,8 @@ export async function getMyAttendanceHistory(): Promise<AttendanceRecord[]> {
             console.error("getMyAttendanceHistory:", res.status, await res.text());
             return [];
         }
-        return await res.json();
+        const data = await res.json();
+        return deduplicateAttendanceRecords(data);
     } catch (error) {
         console.error("Error fetching my attendance history:", error);
         return [];
@@ -238,7 +277,8 @@ export async function getTeamAttendanceToday(): Promise<AttendanceRecord[]> {
             console.error("getTeamAttendanceToday:", res.status, await res.text());
             return [];
         }
-        return await res.json();
+        const data = await res.json();
+        return deduplicateAttendanceRecords(data);
     } catch (error) {
         console.error("Error fetching team attendance:", error);
         return [];
@@ -250,11 +290,6 @@ export async function getTeamAttendanceHistory(): Promise<AttendanceRecord[]> {
     if (!headers) return [];
 
     try {
-        // Since there's no direct "all history" endpoint in the spec,
-        // we'll fetch all users and then fetch history for each.
-        // However, for efficiency, we should check if /attendance/history exists first (as I added it).
-        // If it's returning empty, it might be the wrong endpoint.
-        
         const res = await fetch(`${API_BASE_URL}/attendance/history`, {
             method: 'GET',
             headers,
@@ -263,21 +298,23 @@ export async function getTeamAttendanceHistory(): Promise<AttendanceRecord[]> {
 
         if (res.ok) {
             const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) return data;
+            if (Array.isArray(data) && data.length > 0) {
+                return deduplicateAttendanceRecords(data);
+            }
         }
 
-        // Fallback: Get all users and fetch their history (limit to active users/staff for performance)
+        // Fallback: Get all users and fetch their history
         const usersRes = await fetch(`${API_BASE_URL}/users`, { headers });
         if (!usersRes.ok) return [];
         const users = await usersRes.json();
         
-        // Fetch histories in parallel with a limit
         const historyPromises = users.slice(0, 20).map((user: any) => 
             getUserAttendanceHistory(String(user.id))
         );
         
         const histories = await Promise.all(historyPromises);
-        return histories.flat().sort((a, b) => {
+        const combined = histories.flat();
+        return deduplicateAttendanceRecords(combined).sort((a, b) => {
             const dateA = new Date(a.work_date || a.date || 0).getTime();
             const dateB = new Date(b.work_date || b.date || 0).getTime();
             return dateB - dateA; // Newest first
@@ -303,7 +340,8 @@ export async function getUserAttendanceHistory(userId: string): Promise<Attendan
             console.error("getUserAttendanceHistory:", res.status, await res.text());
             return [];
         }
-        return await res.json();
+        const data = await res.json();
+        return deduplicateAttendanceRecords(data);
     } catch (error) {
         console.error("Error fetching user attendance history:", error);
         return [];

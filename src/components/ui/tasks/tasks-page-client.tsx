@@ -392,7 +392,7 @@ export default function TasksPageClient({
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-card-border">
-                                    <AnimatePresence initial={false} mode="wait">
+                                    <AnimatePresence initial={false} mode="popLayout">
                                         {filteredTasks.map((task, index) => (
                                             <TaskCard
                                                 key={task.id}
