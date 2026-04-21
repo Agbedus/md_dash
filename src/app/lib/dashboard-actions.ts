@@ -6,6 +6,11 @@ import { getNotes } from '@/app/(dashboard)/notes/actions';
 import { getProjects } from '@/app/(dashboard)/projects/actions';
 import { getEvents } from '@/app/(dashboard)/calendar/actions';
 import { getUsers } from '@/app/(dashboard)/users/actions';
+import { 
+    getMyAttendanceToday, 
+    getMyAttendanceHistory, 
+    getTeamAttendanceToday 
+} from '@/app/(dashboard)/attendance/actions';
 import { cache } from 'react';
 import { format, startOfWeek, endOfWeek, subWeeks, subDays, isSameDay } from 'date-fns';
 
@@ -14,13 +19,57 @@ export async function getUserName() {
   return session?.user?.name || 'User';
 }
 
+export async function getAttendanceStats() {
+    const [myToday, teamToday, myHistory] = await Promise.all([
+        getMyAttendanceToday(),
+        getTeamAttendanceToday(),
+        getMyAttendanceHistory(),
+    ]);
+
+    const activeTeam = teamToday.filter(r => r.attendance_state === 'CLOCKED_IN').length;
+    const totalTeam = teamToday.length;
+
+    // Helper to compute hours for a record
+    const computeHours = (r: any) => {
+        if (r.total_hours && r.total_hours > 0) return r.total_hours;
+        if (r.total_seconds && r.total_seconds > 0) return r.total_seconds / 3600;
+        
+        const clockIn = r.clock_in_at || r.clock_in;
+        const clockOut = r.clock_out_at || r.clock_out;
+        
+        if (clockIn && clockOut) {
+            const start = new Date(clockIn);
+            const end = new Date(clockOut);
+            const diff = end.getTime() - start.getTime();
+            return Math.max(0, diff / (1000 * 60 * 60));
+        }
+        return 0;
+    };
+
+    // Calculate average hours from history (last 5 records)
+    const recentHistory = myHistory.slice(0, 5);
+    const avgHours = recentHistory.length > 0 
+        ? recentHistory.reduce((acc, r) => acc + computeHours(r), 0) / recentHistory.length 
+        : 0;
+
+    return {
+        myStatus: myToday?.attendance_state || 'NOT_CLOCKED_IN',
+        myPresence: myToday?.presence_state || 'OUT_OF_OFFICE',
+        teamActiveCount: activeTeam,
+        teamTotalCount: totalTeam,
+        avgDailyHours: Math.round(avgHours * 10) / 10,
+        lastClockIn: myToday?.clock_in_at || myToday?.clock_in || null,
+    };
+}
+
 export async function getSummaryStats() {
-    const [tasks, events, notes, users, projects] = await Promise.all([
+    const [tasks, events, notes, users, projects, attendance] = await Promise.all([
         getTasks(undefined, undefined, undefined, undefined, 1000),
         getEvents(),
         getNotes(1000),
         getUsers(),
-        getProjects()
+        getProjects(),
+        getAttendanceStats()
     ]);
 
     const now = new Date();
@@ -53,6 +102,7 @@ export async function getSummaryStats() {
         pendingTasks: tasks.length - completedTasks.length,
         totalUsers: users.length,
         totalProjects: projects.length,
+        attendance,
         users: users.slice(0, 3).map((u: any) => ({ name: u.name, image: u.image })),
         trends: {
             tasks: getTrendData(tasks, 'createdAt'),
@@ -270,6 +320,7 @@ export async function getRecentNotes() {
 
         return {
             title: n.title,
+            content: n.content,
             type: n.type,
             color: color,
             updatedAt: n.updated_at
@@ -329,7 +380,8 @@ export async function getAggregatedDashboardData() {
         decisions,
         notes,
         events,
-        allProjects
+        allProjects,
+        attendance
     ] = await Promise.all([
         getProductivityData(),
         getTasksOverviewData(),
@@ -340,6 +392,7 @@ export async function getAggregatedDashboardData() {
         getNotes(10), // Fetch more notes
         getEvents(),
         getProjects(),
+        getAttendanceStats()
     ]);
 
     // Process events (upcoming 7 days)
@@ -353,6 +406,12 @@ export async function getAggregatedDashboardData() {
     // Format as a readable string for the AI
     return `
     FULL DASHBOARD CONTEXT:
+    
+    0. Attendance & Team Presence:
+       - My Status: ${attendance.myStatus} (${attendance.myPresence})
+       - Team Presence: ${attendance.teamActiveCount} / ${attendance.teamTotalCount} active
+       - My Avg Daily Hours: ${attendance.avgDailyHours}h
+       - Last Clock-in: ${attendance.lastClockIn || 'N/A'}
     
     1. Productivity Trend (Last 7 Days):
     ${productivity.map(p => `   - ${p.name}: ${p.productivity} completed tasks`).join('\n')}

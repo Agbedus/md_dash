@@ -16,10 +16,11 @@ import {
   getPriorityMatrix,
   getTemporalBurnRate,
   getCriticalBottlenecks,
-  getLatestIntelligence,
   getOperationVelocity,
 } from "@/app/lib/dashboard-actions";
 import { RangeFilter } from "./range-filter";
+import { NoteStack } from "./note-stack";
+import { AttendanceStack } from "./attendance-stack";
 import {
   ProductivityChart,
   TasksChart,
@@ -28,6 +29,12 @@ import {
   ProjectProgressChart,
   VelocityChart,
 } from "@/components/ui/client-charts";
+import { 
+  presenceStateColors, 
+  attendanceStateColors, 
+  presenceStateLabels, 
+  attendanceStateLabels 
+} from "@/types/attendance";
 import { Sparkline } from "@/components/ui/sparkline";
 import {
   FiMoreHorizontal,
@@ -45,6 +52,7 @@ import {
   FiCalendar,
   FiActivity,
   FiUsers,
+  FiMapPin,
   FiAlertTriangle,
   FiTrendingUp,
   FiTarget,
@@ -82,8 +90,8 @@ export async function SummaryStatsSection() {
         { label: 'Total Users', value: stats.totalUsers, icon: FiUsers, color: 'text-[var(--pastel-blue)]', bg: 'bg-[var(--pastel-blue)]/10', users: stats.users, trend: stats.trends.users },
         { label: 'Total Tasks', value: stats.totalTasks, icon: FiCheckSquare, color: 'text-[var(--pastel-purple)]', bg: 'bg-[var(--pastel-purple)]/10', trend: stats.trends.tasks },
         { label: 'Completed', value: stats.completedTasks, icon: FiCheckCircle, color: 'text-[var(--pastel-emerald)]', bg: 'bg-[var(--pastel-emerald)]/10', trend: stats.trends.completions },
-        { label: 'Upcoming Events', value: stats.upcomingEvents, icon: FiCalendar, color: 'text-[var(--pastel-rose)]', bg: 'bg-[var(--pastel-rose)]/10', trend: stats.trends.events },
-        { label: 'Recent Notes', value: stats.recentNotesCount, icon: FiFileText, color: 'text-[var(--pastel-amber)]', bg: 'bg-[var(--pastel-amber)]/10', trend: stats.trends.notes },
+        { label: 'Team Active', value: stats.attendance.teamActiveCount, icon: FiActivity, color: 'text-[var(--pastel-teal)]', bg: 'bg-[var(--pastel-teal)]/10', trend: stats.trends.events },
+        { label: 'Upcoming', value: stats.upcomingEvents, icon: FiCalendar, color: 'text-[var(--pastel-rose)]', bg: 'bg-[var(--pastel-rose)]/10', trend: stats.trends.events },
     ];
 
     return (
@@ -126,6 +134,70 @@ export async function SummaryStatsSection() {
         </div>
     );
 }
+
+export async function AttendanceStatusSection() {
+    const stats = await getSummaryStats();
+    return (
+        <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
+            <AttendanceStack stats={stats.attendance} />
+        </div>
+    );
+}
+
+export async function UserStatSection() {
+    const stats = await getSummaryStats();
+    
+    return (
+        <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96 text-left">
+            <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
+                <div>
+                    <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">User Intelligence</h2>
+                    <p className="text-[11px] text-(--text-muted) uppercase tracking-tight font-bold mt-0.5">Tactical Output</p>
+                </div>
+                <div className="p-2 rounded-xl bg-[var(--pastel-purple)]/10">
+                    <FiCpu className="text-sm text-[var(--pastel-purple)]" />
+                </div>
+            </div>
+            
+            <div className="flex-1 flex flex-col justify-center space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-2xl bg-background/50 border border-card-border">
+                        <p className="text-[9px] text-(--text-muted) font-black uppercase tracking-widest mb-1">Total Notes</p>
+                        <p className="text-2xl font-black font-numbers text-foreground">{stats.totalNotes}</p>
+                    </div>
+                    <div className="p-3 rounded-2xl bg-background/50 border border-card-border">
+                        <p className="text-[9px] text-(--text-muted) font-black uppercase tracking-widest mb-1">Total Tasks</p>
+                        <p className="text-2xl font-black font-numbers text-foreground">{stats.totalTasks}</p>
+                    </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-background/50 border border-card-border">
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-[9px] text-(--text-muted) font-black uppercase tracking-widest">Completion Rate</p>
+                        <span className="text-xs font-bold font-numbers text-emerald-400">
+                            {stats.totalTasks > 0 ? Math.round((stats.completedTasks / stats.totalTasks) * 100) : 0}%
+                        </span>
+                    </div>
+                    <div className="h-1.5 bg-background rounded-full overflow-hidden border border-card-border">
+                        <div 
+                            className="h-full bg-emerald-500 rounded-full" 
+                            style={{ width: `${stats.totalTasks > 0 ? (stats.completedTasks / stats.totalTasks) * 100 : 0}%` }}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-[var(--pastel-blue)]/5 border border-[var(--pastel-blue)]/10">
+                    <div className="flex items-center gap-2">
+                        <FiTarget className="text-[var(--pastel-blue)]" />
+                        <span className="text-[10px] text-foreground font-bold uppercase tracking-widest">Active Projects</span>
+                    </div>
+                    <span className="text-sm font-black font-numbers text-foreground">{stats.totalProjects}</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 
 export async function ProductivitySection({ range }: { range?: string }) {
   const data = await getProductivityData(range);
@@ -373,42 +445,8 @@ export async function RecentNotesSection() {
           <FiPlus />
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-        {recentNotes.length > 0 ? (
-          recentNotes.map((note, i) => {
-            const icon =
-              note.type === "meeting"
-                ? FiFileText
-                : note.type === "idea"
-                  ? FiZap
-                  : FiFileText;
-            const color = note.color || "text-yellow-400";
-            const timeAgo = note.updatedAt
-              ? new Date(note.updatedAt).toLocaleDateString()
-              : "Unknown";
-
-            return (
-              <div
-                key={i}
-                className="p-4 rounded-xl bg-background/50 border border-card-border hover:border-foreground/10 hover:bg-background/80 transition-all cursor-pointer group"
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  {React.createElement(icon, { className: color })}
-                  <h3 className="font-bold text-(--text-muted) group-hover:text-foreground transition-colors truncate">
-                    {note.title}
-                  </h3>
-                </div>
-                <p className="text-[11px] text-(--text-muted) font-bold font-numbers" suppressHydrationWarning>
-                  {timeAgo}
-                </p>
-              </div>
-            );
-          })
-        ) : (
-          <p className="text-(--text-muted) text-center py-4 col-span-2 font-bold uppercase tracking-tight text-[11px]">
-            No recent notes
-          </p>
-        )}
+      <div className="flex-1 min-h-0">
+        <NoteStack notes={recentNotes} />
       </div>
     </div>
   );
@@ -702,75 +740,6 @@ export async function CriticalBottlenecksSection() {
           <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
             <FiCheckCircle className="text-2xl mb-2 text-emerald-500" />
             <p className="text-sm text-(--text-muted) font-bold uppercase tracking-tight">No overdue tasks!</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export async function LatestIntelligenceSection() {
-  const intel = await getLatestIntelligence();
-
-  const typeColors: Record<string, string> = {
-    meeting: 'bg-blue-500/10 text-blue-400',
-    idea: 'bg-amber-500/10 text-amber-400',
-    journal: 'bg-pink-500/10 text-pink-400',
-    code: 'bg-purple-500/10 text-purple-400',
-    note: 'bg-background/50 text-(--text-muted)',
-  };
-
-  return (
-    <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96">
-      <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
-        <div>
-          <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">Field Reports</h2>
-          <p className="text-[11px] text-(--text-muted) uppercase tracking-tight font-bold mt-0.5">Latest Intelligence</p>
-        </div>
-        <div className="p-2 rounded-xl bg-[var(--pastel-amber)]/10">
-          <FiRadio className="text-sm text-[var(--pastel-amber)]" />
-        </div>
-      </div>
-      <div className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
-        {intel.length > 0 ? (
-          intel.map((note, i) => (
-            <div key={i} className="p-4 rounded-xl bg-background/50 border border-card-border hover:bg-background/80 hover:border-foreground/10 transition-all cursor-pointer group">
-              <div className="flex items-center gap-3 mb-2.5">
-                <div className="shrink-0 h-8 w-8 rounded-full bg-background/50 border border-card-border overflow-hidden ring-1 ring-background relative">
-                  {note.authorAvatar ? (
-                    <Image src={note.authorAvatar} alt={note.authorName} fill className="object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-foreground bg-[var(--pastel-indigo)]/20">
-                      {note.authorName?.[0]?.toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-bold text-(--text-muted) group-hover:text-foreground transition-colors truncate">
-                    {note.title}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-(--text-muted) font-bold">{note.authorName}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-tight ${typeColors[note.type] || typeColors.note}`}>
-                      {note.type}
-                    </span>
-                  </div>
-                </div>
-                {note.updatedAt && (
-                  <span className="text-[10px] text-(--text-muted) shrink-0 font-bold font-numbers" suppressHydrationWarning>
-                    {new Date(note.updatedAt).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-(--text-muted) font-medium leading-relaxed line-clamp-2">
-                {note.excerpt}
-              </p>
-            </div>
-          ))
-        ) : (
-          <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
-            <FiFileText className="text-2xl mb-2 text-(--text-muted)" />
-            <p className="text-sm text-(--text-muted) font-bold uppercase tracking-tight">No recent briefings</p>
           </div>
         )}
       </div>
