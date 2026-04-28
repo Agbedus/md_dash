@@ -27,6 +27,7 @@ const COLORS = [
 ];
 
 const getStableColor = (id: string) => {
+  if (!id) return COLORS[0];
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = id.charCodeAt(i) + ((hash << 5) - hash);
@@ -45,7 +46,7 @@ export const CreatorAvatar: React.FC<CreatorAvatarProps> = ({
 
   // Fetch full user profile if initialUser is missing or doesn't have an image
   const { data: fetchedUser, isLoading } = useSWR<User>(
-    !initialUser?.image && !initialUser?.avatar_url && currentUser?.accessToken 
+    !initialUser?.image && !initialUser?.avatar_url && currentUser?.accessToken && userId
       ? [`${baseUrl}/api/v1/users/${userId}`, currentUser.accessToken] 
       : null,
     ([url, token]: [string, string]) => fetcher(url, token)
@@ -54,7 +55,7 @@ export const CreatorAvatar: React.FC<CreatorAvatarProps> = ({
   const displayUser = fetchedUser || initialUser;
   const avatarUrl = displayUser?.avatar_url || displayUser?.image;
   const name = displayUser?.name || displayUser?.email || "User";
-  const initials = name[0].toUpperCase();
+  const initials = name && name.length > 0 ? name[0].toUpperCase() : "?";
   const bgColor = getStableColor(userId);
 
   if (avatarUrl) {

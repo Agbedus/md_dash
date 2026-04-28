@@ -114,9 +114,9 @@ export const AnnouncementDrawer = () => {
             {/* List */}
             <div className="flex-1 overflow-y-auto px-0 py-2 space-y-px custom-scrollbar bg-background">
               {sortedAnnouncements.length > 0 ? (
-                sortedAnnouncements.map((announcement) => (
+                sortedAnnouncements.map((announcement, index) => (
                   <motion.div 
-                    key={announcement.id}
+                    key={announcement.id || `announcement-${index}`}
                     layout
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}

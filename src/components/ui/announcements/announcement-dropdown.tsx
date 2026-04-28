@@ -25,9 +25,9 @@ export const AnnouncementDropdown = () => {
       
       <div className="max-h-[350px] overflow-y-auto">
         {latestAnnouncements.length > 0 ? (
-          latestAnnouncements.map((announcement) => (
+          latestAnnouncements.map((announcement, index) => (
             <div 
-              key={announcement.id}
+              key={announcement.id || `dropdown-${index}`}
               onClick={() => {
                 setIsDropdownOpen(false);
                 setIsDrawerOpen(true);
@@ -46,7 +46,14 @@ export const AnnouncementDropdown = () => {
                     {announcement.content}
                   </p>
                   <p className="text-[10px] text-text-muted opacity-80 mt-2 uppercase tracking-[0.15em] font-bold">
-                    {formatDistanceToNow(new Date(announcement.created_at), { addSuffix: true })}
+                    {(() => {
+                      try {
+                        const date = announcement.created_at ? new Date(announcement.created_at) : new Date();
+                        return isNaN(date.getTime()) ? 'Just now' : formatDistanceToNow(date, { addSuffix: true });
+                      } catch (e) {
+                        return 'Just now';
+                      }
+                    })()}
                   </p>
                 </div>
               </div>

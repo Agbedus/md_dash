@@ -75,9 +75,10 @@ export const AnnouncementProvider: React.FC<{ children: React.ReactNode, user?: 
     ([url, token]: [string, string]) => fetcher(url, token)
   );
 
-  const unreadCount = announcements.filter(a => !readIds.includes(a.id)).length;
+  const unreadCount = announcements.filter(a => a.id && !readIds.includes(a.id)).length;
 
   const markAsRead = useCallback((id: string) => {
+    if (!id) return;
     setReadIds(prev => prev.includes(id) ? prev : [...prev, id]);
   }, []);
 
