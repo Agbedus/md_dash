@@ -12,6 +12,7 @@ export function Portal({ children, containerId = 'portal-root' }: PortalProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     
     // Create portal root if it doesn't exist

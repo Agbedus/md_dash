@@ -292,24 +292,32 @@ export async function getTeamAttendanceToday(): Promise<AttendanceRecord[]> {
 }
 
 export async function getTeamAttendanceHistory(): Promise<AttendanceRecord[]> {
+    const session = await auth();
     const headers = await getAuthHeaders();
-    if (!headers) return [];
+    if (!headers || !session) return [];
+
+    const roles = session.user?.roles || [];
+    const isAdmin = roles.some((r: string) => r.toLowerCase() === 'super_admin');
 
     try {
-        const res = await fetch(`${API_BASE_URL}/attendance/history`, {
-            method: 'GET',
-            headers,
-            next: { tags: ['attendance-team-history'], revalidate: 60 },
-        });
+        // If admin, try the system-wide records endpoint first
+        if (isAdmin) {
+            const res = await fetch(`${API_BASE_URL}/attendance/admin/all-records`, {
+                method: 'GET',
+                headers,
+                next: { tags: ['attendance-team-history'], revalidate: 60 },
+            });
 
-        if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-                return deduplicateAttendanceRecords(data);
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    return deduplicateAttendanceRecords(data);
+                }
             }
         }
 
-        // Fallback: Get all users and fetch their history
+        // Fallback for Managers or if Admin endpoint is unavailable: 
+        // Fetch history for each user individually (limited to first 20 for performance)
         const usersRes = await fetch(`${API_BASE_URL}/users`, { headers });
         if (!usersRes.ok) return [];
         const users = await usersRes.json();

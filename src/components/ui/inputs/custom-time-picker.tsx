@@ -31,13 +31,20 @@ export function CustomTimePicker({
   const [minutes, setMinutes] = useState(parseInt(value.split(':')[1]) || 0);
   const [activeRing, setActiveRing] = useState<'hours' | 'minutes' | null>(null);
 
-  useEffect(() => {
+  // Track previous value and open state to sync navigation/time state during render
+  const [prevValue, setPrevValue] = useState(value);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  if (value !== prevValue || isOpen !== prevIsOpen) {
+    setPrevValue(value);
+    setPrevIsOpen(isOpen);
+    
     if (value) {
       const [h, m] = value.split(':');
       setHours(parseInt(h) || 0);
       setMinutes(parseInt(m) || 0);
     }
-  }, [value, isOpen]);
+  }
 
   const updateCoords = () => {
     if (containerRef.current) {
@@ -56,6 +63,7 @@ export function CustomTimePicker({
   };
 
   useLayoutEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isOpen) updateCoords();
   }, [isOpen]);
 

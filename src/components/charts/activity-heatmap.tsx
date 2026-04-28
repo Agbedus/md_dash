@@ -23,6 +23,7 @@ const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({ data, variant = 'comp
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

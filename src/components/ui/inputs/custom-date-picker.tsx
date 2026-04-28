@@ -43,8 +43,14 @@ export function CustomDatePicker({
   const [selectedHours, setSelectedHours] = useState(0);
   const [selectedMinutes, setSelectedMinutes] = useState(0);
 
-  // Initialize from value
-  useEffect(() => {
+  // Track previous value and open state to sync navigation/time state during render
+  const [prevValue, setPrevValue] = useState(value);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  if (value !== prevValue || isOpen !== prevIsOpen) {
+    setPrevValue(value);
+    setPrevIsOpen(isOpen);
+    
     if (value) {
       const d = typeof value === 'string' ? parseISO(value) : value;
       if (!isNaN(d.getTime())) {
@@ -53,7 +59,7 @@ export function CustomDatePicker({
         setSelectedMinutes(d.getMinutes());
       }
     }
-  }, [value, isOpen]);
+  }
 
   const parsedValue = value ? (typeof value === 'string' ? parseISO(value) : value) : null;
   const isValidValue = parsedValue && !isNaN(parsedValue.getTime());
@@ -85,6 +91,7 @@ export function CustomDatePicker({
 
   useLayoutEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       updateCoords();
     }
   }, [isOpen]);

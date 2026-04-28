@@ -150,11 +150,15 @@ export default function NotificationsPage() {
     }));
   }, [notifications, activeTab, searchQuery, users]);
 
-  useEffect(() => {
+  // Track filtered notifications to auto-select the first one if none is selected during render
+  const [prevFilteredCount, setPrevFilteredCount] = useState(0);
+  
+  if (filteredNotifications.length !== prevFilteredCount) {
+    setPrevFilteredCount(filteredNotifications.length);
     if (filteredNotifications.length > 0 && !selectedId) {
       setSelectedId(filteredNotifications[0].id);
     }
-  }, [filteredNotifications, selectedId]);
+  }
 
   const selectedNotification = useMemo(() => 
     filteredNotifications.find(n => n.id === selectedId) || null

@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronUp, FiChevronDown, FiMapPin, FiUsers, FiClock, FiActivity } from 'react-icons/fi';
-import { presenceStateLabels, presenceStateColors, attendanceStateLabels, attendanceStateColors } from '@/types/attendance';
+import { presenceStateLabels, presenceStateColors, attendanceStateLabels, attendanceStateColors, PresenceState, AttendanceState } from '@/types/attendance';
 
 interface AttendanceStats {
-  myStatus: string;
-  myPresence: string;
+  myStatus: AttendanceState | string;
+  myPresence: PresenceState | string;
   teamActiveCount: number;
   teamTotalCount: number;
   avgDailyHours: number;
@@ -18,8 +18,8 @@ export function AttendanceStack({ stats }: { stats: AttendanceStats }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
 
-  const pColors = presenceStateColors[stats.myPresence as any] || presenceStateColors.OUT_OF_OFFICE;
-  const aColors = attendanceStateColors[stats.myStatus as any] || attendanceStateColors.NOT_CLOCKED_IN;
+  const pColors = presenceStateColors[stats.myPresence as PresenceState] || presenceStateColors.OUT_OF_OFFICE;
+  const aColors = attendanceStateColors[stats.myStatus as AttendanceState] || attendanceStateColors.NOT_CLOCKED_IN;
 
   const slides = [
     {
@@ -33,11 +33,11 @@ export function AttendanceStack({ stats }: { stats: AttendanceStats }) {
           <div className="glass p-4 rounded-2xl border border-card-border relative overflow-hidden mb-2">
              <div className={`absolute left-0 top-0 bottom-0 w-1 ${pColors.dot}`} />
              <p className="text-[10px] text-(--text-muted) font-black uppercase tracking-widest mb-1">Live Presence</p>
-             <h3 className="text-xl font-bold text-foreground">{presenceStateLabels[stats.myPresence as any] || 'Standby'}</h3>
+             <h3 className="text-xl font-bold text-foreground">{presenceStateLabels[stats.myPresence as PresenceState] || 'Standby'}</h3>
           </div>
           <div className="flex items-center justify-between px-1">
              <span className={`text-[10px] font-black uppercase tracking-widest ${aColors.text}`}>
-                {attendanceStateLabels[stats.myStatus as any] || 'Inactive'}
+                {attendanceStateLabels[stats.myStatus as AttendanceState] || 'Inactive'}
              </span>
              {stats.lastClockIn && (
                 <span className="text-[10px] text-(--text-muted) font-bold font-numbers uppercase tracking-tight" suppressHydrationWarning>

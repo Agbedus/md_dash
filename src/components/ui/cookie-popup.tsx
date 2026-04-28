@@ -22,6 +22,7 @@ export const CookiePopup = () => {
         const storedPrefs = localStorage.getItem(COOKIE_PREFS_KEY);
         
         if (storedPrefs) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setPrefs(JSON.parse(storedPrefs));
         }
 
@@ -91,7 +92,7 @@ export const CookiePopup = () => {
                         {!showSettings ? (
                             <>
                                 <p className="text-xs text-text-secondary leading-relaxed">
-                                    We use cookies to enhance your executive oversight experience, analyze mission-critical traffic, and provide secure authentication. By clicking "Accept All", you consent to our use of all cookies. 
+                                    We use cookies to enhance your executive oversight experience, analyze mission-critical traffic, and provide secure authentication. By clicking &quot;Accept All&quot;, you consent to our use of all cookies. 
                                     <button 
                                         onClick={() => setShowSettings(true)}
                                         className="text-indigo-400 hover:underline ml-1 font-medium"

@@ -37,6 +37,39 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
      const [isFavorite, setIsFavorite] = useState(false);
      const [isArchived, setIsArchived] = useState(false);
 
+    // Track the note we're currently editing to detect changes and reset state during render
+    const [prevNoteId, setPrevNoteId] = useState<string | null>(null);
+    const [prevIsOpen, setPrevIsOpen] = useState(false);
+
+    const currentInitialNoteId = initialNote ? String(initialNote.id) : null;
+
+    if (currentInitialNoteId !== prevNoteId || isOpen !== prevIsOpen) {
+        setPrevNoteId(currentInitialNoteId);
+        setPrevIsOpen(isOpen);
+        
+        if (initialNote) {
+            setTitle(initialNote.title || '');
+            setPriority(initialNote.priority || 'low');
+            setTypeVal(initialNote.type || 'note');
+            setTaskId(initialNote.task_id ? String(initialNote.task_id) : '');
+            setNoteId(String(initialNote.id));
+            setTags(initialNote.tags || '');
+            setIsPinned(initialNote.is_pinned === 1);
+            setIsFavorite(initialNote.is_favorite === 1);
+            setIsArchived(initialNote.is_archived === 1);
+        } else if (isOpen) {
+            setTitle('');
+            setPriority('low');
+            setTypeVal('note');
+            setNoteId('');
+            setTaskId('');
+            setTags('');
+            setIsPinned(false);
+            setIsFavorite(false);
+            setIsArchived(false);
+        }
+    }
+
     // Initialize Quill once when the component mounts and keep it mounted so content persists
     useEffect(() => {
         if (editorContainerRef.current && !quillRef.current) {
@@ -48,54 +81,22 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                 },
             });
         }
+    }, []);
 
-
-
-        // Do not destroy Quill on unmount so editor state persists across opens.
-        return () => {
-            // intentionally keep quillRef and DOM so content persists
-        };
-    }, []); // run only once
-
-    // When `isOpen` changes to true, focus the title input but don't clear the editor
+    // When `isOpen` changes to true, focus the title input
     useEffect(() => {
         if (isOpen) {
-            setTimeout(() => titleRef.current?.focus(), 100);
+            const timer = setTimeout(() => titleRef.current?.focus(), 100);
+            return () => clearTimeout(timer);
         }
     }, [isOpen]);
 
-    // When initialNote or isOpen changes, sync controlled state and quill content
+    // Update Quill content separately (must be in effect due to DOM interaction)
     useEffect(() => {
-        if (initialNote) {
-            setTitle(initialNote.title || '');
-            setPriority(initialNote.priority || 'low');
-            setTypeVal(initialNote.type || 'note');
-            setTaskId(initialNote.task_id ? String(initialNote.task_id) : '');
-            setNoteId(String(initialNote.id));
-            
-            // Tag initialization - now a simple string
-            setTags(initialNote.tags || '');
-            
-            setIsPinned(initialNote.is_pinned === 1);
-            setIsFavorite(initialNote.is_favorite === 1);
-            setIsArchived(initialNote.is_archived === 1);
-            if (quillRef.current) {
-                quillRef.current.clipboard.dangerouslyPasteHTML(initialNote.content || '');
-            }
-        } else if (isOpen) {
-            // new note: clear state and editor
-            setTitle('');
-            setPriority('low');
-            setTypeVal('note');
-            setNoteId('');
-            setTaskId('');
-            setTags('');
-            setIsPinned(false);
-            setIsFavorite(false);
-            setIsArchived(false);
-            if (quillRef.current) {
-                quillRef.current.setContents([]);
-            }
+        if (initialNote && quillRef.current) {
+            quillRef.current.clipboard.dangerouslyPasteHTML(initialNote.content || '');
+        } else if (isOpen && quillRef.current) {
+            quillRef.current.setContents([]);
         }
     }, [initialNote, isOpen]);
 
