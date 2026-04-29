@@ -11,6 +11,7 @@ import { toast } from '@/lib/toast';
 import type { TimeOffRequest, TimeOffStatus, TimeOffType } from '@/types/time-off';
 import type { User } from '@/types/user';
 import { approveTimeOffRequest, rejectTimeOffRequest, deleteTimeOffRequest } from '@/app/(dashboard)/time-off/actions';
+import { useConfirm } from '@/providers/confirmation-provider';
 
 interface TimeOffAdminClientProps {
     initialRequests: TimeOffRequest[];
@@ -38,6 +39,7 @@ const typeLabels: Record<string, string> = {
 };
 
 export default function TimeOffAdminClient({ initialRequests, users }: TimeOffAdminClientProps) {
+    const confirm = useConfirm();
     const [requests, setRequests] = useState(initialRequests);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('');
@@ -108,7 +110,14 @@ export default function TimeOffAdminClient({ initialRequests, users }: TimeOffAd
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Delete this time-off request permanently?')) return;
+        const confirmed = await confirm({
+            title: 'Delete Time-Off Request',
+            message: 'Are you sure you want to delete this time-off request permanently? This action cannot be undone.',
+            confirmText: 'Delete Request',
+            type: 'danger'
+        });
+
+        if (!confirmed) return;
         setActionLoading(id);
         setRequests(prev => prev.filter(r => r.id !== id));
         try {

@@ -26,6 +26,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { useUsers } from '@/hooks/use-users';
 import { useProjects } from '@/hooks/use-projects';
 import TasksLoading from '@/app/(dashboard)/tasks/loading';
+import { useConfirm } from '@/providers/confirmation-provider';
 
 export default function TasksPageClient({ 
     allTasks: initialTasks = [], 
@@ -40,6 +41,7 @@ export default function TasksPageClient({
     projectId?: number, 
     currentUserId?: string 
 }) {
+    const confirm = useConfirm();
     const [tableTab, setTableTab] = useState<'active' | 'done'>('active');
     const [viewMode, setViewMode] = useState<ViewMode>('table');
     const [isAddingTask, setIsAddingTask] = useState(false);
@@ -122,9 +124,39 @@ export default function TasksPageClient({
         if (viewMode === 'kanban') return tasks;
 
         // In table view, filter by active/done status based on tab
-        return tasks.filter(task => {
+        const filtered = tasks.filter(task => {
             if (tableTab === 'done') return task.status === 'DONE';
             return task.status !== 'DONE';
+        });
+
+        // Sort by Status then Priority
+        const statusOrder: Record<string, number> = {
+            'IN_PROGRESS': 1,
+            'REVIEW': 2,
+            'QA': 3,
+            'TODO': 4,
+            'DONE': 5
+        };
+
+        const priorityOrder: Record<string, number> = {
+            'high': 1,
+            'medium': 2,
+            'low': 3
+        };
+
+        return [...filtered].sort((a, b) => {
+            const sA = statusOrder[a.status] || 99;
+            const sB = statusOrder[b.status] || 99;
+            if (sA !== sB) return sA - sB;
+
+            const pA = priorityOrder[a.priority] || 99;
+            const pB = priorityOrder[b.priority] || 99;
+            if (pA !== pB) return pA - pB;
+
+            // Finally by date (newest first)
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
         });
     }, [optimisticTasks, searchQuery, filterPriority, filterStatus, filterMyTasks, currentUserId, viewMode, tableTab]);
 
@@ -577,9 +609,16 @@ export default function TasksPageClient({
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            onClick={() => {
+                                                            onClick={async () => {
                                                                 if (isDirty) {
-                                                                    if (confirm('You have unsaved changes. Are you sure you want to cancel?')) {
+                                                                    const confirmed = await confirm({
+                                                                        title: 'Unsaved Changes',
+                                                                        message: 'You have unsaved changes. Are you sure you want to discard them?',
+                                                                        confirmText: 'Discard Changes',
+                                                                        type: 'warning'
+                                                                    });
+
+                                                                    if (confirmed) {
                                                                         setIsAddingTask(false);
                                                                         setIsDirty(false);
                                                                         setNewAssignees([]);
@@ -602,34 +641,51 @@ export default function TasksPageClient({
                                 </tbody>
                             </table>
                         </div>
-                        {isLoadingMore && (
-                            <div className="p-4 flex items-center justify-center border-t border-card-border bg-foreground/[0.03]">
-                                <div className="h-5 w-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                                <span className="ml-3 text-xs text-text-muted font-bold uppercase tracking-wider">Hydrating data stream...</span>
+                        <div className="p-4 border-t border-card-border bg-foreground/[0.01] flex items-center justify-between">
+                            <div className="flex items-center">
+                                {!isAddingTask && (
+                                    <button
+                                        onClick={async () => {
+                                            if (isAddingTask && isDirty) {
+                                                 const confirmed = await confirm({
+                                                     title: 'Unsaved Changes',
+                                                     message: 'You have unsaved changes. Are you sure you want to close the form?',
+                                                     confirmText: 'Close Anyway',
+                                                     type: 'warning'
+                                                 });
+                                                 
+                                                 if (confirmed) {
+                                                     setIsAddingTask(!isAddingTask);
+                                                     setIsDirty(false);
+                                                 }
+                                            } else {
+                                                setIsAddingTask(!isAddingTask);
+                                            }
+                                        }}
+                                        className="flex items-center gap-2 p-1.5 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border hover:border-card-border text-sm text-text-muted hover:text-foreground transition-all duration-200 group"
+                                    >
+                                        <div className="p-1 rounded-lg bg-foreground/[0.03] group-hover:bg-foreground/[0.06] transition-colors">
+                                            <FiPlus className="w-4 h-4" />
+                                        </div>
+                                        <span>New Task</span>
+                                    </button>
+                                )}
                             </div>
-                        )}
-                        {!isAddingTask && (
-                            <div className="p-4 border-t border-card-border bg-foreground/[0.02]">
-                                <button
-                                    onClick={() => {
-                                        if (isAddingTask && isDirty) {
-                                             if (confirm('You have unsaved changes. Are you sure you want to close the form?')) {
-                                                 setIsAddingTask(!isAddingTask);
-                                                 setIsDirty(false);
-                                             }
-                                        } else {
-                                            setIsAddingTask(!isAddingTask);
-                                        }
-                                    }}
-                                    className="flex items-center gap-2 p-1.5 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border hover:border-card-border text-sm text-text-muted hover:text-foreground transition-all duration-200 group"
-                                >
-                                    <div className="p-1 rounded-lg bg-foreground/[0.03] group-hover:bg-foreground/[0.06] transition-colors">
-                                        <FiPlus className="w-4 h-4" />
+
+                            {isLoadingMore && (
+                                <div className="flex items-center gap-3 bg-foreground/[0.03] border border-card-border/50 py-1.5 px-3 rounded-full animate-in fade-in slide-in-from-right-4 duration-500">
+                                    <div className="flex flex-col items-end hidden sm:flex">
+                                        <div className="h-1.5 w-16 bg-foreground/10 rounded-full mb-1"></div>
+                                        <div className="h-1 w-10 bg-foreground/5 rounded-full"></div>
                                     </div>
-                                    <span>{isAddingTask ? 'Cancel' : 'New Task'}</span>
-                                </button>
-                            </div>
-                        )}
+                                    <div className="relative h-5 w-5">
+                                        <div className="absolute inset-0 border-2 border-emerald-500/20 rounded-full"></div>
+                                        <div className="absolute inset-0 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                    <span className="text-[10px] text-text-muted font-bold uppercase tracking-widest">Hydrating</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

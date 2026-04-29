@@ -13,9 +13,16 @@ export function ThemeToggle({
   minimal?: boolean;
 }) {
   const { theme, toggleTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const currentTheme = mounted ? theme : 'system';
 
   const getIcon = () => {
-    switch (theme) {
+    switch (currentTheme) {
       case 'light': return <FiSun className="text-[var(--pastel-amber)]" />;
       case 'dark': return <FiMoon className="text-[var(--pastel-blue)]" />;
       default: return <FiMonitor className="text-(--text-muted)" />;
@@ -23,7 +30,7 @@ export function ThemeToggle({
   };
 
   const getLabel = () => {
-    switch (theme) {
+    switch (currentTheme) {
       case 'light': return 'Light Mode';
       case 'dark': return 'Dark Mode';
       default: return 'System Mode';
@@ -39,7 +46,7 @@ export function ThemeToggle({
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={theme}
+            key={currentTheme}
             initial={{ y: 20, opacity: 0, rotate: -45 }}
             animate={{ y: 0, opacity: 1, rotate: 0 }}
             exit={{ y: -20, opacity: 0, rotate: 45 }}
@@ -73,7 +80,7 @@ export function ThemeToggle({
       )}
       
       {/* Visual Indicator of resolved theme if in system mode */}
-      {theme === 'system' && !collapsed && (
+      {currentTheme === 'system' && !collapsed && (
         <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
       )}
     </button>

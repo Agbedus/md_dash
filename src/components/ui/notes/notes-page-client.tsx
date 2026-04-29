@@ -14,6 +14,7 @@ import dynamic from 'next/dynamic';
 import { useNotes } from '@/hooks/use-notes';
 import { createOptimisticNote, updateOptimisticNote } from '@/lib/optimistic-utils';
 import { toast } from '@/lib/toast';
+import { useConfirm } from '@/providers/confirmation-provider';
 
 const NoteFormModal = dynamic(() => import('./NoteFormModal'), { ssr: false });
 
@@ -49,6 +50,7 @@ const noteTypeColors: Record<Note['type'], string> = {
 import NotesLoading from '@/app/(dashboard)/notes/loading';
 
 export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNotes?: Note[] }) {
+    const confirm = useConfirm();
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
@@ -173,7 +175,15 @@ export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNo
         const id = Number(formData.get('id'));
         const existing = serverNotes.find(n => n.id === id);
         if (existing) {
-            if (!confirm('Are you sure you want to delete this note?')) return;
+            const confirmed = await confirm({
+                title: 'Delete Note',
+                message: `Are you sure you want to delete "${existing.title}"? This action cannot be undone.`,
+                confirmText: 'Delete Note',
+                type: 'danger'
+            });
+
+            if (!confirmed) return;
+
             startTransition(() => {
                 addOptimisticNote({ type: 'delete', note: existing });
             });

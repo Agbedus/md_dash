@@ -40,6 +40,7 @@ export const useNotifications = () => {
 };
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: any }> = ({ children, user }) => {
+  const { mutate } = useSWRConfig();
   const [isConnected, setIsConnected] = useState(false);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>(null);
   const reconnectAttemptsRef = useRef(0);
@@ -133,7 +134,37 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
 
       socket.onmessage = (event: MessageEvent) => {
         try {
-          const notification: Notification = JSON.parse(event.data);
+          const message = JSON.parse(event.data);
+          
+          // 1. Handle Data Updates (Real-time sync)
+          if (message.realtime_type === 'DATA_UPDATE') {
+            const { resource, action, data } = message;
+            
+            // Trigger SWR revalidation for all keys starting with the resource name
+            mutate((key: any) => Array.isArray(key) && key[0] === (resource === 'task' ? 'tasks' : resource + 's'));
+            
+            // Special cases or specific mutations
+            if (resource === 'task') {
+               // We could also show a small "mission updated" toast if action is 'created'
+               if (action === 'created') {
+                  toast(`New Task: ${data.name || 'Untitled'}`, {
+                    icon: <FiCheckCircle className="text-emerald-400" />,
+                    duration: 3000
+                  });
+               }
+            } else if (resource === 'note') {
+                if (action === 'created') {
+                    toast(`New Note: ${data.title || 'Untitled'}`, {
+                        icon: <FiInfo className="text-blue-400" />,
+                        duration: 3000
+                    });
+                }
+            }
+            return;
+          }
+
+          // 2. Handle Notifications (Existing logic)
+          const notification: Notification = message;
           mutateNotifications((currentNotifications = []) => [notification, ...currentNotifications], false);
           
           let icon = <FiInfo size={22} className="text-blue-400" />;

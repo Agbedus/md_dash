@@ -16,6 +16,7 @@ import { FiChevronRight, FiChevronDown, FiPlus, FiPieChart } from 'react-icons/f
 import { TaskDonutChart } from './task-donut-chart';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/lib/toast';
+import { useConfirm } from '@/providers/confirmation-provider';
 
 interface ProjectTableProps {
   projects: Project[];
@@ -25,6 +26,7 @@ interface ProjectTableProps {
 }
 
 export function ProjectTable({ projects, users, clients, onSelectProject }: ProjectTableProps) {
+  const confirm = useConfirm();
   const router = useRouter();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<{
@@ -139,7 +141,14 @@ export function ProjectTable({ projects, users, clients, onSelectProject }: Proj
   };
 
   const handleDelete = async (project: Project) => {
-    if (confirm('Are you sure you want to delete this project?')) {
+    const confirmed = await confirm({
+      title: 'Delete Project',
+      message: `Are you sure you want to delete "${project.name}"? This action will remove all linked tasks and data. This cannot be undone.`,
+      confirmText: 'Delete Project',
+      type: 'danger'
+    });
+
+    if (confirmed) {
       const formData = new FormData();
       formData.set('id', project.id.toString());
       await deleteProject(formData);

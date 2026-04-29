@@ -6,6 +6,7 @@ import UserAvatarGroup from '@/components/ui/user-avatar-group';
 import Link from 'next/link';
 import { FiCheckSquare } from 'react-icons/fi';
 import { TaskDonutChart } from './task-donut-chart';
+import { useConfirm } from '@/providers/confirmation-provider';
 
 import { User } from '@/types/user';
 
@@ -18,6 +19,7 @@ interface ProjectCardProps {
 
 
 export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardProps) {
+  const confirm = useConfirm();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const statusColors = {
     planning: "bg-[var(--pastel-blue)]/10 text-[var(--pastel-blue)] border-[var(--pastel-blue)]/20",
@@ -63,7 +65,14 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
           </button>
           <button
             onClick={async () => {
-              if (confirm('Are you sure you want to delete this project?')) {
+              const confirmed = await confirm({
+                title: 'Delete Project',
+                message: `Are you sure you want to delete "${project.name}"? This action will remove all linked tasks and data. This cannot be undone.`,
+                confirmText: 'Delete Project',
+                type: 'danger'
+              });
+
+              if (confirmed) {
                  setIsDeleting(true);
                  try {
                    await onDelete(project);

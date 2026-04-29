@@ -10,6 +10,7 @@ import { updateEvent, deleteEvent } from "@/app/(dashboard)/calendar/actions";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { CustomDatePicker } from "@/components/ui/inputs/custom-date-picker";
 import { CustomNumberInput } from "@/components/ui/inputs/custom-number-input";
+import { useConfirm } from "@/providers/confirmation-provider";
 
 interface Props {
   event: CalendarEvent | null;
@@ -28,6 +29,7 @@ export default function EventDetailModal({
   onOptimisticUpdate,
   onOptimisticDelete 
 }: Props) {
+  const confirm = useConfirm();
   const [isEditing, setIsEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -170,7 +172,14 @@ export default function EventDetailModal({
   }
 
   async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this event?")) return;
+    const confirmed = await confirm({
+      title: 'Delete Event',
+      message: `Are you sure you want to delete "${event?.title}"? This action cannot be undone.`,
+      confirmText: 'Delete Event',
+      type: 'danger'
+    });
+
+    if (!confirmed) return;
     if (!event) return;
     setSubmitting(true);
 

@@ -17,6 +17,7 @@ import { subDays, isSameDay } from 'date-fns';
 import { useProjects } from '@/hooks/use-projects';
 import { createOptimisticProject, updateOptimisticProject } from '@/lib/optimistic-utils';
 import { toast } from '@/lib/toast';
+import { useConfirm } from '@/providers/confirmation-provider';
 
 import { useUsers } from '@/hooks/use-users';
 import { useClients } from '@/hooks/use-clients';
@@ -40,6 +41,7 @@ export default function ProjectsPageClient({
   initialNotes = [],
   initialTasks = []
 }: ProjectsPageClientProps) {
+  const confirm = useConfirm();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -189,7 +191,14 @@ export default function ProjectsPageClient({
   };
 
   const handleDelete = async (project: Project) => {
-    if (confirm('Are you sure you want to delete this project?')) {
+    const confirmed = await confirm({
+      title: 'Delete Project',
+      message: `Are you sure you want to delete "${project.name}"? This action will remove all linked tasks and data. This cannot be undone.`,
+      confirmText: 'Delete Project',
+      type: 'danger'
+    });
+
+    if (confirmed) {
       startTransition(() => {
         addOptimisticProject({ type: 'delete', project });
       });

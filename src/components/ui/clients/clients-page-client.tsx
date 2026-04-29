@@ -9,6 +9,7 @@ import ClientTable from './client-table';
 import { toast } from '@/lib/toast';
 import { useClients } from '@/hooks/use-clients';
 import { createOptimisticClient, updateOptimisticClient } from '@/lib/optimistic-utils';
+import { useConfirm } from '@/providers/confirmation-provider';
 
 import ClientsLoading from '@/app/(dashboard)/clients/loading';
 
@@ -17,6 +18,7 @@ interface ClientsPageClientProps {
 }
 
 export default function ClientsPageClient({ initialClients = [] }: ClientsPageClientProps) {
+  const confirm = useConfirm();
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
@@ -101,7 +103,14 @@ export default function ClientsPageClient({ initialClients = [] }: ClientsPageCl
   };
 
   const handleDelete = async (client: Client) => {
-    if (confirm(`Are you sure you want to delete ${client.companyName}?`)) {
+    const confirmed = await confirm({
+      title: 'Delete Client',
+      message: `Are you sure you want to delete "${client.companyName}"? This action will remove all linked data for this client. This cannot be undone.`,
+      confirmText: 'Delete Client',
+      type: 'danger'
+    });
+
+    if (confirmed) {
       startTransition(() => {
         addOptimisticClient({ type: 'delete', client });
       });

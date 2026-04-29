@@ -5,12 +5,14 @@ import { batchUpdateTaskStatus } from '@/app/(dashboard)/tasks/actions';
 import { Sparkline } from "@/components/ui/sparkline";
 import { format, subDays, isSameDay } from 'date-fns';
 import { toast } from '@/lib/toast';
+import { useConfirm } from '@/providers/confirmation-provider';
 
 interface TaskSummarySectionProps {
   tasks: Task[];
 }
 
 export function TaskSummarySection({ tasks }: TaskSummarySectionProps) {
+  const confirm = useConfirm();
   const [isUpdating, setIsUpdating] = useState(false);
   
   const totalTasks = tasks.length;
@@ -44,7 +46,14 @@ export function TaskSummarySection({ tasks }: TaskSummarySectionProps) {
 
   const handleMarkAllDone = async () => {
     if (activeTasks.length === 0) return;
-    if (!confirm(`Are you sure you want to mark all ${activeTasks.length} active tasks as completed?`)) return;
+    const confirmed = await confirm({
+      title: 'Batch Complete Tasks',
+      message: `Are you sure you want to mark all ${activeTasks.length} active tasks as completed? This will affect all current items in your workflow.`,
+      confirmText: 'Complete All',
+      type: 'warning'
+    });
+
+    if (!confirmed) return;
 
     setIsUpdating(true);
     try {

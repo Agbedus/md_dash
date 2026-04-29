@@ -8,6 +8,7 @@ import { FiSearch, FiEdit2, FiTrash2, FiX, FiCheck, FiClock, FiChevronRight, FiS
 import { updateUser, deleteUser, getUsers } from '@/app/(dashboard)/users/actions';
 import { useOptimistic, useTransition } from 'react';
 import type { TimeOffRequest } from '@/types/time-off';
+import { useConfirm } from '@/providers/confirmation-provider';
 
 interface UsersPageClientProps {
   initialUsers: User[];
@@ -22,6 +23,7 @@ interface UsersPageClientProps {
 const AVAILABLE_ROLES = ['user', 'client', 'staff', 'manager', 'super_admin'];
 
 export default function UsersPageClient({ initialUsers, currentUser, timeOffRequests = [] }: UsersPageClientProps) {
+  const confirm = useConfirm();
   const [allUsers, setAllUsers] = useState<User[]>(initialUsers);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,7 +113,14 @@ export default function UsersPageClient({ initialUsers, currentUser, timeOffRequ
   };
 
   const handleDelete = async (user: User) => {
-    if (confirm(`Are you sure you want to delete ${user.fullName || 'this user'}?`)) {
+    const confirmed = await confirm({
+      title: 'Delete User Access',
+      message: `Are you sure you want to delete ${user.fullName || 'this user'}? Their access will be revoked immediately and this action cannot be undone.`,
+      confirmText: 'Revoke Access',
+      type: 'danger'
+    });
+
+    if (confirmed) {
       addOptimisticUser({ type: 'delete', user });
       try {
         const formData = new FormData();

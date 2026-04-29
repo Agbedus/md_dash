@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { startTaskTimer, pauseTaskTimer, stopTaskTimer } from "@/app/(dashboard)/tasks/actions";
 import { useTaskTimer } from "@/providers/task-timer-provider";
 import { canUserWorkOnTask } from "@/lib/task-auth";
+import { useConfirm } from "@/providers/confirmation-provider";
 import Image from "next/image";
 
 interface TaskCardProps {
@@ -45,6 +46,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
     onCancel = () => {}
 }, ref) => {
     const { startTimer, activeTask } = useTaskTimer();
+    const confirm = useConfirm();
     const [selectedAssignees, setSelectedAssignees] = useState<(string | number)[]>(
       task.assignees?.map(a => a.user.id) || []
     );
@@ -498,37 +500,40 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
             >
                 <FiEdit2 className="w-3.5 h-3.5" />
             </button>
-            <form
-                onSubmit={async (e) => {
-                e.preventDefault();
-                if (!confirm('Are you sure you want to delete this task?')) return;
-                
-                try {
-                    const fd = new FormData(e.currentTarget);
-                    const result = await deleteTask(fd);
-                    if (result?.success) {
-                        toast.success("Task deleted successfully");
-                    } else {
-                        toast.error(result?.error || "Failed to delete task");
+            <button 
+                type="button" 
+                disabled={task.id < 0 || isDeleting}
+                onClick={async () => {
+                    const confirmed = await confirm({
+                        title: 'Delete Task',
+                        message: `Are you sure you want to delete "${task.name}"? This action cannot be undone.`,
+                        confirmText: 'Delete Task',
+                        type: 'danger'
+                    });
+
+                    if (!confirmed) return;
+
+                    setIsDeleting(true);
+                    try {
+                        const fd = new FormData();
+                        fd.append('id', task.id.toString());
+                        const result = await deleteTask(fd);
+                        if (result?.success) {
+                            toast.success("Task deleted successfully");
+                        } else {
+                            toast.error(result?.error || "Failed to delete task");
+                        }
+                    } catch (error) {
+                        toast.error("An unexpected error occurred");
+                    } finally {
+                        setIsDeleting(false);
                     }
-                } catch (error) {
-                    toast.error("An unexpected error occurred");
-                } finally {
-                    setIsDeleting(false);
-                }
                 }}
-                style={{ display: 'inline' }}
+                className="p-1.5 text-text-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg border border-transparent hover:border-rose-500/20 transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed" 
+                title={task.id < 0 ? "Saving..." : "Delete"}
             >
-                <input type="hidden" name="id" value={task.id} />
-                <button 
-                  type="submit" 
-                  disabled={task.id < 0 || isDeleting}
-                  className="p-1.5 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/20 transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed" 
-                  title={task.id < 0 ? "Saving..." : "Delete"}
-                >
-                    {isDeleting ? <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-red-500"></div> : <FiTrash2 className="w-3.5 h-3.5" />}
-                </button>
-            </form>
+                {isDeleting ? <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-rose-500"></div> : <FiTrash2 className="w-3.5 h-3.5" />}
+            </button>
           </div>
         </td>
       </motion.tr>
