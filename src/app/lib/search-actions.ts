@@ -22,7 +22,7 @@ export async function searchGlobal(query: string): Promise<SearchResult[]> {
 
     // 1. Fetch Tasks and Projects (we fetch all and filter client-side/server-side for now as API might not have search)
     const [tasks, projects] = await Promise.all([
-        getTasks(50), // Fetch a reasonable amount to search through
+        getTasks(undefined, undefined, undefined, undefined, 50), // Fetch a reasonable amount to search through
         getProjects(50)
     ]);
 
@@ -30,12 +30,12 @@ export async function searchGlobal(query: string): Promise<SearchResult[]> {
 
     // Filter Tasks
     tasks.filter(t => 
-        t.title.toLowerCase().includes(lowerQuery) || 
+        t.name.toLowerCase().includes(lowerQuery) || 
         t.description?.toLowerCase().includes(lowerQuery)
     ).forEach(t => {
         results.push({
             id: t.id,
-            title: t.title,
+            title: t.name,
             type: 'task',
             href: `/tasks?id=${t.id}`,
             subtitle: `Status: ${t.status}`
