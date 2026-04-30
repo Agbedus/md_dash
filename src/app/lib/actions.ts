@@ -14,15 +14,23 @@ export async function authenticate(
   try {
     await signIn('credentials', formData);
   } catch (error) {
+    // Next.js redirects work by throwing a special error. 
+    // We need to re-throw it so Next.js can handle the redirect.
+    if ((error as any).message === 'NEXT_REDIRECT' || (error as any).digest?.startsWith('NEXT_REDIRECT')) {
+      throw error;
+    }
+
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
           return 'Invalid credentials.';
         default:
-          return 'Something went wrong.';
+          return 'Something went wrong during authentication.';
       }
     }
-    throw error;
+    
+    console.error("Unhandled authenticate error:", error);
+    return 'An unexpected error occurred. Please try again.';
   }
 }
 

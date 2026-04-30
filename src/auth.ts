@@ -30,20 +30,24 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
             formData.append('username', email);
             formData.append('password', password);
 
+            console.log(`Attempting login for ${email} at ${API_BASE_URL}/auth/login`);
             const res = await fetch(`${API_BASE_URL}/auth/login`, {
               method: 'POST',
               body: formData,
+              // Set a reasonable timeout if your fetch implementation supports it, 
+              // or just rely on the logging to identify slowness.
             });
 
             if (!res.ok) {
                 const errorBody = await res.text();
-                console.error("Login API failed:", errorBody);
+                console.error(`Login API failed for ${email} with status ${res.status}:`, errorBody);
                 return null;
             }
 
             const data = await res.json();
             
             // Fetch user profile
+            console.log(`Fetching profile for ${email}`);
             const userRes = await fetch(`${API_BASE_URL}/users/me`, {
                 headers: {
                     'Authorization': `Bearer ${data.access_token}`
@@ -59,10 +63,11 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
                   : userProfileData;
 
                 if (!userProfile || !userProfile.id) {
-                    console.error("Invalid user profile response:", userProfileData);
+                    console.error("Invalid user profile response structure:", userProfileData);
                     return null;
                 }
 
+                console.log(`Login successful for ${email} (ID: ${userProfile.id})`);
                 return {
                     id: userProfile.id,
                     name: userProfile.full_name,
@@ -73,10 +78,11 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
                 };
             }
             
-            console.error("Failed to fetch user profile:", await userRes.text());
+            const profileError = await userRes.text();
+            console.error(`Failed to fetch user profile for ${email}:`, profileError);
             return null;
           } catch (error) {
-            console.error("Authentication catch block:", error);
+            console.error("Authentication exception:", error);
             return null;
           }
         }

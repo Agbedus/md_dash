@@ -43,20 +43,21 @@ export function useTasks({
         });
     };
 
-    const { data, error, size, setSize, mutate, isLoading } = useSWRInfinite(getKey, fetcher, {
+    const { data, error, size, setSize, mutate, isLoading, isValidating } = useSWRInfinite(getKey, fetcher, {
         revalidateOnFocus: true,
         fallbackData: initialTasks ? [initialTasks] : undefined,
         keepPreviousData: true,
         dedupingInterval: 2000, // Short interval to allow frequent updates
     });
-
     const tasks = data ? data.flat() : [];
-    const isLoadingMore = isLoading && size > 1; // Basic approximation
+    const isLoadingMore = 
+        isLoading || (size > 0 && data && typeof data[size - 1] === "undefined");
     const isReachingEnd = data && data[data.length - 1]?.length < limit;
 
     return {
         tasks,
         isLoading,
+        isValidating,
         isLoadingMore,
         isReachingEnd,
         size,

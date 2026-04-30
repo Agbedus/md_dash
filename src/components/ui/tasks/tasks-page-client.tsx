@@ -143,8 +143,7 @@ export default function TasksPageClient({
             'medium': 2,
             'low': 3
         };
-
-        return [...filtered].sort((a, b) => {
+        const sorted = [...filtered].sort((a, b) => {
             const sA = statusOrder[a.status] || 99;
             const sB = statusOrder[b.status] || 99;
             if (sA !== sB) return sA - sB;
@@ -158,6 +157,11 @@ export default function TasksPageClient({
             const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
             return dateB - dateA;
         });
+
+        // Final deduplication by ID to prevent duplicate keys during rapid updates or pagination overlaps
+        const uniqueTasksMap = new Map();
+        sorted.forEach(t => uniqueTasksMap.set(t.id, t));
+        return Array.from(uniqueTasksMap.values());
     }, [optimisticTasks, searchQuery, filterPriority, filterStatus, filterMyTasks, currentUserId, viewMode, tableTab]);
 
     // New task state
@@ -169,18 +173,25 @@ export default function TasksPageClient({
     const [newDependsOn, setNewDependsOn] = useState<number | null>(null);
     const newNameRef = useRef<HTMLInputElement | null>(null);
 
-    // Infinite Scroll Handler
-    const observer = useRef<IntersectionObserver | null>(null);
-    const lastTaskElementRef = useCallback((node: any) => {
-        if (isLoadingMore || viewMode === 'kanban' || isReachingEnd) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
+    // Infinite Scroll Sentinel
+    const sentinelRef = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+        if (viewMode === 'kanban' || isReachingEnd || isLoadingMore) return;
+        
+        const currentSentinel = sentinelRef.current;
+        if (!currentSentinel) return;
+
+        const observer = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting) {
-                setSize(size + 1);
+                setSize(prev => prev + 1);
             }
-        });
-        if (node) observer.current.observe(node);
-    }, [isLoadingMore, viewMode, isReachingEnd, setSize, size]);
+        }, { rootMargin: '200px' }); // Load early
+
+        observer.observe(currentSentinel);
+        return () => {
+            if (currentSentinel) observer.unobserve(currentSentinel);
+        };
+    }, [viewMode, isReachingEnd, isLoadingMore, setSize]);
 
     useEffect(() => {
         if (isAddingTask && newNameRef.current) {
@@ -437,9 +448,52 @@ export default function TasksPageClient({
                                                 isEditing={editingTaskId === task.id}
                                                 onEdit={() => setEditingTaskId(task.id)}
                                                 onCancel={() => setEditingTaskId(null)}
-                                                ref={index === filteredTasks.length - 1 ? lastTaskElementRef : null}
                                             />
                                         ))}
+
+                                        {isLoadingMore && (
+                                            <tr className="bg-foreground/[0.01] animate-pulse">
+                                                <td className="px-6 py-4 sticky left-0 z-20 bg-card/90 backdrop-blur-md border-r border-card-border">
+                                                    <div className="h-4 w-32 bg-foreground/10 rounded-lg"></div>
+                                                </td>
+                                                <td className="px-6 py-4 hidden lg:table-cell">
+                                                    <div className="h-4 w-48 bg-foreground/5 rounded-lg"></div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="h-4 w-20 bg-foreground/5 rounded-lg"></div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="h-4 w-16 bg-foreground/5 rounded-lg"></div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="h-4 w-24 bg-foreground/5 rounded-lg"></div>
+                                                </td>
+                                                <td className="px-6 py-4 hidden md:table-cell">
+                                                    <div className="h-8 w-8 rounded-full bg-foreground/10"></div>
+                                                </td>
+                                                <td className="px-6 py-4 hidden sm:table-cell">
+                                                    <div className="h-5 w-12 rounded-full bg-foreground/10"></div>
+                                                </td>
+                                                <td className="px-6 py-4 hidden lg:table-cell">
+                                                    <div className="flex -space-x-2">
+                                                        <div className="h-6 w-6 rounded-full bg-foreground/5"></div>
+                                                        <div className="h-6 w-6 rounded-full bg-foreground/5"></div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 hidden md:table-cell">
+                                                    <div className="h-4 w-16 bg-foreground/5 rounded-lg"></div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="h-6 w-20 rounded-full bg-foreground/10"></div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="h-4 w-12 bg-foreground/5 rounded-lg"></div>
+                                                </td>
+                                                <td className="px-6 py-4 sticky right-0 z-20 bg-card/90 backdrop-blur-md border-l border-card-border">
+                                                    <div className="h-8 w-8 ml-auto rounded-lg bg-foreground/5"></div>
+                                                </td>
+                                            </tr>
+                                        )}
                                         {isAddingTask && (
                                             <motion.tr 
                                                 initial={{ opacity: 0, y: -20 }}
@@ -641,6 +695,12 @@ export default function TasksPageClient({
                                 </tbody>
                             </table>
                         </div>
+                        
+                        {/* Infinite Scroll Sentinel */}
+                        {!isReachingEnd && (
+                            <div ref={sentinelRef} className="h-4 w-full" />
+                        )}
+
                         <div className="p-4 border-t border-card-border bg-foreground/[0.01] flex items-center justify-between">
                             <div className="flex items-center">
                                 {!isAddingTask && (
@@ -673,16 +733,22 @@ export default function TasksPageClient({
                             </div>
 
                             {isLoadingMore && (
-                                <div className="flex items-center gap-3 bg-foreground/[0.03] border border-card-border/50 py-1.5 px-3 rounded-full animate-in fade-in slide-in-from-right-4 duration-500">
-                                    <div className="flex flex-col items-end hidden sm:flex">
-                                        <div className="h-1.5 w-16 bg-foreground/10 rounded-full mb-1"></div>
-                                        <div className="h-1 w-10 bg-foreground/5 rounded-full"></div>
+                                <div className="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/20 py-2 px-4 rounded-2xl animate-in fade-in slide-in-from-bottom-2 duration-500 backdrop-blur-xl shadow-xl shadow-emerald-500/5">
+                                    <div className="flex flex-col items-end">
+                                        <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest leading-none mb-1">Expanding</div>
+                                        <div className="h-1 w-12 bg-emerald-500/20 rounded-full overflow-hidden">
+                                            <motion.div 
+                                                className="h-full bg-emerald-500"
+                                                initial={{ x: '-100%' }}
+                                                animate={{ x: '100%' }}
+                                                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="relative h-5 w-5">
-                                        <div className="absolute inset-0 border-2 border-emerald-500/20 rounded-full"></div>
+                                    <div className="relative h-6 w-6 flex items-center justify-center">
+                                        <div className="absolute inset-0 border-2 border-emerald-500/10 rounded-full"></div>
                                         <div className="absolute inset-0 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                                     </div>
-                                    <span className="text-[10px] text-text-muted font-bold uppercase tracking-widest">Hydrating</span>
                                 </div>
                             )}
                         </div>
