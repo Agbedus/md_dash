@@ -83,7 +83,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         </Suspense>
 
         {/* Row 3 */}
-        <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><ListSkeleton /></div>}>
+        <Suspense fallback={<div className="col-span-1 lg:col-span-6 h-96"><ListSkeleton /></div>}>
             <RecentNotesSection />
         </Suspense>
 
@@ -95,20 +95,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             <AttendanceStatusSection />
         </Suspense>
 
-        <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><CardSkeleton /></div>}>
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><CardSkeleton /></div>}>
             <UserStatSection />
         </Suspense>
 
         {/* Row 4 — Tactical Insights */}
-        <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><ListSkeleton /></div>}>
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><ListSkeleton /></div>}>
             <UnitLoadSection />
         </Suspense>
 
-        <Suspense fallback={<div className="col-span-1 lg:col-span-6 h-96"><ChartSkeleton /></div>}>
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><ChartSkeleton /></div>}>
             <PriorityMatrixSection />
         </Suspense>
 
-        <Suspense fallback={<div className="col-span-1 lg:col-span-3 h-96"><CardSkeleton /></div>}>
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><CardSkeleton /></div>}>
             <TemporalBurnRateSection />
         </Suspense>
 
@@ -117,7 +117,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             <CriticalBottlenecksSection />
         </Suspense>
 
-        <Suspense fallback={<div className="col-span-1 lg:col-span-8 h-96"><ChartSkeleton /></div>}>
+        <Suspense fallback={<div className="col-span-1 lg:col-span-4 h-96"><ChartSkeleton /></div>}>
             <OperationVelocitySection />
         </Suspense>
 

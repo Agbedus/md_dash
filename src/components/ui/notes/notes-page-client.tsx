@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect, useMemo, useOptimistic } from 'react';
+import { useState, useTransition, useEffect, useMemo, useOptimistic, useRef } from 'react';
 import { 
     FiPlus, FiGrid, FiList, FiFileText, FiCheckSquare, 
     FiBookOpen, FiUsers, FiZap, FiLink, FiCode, FiBookmark, FiEdit3, FiCheckCircle, FiSearch, FiFolder
@@ -171,32 +171,51 @@ export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNo
         }
     };
 
+    const pendingDeletions = useRef<Map<number, NodeJS.Timeout>>(new Map());
+
     const handleDelete = async (formData: FormData) => {
         const id = Number(formData.get('id'));
         const existing = serverNotes.find(n => n.id === id);
-        if (existing) {
-            const confirmed = await confirm({
-                title: 'Delete Note',
-                message: `Are you sure you want to delete "${existing.title}"? This action cannot be undone.`,
-                confirmText: 'Delete Note',
-                type: 'danger'
-            });
+        
+        if (!existing) return;
 
-            if (!confirmed) return;
+        // Optimistically delete
+        startTransition(() => {
+            addOptimisticNote({ type: 'delete', note: existing });
+        });
 
+        // Setup undoable toast
+        toast.undoable(`Note "${existing.title || 'Untitled'}" deleted`, () => {
+            // Undo action
+            const timeoutId = pendingDeletions.current.get(id);
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                pendingDeletions.current.delete(id);
+            }
+            // Add it back optimistically
             startTransition(() => {
-                addOptimisticNote({ type: 'delete', note: existing });
+                addOptimisticNote({ type: 'add', note: existing });
             });
-        }
+            toast.success("Note restored");
+        }, { duration: 5000 });
 
-        try {
-            await deleteNote(formData);
-            toast.success("Note deleted");
-            mutate();
-        } catch (err) {
-            toast.error("Delete failed");
-            mutate();
-        }
+        // Delay the actual server request
+        const timeoutId = setTimeout(async () => {
+            pendingDeletions.current.delete(id);
+            try {
+                await deleteNote(formData);
+                mutate();
+            } catch (err) {
+                // If it fails, restore it and show error
+                startTransition(() => {
+                    addOptimisticNote({ type: 'add', note: existing });
+                });
+                toast.error("Failed to delete note permanently");
+                mutate();
+            }
+        }, 5000);
+
+        pendingDeletions.current.set(id, timeoutId);
     };
 
     const filteredNotes = useMemo(() => {

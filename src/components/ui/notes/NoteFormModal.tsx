@@ -1,14 +1,10 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { FiCheck, FiX, FiImage, FiStar, FiMapPin, FiArchive } from 'react-icons/fi';
+import { FiCheck, FiX, FiStar, FiMapPin, FiArchive } from 'react-icons/fi';
 import type { Note } from '@/types/note';
-
-// Import Quill and styles
-import Quill from 'quill';
-import 'quill/dist/quill.snow.css';
-
 import type { Task } from '@/types/task';
+import SlashCommandEditor from '../editor/slash-command-editor';
 
 interface NoteFormModalProps {
     isOpen: boolean;
@@ -23,11 +19,10 @@ interface NoteFormModalProps {
 export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSaving, initialNote, tasks }: NoteFormModalProps) {
      const formRef = useRef<HTMLFormElement>(null);
      const titleRef = useRef<HTMLInputElement>(null);
-     const editorContainerRef = useRef<HTMLDivElement | null>(null);
-     const quillRef = useRef<Quill | null>(null);
 
      // Controlled form state to avoid DOM timing issues
      const [title, setTitle] = useState('');
+     const [content, setContent] = useState('');
      const [priority, setPriority] = useState<Note['priority'] | ''>('low');
      const [typeVal, setTypeVal] = useState<Note['type'] | ''>('note');
      const [noteId, setNoteId] = useState<string>('');
@@ -49,6 +44,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
         
         if (initialNote) {
             setTitle(initialNote.title || '');
+            setContent(initialNote.content || '');
             setPriority(initialNote.priority || 'low');
             setTypeVal(initialNote.type || 'note');
             setTaskId(initialNote.task_id ? String(initialNote.task_id) : '');
@@ -59,6 +55,7 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
             setIsArchived(initialNote.is_archived === 1);
         } else if (isOpen) {
             setTitle('');
+            setContent('');
             setPriority('low');
             setTypeVal('note');
             setNoteId('');
@@ -70,19 +67,6 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
         }
     }
 
-    // Initialize Quill once when the component mounts and keep it mounted so content persists
-    useEffect(() => {
-        if (editorContainerRef.current && !quillRef.current) {
-            quillRef.current = new Quill(editorContainerRef.current, {
-                theme: 'snow',
-                placeholder: 'Write your note here...',
-                modules: {
-                    toolbar: '#toolbar-container',
-                },
-            });
-        }
-    }, []);
-
     // When `isOpen` changes to true, focus the title input
     useEffect(() => {
         if (isOpen) {
@@ -91,46 +75,10 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
         }
     }, [isOpen]);
 
-    // Update Quill content separately (must be in effect due to DOM interaction)
-    useEffect(() => {
-        if (initialNote && quillRef.current) {
-            quillRef.current.clipboard.dangerouslyPasteHTML(initialNote.content || '');
-        } else if (isOpen && quillRef.current) {
-            quillRef.current.setContents([]);
-        }
-    }, [initialNote, isOpen]);
-
-    // Always render the modal but hide it when not open so Quill instance and DOM persist
-    const visibilityClass = isOpen ? 'block' : 'hidden';
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const contentInput = formRef.current?.querySelector('input[name="content"]') as HTMLInputElement | null;
-        if (contentInput && quillRef.current) {
-            contentInput.value = quillRef.current.root.innerHTML;
-        }
         const formData = new FormData(e.currentTarget);
         await onSave(formData);
-    };
-
-    const handleImageClick = () => {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-        input.onchange = async () => {
-            const file = input.files ? input.files[0] : null;
-            if (file && quillRef.current) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const range = quillRef.current?.getSelection(true);
-                    if (range && e.target?.result) {
-                        quillRef.current?.insertEmbed(range.index, 'image', e.target.result);
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        };
     };
 
     return (
@@ -256,126 +204,16 @@ export default function NoteFormModal({ isOpen, onClose, onSave, noteTypes, isSa
                                 className="text-sm flex-1 bg-white/[0.03] border border-white/5 py-2 px-4 rounded-xl text-zinc-400 focus:outline-none focus:bg-white/[0.06] transition-all placeholder:text-zinc-600"
                             />
                         </div>
-                        <div ref={editorContainerRef} id="quill-editor" className="min-h-[25rem]" />
-                        <input type="hidden" name="content" value="" />
+                        <SlashCommandEditor initialContent={content} onChange={setContent} />
+                        <input type="hidden" name="content" value={content} />
                         <input type="hidden" name="id" value={noteId} />
                         <input type="hidden" name="is_pinned" value={isPinned ? '1' : '0'} />
                         <input type="hidden" name="is_favorite" value={isFavorite ? '1' : '0'} />
                         <input type="hidden" name="is_archived" value={isArchived ? '1' : '0'} />
                         {noteId ? <input type="hidden" name="_editing" value="1" /> : null}
                      </div>
-
-
-                    <div id="toolbar-container" className="px-6 py-4 border-t border-white/5 bg-white/[0.03] flex flex-wrap gap-2">
-                        <span className="ql-formats">
-                            <button className="ql-bold"></button>
-                            <button className="ql-italic"></button>
-                            <button className="ql-underline"></button>
-                            <button className="ql-strike"></button>
-                        </span>
-                        <span className="ql-formats">
-                            <button className="ql-list" value="ordered"></button>
-                            <button className="ql-list" value="bullet"></button>
-                        </span>
-                        <span className="ql-formats">
-                            <button className="ql-blockquote"></button>
-                            <button className="ql-code-block"></button>
-                        </span>
-                        <span className="ql-formats">
-                            <button className="ql-link"></button>
-                            <button type="button" className="ql-image" onClick={handleImageClick}>
-                                <FiImage />
-                            </button>
-                        </span>
-                        <span className="ql-formats">
-                            <select className="ql-header" defaultValue="">
-                                <option value="1"></option>
-                                <option value="2"></option>
-                                <option value="3"></option>
-                                <option value=""></option>
-                            </select>
-                            <select className="ql-color"></select>
-                            <select className="ql-background"></select>
-                        </span>
-                    </div>
                  </form>
              </div>
-
-             <style jsx global>{`
-                .ql-snow { border: none !important; }
-                .ql-toolbar { border: none !important; background: transparent; }
-                .ql-container { color: #A1A1AA; font-family: inherit; font-size: 1.1rem; }
-                .ql-editor.ql-blank::before { color: #27272A; font-style: normal; opacity: 1; }
-                .ql-snow .ql-stroke { stroke: #52525B; }
-                .ql-snow .ql-fill { fill: #52525B; }
-                .ql-snow .ql-picker-label { color: #52525B; }
-
-                .ql-container.ql-snow { border: none; background: transparent; }
-                .ql-editor { background: transparent; color: #E4E4E7; min-height: 25rem; line-height: 1.8; }
-
-                .ql-snow .ql-toolbar button:hover .ql-stroke,
-                .ql-snow.ql-toolbar button:hover .ql-stroke { stroke: #10B981 !important; }
-                
-                .ql-snow .ql-toolbar button.ql-active .ql-stroke { stroke: #10B981 !important; }
-                .ql-snow .ql-toolbar button.ql-active .ql-fill { fill: #10B981 !important; }
-
-                .ql-snow .ql-toolbar button,
-                .ql-snow .ql-toolbar .ql-picker-label,
-                .ql-snow .ql-toolbar .ql-picker-item {
-                    color: #52525B;
-                }
-                .ql-snow .ql-toolbar .ql-stroke { stroke: #52525B !important; }
-                .ql-snow .ql-toolbar .ql-fill { fill: #52525B !important; }
-
-                /* Dropdown/Picker refinements */
-                .ql-snow .ql-picker-options {
-                    display: none !important;
-                    background-color: #18181B !important; /* zinc-900 */
-                    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                    border-radius: 12px !important;
-                    box-: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4) !important;
-                    padding: 8px !important;
-                    bottom: 100% !important;
-                    top: auto !important;
-                    margin-bottom: 8px !important;
-                }
-
-                .ql-snow .ql-picker.ql-expanded .ql-picker-options {
-                    display: flex !important;
-                    flex-direction: column !important;
-                    gap: 2px !important;
-                }
-
-                .ql-snow .ql-color-picker.ql-expanded .ql-picker-options {
-                    display: grid !important;
-                }
-
-                .ql-snow .ql-picker-item {
-                    border-radius: 6px !important;
-                    padding: 4px 8px !important;
-                    transition: all 0.2s !important;
-                }
-
-                .ql-snow .ql-picker-item:hover {
-                    background-color: rgba(255, 255, 255, 0.05) !important;
-                    color: #10B981 !important; /* emerald-500 */
-                }
-
-                .ql-snow .ql-color-picker .ql-picker-options {
-                    width: 160px !important; 
-                    grid-template-columns: repeat(7, 1fr) !important;
-                    gap: 3px !important;
-                    overflow: hidden !important;
-                }
-
-                .ql-snow .ql-color-picker .ql-picker-item {
-                    width: 16px !important;
-                    height: 16px !important;
-                    padding: 0 !important;
-                    border-radius: 4px !important;
-                    margin: 2px !important;
-                }
-            `}</style>
          </div>
      );
  }

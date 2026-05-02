@@ -21,18 +21,15 @@ interface TopNavProps {
   };
 }
 
-import { CommandMenu } from "@/components/ui/command-menu";
-
 const TopNav = ({ user }: TopNavProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isCommandOpen, setIsCommandOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
   const announcementRef = useRef<HTMLDivElement>(null);
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { unreadCount: announcementUnreadCount, isDropdownOpen: isAnnouncementsOpen, setIsDropdownOpen: setIsAnnouncementsOpen } = useAnnouncements();
-  const { isMobileExpanded, setIsMobileExpanded } = useDashboard();
+  const { isMobileExpanded, setIsMobileExpanded, setIsCommandOpen } = useDashboard();
   const { attendanceState } = useLocation();
 
   const statusColor = attendanceState === 'CLOCKED_IN' ? 'bg-emerald-500' : 
@@ -59,7 +56,6 @@ const TopNav = ({ user }: TopNavProps) => {
 
   return (
     <>
-      <CommandMenu open={isCommandOpen} setOpen={setIsCommandOpen} />
       <nav className="h-20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-card-border">
         <div className="flex items-center gap-6 flex-1">
           {/* Mobile Logo */}

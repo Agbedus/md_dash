@@ -5,14 +5,16 @@ import { NotificationProvider } from './notifications/notification-provider';
 import { AnnouncementProvider } from './announcements/announcement-provider';
 import { AnnouncementDrawer } from './announcements/announcement-drawer';
 import { MobileNav } from './mobile-nav';
-import { CommandMenu } from './command-menu';
 import { ConfirmationProvider } from '@/providers/confirmation-provider';
+import { useGlobalActions } from '@/providers/global-action-provider';
 
 interface DashboardContextType {
   isMobileExpanded: boolean;
   setIsMobileExpanded: (v: boolean) => void;
   isDesktopCollapsed: boolean;
   setIsDesktopCollapsed: (v: boolean) => void;
+  isCommandOpen: boolean;
+  setIsCommandOpen: (v: boolean) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -38,14 +40,16 @@ export default function DashboardLayout({
 }) {
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
-  const [isCommandOpen, setIsCommandOpen] = useState(false);
+  const { isCommandOpen, setIsCommandOpen } = useGlobalActions();
 
   return (
     <DashboardContext.Provider value={{ 
         isMobileExpanded, 
         setIsMobileExpanded, 
         isDesktopCollapsed, 
-        setIsDesktopCollapsed 
+        setIsDesktopCollapsed,
+        isCommandOpen,
+        setIsCommandOpen
     }}>
       <NotificationProvider user={user}>
         <AnnouncementProvider user={user}>
@@ -68,7 +72,6 @@ export default function DashboardLayout({
                 </div>
               </div>
               <MobileNav setIsCommandOpen={setIsCommandOpen} />
-              <CommandMenu open={isCommandOpen} setOpen={setIsCommandOpen} />
               <AnnouncementDrawer />
             </div>
           </ConfirmationProvider>

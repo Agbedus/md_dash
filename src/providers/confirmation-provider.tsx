@@ -58,7 +58,7 @@ export const ConfirmationProvider: React.FC<{ children: ReactNode }> = ({ childr
                             initial={{ opacity: 0, y: 50, scale: 0.9, x: 20 }}
                             animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
                             exit={{ opacity: 0, y: 20, scale: 0.95, x: 10 }}
-                            className="w-full max-w-sm bg-background/98 backdrop-blur-2xl border border-card-border rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto"
+                            className="w-full max-w-sm bg-background/98 backdrop-blur-2xl border border-card-border rounded-[2.5rem] shadow-2xl overflow-hidden pointer-events-auto"
                         >
                             <div className="p-8 space-y-6">
                                 <div className="flex items-start gap-4">

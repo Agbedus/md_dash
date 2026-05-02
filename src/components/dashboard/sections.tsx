@@ -148,7 +148,7 @@ export async function UserStatSection() {
     const stats = await getSummaryStats();
     
     return (
-        <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-3 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96 text-left">
+        <div className="bg-card p-4 lg:p-6 rounded-2xl col-span-1 lg:col-span-4 border border-card-border hover:border-foreground/10 transition-all duration-300 flex flex-col h-80 lg:h-96 text-left">
             <div className="flex justify-between items-center mb-4 lg:mb-5 shrink-0">
                 <div>
                     <h2 className="text-lg lg:text-xl font-bold text-foreground tracking-tight">User Intelligence</h2>

@@ -13,6 +13,12 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.2.0",
+    "@tiptap/extension-mention": "^3.22.5",
+    "@tiptap/extension-placeholder": "^3.22.5",
+    "@tiptap/pm": "^3.22.5",
+    "@tiptap/react": "^3.22.5",
+    "@tiptap/starter-kit": "^3.22.5",
+    "@tiptap/suggestion": "^3.22.5",
     "@types/recharts": "^1.8.29",
     "bcryptjs": "^3.0.3",
     "cmdk": "^1.1.1",
@@ -31,6 +37,7 @@
     "react-leaflet": "^5.0.0",
     "recharts": "^3.8.0",
     "swr": "^2.4.0",
+    "tippy.js": "^6.3.7",
     "zod": "^4.2.1"
   },
   "devDependencies": {

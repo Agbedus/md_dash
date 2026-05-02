@@ -172,7 +172,7 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
                     <button
                         onClick={handleClockIn}
                         disabled={isLoading}
-                        className="group relative w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-emerald-500 text-emerald-950 hover:bg-emerald-400 active:scale-[0.96] transition-all duration-500 shadow-[0_8px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_12px_40px_rgba(16,185,129,0.4)]"
+                        className="group relative w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-emerald-500 text-emerald-950 hover:bg-emerald-400 active:scale-[0.96] transition-all duration-500 shadow-lg shadow-emerald-500/20"
                     >
                         <FiClock className="w-4 h-4" />
                         <span className="text-base font-black uppercase tracking-wider italic leading-none">
@@ -203,7 +203,7 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
                                     initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }}
                                     animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                                     exit={{ opacity: 0, y: -10, filter: 'blur(10px)' }}
-                                    className="w-full h-full flex items-center justify-between gap-4 px-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 backdrop-blur-xl relative overflow-hidden group shadow-[0_0_30px_rgba(244,63,94,0.1)]"
+                                    className="w-full h-full flex items-center justify-between gap-4 px-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 backdrop-blur-xl relative overflow-hidden group shadow-md shadow-rose-500/5"
                                 >
                                     {/* Accent line */}
                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-rose-500/50" />
@@ -221,7 +221,7 @@ export default function AttendanceStatusCard({ record: initialRecord }: { record
                                         <button
                                             onClick={handleConfirmClockOut}
                                             disabled={isLoading}
-                                            className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-[0_4px_12px_rgba(244,63,94,0.3)]"
+                                            className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-sm shadow-rose-500/10"
                                             title="Confirm Override"
                                         >
                                             <FiCheck className="w-5 h-5" />

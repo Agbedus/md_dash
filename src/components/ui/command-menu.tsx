@@ -139,7 +139,7 @@ export function CommandMenu({ open, setOpen }: CommandMenuProps) {
         initial={{ opacity: 0, scale: 0.95, y: -20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: -20 }}
-        className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-card-border bg-card shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)]"
+        className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-card-border bg-card shadow-2xl"
       >
         <Command className="w-full bg-transparent" loop>
           <div className="flex items-center border-b border-card-border px-4 h-14">
