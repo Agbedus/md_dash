@@ -13,7 +13,7 @@ export interface CommandItemProps {
 }
 
 export const getSuggestionItems = ({ query }: { query: string }): CommandItemProps[] => {
-  return [
+  const items: CommandItemProps[] = [
     {
       title: 'Heading 1',
       description: 'Big section heading.',
@@ -54,7 +54,9 @@ export const getSuggestionItems = ({ query }: { query: string }): CommandItemPro
         editor.chain().focus().deleteRange(range).toggleCodeBlock().run();
       },
     },
-  ].filter(item => item.title.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10);
+  ];
+
+  return items.filter(item => item.title.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10);
 };
 
 export const CommandList = forwardRef((props: any, ref) => {
@@ -193,7 +195,7 @@ export const renderItems = () => {
         popup[0].hide();
         return true;
       }
-      return component.ref?.onKeyDown(props);
+      return (component.ref as any)?.onKeyDown(props);
     },
     onExit() {
       popup[0].destroy();
