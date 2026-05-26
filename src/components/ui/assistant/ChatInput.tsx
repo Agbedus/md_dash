@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { FiSend, FiMic, FiMicOff, FiPaperclip, FiGlobe } from 'react-icons/fi';
+import TextareaAutosize from 'react-textarea-autosize';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -36,21 +37,20 @@ interface WindowWithSpeech extends Window {
 }
 
 export default function ChatInput({ onSendMessage }: ChatInputProps) {
-  // baseText holds committed / typed / final speech text
   const [baseText, setBaseText] = React.useState('');
-  // interimText holds live (interim) speech recognition results
   const [interimText, setInterimText] = React.useState('');
   const [isRecording, setIsRecording] = React.useState(false);
+  const [isSpeechSupported, setIsSpeechSupported] = React.useState(false);
   const recognitionRef = React.useRef<SpeechRecognition | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-// track last final transcript to avoid duplicate appends
   const lastFinalRef = React.useRef<string>('');
 
-  // Initialize SpeechRecognition if available
   React.useEffect(() => {
     const win = window as unknown as WindowWithSpeech;
     const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
+    
+    setIsSpeechSupported(true);
 
     const recog = new SpeechRecognition();
     recog.interimResults = true;
@@ -68,17 +68,14 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
           interim += transcript;
         }
       }
-      // If we got a final segment, append it once to baseText and clear interim
       if (final) {
         const finalTrim = final.trim();
-        // avoid appending identical final transcripts multiple times
         if (finalTrim && lastFinalRef.current !== finalTrim) {
           setBaseText((prev) => (prev ? prev + ' ' : '') + finalTrim);
           lastFinalRef.current = finalTrim;
         }
         setInterimText('');
       } else {
-        // otherwise update interim display (don't mutate baseText)
         setInterimText(interim);
       }
     };
@@ -106,49 +103,50 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
       setIsRecording(false);
     } else {
       try {
-        // reset last final for new session
         lastFinalRef.current = '';
         recog.start();
         setIsRecording(true);
       } catch (e) {
-        // start can throw if called twice quickly
         console.warn('SpeechRecognition start error', e);
         setIsRecording(false);
       }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // combine committed baseText and any interim text for submission
+  const handleSend = () => {
     const combined = (baseText + (interimText ? ' ' + interimText : '')).trim();
     if (combined) {
       onSendMessage(combined);
       setBaseText('');
       setInterimText('');
       lastFinalRef.current = '';
-       // if recording, stop
-       if (isRecording && recognitionRef.current) {
-         try { recognitionRef.current.stop(); } catch {};
-         setIsRecording(false);
-       }
+      if (isRecording && recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch {};
+        setIsRecording(false);
+      }
     }
   };
 
-  // derived value shown in the input: base + interim (space separated)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   const displayValue = (baseText + (interimText ? ' ' + interimText : '')).trimStart();
 
-  const isSpeechSupported = typeof window !== 'undefined' && (!!(window as unknown as WindowWithSpeech).SpeechRecognition || !!(window as unknown as WindowWithSpeech).webkitSpeechRecognition);
-
   return (
-    <form onSubmit={handleSubmit} className="p-4">
-      <div className="bg-card p-2 relative flex flex-col w-full max-w-full rounded-3xl border border-card-border transition-all duration-300 focus-within:bg-foreground/[0.02]">
-        <input
-          type="text"
+    <div className="p-4 pt-2">
+      <div className="bg-card/90 backdrop-blur-xl p-2 relative flex flex-col w-full max-w-full rounded-[2rem] border border-card-border shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500/30">
+        <TextareaAutosize
+          minRows={1}
+          maxRows={8}
           value={displayValue}
           onChange={(e) => { setBaseText(e.target.value); setInterimText(''); }}
+          onKeyDown={handleKeyDown}
           placeholder="Type a message or use voice..."
-          className="flex-grow bg-transparent text-foreground placeholder:text-text-muted px-4 py-3 rounded-full focus:outline-none"
+          className="flex-grow bg-transparent text-foreground placeholder:text-text-muted px-4 py-3 resize-none focus:outline-none scrollbar-hide"
           aria-label="Message"
         />
 
@@ -196,7 +194,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
                 <button
                     type="button"
                     onClick={toggleRecording}
-                    className={`p-2 rounded-full transition-all duration-200 ${isRecording ? 'bg-red-500/20 text-red-400 animate-pulse' : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.06]'}`}
+                    className={`p-2 rounded-full transition-all duration-200 ${isRecording ? 'bg-rose-500/20 text-rose-400 animate-pulse' : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.06]'}`}
                     aria-pressed={isRecording}
                     aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
                     title={isRecording ? 'Stop' : 'Voice'}
@@ -206,8 +204,10 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
             )}
 
             <button
-                type="submit"
-                className="p-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover: hover:-purple-500/20 hover:scale-105 transition-all duration-200 focus:outline-none active:scale-95"
+                type="button"
+                onClick={handleSend}
+                disabled={!displayValue.trim()}
+                className="p-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full hover:shadow-lg hover:shadow-indigo-500/25 hover:scale-105 transition-all duration-200 focus:outline-none active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
                 aria-label="Send message"
                 title="Send"
             >
@@ -216,6 +216,6 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
           </div>
         </div>
       </div>
-    </form>
+    </div>
   );
 }

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { logout } from '@/app/lib/actions';
 import { useDashboard } from './dashboard-layout';
 import { FiBell, FiSearch, FiUser, FiSettings, FiLogOut, FiPlus, FiHelpCircle, FiMessageSquare, FiMenu, FiX, FiCheck, FiInfo, FiAlertCircle } from 'react-icons/fi';
@@ -31,6 +32,27 @@ const TopNav = ({ user }: TopNavProps) => {
   const { unreadCount: announcementUnreadCount, isDropdownOpen: isAnnouncementsOpen, setIsDropdownOpen: setIsAnnouncementsOpen } = useAnnouncements();
   const { isMobileExpanded, setIsMobileExpanded, setIsCommandOpen } = useDashboard();
   const { attendanceState } = useLocation();
+
+  const [notifMinimized, setNotifMinimized] = useState(false);
+  const [announcementMinimized, setAnnouncementMinimized] = useState(false);
+  const [isNotifHovered, setIsNotifHovered] = useState(false);
+  const [isAnnHovered, setIsAnnHovered] = useState(false);
+
+  useEffect(() => {
+    if (unreadCount > 0) {
+      setNotifMinimized(false);
+      const timer = setTimeout(() => setNotifMinimized(true), 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [unreadCount]);
+
+  useEffect(() => {
+    if (announcementUnreadCount > 0) {
+      setAnnouncementMinimized(false);
+      const timer = setTimeout(() => setAnnouncementMinimized(true), 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [announcementUnreadCount]);
 
   const statusColor = attendanceState === 'CLOCKED_IN' ? 'bg-emerald-500' : 
                       attendanceState === 'CLOCKED_OUT' ? 'bg-blue-500' : 'bg-zinc-500';
@@ -93,24 +115,63 @@ const TopNav = ({ user }: TopNavProps) => {
           <div className="relative" ref={notificationRef}>
             <button 
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              onMouseEnter={() => setIsNotifHovered(true)}
+              onMouseLeave={() => setIsNotifHovered(false)}
               className="relative p-2.5 text-text-muted hover:text-foreground transition-colors bg-background/50 border border-card-border rounded-xl hover:bg-foreground/[0.05] group hover-scale"
             >
               <FiBell className="text-xl group-hover:text-[var(--pastel-yellow)] transition-colors" />
               {unreadCount > 0 && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-emerald-500 rounded-full ring-2 ring-background animate-pulse"></span>
+                <div className="absolute -top-1 -right-1 flex items-center justify-center pointer-events-none">
+                  <motion.div 
+                    layout
+                    initial={false}
+                    animate={{ 
+                      width: (!notifMinimized || isNotifHovered) ? (unreadCount > 9 ? 24 : 20) : 12,
+                      height: (!notifMinimized || isNotifHovered) ? 20 : 12,
+                    }}
+                    transition={{ 
+                      type: 'spring', 
+                      stiffness: 500, 
+                      damping: 30,
+                    }}
+                    className="bg-emerald-500 text-white rounded-full ring-2 ring-background shadow-lg flex items-center justify-center overflow-hidden"
+                  >
+                    <AnimatePresence mode="wait">
+                      {(!notifMinimized || isNotifHovered) ? (
+                        <motion.span 
+                          key="count"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.5 }}
+                          className="text-[10px] font-black font-numbers leading-none flex items-center justify-center"
+                        >
+                          {unreadCount}
+                        </motion.span>
+                      ) : (
+                        <motion.span 
+                          key="dot"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="w-1.5 h-1.5 bg-white rounded-full animate-pulse flex-shrink-0"
+                        />
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </div>
               )}
             </button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-background/95 border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl">
-                <div className="px-4 py-3 border-b border-card-border flex justify-between items-center">
-                  <p className="text-sm font-bold text-foreground">Notifications</p>
+              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-background/80 border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl shadow-2xl">
+                <div className="px-4 py-3 border-b border-card-border flex justify-between items-center bg-background/50">
+                  <p className="text-sm font-black text-foreground uppercase tracking-tight">Notifications</p>
                   {unreadCount > 0 && (
-                    <span className="text-xs text-text-muted bg-foreground/[0.05] px-2 py-0.5 rounded-full">{unreadCount} New</span>
+                    <span className="text-[10px] text-text-muted bg-foreground/[0.05] px-2 py-0.5 rounded-full font-black uppercase tracking-wider border border-card-border">{unreadCount} New</span>
                   )}
                 </div>
                 
-                <div className="max-h-[300px] overflow-y-auto">
+                <div className="max-h-[300px] overflow-y-auto bg-background/30">
                   {notifications.length > 0 ? (
                     (() => {
                       const unread = notifications.filter(n => !n.is_read);
@@ -125,7 +186,7 @@ const TopNav = ({ user }: TopNavProps) => {
                           className={`px-4 py-3 hover:bg-foreground/[0.04] transition-colors cursor-pointer border-b border-card-border last:border-0 ${!notification.is_read ? 'bg-foreground/[0.02]' : ''}`}
                         >
                           <div className="flex gap-3">
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border ${
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border shadow-sm ${
                               notification.type === 'success' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                               notification.type === 'error' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
                               notification.type === 'warning' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
@@ -137,34 +198,34 @@ const TopNav = ({ user }: TopNavProps) => {
                                <FiBell size={14} />}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-sm line-clamp-2 ${!notification.is_read ? 'text-foreground font-bold' : 'text-text-muted'}`}>
+                              <p className={`text-sm line-clamp-2 ${!notification.is_read ? 'text-foreground font-black uppercase tracking-tight' : 'text-text-secondary font-bold'}`}>
                                 {notification.message}
                               </p>
-                              <p className="text-[11px] text-text-muted mt-1 font-bold font-numbers">
+                              <p className="text-[11px] text-text-muted mt-1 font-black font-numbers uppercase tracking-widest opacity-70">
                                 {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                               </p>
                             </div>
                             {!notification.is_read && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5"></div>
+                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
                             )}
                           </div>
                         </div>
                       ));
                     })()
                   ) : (
-                    <div className="px-4 py-8 text-center">
-                      <FiBell className="mx-auto text-text-muted mb-2 opacity-20" size={24} />
-                      <p className="text-xs text-text-muted">No notifications yet</p>
+                    <div className="px-4 py-12 text-center">
+                      <FiBell className="mx-auto text-text-muted mb-3 opacity-20" size={32} />
+                      <p className="text-xs text-text-muted font-black uppercase tracking-widest">No notifications yet</p>
                     </div>
                   )}
                 </div>
 
                 {notifications.length > 0 && (
-                  <div className="p-2 border-t border-card-border flex gap-2">
+                  <div className="p-2 border-t border-card-border flex gap-2 bg-background/50">
                     {unreadCount > 0 && (
                       <button 
                         onClick={() => markAllAsRead()}
-                        className="flex-1 py-2 text-xs text-text-muted hover:text-foreground hover:bg-foreground/[0.05] rounded-lg transition-colors border border-transparent hover:border-card-border"
+                        className="flex-1 py-2 text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-foreground hover:bg-foreground/[0.05] rounded-lg transition-colors border border-transparent hover:border-card-border"
                       >
                         Mark all as read
                       </button>
@@ -172,7 +233,7 @@ const TopNav = ({ user }: TopNavProps) => {
                     <Link 
                       href="/notifications"
                       onClick={() => setIsNotificationsOpen(false)}
-                      className="flex-1 py-2 text-xs text-center bg-foreground/[0.04] text-text-muted hover:text-foreground hover:bg-foreground/[0.07] rounded-lg transition-colors border border-card-border"
+                      className="flex-1 py-2 text-[10px] font-black uppercase tracking-widest text-center bg-foreground/[0.04] text-text-secondary hover:text-foreground hover:bg-foreground/[0.07] rounded-lg transition-colors border border-card-border"
                     >
                       View all
                     </Link>
@@ -185,12 +246,51 @@ const TopNav = ({ user }: TopNavProps) => {
           <div className="relative" ref={announcementRef}>
             <button 
               onClick={() => setIsAnnouncementsOpen(!isAnnouncementsOpen)}
+              onMouseEnter={() => setIsAnnHovered(true)}
+              onMouseLeave={() => setIsAnnHovered(false)}
               className="relative p-2.5 text-text-muted hover:text-foreground transition-colors bg-background/50 border border-card-border rounded-xl hover:bg-foreground/[0.05] group hover-scale"
               title="Announcements"
             >
               <FiMessageSquare className={`text-xl group-hover:text-[var(--pastel-yellow)] transition-colors ${isAnnouncementsOpen ? 'text-[var(--pastel-yellow)]' : 'text-text-muted'}`} />
               {announcementUnreadCount > 0 && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[var(--pastel-yellow)] rounded-full ring-2 ring-background animate-pulse"></span>
+                <div className="absolute -top-1 -right-1 flex items-center justify-center pointer-events-none">
+                  <motion.div 
+                    layout
+                    initial={false}
+                    animate={{ 
+                      width: (!announcementMinimized || isAnnHovered) ? (announcementUnreadCount > 9 ? 24 : 20) : 12,
+                      height: (!announcementMinimized || isAnnHovered) ? 20 : 12,
+                    }}
+                    transition={{ 
+                      type: 'spring', 
+                      stiffness: 500, 
+                      damping: 30,
+                    }}
+                    className="bg-amber-500 text-zinc-950 rounded-full ring-2 ring-background shadow-lg flex items-center justify-center overflow-hidden"
+                  >
+                    <AnimatePresence mode="wait">
+                      {(!announcementMinimized || isAnnHovered) ? (
+                        <motion.span 
+                          key="count"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.5 }}
+                          className="text-[10px] font-black font-numbers leading-none flex items-center justify-center"
+                        >
+                          {announcementUnreadCount}
+                        </motion.span>
+                      ) : (
+                        <motion.span 
+                          key="dot"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="w-1.5 h-1.5 bg-zinc-950 rounded-full animate-pulse flex-shrink-0"
+                        />
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </div>
               )}
             </button>
 
@@ -236,15 +336,15 @@ const TopNav = ({ user }: TopNavProps) => {
 
               {/* Dropdown Menu */}
               {isOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-background/95 border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl">
-                      <div className="px-4 py-3 border-b border-card-border mb-2">
-                          <p className="text-sm font-bold text-foreground truncate">{user.name || 'User'}</p>
-                          <p className="text-xs text-text-muted font-medium truncate">{user.email}</p>
+                  <div className="absolute right-0 mt-2 w-56 bg-background/80 border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl shadow-2xl">
+                      <div className="px-4 py-3 border-b border-card-border mb-2 bg-background/50">
+                          <p className="text-sm font-black text-foreground truncate uppercase tracking-tight">{user.name || 'User'}</p>
+                          <p className="text-[10px] text-text-muted font-black truncate uppercase tracking-widest">{user.email}</p>
                       </div>
                       
                       <Link 
                           href="/profile" 
-                      className="flex items-center px-4 py-2.5 text-sm text-text-muted hover:text-foreground hover:bg-foreground/[0.04] transition-colors group"
+                      className="flex items-center px-4 py-2.5 text-sm text-text-secondary font-bold hover:text-foreground hover:bg-foreground/[0.04] transition-colors group"
                           onClick={() => setIsOpen(false)}
                       >
                           <FiUser className="mr-3 text-text-muted group-hover:text-[var(--pastel-blue)]" />
@@ -252,7 +352,7 @@ const TopNav = ({ user }: TopNavProps) => {
                       </Link>
                       <Link 
                           href="/settings" 
-                      className="flex items-center px-4 py-2.5 text-sm text-text-muted hover:text-foreground hover:bg-foreground/[0.04] transition-colors group"
+                      className="flex items-center px-4 py-2.5 text-sm text-text-secondary font-bold hover:text-foreground hover:bg-foreground/[0.04] transition-colors group"
                           onClick={() => setIsOpen(false)}
                       >
                           <FiSettings className="mr-3 text-text-muted group-hover:text-[var(--pastel-teal)]" />
@@ -264,7 +364,7 @@ const TopNav = ({ user }: TopNavProps) => {
                       <form action={logout}>
                           <button 
                               type="submit"
-                              className="flex w-full items-center px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors group"
+                              className="flex w-full items-center px-4 py-2.5 text-sm text-rose-500 font-bold hover:bg-rose-500/10 transition-colors group"
                           >
                               <FiLogOut className="mr-3 group-hover:translate-x-0.5 transition-transform" />
                               Sign Out

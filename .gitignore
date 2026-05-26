@@ -54,3 +54,13 @@ debug_tasks.js
 
 FEATURES.md
 API_DOCUMENTATION.md
+
+# AI Agents & IDE Tooling
+.agent/
+.antigravity/
+.gemini/
+.cursor/
+.vscode/
+.idea/
+*.log
+update_overlays.py

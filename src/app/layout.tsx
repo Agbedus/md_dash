@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
+import { Geist, Geist_Mono, Sora, DM_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -9,6 +9,16 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const sora = Sora({
+  variable: "--font-sora-sans",
+  subsets: ["latin"],
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
 });
 
@@ -64,7 +74,7 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${sora.variable} ${dmSans.variable} ${spaceGrotesk.variable} antialiased`}
       >
         <ThemeProvider>
           <GlobalActionProvider>

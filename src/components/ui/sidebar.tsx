@@ -128,7 +128,6 @@ const Sidebar = ({ user }: SidebarProps) => {
     { href: "/attendance", icon: FiMapPin, label: "Attendance", color: "text-sky-400" },
     { href: "/focus", icon: FiClock, label: "Focus Mode", color: "text-orange-400" },
     { href: "/assistant", icon: FiCpu, label: "AI Assistant", color: "text-cyan-400" },
-    { href: "/settings", icon: FiSettings, label: "Settings", color: "text-indigo-400" },
   ];
 
   const systemMenuItems = [
@@ -318,28 +317,40 @@ const Sidebar = ({ user }: SidebarProps) => {
       {/* ---------- Footer ---------- */}
       <div className="py-3 border-t border-sidebar-border space-y-3">
         {user && (
-          <div className={`flex items-center ${itemAlignmentClass} py-2`}>
-            <div className="relative w-8 h-8">
-              {user.image ? (
-                <Image
-                  src={user.image}
-                  alt={user.name || "User"}
-                  fill
-                  className="rounded-full object-cover border border-emerald-500/30"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
-                  {(user.name || user.email || "?")[0].toUpperCase()}
-                </div>
-              )}
+          <div className={`flex items-center justify-between w-full py-2 ${isSidebarCollapsed ? "px-0 justify-center" : "px-6"}`}>
+            <div className="flex items-center">
+              <div className="relative w-8 h-8 flex-shrink-0">
+                {user.image ? (
+                  <Image
+                    src={user.image}
+                    alt={user.name || "User"}
+                    fill
+                    className="rounded-full object-cover border border-emerald-500/30"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                    {(user.name || user.email || "?")[0].toUpperCase()}
+                  </div>
+                )}
+              </div>
+
+              <div className={`ml-3 overflow-hidden ${contentVisibilityClass}`}>
+                <p className="text-sm text-foreground font-medium truncate">{user.name}</p>
+                <p className="text-xs text-text-muted capitalize">
+                  {user.roles?.[0]?.replace("_", " ") || "Member"}
+                </p>
+              </div>
             </div>
 
-            <div className={`ml-3 overflow-hidden ${contentVisibilityClass}`}>
-              <p className="text-sm text-foreground font-medium truncate">{user.name}</p>
-              <p className="text-xs text-text-muted capitalize">
-                {user.roles?.[0]?.replace("_", " ") || "Member"}
-              </p>
-            </div>
+            {!isSidebarCollapsed && (
+              <Link 
+                href="/settings"
+                className="p-2 hover:bg-foreground/[0.05] rounded-lg transition-colors text-text-muted hover:text-foreground shrink-0 ml-auto flex items-center justify-center"
+                title="Settings"
+              >
+                <FiSettings size={16} className="text-text-muted hover:text-foreground transition-colors" />
+              </Link>
+            )}
           </div>
         )}
 

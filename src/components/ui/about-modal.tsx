@@ -24,18 +24,18 @@ export function AboutModal({ isOpen, onClose, version }: AboutModalProps) {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={onClose}
-                            className="absolute inset-0 bg-background/80 backdrop-blur-xl"
+                            className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-md"
                         />
                         
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative w-full max-w-xl bg-card border border-card-border rounded-[3rem] overflow-hidden"
+                            className="relative w-full max-w-xl bg-background border border-card-border rounded-[3rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden"
                         >
                             <button
                                 onClick={onClose}
-                                className="absolute top-8 right-8 p-2 rounded-2xl hover:bg-foreground/[0.05] text-text-muted hover:text-foreground transition-all z-20"
+                                className="absolute top-8 right-8 p-2 rounded-2xl hover:bg-foreground/[0.05] text-text-secondary hover:text-foreground transition-all z-20"
                             >
                                 <FiX className="w-5 h-5" />
                             </button>
@@ -55,14 +55,14 @@ export function AboutModal({ isOpen, onClose, version }: AboutModalProps) {
                                     <div>
                                         <h2 className="text-3xl font-black text-foreground uppercase tracking-tight">MD Platform</h2>
                                         <div className="flex items-center justify-center gap-2 mt-4 font-numbers">
-                                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted/50">Core Version</span>
-                                            <span className="px-3 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider">{version}</span>
-                                            <span className="px-3 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-black uppercase tracking-wider">Operational</span>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Core Version</span>
+                                            <span className="px-3 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">{version}</span>
+                                            <span className="px-3 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-500 border border-amber-500/20 text-[10px] font-black uppercase tracking-wider">Operational</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <p className="text-text-muted text-base leading-relaxed max-w-md mx-auto font-medium">
+                                <p className="text-text-secondary text-base leading-relaxed max-w-md mx-auto font-bold uppercase tracking-tight">
                                     A bespoke, secure, and intelligent productivity ecosystem designed for high-performance teams and strategic maneuvers.
                                 </p>
 

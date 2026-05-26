@@ -49,7 +49,7 @@ const noteTypeColors: Record<Note['type'], string> = {
 
 import NotesLoading from '@/app/(dashboard)/notes/loading';
 
-export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNotes?: Note[] }) {
+export default function NotesPageClient({ allNotes: initialNotes = [], currentUser }: { allNotes?: Note[], currentUser?: any }) {
     const confirm = useConfirm();
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -371,6 +371,7 @@ export default function NotesPageClient({ allNotes: initialNotes = [] }: { allNo
                  noteTypes={noteTypes}
                  isSaving={false}
                  tasks={tasks}
+                 currentUser={currentUser}
              />
             <style jsx>{`
                 .masonry-container {

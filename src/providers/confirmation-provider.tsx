@@ -53,26 +53,33 @@ export const ConfirmationProvider: React.FC<{ children: ReactNode }> = ({ childr
             
             <AnimatePresence>
                 {options && (
-                    <div className="fixed inset-0 z-[200] flex items-end justify-end p-8 pointer-events-none">
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 pointer-events-none">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={handleCancel}
+                            className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-md pointer-events-auto"
+                        />
                         <motion.div
                             initial={{ opacity: 0, y: 50, scale: 0.9, x: 20 }}
                             animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
                             exit={{ opacity: 0, y: 20, scale: 0.95, x: 10 }}
-                            className="w-full max-w-sm bg-background/98 backdrop-blur-2xl border border-card-border rounded-[2.5rem] shadow-2xl overflow-hidden pointer-events-auto"
+                            className="relative w-full max-w-sm bg-background border border-card-border rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden pointer-events-auto"
                         >
                             <div className="p-8 space-y-6">
                                 <div className="flex items-start gap-4">
                                     <div className={`p-4 rounded-3xl ${
-                                        options.type === 'danger' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 
-                                        'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                                    } border flex items-center justify-center shrink-0`}>
+                                        options.type === 'danger' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-500 border-rose-500/20' : 
+                                        'bg-amber-500/10 text-amber-600 dark:text-amber-500 border-amber-500/20'
+                                    } border flex items-center justify-center shrink-0 shadow-sm`}>
                                         <FiAlertTriangle size={24} />
                                     </div>
                                     <div className="space-y-2">
-                                        <h3 className="text-lg font-bold text-foreground tracking-tight leading-tight">
+                                        <h3 className="text-lg font-black text-foreground tracking-tight leading-tight uppercase">
                                             {options.title}
                                         </h3>
-                                        <p className="text-sm text-text-muted font-medium leading-relaxed">
+                                        <p className="text-sm text-text-secondary font-bold leading-relaxed uppercase tracking-tight">
                                             {options.message}
                                         </p>
                                     </div>

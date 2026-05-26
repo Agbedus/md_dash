@@ -32,9 +32,9 @@ export default function AuthInfoSlider() {
   }, []);
 
   return (
-    <div className="relative h-full w-full flex flex-col justify-center text-white overflow-hidden bg-zinc-900/50">
+    <div className="relative h-full w-full flex flex-col justify-center text-foreground overflow-hidden bg-foreground/[0.01]">
       {/* Background Decorative Icons - larger and more spread out */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-10">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.03] dark:opacity-[0.07]">
         <FiTrendingUp className="absolute top-[5%] left-[5%] w-48 h-48 rotate-12 animate-pulse-soft" />
         <FiCpu className="absolute bottom-[5%] right-[5%] w-64 h-64 -rotate-12 animate-pulse-soft" style={{ animationDelay: '2s' }} />
         <FiLock className="absolute top-[35%] right-[-5%] w-40 h-40 rotate-[35deg] animate-pulse-soft" style={{ animationDelay: '1s' }} />
@@ -56,7 +56,7 @@ export default function AuthInfoSlider() {
             <div className="flex flex-col gap-2">
                {/* Line 1: Icon Box */}
                <div 
-                 className={`mb-8 w-20 h-20 flex items-center justify-center rounded-3xl bg-white/[0.03] border border-white/5 backdrop-blur-md transition-all duration-700 delay-[100ms] ${
+                 className={`mb-8 w-20 h-20 flex items-center justify-center rounded-3xl bg-foreground/[0.03] border border-card-border backdrop-blur-md transition-all duration-700 delay-[100ms] ${
                    index === currentSlide ? 'translate-y-0 opacity-100' : '-translate-y-12 opacity-0'
                  }`}
                >
@@ -65,7 +65,7 @@ export default function AuthInfoSlider() {
 
                {/* Line 2: Title */}
                <h2 
-                 className={`text-7xl lg:text-8xl font-medium bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/30 mb-8 leading-[0.9] tracking-tight transition-all duration-700 delay-[300ms] ${
+                 className={`text-7xl lg:text-8xl font-black text-foreground mb-8 leading-[0.9] tracking-tight transition-all duration-700 delay-[300ms] uppercase italic ${
                    index === currentSlide ? 'translate-y-0 opacity-100' : '-translate-y-12 opacity-0'
                  }`}
                >
@@ -74,7 +74,7 @@ export default function AuthInfoSlider() {
 
                {/* Line 3: Description */}
                <p 
-                 className={`text-3xl text-zinc-400 leading-tight max-w-2xl font-medium tracking-tight transition-all duration-700 delay-[500ms] ${
+                 className={`text-3xl text-text-secondary leading-tight max-w-2xl font-bold tracking-tight transition-all duration-700 delay-[500ms] uppercase ${
                    index === currentSlide ? 'translate-y-0 opacity-100' : '-translate-y-12 opacity-0'
                  }`}
                >
@@ -91,8 +91,8 @@ export default function AuthInfoSlider() {
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`h-2.5 rounded-full transition-all duration-500 hover:bg-white/30 ${
-              index === currentSlide ? 'w-16 bg-emerald-500 -[0_0_20px_rgba(16,185,129,0.4)]' : 'w-4 bg-white/[0.06]'
+            className={`h-2.5 rounded-full transition-all duration-500 hover:bg-foreground/20 ${
+              index === currentSlide ? 'w-16 bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'w-4 bg-foreground/[0.06]'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

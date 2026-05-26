@@ -37,18 +37,18 @@ interface GanttGridProps {
 type ZoomLevel = 'days' | 'weeks' | 'months';
 
 const COLOR_PALETTE = [
-  { bg: 'bg-indigo-500/20', border: 'border-indigo-400/30', text: 'text-indigo-300' },
-  { bg: 'bg-emerald-500/20', border: 'border-emerald-400/30', text: 'text-emerald-300' },
-  { bg: 'bg-rose-500/20', border: 'border-rose-400/30', text: 'text-rose-300' },
-  { bg: 'bg-amber-500/20', border: 'border-amber-400/30', text: 'text-amber-300' },
-  { bg: 'bg-sky-500/20', border: 'border-sky-400/30', text: 'text-sky-300' },
-  { bg: 'bg-purple-500/20', border: 'border-purple-400/30', text: 'text-purple-300' },
-  { bg: 'bg-fuchsia-500/20', border: 'border-fuchsia-400/30', text: 'text-fuchsia-300' },
-  { bg: 'bg-teal-500/20', border: 'border-teal-400/30', text: 'text-teal-300' },
-  { bg: 'bg-orange-500/20', border: 'border-orange-400/30', text: 'text-orange-300' },
-  { bg: 'bg-blue-500/20', border: 'border-blue-400/30', text: 'text-blue-300' },
-  { bg: 'bg-lime-500/20', border: 'border-lime-400/30', text: 'text-lime-300' },
-  { bg: 'bg-pink-500/20', border: 'border-pink-400/30', text: 'text-pink-300' },
+  { bg: 'bg-indigo-500/10 dark:bg-indigo-500/20', border: 'border-indigo-500/30', text: 'text-indigo-700 dark:text-indigo-300' },
+  { bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-700 dark:text-emerald-300' },
+  { bg: 'bg-rose-500/10 dark:bg-rose-500/20', border: 'border-rose-500/30', text: 'text-rose-700 dark:text-rose-300' },
+  { bg: 'bg-amber-500/10 dark:bg-amber-500/20', border: 'border-amber-500/30', text: 'text-amber-700 dark:text-amber-300' },
+  { bg: 'bg-sky-500/10 dark:bg-sky-500/20', border: 'border-sky-500/30', text: 'text-sky-700 dark:text-sky-300' },
+  { bg: 'bg-purple-500/10 dark:bg-purple-500/20', border: 'border-purple-500/30', text: 'text-purple-700 dark:text-purple-300' },
+  { bg: 'bg-fuchsia-500/10 dark:bg-fuchsia-500/20', border: 'border-fuchsia-500/30', text: 'text-fuchsia-700 dark:text-fuchsia-300' },
+  { bg: 'bg-teal-500/10 dark:bg-teal-500/20', border: 'border-teal-500/30', text: 'text-teal-700 dark:text-teal-300' },
+  { bg: 'bg-orange-500/10 dark:bg-orange-500/20', border: 'border-orange-500/30', text: 'text-orange-700 dark:text-orange-300' },
+  { bg: 'bg-blue-500/10 dark:bg-blue-500/20', border: 'border-blue-500/30', text: 'text-blue-700 dark:text-blue-300' },
+  { bg: 'bg-lime-500/10 dark:bg-lime-500/20', border: 'border-lime-500/30', text: 'text-lime-700 dark:text-lime-300' },
+  { bg: 'bg-pink-500/10 dark:bg-pink-500/20', border: 'border-pink-500/30', text: 'text-pink-700 dark:text-pink-300' },
 ];
 
 function getColorForId(id: string) {
@@ -121,24 +121,24 @@ export default function GanttGrid({ date, events, activeFilter, onEventClick }: 
   }
 
   return (
-    <div className="flex flex-col h-full bg-background/50 overflow-hidden relative">
+    <div className="flex flex-col h-full bg-background overflow-hidden relative">
       {/* Zoom Controls Overlay */}
-      <div className="absolute bottom-6 right-6 z-[60] flex items-center gap-1 p-1 bg-background/80 backdrop-blur-md border border-card-border rounded-2xl">
+      <div className="absolute bottom-6 right-6 z-[60] flex items-center gap-1 p-1 bg-background/80 backdrop-blur-md border border-card-border rounded-2xl shadow-xl">
         <button 
           onClick={() => setZoomLevel('days')}
-          className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${zoomLevel === 'days' ? 'bg-foreground/[0.1] text-foreground' : 'text-(--text-muted) hover:text-foreground hover:bg-foreground/[0.05]'}`}
+          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${zoomLevel === 'days' ? 'bg-foreground/[0.08] text-foreground' : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.05]'}`}
         >
           Days
         </button>
         <button 
           onClick={() => setZoomLevel('weeks')}
-          className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${zoomLevel === 'weeks' ? 'bg-foreground/[0.1] text-foreground' : 'text-(--text-muted) hover:text-foreground hover:bg-foreground/[0.05]'}`}
+          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${zoomLevel === 'weeks' ? 'bg-foreground/[0.08] text-foreground' : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.05]'}`}
         >
           Weeks
         </button>
         <button 
           onClick={() => setZoomLevel('months')}
-          className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${zoomLevel === 'months' ? 'bg-foreground/[0.1] text-foreground' : 'text-(--text-muted) hover:text-foreground hover:bg-foreground/[0.05]'}`}
+          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${zoomLevel === 'months' ? 'bg-foreground/[0.08] text-foreground' : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.05]'}`}
         >
           Months
         </button>
@@ -184,15 +184,15 @@ export default function GanttGrid({ date, events, activeFilter, onEventClick }: 
 
             {/* Sub Level Header (Days or Weeks or Months) */}
             <div className="flex">
-                <div className="w-64 flex-shrink-0 sticky left-0 z-50 bg-background/80 backdrop-blur-md border-r border-card-border p-4 text-[10px] font-black text-(--text-muted) uppercase tracking-widest flex items-center gap-2">
-                    <FiLayers className="w-3 h-3" />
-                    {activeFilter === 'projects' ? 'Projects' : 'Team'}
+                <div className="w-64 flex-shrink-0 sticky left-0 z-50 bg-background/80 backdrop-blur-md border-r border-card-border p-4 text-[10px] font-black text-text-muted uppercase tracking-widest flex items-center gap-2">
+                    <FiLayers className="w-3.5 h-3.5" />
+                    {activeFilter === 'projects' ? 'Active Missions' : 'Personnel'}
                 </div>
                 <div className="flex">
                       {zoomLevel === 'days' && days.map((d) => (
                         <div key={d.toISOString()} className={`flex-shrink-0 w-12 border-r border-card-border p-2 text-center transition-colors ${isSameDay(d, new Date()) ? 'bg-indigo-500/5' : 'hover:bg-foreground/[0.05]'}`}>
-                            <div className="text-[9px] font-bold text-(--text-muted) uppercase leading-none mb-1">{format(d, "EEE")}</div>
-                            <div className={`text-xs font-black leading-none tracking-tight ${isSameDay(d, new Date()) ? 'text-indigo-400' : 'text-text-secondary'}`}>{format(d, "d")}</div>
+                            <div className="text-[9px] font-black text-text-muted uppercase leading-none mb-1">{format(d, "EEE")}</div>
+                            <div className={`text-xs font-black leading-none tracking-tight ${isSameDay(d, new Date()) ? 'text-indigo-600 dark:text-indigo-400' : 'text-text-secondary'}`}>{format(d, "d")}</div>
                         </div>
                     ))}
                     {zoomLevel === 'weeks' && weeks.map((w) => {
@@ -200,8 +200,8 @@ export default function GanttGrid({ date, events, activeFilter, onEventClick }: 
                         const isCurrentWeek = isWithinInterval(new Date(), { start: wStart, end: endOfWeek(wStart, { weekStartsOn: 1 }) });
                         return (
                             <div key={w.toISOString()} style={{ width: `${7 * dayWidth}px` }} className={`flex-shrink-0 border-r border-card-border p-2 text-center transition-colors ${isCurrentWeek ? 'bg-indigo-500/5' : 'hover:bg-foreground/[0.05]'}`}>
-                                <div className="text-[9px] font-bold text-(--text-muted) uppercase leading-none mb-1">W{format(w, "w")}</div>
-                                <div className={`text-[10px] font-black leading-none tracking-tight ${isCurrentWeek ? 'text-indigo-400' : 'text-(--text-muted)'}`}>{format(w, "MMM d")}</div>
+                                <div className="text-[9px] font-black text-text-muted uppercase leading-none mb-1">W{format(w, "w")}</div>
+                                <div className={`text-[10px] font-black leading-none tracking-tight ${isCurrentWeek ? 'text-indigo-600 dark:text-indigo-400' : 'text-text-muted'}`}>{format(w, "MMM d")}</div>
                             </div>
                         );
                     })}
@@ -211,7 +211,7 @@ export default function GanttGrid({ date, events, activeFilter, onEventClick }: 
                         const isCurrentMonth = isSameDay(startOfMonth(new Date()), mStart);
                         return (
                             <div key={m.toISOString()} style={{ width: `${daysInM * dayWidth}px` }} className={`flex-shrink-0 border-r border-card-border p-2 text-center transition-colors ${isCurrentMonth ? 'bg-indigo-500/5' : 'hover:bg-foreground/[0.05]'}`}>
-                                <div className="text-[10px] font-black leading-none text-(--text-muted) uppercase tracking-wider">{format(m, "MMM")}</div>
+                                <div className="text-[10px] font-black leading-none text-text-muted uppercase tracking-wider">{format(m, "MMM")}</div>
                             </div>
                         );
                     })}
@@ -228,19 +228,19 @@ export default function GanttGrid({ date, events, activeFilter, onEventClick }: 
                 const rowLabel = activeFilter === 'projects' ? row.title.replace('[PROJ] ', '') : row.user?.fullName || row.user?.email || 'User';
                 const user = activeFilter === 'projects' ? (row.user || null) : row.user;
                 return (
-                  <div key={idx} style={{ height: `${rowHeight}px` }} className="p-4 flex items-center gap-3 border-b border-card-border hover:bg-foreground/[0.05] transition-colors group">
+                  <div key={idx} style={{ height: `${rowHeight}px` }} className="p-4 flex items-center gap-3 border-b border-card-border hover:bg-foreground/[0.04] transition-colors group">
                       {user && (
-                        <div className="h-8 w-8 rounded-xl bg-background/50 relative overflow-hidden ring-1 ring-white/10 flex-shrink-0 ">
+                        <div className="h-9 w-9 rounded-xl bg-foreground/[0.03] relative overflow-hidden ring-1 ring-card-border flex-shrink-0 ">
                           {(user as any).avatar_url || (user as any).avatarUrl || (user as any).image ? (
                             <Image src={(user as any).avatar_url || (user as any).avatarUrl || (user as any).image} alt={rowLabel} fill className="object-cover transition-transform group-hover:scale-110" />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center text-[10px] font-black bg-indigo-500/5 text-indigo-400/80">
+                            <div className="flex h-full w-full items-center justify-center text-[10px] font-black bg-indigo-500/5 text-indigo-600 dark:text-indigo-400">
                               {rowLabel.charAt(0).toUpperCase()}
                             </div>
                           )}
                         </div>
                       )}
-                      <span className="text-xs font-black text-text-secondary truncate uppercase tracking-tight group-hover:text-foreground transition-colors">
+                      <span className="text-[11px] font-black text-text-secondary truncate uppercase tracking-tight group-hover:text-foreground transition-colors">
                         {rowLabel}
                       </span>
                   </div>
@@ -304,42 +304,42 @@ export default function GanttGrid({ date, events, activeFilter, onEventClick }: 
                                   style={{ 
                                       left: `${leftPos}px`, 
                                       width: `${barWidth}px`,
-                                      top: `${(rowIdx * rowHeight) + 1}px`,
-                                      height: `${rowHeight - 2}px`
+                                      top: `${(rowIdx * rowHeight) + 4}px`,
+                                      height: `${rowHeight - 8}px`
                                   }}
-                                  className={`absolute rounded-xl border-y border-x flex items-center px-4 z-10 cursor-pointer hover:brightness-110 hover:z-20 active:scale-[0.99] transition-all overflow-hidden backdrop-blur-md ${barColor.bg} ${barColor.border}`}
+                                  className={`absolute rounded-xl border-y border-x flex items-center px-4 z-10 cursor-pointer hover:brightness-105 dark:hover:brightness-125 hover:z-20 active:scale-[0.99] transition-all overflow-hidden backdrop-blur-md ${barColor.bg} ${barColor.border} shadow-sm`}
                                 >
                                   <div className="flex items-center gap-2 w-full overflow-hidden">
                                     {eventUser && barWidth > 60 ? (
-                                        <div className="h-6 w-6 rounded-full bg-white/10 relative overflow-hidden flex-shrink-0 border border-white/10  transition-transform group-hover:scale-105">
+                                        <div className="h-7 w-7 rounded-full bg-background/50 relative overflow-hidden flex-shrink-0 border border-card-border shadow-sm transition-transform group-hover:scale-105">
                                             {((eventUser as any).avatar_url || (eventUser as any).avatarUrl || (eventUser as any).image) ? (
                                                 <Image src={(eventUser as any).avatar_url || (eventUser as any).avatarUrl || (eventUser as any).image} alt={cleanTitle} fill className="object-cover" />
                                             ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-[8px] font-black text-white/70">
+                                                <div className="flex h-full w-full items-center justify-center text-[9px] font-black text-foreground/70">
                                                     {cleanTitle.charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
                                     ) : (
                                         e.isTimeOff && (
-                                            <div className="flex-shrink-0 opacity-80">
-                                                {e.timeOffStatus === 'approved' ? <FiSun className="w-3.5 h-3.5" /> : <FiClock className="w-3.5 h-3.5" />}
+                                            <div className={`flex-shrink-0 ${barColor.text}`}>
+                                                {e.timeOffStatus === 'approved' ? <FiSun className="w-4 h-4" /> : <FiClock className="w-4 h-4" />}
                                             </div>
                                         )
                                     )}
                                     <div className="flex flex-col min-w-0">
                                         <div className="flex items-center gap-1.5 min-w-0">
                                             {e.isTimeOff && eventUser && barWidth > 60 && (
-                                                <span className="opacity-70 flex-shrink-0">
-                                                    {e.timeOffStatus === 'approved' ? <FiSun className="w-3 h-3" /> : <FiClock className="w-3 h-3" />}
+                                                <span className={`flex-shrink-0 ${barColor.text}`}>
+                                                    {e.timeOffStatus === 'approved' ? <FiSun className="w-3.5 h-3.5" /> : <FiClock className="w-3.5 h-3.5" />}
                                                 </span>
                                             )}
-                                            <span className={`text-[10px] font-bold uppercase tracking-widest truncate leading-none ${barColor.text}`}>
+                                            <span className={`text-[10px] font-black uppercase tracking-widest truncate leading-none ${barColor.text}`}>
                                               {cleanTitle}
                                             </span>
                                         </div>
                                         {barWidth > 180 && (
-                                            <span className="text-[8px] font-bold opacity-40 text-white truncate leading-none mt-1 uppercase tracking-tighter">
+                                            <span className={`text-[8px] font-black opacity-60 truncate leading-none mt-1.5 uppercase tracking-tighter ${barColor.text}`}>
                                                 {format(start, 'MMM d')} — {format(end, 'MMM d')}
                                             </span>
                                         )}

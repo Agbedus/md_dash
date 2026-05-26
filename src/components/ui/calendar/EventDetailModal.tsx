@@ -208,42 +208,45 @@ export default function EventDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm p-0 md:p-6"
+      className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-6"
       role="dialog"
       aria-modal="true"
-      onClick={handleBackdropClick}
     >
-      <div className="w-full md:max-w-3xl bg-background/80 backdrop-blur-md border border-card-border rounded-t-2xl md:rounded-2xl -[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col max-h-[90vh]">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-md transition-opacity"
+        onClick={onClose}
+      />
+
+      <div className="relative w-full md:max-w-3xl bg-background border border-card-border rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex-none px-5 py-3 border-b border-card-border flex items-center justify-between bg-foreground/[0.05]">
-          <div className="text-foreground font-bold tracking-tight truncate pr-4 text-sm">
-            {isEditing ? "Edit Event" : event.title.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim()}
+        <div className="flex-none px-8 py-5 border-b border-card-border flex items-center justify-between bg-foreground/[0.03]">
+          <div className="text-foreground font-black tracking-tightest truncate pr-4 text-lg uppercase italic">
+            {isEditing ? "Refine Objective" : event.title.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim()}
           </div>
-          <Tooltip content="Close">
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-lg hover:bg-foreground/[0.05] text-(--text-muted) hover:text-foreground transition-colors"
-            >
-              <FiX className="h-4 w-4" />
-            </button>
-          </Tooltip>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-xl hover:bg-foreground/[0.05] text-text-secondary hover:text-foreground transition-all border border-transparent hover:border-card-border"
+          >
+            <FiX className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
           
           {/* View Mode */}
           {!isEditing && (
-            <div className="space-y-6">
-              <div className="flex flex-col gap-4">
+            <div className="space-y-8">
+              <div className="flex flex-col gap-6">
                  {/* Timing */}
-                 <div className="flex items-start gap-3">
-                    <div className="mt-0.5 h-7 w-7 rounded-full bg-foreground/[0.05] border border-card-border flex items-center justify-center text-purple-400 shrink-0">
-                      <FiCalendar className="h-3.5 w-3.5" />
+                 <div className="flex items-start gap-4">
+                    <div className="mt-1 h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 shadow-sm">
+                      <FiCalendar className="h-5 w-5" />
                     </div>
-                    <div>
-                        <div className="text-sm font-medium text-foreground">
+                    <div className="space-y-1">
+                        <div className="text-lg font-black text-foreground uppercase tracking-tightest italic">
                             {event.allDay ? (
                                 <span>{format(new Date(event.start), "EEEE, MMMM d, yyyy")}</span>
                             ) : (
@@ -252,11 +255,11 @@ export default function EventDetailModal({
                                 </span>
                             )}
                         </div>
-                        <div className="text-xs text-text-secondary mt-0.5 flex items-center gap-2">
-                            {event.allDay ? "All Day" : "Formatted Time"}
+                        <div className="text-[10px] text-text-muted font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                            {event.allDay ? "Full Duration Active" : "Precision Timing Active"}
                             {event.recurrence && event.recurrence !== 'none' && (
-                                <span className="text-purple-400 font-semibold uppercase tracking-wider text-[11px] bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20">
-                                    Repeats: {event.recurrence}
+                                <span className="text-purple-600 dark:text-purple-400 font-black uppercase tracking-[0.2em] bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20">
+                                    Protocol: {event.recurrence}
                                 </span>
                             )}
                         </div>
@@ -265,32 +268,32 @@ export default function EventDetailModal({
 
                   {/* Time Off Specific Details */}
                   {event.isTimeOff && (
-                    <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
-                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                            <FiCoffee className="w-3 h-3 text-amber-400" /> Type
+                    <div className="space-y-6 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl">
+                          <div className="text-[10px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
+                            <FiCoffee className="w-3.5 h-3.5" /> Exemption Type
                           </div>
-                          <div className="text-sm font-bold text-foreground uppercase tracking-tight">
+                          <div className="text-sm font-black text-foreground uppercase tracking-widest">
                             {event.timeOffType || 'Vacation'}
                           </div>
                         </div>
-                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
-                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                            {event.timeOffStatus === 'approved' ? <FiCheckCircle className="w-3 h-3 text-emerald-400" /> : <FiClock className="w-3 h-3 text-amber-400" />} Status
+                        <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl">
+                          <div className="text-[10px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
+                            {event.timeOffStatus === 'approved' ? <FiCheckCircle className="w-3.5 h-3.5 text-emerald-500" /> : <FiClock className="w-3.5 h-3.5 text-amber-500" />} Operational Status
                           </div>
-                          <div className={`text-sm font-bold uppercase tracking-tight ${event.timeOffStatus === 'approved' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                          <div className={`text-sm font-black uppercase tracking-widest ${event.timeOffStatus === 'approved' ? 'text-emerald-600 dark:text-emerald-500' : 'text-amber-600 dark:text-amber-400'}`}>
                             {event.timeOffStatus || 'Pending'}
                           </div>
                         </div>
                       </div>
                       
                       {event.timeOffJustification && (
-                        <div className="p-4 bg-foreground/[0.05] border border-card-border rounded-xl">
-                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                            <FiEdit2 className="w-3 h-3" /> Justification
+                        <div className="p-6 bg-foreground/[0.03] border border-card-border rounded-2xl">
+                          <div className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
+                            <FiEdit2 className="w-3.5 h-3.5" /> Operational Justification
                           </div>
-                          <div className="text-sm text-foreground leading-relaxed italic">
+                          <div className="text-sm text-foreground leading-relaxed italic font-bold">
                             &ldquo;{event.timeOffJustification}&rdquo;
                           </div>
                         </div>
@@ -300,32 +303,32 @@ export default function EventDetailModal({
 
                   {/* Project Specific Details */}
                   {event.isProject && (
-                    <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
-                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                            <FiTrello className="w-3 h-3 text-indigo-400" /> Key / Client
+                    <div className="space-y-6 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl">
+                          <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
+                            <FiTrello className="w-3.5 h-3.5" /> Mission Key / Client
                           </div>
-                          <div className="text-sm font-bold text-foreground">
+                          <div className="text-sm font-black text-foreground uppercase tracking-widest">
                             {event.projectKey || 'N/A'} {event.projectClient ? `• ${event.projectClient}` : ''}
                           </div>
                         </div>
-                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
-                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                            <FiFlag className="w-3 h-3 text-rose-400" /> Priority
+                        <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl">
+                          <div className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
+                            <FiFlag className="w-3.5 h-3.5 text-rose-500" /> Strategic Priority
                           </div>
-                          <div className="text-sm font-bold text-foreground uppercase tracking-tight">
+                          <div className="text-sm font-black text-foreground uppercase tracking-widest">
                             {event.projectPriority || 'Medium'}
                           </div>
                         </div>
                       </div>
 
                       {event.projectBudget && (
-                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl flex items-center justify-between">
-                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest flex items-center gap-1.5">
-                            <FiDollarSign className="w-3 h-3 text-emerald-400" /> Project Budget
+                        <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-center justify-between">
+                          <div className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] flex items-center gap-1.5">
+                            <FiDollarSign className="w-3.5 h-3.5" /> Allocated Capital
                           </div>
-                          <div className="text-sm font-black text-emerald-400 tracking-tighter">
+                          <div className="text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-tighter tabular-nums">
                             ${event.projectBudget.toLocaleString()}
                           </div>
                         </div>
@@ -335,38 +338,38 @@ export default function EventDetailModal({
 
                   {/* Task Specific Details */}
                   {event.isTask && (
-                    <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
-                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                            <FiCheckCircle className="w-3 h-3 text-indigo-400" /> Status
+                    <div className="space-y-6 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="p-4 bg-sky-500/5 border border-sky-500/10 rounded-2xl">
+                          <div className="text-[10px] font-black text-sky-600 dark:text-sky-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
+                            <FiCheckCircle className="w-3.5 h-3.5 text-indigo-500" /> Operational State
                           </div>
-                          <div className="text-sm font-bold text-foreground uppercase tracking-tight">
+                          <div className="text-sm font-black text-foreground uppercase tracking-widest">
                             {event.taskStatus || 'Todo'}
                           </div>
                         </div>
-                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
-                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                            <FiFlag className="w-3 h-3 text-rose-400" /> Priority
+                        <div className="p-4 bg-sky-500/5 border border-sky-500/10 rounded-2xl">
+                          <div className="text-[10px] font-black text-sky-600 dark:text-sky-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-1.5">
+                            <FiFlag className="w-3.5 h-3.5 text-rose-500" /> Strategic Priority
                           </div>
-                          <div className="text-sm font-bold text-foreground uppercase tracking-tight">
+                          <div className="text-sm font-black text-foreground uppercase tracking-widest">
                             {event.taskPriority || 'Medium'}
                           </div>
                         </div>
                       </div>
 
                       {event.taskAssignees && event.taskAssignees.length > 0 && (
-                        <div className="p-3 bg-foreground/[0.05] border border-card-border rounded-xl">
-                          <div className="text-[10px] font-bold text-text-secondary uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                            <FiUsers className="w-3 h-3" /> Assignees
+                        <div className="p-5 bg-foreground/[0.03] border border-card-border rounded-2xl">
+                          <div className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-4 flex items-center gap-1.5">
+                            <FiUsers className="w-3.5 h-3.5" /> Assigned Personnel
                           </div>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-3">
                              {event.taskAssignees.map((u, i) => (
-                               <div key={i} className="flex items-center gap-2 px-2 py-1 bg-foreground/[0.05] rounded-lg border border-card-border">
-                                 <div className="h-4 w-4 bg-indigo-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white uppercase">
+                               <div key={i} className="flex items-center gap-2.5 px-3 py-1.5 bg-background rounded-xl border border-card-border shadow-sm">
+                                 <div className="h-5 w-5 bg-indigo-500 rounded-full flex items-center justify-center text-[10px] font-black text-white uppercase">
                                    {u.fullName?.charAt(0) || u.email?.charAt(0)}
                                  </div>
-                                 <span className="text-[10px] text-foreground font-medium">{u.fullName || u.email}</span>
+                                 <span className="text-[11px] text-foreground font-bold uppercase tracking-tight">{u.fullName || u.email}</span>
                                </div>
                              ))}
                           </div>
@@ -379,78 +382,72 @@ export default function EventDetailModal({
                     <>
                       {/* Location */}
                       {event.location && (
-                          <div className="flex items-start gap-3">
-                              <div className="mt-0.5 h-7 w-7 rounded-full bg-foreground/[0.05] border border-card-border flex items-center justify-center text-purple-400 shrink-0">
-                                <FiMapPin className="h-3.5 w-3.5" />
+                          <div className="flex items-start gap-4">
+                              <div className="mt-1 h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 shadow-sm">
+                                <FiMapPin className="h-5 w-5" />
                               </div>
-                              <div>
-                                  <div className="text-sm text-foreground">{event.location}</div>
-                                  <div className="text-xs text-text-secondary mt-0.5">Location</div>
+                              <div className="space-y-1">
+                                  <div className="text-lg font-black text-foreground uppercase tracking-tight">{event.location}</div>
+                                  <div className="text-[10px] text-text-muted font-black uppercase tracking-[0.2em]">Operational Coordinates</div>
                               </div>
                           </div>
                       )}
 
                       {/* Attendees */}
                       {event.attendees && event.attendees.length > 0 && (
-                          <div className="flex items-start gap-3">
-                              <div className="mt-0.5 h-7 w-7 rounded-full bg-foreground/[0.05] border border-card-border flex items-center justify-center text-purple-400 shrink-0">
-                                <FiUsers className="h-3.5 w-3.5" />
+                          <div className="flex items-start gap-4">
+                              <div className="mt-1 h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 shadow-sm">
+                                <FiUsers className="h-5 w-5" />
                               </div>
-                              <div>
+                              <div className="space-y-3 flex-1 min-w-0">
                                   <div className="flex flex-wrap gap-2">
                                       {event.attendees.map((email, idx) => (
-                                          <span key={idx} className="px-2 py-1 text-xs bg-foreground/[0.05] text-foreground rounded-md border border-card-border">
+                                          <span key={idx} className="px-3 py-1 text-[11px] font-bold bg-foreground/[0.03] text-foreground rounded-lg border border-card-border uppercase tracking-tight">
                                               {email.trim()}
                                           </span>
                                       ))}
                                   </div>
-                                  <div className="text-xs text-text-secondary mt-1">Attendees</div>
+                                  <div className="text-[10px] text-text-muted font-black uppercase tracking-[0.2em]">Assigned Personnel</div>
                               </div>
                           </div>
                       )}
 
                       {/* Description */}
                       {event.description && (
-                          <div className="bg-foreground/[0.05] rounded-xl border border-card-border p-4 mt-2">
-                              <div className="text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-2 flex items-center gap-2">
-                                  <FiEdit2 className="h-3 w-3" /> Description
+                          <div className="bg-foreground/[0.02] rounded-[2rem] border border-card-border p-6 mt-4">
+                              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted mb-3 flex items-center gap-2">
+                                  <FiEdit2 className="h-3.5 w-3.5" /> Tactical Briefing
                               </div>
-                              <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-                                  {event.description}
+                              <div className="text-sm text-foreground font-bold whitespace-pre-wrap leading-relaxed italic opacity-80 uppercase tracking-tight">
+                                  &ldquo;{event.description}&rdquo;
                               </div>
                           </div>
                       )}
                       
                       {/* Metadata Badge Row */}
-                      <div className="flex flex-wrap gap-3 mt-4 border-t border-card-border pt-4">
-                          <Tooltip content="Event Status" position="bottom">
-                              <div className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide border inline-flex items-center gap-1.5 cursor-help ${
-                                  event.status === 'confirmed' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
-                                  event.status === 'cancelled' ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' :
-                                  'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                              }`}>
-                                  <div className={`h-1.5 w-1.5 rounded-full ${
-                                      event.status === 'confirmed' ? 'bg-emerald-400' :
-                                      event.status === 'cancelled' ? 'bg-rose-400' :
-                                      'bg-amber-400'
-                                  }`} />
-                                  {event.status || 'Tentative'}
-                              </div>
-                          </Tooltip>
+                      <div className="flex flex-wrap gap-3 mt-6 border-t border-card-border pt-8">
+                          <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border inline-flex items-center gap-2 shadow-sm ${
+                              event.status === 'confirmed' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' :
+                              event.status === 'cancelled' ? 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400' :
+                              'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                          }`}>
+                              <div className={`h-2 w-2 rounded-full ${
+                                  event.status === 'confirmed' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
+                                  event.status === 'cancelled' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]' :
+                                  'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'
+                              }`} />
+                              {event.status || 'Tentative'}
+                          </div>
                           
-                          <Tooltip content="Visibility" position="bottom">
-                              <div className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-background/50 border border-card-border text-(--text-muted) inline-flex items-center gap-1.5 cursor-help">
-                                  {event.privacy === 'private' ? <FiLock className="h-2.5 w-2.5" /> : <FiGlobe className="h-2.5 w-2.5" />}
-                                  {event.privacy || 'Public'}
-                              </div>
-                          </Tooltip>
+                          <div className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-foreground/[0.03] border border-card-border text-text-secondary inline-flex items-center gap-2 shadow-sm">
+                              {event.privacy === 'private' ? <FiLock className="h-3.5 w-3.5" /> : <FiGlobe className="h-3.5 w-3.5" />}
+                              Security: {event.privacy || 'Public'}
+                          </div>
 
-                          <Tooltip content="Color Code" position="bottom">
-                              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-background/50 border border-card-border text-(--text-muted) cursor-help">
-                                  <div className="h-2 w-2 rounded-full ring-1 ring-white/20" style={{backgroundColor: event.color || '#6366f1'}} />
-                                  <span className="opacity-70">Color</span>
-                              </div>
-                          </Tooltip>
+                          <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-foreground/[0.03] border border-card-border text-text-secondary shadow-sm">
+                              <div className="h-2.5 w-2.5 rounded-full ring-2 ring-background shadow-sm" style={{backgroundColor: event.color || '#6366f1'}} />
+                              Chromatic
+                          </div>
                       </div>
                     </>
                   )}
@@ -460,34 +457,34 @@ export default function EventDetailModal({
 
           {/* Edit Mode Form */}
           {isEditing && (
-            <form id="edit-event-form" onSubmit={handleUpdate} className="space-y-4">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Title</label>
+            <form id="edit-event-form" onSubmit={handleUpdate} className="space-y-8 animate-in fade-in zoom-in-95 duration-300">
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Mission Identifier</label>
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all font-medium"
-                    placeholder="Event title"
+                    className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-purple-500/30 transition-all font-bold"
+                    placeholder="Operational designation..."
                     required
                   />
                 </div>
                 
                 <div className="flex items-center gap-4 py-1">
-                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-foreground/[0.05] border border-card-border hover:border-card-border transition-colors">
+                   <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-foreground/[0.03] border border-card-border hover:bg-foreground/[0.05] transition-all cursor-pointer group">
                       <input 
                         type="checkbox" 
                         id="edit-allday" 
                         checked={allDay} 
                         onChange={(e) => setAllDay(e.target.checked)}
-                        className="rounded border-card-border bg-background/50 text-purple-500 focus:ring-purple-500/50 focus:ring-offset-0 h-3.5 w-3.5"
+                        className="rounded-md border-card-border bg-background text-purple-600 focus:ring-purple-500/30 focus:ring-offset-0 h-4 w-4 transition-all"
                       />
-                      <label htmlFor="edit-allday" className="text-xs font-medium text-foreground cursor-pointer select-none">All day event</label>
+                      <label htmlFor="edit-allday" className="text-[10px] font-black text-text-muted group-hover:text-foreground uppercase tracking-widest cursor-pointer select-none transition-colors">Temporal Mode: Full Duration</label>
                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Start</label>
+                <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Commencement</label>
                         <CustomDatePicker
                             value={start}
                             onChange={(date) => {
@@ -499,8 +496,8 @@ export default function EventDetailModal({
                             className="w-full"
                         />
                     </div>
-                    <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">End</label>
+                    <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Termination</label>
                         <CustomDatePicker
                             value={end}
                             onChange={(date) => {
@@ -515,88 +512,89 @@ export default function EventDetailModal({
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Location</label>
+                <div className="space-y-2">
+                    <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Operational Coordinates</label>
                     <input
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
+                        className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-purple-500/30 transition-all font-bold"
+                        placeholder="Deployment zone..."
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Organizer</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Mission Lead</label>
                         <input
                             value={organizer}
                             onChange={(e) => setOrganizer(e.target.value)}
-                            className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
+                            className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-purple-500/30 transition-all font-bold"
                             placeholder="Host name"
                         />
                     </div>
-                    <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Attendees</label>
+                    <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Assigned Personnel</label>
                         <input
                             value={attendees}
                             onChange={(e) => setAttendees(e.target.value)}
-                            className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all"
-                            placeholder="Emails, comma separated"
+                            className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-purple-500/30 transition-all font-bold"
+                            placeholder="Authorized IDs..."
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                     <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Status</label>
+                <div className="grid grid-cols-2 gap-6">
+                     <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Operational Status</label>
                         <select 
                             value={status} 
                             onChange={(e) => setStatus(e.target.value as any)}
-                            className="w-full bg-background/50 border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                            className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground focus:outline-none focus:border-purple-500/30 font-bold appearance-none cursor-pointer"
                         >
-                            <option value="tentative">Tentative</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="tentative" className="bg-background">Tentative</option>
+                            <option value="confirmed" className="bg-background">Confirmed</option>
+                            <option value="cancelled" className="bg-background">Aborted</option>
                         </select>
                      </div>
-                     <div>
-                        <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Recurrence</label>
+                     <div className="space-y-2">
+                        <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Recurrence Protocol</label>
                         <select 
                             value={recurrence} 
                             onChange={(e) => setRecurrence(e.target.value as any)}
-                            className="w-full bg-background/50 border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                            className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground focus:outline-none focus:border-purple-500/30 font-bold appearance-none cursor-pointer"
                         >
-                            <option value="none">None</option>
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
+                            <option value="none" className="bg-background">Static</option>
+                            <option value="daily" className="bg-background">Daily</option>
+                            <option value="weekly" className="bg-background">Weekly</option>
+                            <option value="monthly" className="bg-background">Monthly</option>
+                            <option value="yearly" className="bg-background">Annual</option>
                         </select>
                      </div>
                 </div>
                 
-                 <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Privacy</label>
+                 <div className="space-y-2">
+                    <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Security Classification</label>
                     <select 
                         value={privacy} 
                         onChange={(e) => setPrivacy(e.target.value as any)}
-                        className="w-full bg-background/50 border border-card-border rounded-lg px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+                        className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground focus:outline-none focus:border-purple-500/30 font-bold appearance-none cursor-pointer"
                     >
-                        <option value="public">Public</option>
-                        <option value="private">Private</option>
-                        <option value="confidential">Confidential</option>
+                        <option value="public" className="bg-background">Public</option>
+                        <option value="private" className="bg-background">Private</option>
+                        <option value="confidential" className="bg-background">Restricted</option>
                     </select>
                  </div>
 
-                <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Color</label>
-                    <div className="flex flex-wrap gap-2 p-2 bg-foreground/[0.05] rounded-lg border border-card-border">
+                <div className="space-y-3">
+                    <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Chromatic Designation</label>
+                    <div className="flex flex-wrap gap-3 p-4 bg-foreground/[0.03] rounded-2xl border border-card-border">
                         {(["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"] as const).map((c) => (
                         <button
                             type="button"
                             key={c}
                             onClick={() => setColor(c)}
-                            className={`h-5 w-5 rounded-full border-2 transition-all duration-300 ${
-                            color === c ? "border-white scale-125" : "border-transparent opacity-60 hover:opacity-100 hover:scale-110"
+                            className={`h-6 w-6 rounded-full border-2 transition-all duration-500 ${
+                            color === c ? "border-foreground scale-110 shadow-lg" : "border-transparent opacity-40 hover:opacity-100 hover:scale-110"
                             }`}
                             style={{ backgroundColor: c }}
                         />
@@ -604,61 +602,59 @@ export default function EventDetailModal({
                     </div>
                 </div>
 
-                <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1 ml-1">Description</label>
+                <div className="space-y-2">
+                    <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Tactical Briefing</label>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full bg-foreground/[0.05] border border-card-border rounded-lg px-3 py-2 text-xs text-foreground placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all custom-scrollbar min-h-[80px] resize-none"
+                        className="w-full bg-foreground/[0.03] border border-card-border rounded-2xl px-5 py-3 text-sm text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-purple-500/30 transition-all font-bold resize-none custom-scrollbar min-h-[100px]"
+                        placeholder="Add mission context..."
                     />
                 </div>
 
-                <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-text-secondary mb-1.5 ml-1 flex items-center gap-1.5">
-                        <FiBell className="text-purple-400" /> Reminders
+                <div className="space-y-4">
+                    <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1 flex items-center gap-2">
+                        <FiBell className="text-purple-500" /> Proactive Notifications
                     </label>
-                    <div className="flex flex-wrap gap-1.5 mb-2">
+                    <div className="flex flex-wrap gap-2 mb-2">
                         {reminders.map((r, idx) => (
-                        <span key={idx} className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-semibold rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-200">
-                            {r.days > 0 && `${r.days}d `}
-                            {r.hours > 0 && `${r.hours}h `}
-                            {r.minutes > 0 && `${r.minutes}m `}
-                            pre
-                            <button type="button" onClick={() => setReminders((prev) => prev.filter((_, i) => i !== idx))} className="hover:text-white transition-colors">
-                             <FiX className="h-2.5 w-2.5" />
+                        <span key={idx} className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400 shadow-sm">
+                            {r.days > 0 && `${r.days}D `}
+                            {r.hours > 0 && `${r.hours}H `}
+                            {r.minutes > 0 && `${r.minutes}M `}
+                            Lead Time
+                            <button type="button" onClick={() => setReminders((prev) => prev.filter((_, i) => i !== idx))} className="ml-1 p-0.5 hover:bg-purple-500/20 rounded-full transition-all">
+                             <FiX className="h-3 w-3" />
                             </button>
                         </span>
                         ))}
                     </div>
                     
-                    <div className="flex flex-wrap items-end gap-2 p-2 bg-foreground/[0.05] border border-card-border rounded-lg">
-                        <div className="flex-1 min-w-[50px]">
-                        <label className="block text-[11px] uppercase font-bold tracking-wider text-text-secondary mb-1 ml-0.5">Days</label>
+                    <div className="flex flex-wrap items-end gap-3 p-5 bg-foreground/[0.03] border border-card-border rounded-2xl shadow-sm">
+                        <div className="flex-1 min-w-[60px]">
+                        <label className="block text-[9px] uppercase font-black tracking-[0.2em] text-text-muted mb-2 ml-1">Days</label>
                         <CustomNumberInput
                             value={rDays}
                             onChange={(val) => setRDays(Number(val) || 0)}
                             min={0}
-                            className="bg-background/50"
                         />
                         </div>
-                        <div className="flex-1 min-w-[50px]">
-                        <label className="block text-[11px] uppercase font-bold tracking-wider text-text-secondary mb-1 ml-0.5">Hrs</label>
+                        <div className="flex-1 min-w-[60px]">
+                        <label className="block text-[9px] uppercase font-black tracking-[0.2em] text-text-muted mb-2 ml-1">Hrs</label>
                         <CustomNumberInput
                             value={rHours}
                             onChange={(val) => setRHours(Number(val) || 0)}
                             min={0}
                             max={23}
-                            className="bg-background/50"
                         />
                         </div>
-                        <div className="flex-1 min-w-[50px]">
-                        <label className="block text-[11px] uppercase font-bold tracking-wider text-text-secondary mb-1 ml-0.5">Mins</label>
+                        <div className="flex-1 min-w-[60px]">
+                        <label className="block text-[9px] uppercase font-black tracking-[0.2em] text-text-muted mb-2 ml-1">Mins</label>
                         <CustomNumberInput
                             value={rMinutes}
                             onChange={(val) => setRMinutes(Number(val) || 0)}
                             min={0}
                             max={59}
-                            className="bg-background/50"
                         />
                         </div>
                         <button
@@ -668,9 +664,9 @@ export default function EventDetailModal({
                             setReminders((prev) => [...prev, { days: rDays, hours: rHours, minutes: rMinutes }]);
                             setRDays(0); setRHours(0); setRMinutes(0);
                         }}
-                        className="h-6 px-3 inline-flex items-center gap-1 text-[11px] font-bold rounded bg-foreground/[0.05] text-foreground border border-card-border hover:bg-foreground/[0.1] transition-all active:scale-95"
+                        className="h-11 px-5 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl bg-foreground/10 text-foreground border border-card-border hover:bg-foreground/[0.15] transition-all active:scale-95 shadow-sm"
                         >
-                        <FiPlus className="h-3 w-3" /> Add
+                        <FiPlus className="h-4 w-4" /> Add Alert
                         </button>
                     </div>
                 </div>
@@ -680,73 +676,67 @@ export default function EventDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex-none p-3 border-t border-card-border bg-foreground/[0.05] flex items-center justify-between">
+        <div className="flex-none p-6 border-t border-card-border bg-foreground/[0.03] flex items-center justify-between">
             {isEditing ? (
                 <>
-                    <Tooltip content="Delete Event">
+                    <button
+                        type="button"
+                        onClick={handleDelete}
+                        className="px-4 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest hover:bg-rose-500/20 transition-all flex items-center gap-2 shadow-sm"
+                    >
+                        <FiTrash2 className="h-4 w-4" />
+                        Terminate
+                    </button>
+                    
+                    <div className="flex items-center gap-3">
                         <button
                             type="button"
-                            onClick={handleDelete}
-                            className="group h-8 w-8 flex items-center justify-center rounded-lg bg-foreground/[0.05] border border-card-border hover:bg-rose-500/10 hover:border-rose-500/20 text-(--text-muted) hover:text-rose-400 transition-all"
+                            onClick={() => setIsEditing(false)}
+                            className="px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-text-secondary hover:text-foreground bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border transition-all"
                         >
-                            <FiTrash2 className="h-3.5 w-3.5" />
+                            Abort
                         </button>
-                    </Tooltip>
-                    
-                    <div className="flex items-center gap-2">
-                        <Tooltip content="Cancel Editing">
-                            <button
-                                type="button"
-                                onClick={() => setIsEditing(false)}
-                                className="group h-8 w-8 flex items-center justify-center rounded-lg bg-foreground/[0.05] border border-card-border hover:bg-foreground/[0.1] hover:border-card-border text-(--text-muted) hover:text-foreground transition-all"
-                            >
-                                <FiX className="h-3.5 w-3.5" />
-                            </button>
-                        </Tooltip>
                         
-                        <Tooltip content="Save Changes">
-                            <button
-                                type="submit"
-                                form="edit-event-form"
-                                disabled={submitting}
-                                className="group h-8 w-8 flex items-center justify-center rounded-lg bg-purple-600 text-white hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
-                            >
-                                <FiCheck className="h-3.5 w-3.5" />
-                            </button>
-                        </Tooltip>
+                        <button
+                            type="submit"
+                            form="edit-event-form"
+                            disabled={submitting}
+                            className="px-8 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-white bg-purple-600 hover:bg-purple-500 transition-all shadow-lg shadow-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            {submitting ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <FiCheck className="h-4 w-4" />}
+                            Execute Sync
+                        </button>
                     </div>
                 </>
             ) : (
                 <>
-                    <Tooltip content="Delete Event">
-                        <button
-                            type="button"
-                            onClick={handleDelete}
-                            disabled={event.isProject || event.isTask || event.isTimeOff}
-                            className={`group h-8 w-8 flex items-center justify-center rounded-lg bg-foreground/[0.05] border border-card-border transition-all ${
-                                (event.isProject || event.isTask || event.isTimeOff) 
-                                ? 'opacity-20 cursor-not-allowed grayscale' 
-                                : 'hover:bg-rose-500/10 hover:border-rose-500/20 text-(--text-muted) hover:text-rose-400'
-                            }`}
-                        >
-                            <FiTrash2 className="h-3.5 w-3.5" />
-                        </button>
-                    </Tooltip>
+                    <button
+                        type="button"
+                        onClick={handleDelete}
+                        disabled={event.isProject || event.isTask || event.isTimeOff}
+                        className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border flex items-center gap-2 transition-all shadow-sm ${
+                            (event.isProject || event.isTask || event.isTimeOff) 
+                            ? 'opacity-20 bg-foreground/[0.03] border-card-border text-text-muted cursor-not-allowed grayscale' 
+                            : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20'
+                        }`}
+                    >
+                        <FiTrash2 className="h-4 w-4" />
+                        Terminate
+                    </button>
                     
-                    <Tooltip content={(event.isProject || event.isTask || event.isTimeOff) ? "Editing disabled for this item" : "Edit Event"}>
-                        <button
-                            type="button"
-                            onClick={() => setIsEditing(true)}
-                            disabled={event.isProject || event.isTask || event.isTimeOff}
-                            className={`group h-8 w-8 flex items-center justify-center rounded-lg border transition-all ${
-                                (event.isProject || event.isTask || event.isTimeOff)
-                                ? 'bg-foreground/[0.02] border-card-border text-text-secondary cursor-not-allowed'
-                                : 'bg-foreground/[0.06] hover:bg-foreground/[0.1] text-foreground border-card-border'
-                            }`}
-                        >
-                            <FiEdit2 className="h-3.5 w-3.5" />
-                        </button>
-                    </Tooltip>
+                    <button
+                        type="button"
+                        onClick={() => setIsEditing(true)}
+                        disabled={event.isProject || event.isTask || event.isTimeOff}
+                        className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest border transition-all flex items-center gap-2 shadow-sm ${
+                            (event.isProject || event.isTask || event.isTimeOff)
+                            ? 'bg-foreground/[0.02] border-card-border text-text-muted cursor-not-allowed'
+                            : 'bg-indigo-600 border-indigo-500 text-white hover:bg-indigo-500 shadow-indigo-500/20'
+                        }`}
+                    >
+                        <FiEdit2 className="h-4 w-4" />
+                        { (event.isProject || event.isTask || event.isTimeOff) ? "Locked Record" : "Refine Mission" }
+                    </button>
                 </>
             )}
         </div>

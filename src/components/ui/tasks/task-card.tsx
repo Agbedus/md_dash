@@ -302,27 +302,27 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
               />
             </td>
           )}
-          <td className="px-4 py-2 text-xs text-zinc-400 whitespace-nowrap bg-zinc-900/50">
+          <td className="px-4 py-2 text-xs text-text-secondary whitespace-nowrap bg-foreground/[0.03]">
             <select
               form={`update-${task.id}`}
               name="status"
               defaultValue={task.status}
               disabled={isUpdating}
-              className="w-full bg-white/[0.06] border border-white/5 rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-white text-xs appearance-none cursor-pointer transition-all disabled:opacity-50"
+              className="w-full bg-foreground/[0.03] border border-card-border rounded-xl focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 px-3 py-1.5 text-foreground text-xs appearance-none cursor-pointer transition-all disabled:opacity-50 font-bold"
             >
-              <option value="TODO" className="bg-zinc-900">To Do</option>
-              <option value="IN_PROGRESS" className="bg-zinc-900">In Progress</option>
-              <option value="QA" className="bg-zinc-900">QA</option>
-              <option value="REVIEW" className="bg-zinc-900">Review</option>
-              <option value="DONE" className="bg-zinc-900">Done</option>
+              <option value="TODO" className="bg-card">To Do</option>
+              <option value="IN_PROGRESS" className="bg-card">In Progress</option>
+              <option value="QA" className="bg-card">QA</option>
+              <option value="REVIEW" className="bg-card">Review</option>
+              <option value="DONE" className="bg-card">Done</option>
             </select>
           </td>
           {/* Time Logged placeholder in edit mode */}
-          <td className="px-4 py-2 text-xs text-zinc-500 whitespace-nowrap">
+          <td className="px-4 py-2 text-xs text-text-muted whitespace-nowrap">
             {totalHours > 0 ? (
               <div className="flex items-center gap-1.5">
-                <FiClock className="w-3 h-3 text-zinc-600" />
-                <span className="font-medium text-zinc-400 tabular-nums">{totalHours.toFixed(1)}h</span>
+                <FiClock className="w-3 h-3 text-text-muted" />
+                <span className="font-bold text-text-secondary tabular-nums">{totalHours.toFixed(1)}h</span>
               </div>
             ) : <span>-</span>}
           </td>

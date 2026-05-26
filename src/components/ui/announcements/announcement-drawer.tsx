@@ -79,7 +79,8 @@ export const AnnouncementDrawer = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
+            onClick={() => setIsDrawerOpen(false)}
+            className="fixed inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-md z-[60]"
           />
 
           {/* Drawer */}
@@ -92,17 +93,17 @@ export const AnnouncementDrawer = () => {
             className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-background border-l border-card-border z-[70]  flex flex-col"
           >
             {/* Header */}
-            <div className="p-6 border-b border-card-border flex justify-between items-center bg-card/50 backdrop-blur-md">
+            <div className="p-6 border-b border-card-border flex justify-between items-center bg-background/80 backdrop-blur-md">
               <div>
                 <h2 className="text-xl font-bold text-foreground flex items-center gap-3 italic tracking-tight">
                   <HiSpeakerphone className="text-[var(--pastel-yellow)]" />
                   Announcements
                 </h2>
-                <p className="text-[10px] text-text-muted mt-1 font-bold uppercase tracking-[0.2em]">System-Wide Broadcasts</p>
+                <p className="text-[10px] text-text-muted mt-1 font-black uppercase tracking-[0.2em]">System-Wide Broadcasts</p>
               </div>
               <button 
                 onClick={() => setIsDrawerOpen(false)}
-                className="p-2.5 hover:bg-foreground/5 rounded-xl text-text-muted hover:text-foreground transition-all border border-transparent hover:border-card-border"
+                className="p-2.5 hover:bg-foreground/5 rounded-xl text-text-secondary hover:text-foreground transition-all border border-transparent hover:border-card-border"
               >
                 <FiX size={18} />
               </button>
@@ -150,12 +151,12 @@ export const AnnouncementDrawer = () => {
                         )}
                       </div>
                       
-                      <p className="text-sm text-text-muted font-medium line-clamp-4 leading-relaxed">
+                      <p className="text-sm text-text-secondary font-bold line-clamp-4 leading-relaxed">
                         {announcement.content}
                       </p>
 
                       <div className="pt-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[10px] text-text-muted font-bold uppercase tracking-widest">
+                        <div className="flex items-center gap-2 text-[10px] text-text-muted font-black uppercase tracking-widest">
                           <FiClock size={12} className="text-text-muted" />
                           <span>
                             {(() => {
@@ -169,7 +170,7 @@ export const AnnouncementDrawer = () => {
                           </span>
                         </div>
 
-                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-bold uppercase tracking-[0.15em] ${getTypeStyles(announcement.type || 'info')}`}>
+                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-[0.15em] ${getTypeStyles(announcement.type || 'info')}`}>
                            {getTypeIcon(announcement.type || 'info')}
                            <span>{announcement.type || 'info'}</span>
                         </div>
@@ -187,7 +188,7 @@ export const AnnouncementDrawer = () => {
             </div>
 
             {/* Footer */}
-            <div className="p-5 border-t border-card-border bg-card/80 backdrop-blur-md flex items-center justify-between">
+            <div className="p-5 border-t border-card-border bg-background/80 backdrop-blur-md flex items-center justify-between">
               {/* Minimal Add Button (Style from task table) */}
               <button
                 onClick={() => setIsAdminFormOpen(true)}
@@ -197,19 +198,19 @@ export const AnnouncementDrawer = () => {
                 <div className="p-1.5 rounded-lg bg-foreground/[0.03] group-hover:bg-foreground/[0.06] transition-colors border border-card-border">
                   <FiPlus className="w-3.5 h-3.5 text-[var(--pastel-yellow)]" />
                 </div>
-                <span className="font-bold uppercase tracking-[0.2em] text-[9px]">New Broadcast</span>
+                <span className="font-black uppercase tracking-[0.2em] text-[9px]">New Broadcast</span>
               </button>
 
               {/* Info Tooltip */}
               <div className="relative group">
-                <button className="p-3 text-text-muted hover:text-foreground transition-colors bg-foreground/[0.03] rounded-2xl border border-card-border hover:bg-foreground/[0.06] hover:border-card-border">
+                <button className="p-3 text-text-secondary hover:text-foreground transition-colors bg-foreground/[0.03] rounded-2xl border border-card-border hover:bg-foreground/[0.06] hover:border-card-border">
                   <FiInfo size={18} />
                 </button>
-                <div className="absolute bottom-full right-0 mb-4 w-72 p-5 bg-card border border-card-border rounded-3xl  opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-[80]">
-                  <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest leading-relaxed">
+                <div className="absolute bottom-full right-0 mb-4 w-72 p-5 bg-background/95 backdrop-blur-xl border border-card-border rounded-3xl shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-[80]">
+                  <p className="text-[10px] text-text-secondary font-black uppercase tracking-widest leading-relaxed">
                     Stay updated with the latest platform news. All broadcasts are strictly for internal system purposes.
                   </p>
-                  <div className="absolute bottom-[-6px] right-5 w-3 h-3 bg-card border-r border-b border-card-border rotate-45" />
+                  <div className="absolute bottom-[-6px] right-5 w-3 h-3 bg-background border-r border-b border-card-border rotate-45" />
                 </div>
               </div>
             </div>

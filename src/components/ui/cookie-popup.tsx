@@ -70,7 +70,7 @@ export const CookiePopup = () => {
                     exit={{ y: 100, opacity: 0 }}
                     className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:w-[450px] z-[100]"
                 >
-                    <div className="glass bg-card/95 backdrop-blur-xl border border-card-border rounded-3xl p-6 -[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col gap-6">
+                    <div className="glass bg-background/80 backdrop-blur-2xl border border-card-border rounded-3xl p-6 shadow-2xl flex flex-col gap-6">
                         <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
@@ -78,12 +78,12 @@ export const CookiePopup = () => {
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Privacy Preference</h3>
-                                    <p className="text-[10px] text-text-muted font-medium uppercase tracking-tight">Compliance Shield v1.0</p>
+                                    <p className="text-[10px] text-text-muted font-bold uppercase tracking-tight">Compliance Shield v1.0</p>
                                 </div>
                             </div>
                             <button 
                                 onClick={() => setIsVisible(false)}
-                                className="p-2 hover:bg-foreground/[0.05] rounded-full text-text-muted hover:text-foreground transition-colors"
+                                className="p-2 hover:bg-foreground/[0.05] rounded-full text-text-secondary hover:text-foreground transition-colors"
                             >
                                 <FiX />
                             </button>
@@ -91,11 +91,11 @@ export const CookiePopup = () => {
 
                         {!showSettings ? (
                             <>
-                                <p className="text-xs text-text-secondary leading-relaxed">
+                                <p className="text-xs text-text-secondary leading-relaxed font-bold">
                                     We use cookies to enhance your executive oversight experience, analyze mission-critical traffic, and provide secure authentication. By clicking &quot;Accept All&quot;, you consent to our use of all cookies. 
                                     <button 
                                         onClick={() => setShowSettings(true)}
-                                        className="text-indigo-400 hover:underline ml-1 font-medium"
+                                        className="text-indigo-500 dark:text-indigo-400 hover:underline ml-1 font-black"
                                     >
                                         Customize Preferences
                                     </button>
@@ -136,16 +136,16 @@ export const CookiePopup = () => {
                                     {/* Analytics */}
                                     <div 
                                         onClick={() => togglePref('analytics')}
-                                        className="p-4 rounded-2xl bg-foreground/[0.02] border border-card-border flex items-center justify-between cursor-pointer hover:bg-foreground/[0.04] transition-colors"
+                                        className="p-4 rounded-2xl bg-foreground/[0.03] border border-card-border flex items-center justify-between cursor-pointer hover:bg-foreground/[0.06] transition-colors"
                                     >
                                         <div className="space-y-1">
                                             <span className="text-xs font-bold text-foreground uppercase tracking-wide">Performance & Intel</span>
-                                            <p className="text-[10px] text-text-muted leading-relaxed">Helps us understand operational velocity and bottleneck patterns.</p>
+                                            <p className="text-[10px] text-text-secondary font-bold leading-relaxed">Helps us understand operational velocity and bottleneck patterns.</p>
                                         </div>
                                         <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-1 ${prefs.analytics ? 'bg-emerald-500' : 'bg-card-border'}`}>
                                             <motion.div 
                                                 animate={{ x: prefs.analytics ? 16 : 0 }}
-                                                className="w-4 h-4 rounded-full bg-white " 
+                                                className="w-4 h-4 rounded-full bg-white shadow-sm" 
                                             />
                                         </div>
                                     </div>
@@ -153,16 +153,16 @@ export const CookiePopup = () => {
                                     {/* Personalization */}
                                     <div 
                                         onClick={() => togglePref('personalization')}
-                                        className="p-4 rounded-2xl bg-foreground/[0.02] border border-card-border flex items-center justify-between cursor-pointer hover:bg-foreground/[0.04] transition-colors"
+                                        className="p-4 rounded-2xl bg-foreground/[0.03] border border-card-border flex items-center justify-between cursor-pointer hover:bg-foreground/[0.06] transition-colors"
                                     >
                                         <div className="space-y-1">
                                             <span className="text-xs font-bold text-foreground uppercase tracking-wide">Personalization</span>
-                                            <p className="text-[10px] text-text-muted leading-relaxed">Remembers your preferred command-center layout and AI persona settings.</p>
+                                            <p className="text-[10px] text-text-secondary font-bold leading-relaxed">Remembers your preferred command-center layout and AI persona settings.</p>
                                         </div>
                                         <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-1 ${prefs.personalization ? 'bg-indigo-500' : 'bg-card-border'}`}>
                                             <motion.div 
                                                 animate={{ x: prefs.personalization ? 16 : 0 }}
-                                                className="w-4 h-4 rounded-full bg-white " 
+                                                className="w-4 h-4 rounded-full bg-white shadow-sm" 
                                             />
                                         </div>
                                     </div>

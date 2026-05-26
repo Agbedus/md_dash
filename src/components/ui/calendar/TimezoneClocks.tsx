@@ -105,21 +105,21 @@ export default function TimezoneClocks() {
       <div className="flex items-center gap-2 pointer-events-auto">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="bg-card border border-card-border rounded-2xl p-3 flex items-center gap-4 hover:border-card-border transition-all group backdrop-blur-xl"
+          className="bg-background border border-card-border rounded-2xl p-3 flex items-center gap-4 hover:border-card-border transition-all group backdrop-blur-xl shadow-xl shadow-foreground/[0.05]"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm">
               <FiClock className="h-4 w-4" />
             </div>
             <div className="text-left">
-              <div className="text-foreground text-lg font-black tracking-tight leading-none">
+              <div className="text-foreground text-lg font-black tracking-tightest leading-none">
                 {formatInTZ(now, 'UTC').time}
               </div>
-              <div className="text-(--text-muted) text-[10px] font-bold uppercase tracking-widest mt-1">Universal Time</div>
+              <div className="text-text-muted text-[9px] font-black uppercase tracking-[0.2em] mt-1">Universal Time</div>
             </div>
           </div>
           <div className="pl-2 border-l border-card-border">
-            {isExpanded ? <FiChevronDown className="text-(--text-muted) group-hover:text-foreground transition-colors" /> : <FiChevronUp className="text-(--text-muted) group-hover:text-foreground transition-colors" />}
+            {isExpanded ? <FiChevronDown className="text-text-muted group-hover:text-foreground transition-colors" /> : <FiChevronUp className="text-text-muted group-hover:text-foreground transition-colors" />}
           </div>
         </button>
       </div>
@@ -133,29 +133,29 @@ export default function TimezoneClocks() {
             className="flex flex-row-reverse items-center gap-2 pointer-events-auto"
           >
            {isAdding ? (
-              <div className="bg-card border border-indigo-500/50 rounded-xl p-2 flex items-center gap-2 backdrop-blur-xl">
+              <div className="bg-background border border-indigo-500/30 rounded-2xl p-2.5 flex items-center gap-2 backdrop-blur-xl shadow-2xl">
                 <select
                   value={selected}
                   onChange={(e) => setSelected(e.target.value)}
-                  className="bg-background text-foreground text-xs px-2 py-1.5 rounded-lg border border-card-border outline-none focus:border-indigo-500/50"
+                  className="bg-foreground/[0.03] text-foreground text-xs px-3 py-2 rounded-xl border border-card-border outline-none focus:border-indigo-500/30 font-bold appearance-none cursor-pointer"
                 >
                   {COMMON_TIMEZONES.map((opt) => (
-                    <option key={opt.tz} value={opt.tz}>
+                    <option key={opt.tz} value={opt.tz} className="bg-background">
                       {opt.label}
                     </option>
                   ))}
                 </select>
-                <button onClick={addClock} className="p-1.5 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
-                  <FiCheck className="h-3.5 w-3.5" />
+                <button onClick={addClock} className="p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20">
+                  <FiCheck className="h-4 w-4" />
                 </button>
-                <button onClick={() => setIsAdding(false)} className="p-1.5 bg-foreground/[0.05] text-(--text-muted) rounded-lg hover:bg-foreground/[0.1] transition-colors">
-                  <FiX className="h-3.5 w-3.5" />
+                <button onClick={() => setIsAdding(false)} className="p-2 bg-foreground/[0.05] text-text-muted rounded-xl hover:bg-foreground/[0.1] transition-colors">
+                  <FiX className="h-4 w-4" />
                 </button>
               </div>
             ) : (
               <button 
                 onClick={() => setIsAdding(true)}
-                className="flex items-center justify-center h-[52px] w-[52px] rounded-xl border border-dashed border-card-border hover:border-foreground/40 text-(--text-muted) hover:text-foreground transition-all bg-background/50 hover:bg-foreground/[0.05] backdrop-blur-md"
+                className="flex items-center justify-center h-[56px] w-[52px] rounded-2xl border border-dashed border-card-border hover:border-indigo-500/50 text-text-muted hover:text-indigo-600 dark:hover:text-indigo-400 transition-all bg-background/50 hover:bg-indigo-500/5 backdrop-blur-md shadow-xl"
                 title="Add Timezone"
               >
                 <FiPlus className="h-5 w-5" />
@@ -165,12 +165,12 @@ export default function TimezoneClocks() {
             {otherClocks.map((c) => {
               const { time, day } = formatInTZ(now, c.tz);
               return (
-                <div key={c.id} className="bg-card border border-card-border rounded-xl p-3 flex items-center justify-between gap-4 min-w-[160px] backdrop-blur-xl group/item">
+                <div key={c.id} className="bg-background border border-card-border rounded-2xl p-3.5 flex items-center justify-between gap-6 min-w-[180px] backdrop-blur-xl shadow-xl shadow-foreground/[0.02] group/item border-b-2 border-b-indigo-500/20">
                   <div>
-                    <div className="text-foreground text-base font-bold tracking-tight">{time}</div>
-                    <div className="text-(--text-muted) text-[10px] font-bold uppercase tracking-wider">{day} • {c.tz.split('/').pop()?.replace('_', ' ')}</div>
+                    <div className="text-foreground text-base font-black tracking-tightest leading-none">{time}</div>
+                    <div className="text-text-muted text-[9px] font-black uppercase tracking-widest mt-1.5 opacity-70">{day} • {c.tz.split('/').pop()?.replace('_', ' ')}</div>
                   </div>
-                  <button onClick={() => removeClock(c.id)} className="p-1.5 text-(--text-muted) hover:text-rose-400 transition-colors opacity-0 group-hover/item:opacity-100">
+                  <button onClick={() => removeClock(c.id)} className="p-1.5 text-text-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all opacity-0 group-hover/item:opacity-100">
                     <FiTrash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>

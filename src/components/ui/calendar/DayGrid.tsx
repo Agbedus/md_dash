@@ -20,37 +20,36 @@ const HOURS = eachHourOfInterval({ start: startOfDay(new Date()), end: endOfDay(
 function privacyClasses(p?: CalendarEvent["privacy"]) {
   switch (p) {
     case "public":
-      return { dot: "bg-emerald-400", border: "border-emerald-500/50", text: "text-emerald-200" };
+      return { dot: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]", border: "border-emerald-500/30", text: "text-emerald-700 dark:text-emerald-400" };
     case "private":
-      return { dot: "bg-amber-400", border: "border-amber-500/50", text: "text-amber-200" };
+      return { dot: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]", border: "border-amber-500/30", text: "text-amber-700 dark:text-amber-400" };
     case "confidential":
-      return { dot: "bg-rose-400", border: "border-rose-500/50", text: "text-rose-200" };
+      return { dot: "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]", border: "border-rose-500/30", text: "text-rose-700 dark:text-rose-400" };
     default:
-      return { dot: "bg-slate-400", border: "border-slate-600", text: "text-slate-200" };
+      return { dot: "bg-slate-400", border: "border-slate-500/30", text: "text-text-secondary" };
   }
 }
 
-function taskClasses(status?: "task" | "in_progress" | "completed") {
+function taskClasses(status?: string) {
   switch (status) {
     case "completed":
-      return { dot: "", border: "border-emerald-500/50", text: "text-emerald-200", bg: "bg-emerald-500/10" };
+      return { dot: "", border: "border-emerald-500/30", text: "text-emerald-700 dark:text-emerald-400", bg: "bg-emerald-500/5" };
     case "in_progress":
-      return { dot: "", border: "border-amber-500/50", text: "text-amber-200", bg: "bg-amber-500/10" };
-    case "task":
+      return { dot: "", border: "border-amber-500/30", text: "text-amber-700 dark:text-amber-400", bg: "bg-amber-500/5" };
     default:
-      return { dot: "", border: "border-sky-500/50", text: "text-sky-200", bg: "bg-sky-500/10" };
+      return { dot: "", border: "border-sky-500/30", text: "text-sky-700 dark:text-sky-400", bg: "bg-sky-500/5" };
   }
 }
 
 function timeOffClasses(status?: string) {
   switch (status) {
     case "approved":
-      return { dot: "bg-emerald-400", border: "border-emerald-500/50", text: "text-emerald-200", bg: "bg-emerald-500/10" };
+      return { dot: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]", border: "border-emerald-500/30", text: "text-emerald-700 dark:text-emerald-400", bg: "bg-emerald-500/5" };
     case "rejected":
-      return { dot: "bg-rose-400", border: "border-rose-500/50", text: "text-rose-200", bg: "bg-rose-500/10" };
+      return { dot: "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]", border: "border-rose-500/30", text: "text-rose-700 dark:text-rose-400", bg: "bg-rose-500/5" };
     case "pending":
     default:
-      return { dot: "bg-amber-400", border: "border-amber-500/50", text: "text-amber-200", bg: "bg-amber-500/10" };
+      return { dot: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]", border: "border-amber-500/30", text: "text-amber-700 dark:text-amber-400", bg: "bg-amber-500/5" };
   }
 }
 

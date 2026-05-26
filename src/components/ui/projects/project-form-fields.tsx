@@ -28,15 +28,18 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
   const [spent, setSpent] = useState<number | ''>(defaultValues?.spent || '');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Basic Information */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Basic Information</h3>
+      <div className="space-y-6">
+        <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+            Operational Foundation
+        </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <label htmlFor="name" className="block text-sm font-medium text-zinc-400 mb-1">
-              Project Name *
+            <label htmlFor="name" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Mission Designation *
             </label>
             <input
               type="text"
@@ -44,13 +47,13 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
               id="name"
               required
               defaultValue={defaultValues?.name}
-              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold"
               placeholder="Enter project name"
             />
           </div>
 
           <div>
-            <label htmlFor="key" className="block text-sm font-medium text-zinc-400 mb-1">
+            <label htmlFor="key" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
               Project Key
             </label>
             <input
@@ -58,89 +61,99 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
               name="key"
               id="key"
               defaultValue={defaultValues?.key || ''}
-              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold"
               placeholder="e.g., PROJ-123"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-zinc-400 mb-1">
-            Description
+          <label htmlFor="description" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+            Tactical Briefing
           </label>
           <textarea
             name="description"
             id="description"
             rows={3}
             defaultValue={defaultValues?.description || ''}
-            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
+            className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all resize-none font-bold"
             placeholder="Add details about this project..."
           />
         </div>
 
         <div>
-          <label htmlFor="tags" className="block text-sm font-medium text-zinc-400 mb-1">
-            Tags
+          <label htmlFor="tags" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+            Operational Tags
           </label>
           <input
             type="text"
             name="tags"
             id="tags"
             defaultValue={defaultValues?.tags ? (Array.isArray(defaultValues.tags) ? defaultValues.tags.join(', ') : defaultValues.tags) : ''}
-            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+            className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold"
             placeholder="Comma-separated tags"
           />
         </div>
       </div>
 
       {/* Status & Priority */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Status & Priority</h3>
+      <div className="space-y-6">
+        <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Executive Oversight
+        </h3>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-6">
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-zinc-400 mb-1">
-              Status
+            <label htmlFor="status" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Operational Status
             </label>
-            <select
-              name="status"
-              id="status"
-              defaultValue={defaultValues?.status || 'planning'}
-              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
-            >
-              <option value="planning">Planning</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="on_hold">On Hold</option>
-            </select>
+            <div className="relative">
+                <select
+                name="status"
+                id="status"
+                defaultValue={defaultValues?.status || 'planning'}
+                className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-indigo-500/30 transition-all appearance-none cursor-pointer font-bold"
+                >
+                <option value="planning" className="bg-background">Planning</option>
+                <option value="in_progress" className="bg-background">In Progress</option>
+                <option value="completed" className="bg-background">Completed</option>
+                <option value="on_hold" className="bg-background">On Hold</option>
+                </select>
+            </div>
           </div>
 
           <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-zinc-400 mb-1">
-              Priority
+            <label htmlFor="priority" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Strategic Priority
             </label>
-            <select
-              name="priority"
-              id="priority"
-              defaultValue={defaultValues?.priority || 'medium'}
-              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
+            <div className="relative">
+                <select
+                name="priority"
+                id="priority"
+                defaultValue={defaultValues?.priority || 'medium'}
+                className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-indigo-500/30 transition-all appearance-none cursor-pointer font-bold"
+                >
+                <option value="low" className="bg-background">Low</option>
+                <option value="medium" className="bg-background">Medium</option>
+                <option value="high" className="bg-background">High</option>
+                </select>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Timeline */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Timeline</h3>
+      <div className="space-y-6">
+        <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            Temporal Projection
+        </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-zinc-400 mb-1">
-              Start Date
+            <label htmlFor="startDate" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Commencement Date
             </label>
             <CustomDatePicker
               value={startDate}
@@ -152,8 +165,8 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
           </div>
 
           <div>
-            <label htmlFor="endDate" className="block text-sm font-medium text-zinc-400 mb-1">
-              End Date
+            <label htmlFor="endDate" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Terminal Date
             </label>
             <CustomDatePicker
               value={endDate}
@@ -168,13 +181,16 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
       </div>
 
       {/* Financials */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Financials</h3>
+      <div className="space-y-6">
+        <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+            Resource Intelligence
+        </h3>
         
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-6">
           <div>
-            <label htmlFor="budget" className="block text-sm font-medium text-zinc-400 mb-1">
-              Budget
+            <label htmlFor="budget" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Mission Budget
             </label>
             <CustomNumberInput
                 value={budget}
@@ -187,8 +203,8 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
           </div>
 
           <div>
-            <label htmlFor="spent" className="block text-sm font-medium text-zinc-400 mb-1">
-              Spent
+            <label htmlFor="spent" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Allocated Capital
             </label>
             <CustomNumberInput
                 value={spent}
@@ -201,46 +217,51 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
           </div>
 
           <div>
-            <label htmlFor="currency" className="block text-sm font-medium text-zinc-400 mb-1">
-              Currency
+            <label htmlFor="currency" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Unit Currency
             </label>
             <input
               type="text"
               name="currency"
               id="currency"
               defaultValue={defaultValues?.currency || 'USD'}
-              className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold"
               placeholder="USD"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="billingType" className="block text-sm font-medium text-zinc-400 mb-1">
-            Billing Type
+          <label htmlFor="billingType" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+            Billing Protocol
           </label>
-          <select
-            name="billingType"
-            id="billingType"
-            defaultValue={defaultValues?.billingType || 'non_billable'}
-            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
-          >
-            <option value="non_billable">Non-Billable</option>
-            <option value="time_and_materials">Time & Materials</option>
-            <option value="fixed_price">Fixed Price</option>
-          </select>
+          <div className="relative">
+            <select
+                name="billingType"
+                id="billingType"
+                defaultValue={defaultValues?.billingType || 'non_billable'}
+                className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground focus:outline-none focus:border-indigo-500/30 transition-all appearance-none cursor-pointer font-bold"
+            >
+                <option value="non_billable" className="bg-background">Non-Billable</option>
+                <option value="time_and_materials" className="bg-background">Time & Materials</option>
+                <option value="fixed_price" className="bg-background">Fixed Price</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Team & Stakeholders */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Team & Stakeholders</h3>
+      <div className="space-y-6">
+        <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+            Personnel Assignment
+        </h3>
         
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-6">
           {/* Owner */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-1">
-              Owner
+            <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Command Lead
             </label>
             <Combobox
               name="ownerId"
@@ -255,8 +276,8 @@ export function ProjectFormFields({ defaultValues, users, clients }: ProjectForm
 
           {/* Client */}
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-zinc-400 mb-1">
-              Client
+            <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Strategic Partner
             </label>
             <Combobox
               name="clientId"

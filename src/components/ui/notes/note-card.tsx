@@ -7,6 +7,7 @@ import { FiEdit2, FiTrash2, FiFileText, FiCheckSquare, FiBookOpen, FiUsers, FiZa
 import { FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import UserAvatarGroup from "@/components/ui/user-avatar-group";
 import { Portal } from "@/components/ui/portal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface NoteCardProps {
     note: Note;
@@ -315,7 +316,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                             />
                                         )}
                                         {isSharing && (
-                                            <div className="w-6 h-6 rounded-full bg-white/[0.06] animate-pulse" />
+                                            <Skeleton className="w-6 h-6 rounded-full" />
                                         )}
                                     </div>
                                 )}
@@ -332,22 +333,21 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                         left: `${ownerCoords.left}px`,
                                         transform: 'translate(-50%, -100%)',
                                     }}
-                                    className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg  animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                                    className="mb-2 w-48 p-3 bg-background border border-card-border rounded-xl shadow-xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
                                 >
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-9 w-9 rounded-full bg-foreground/[0.03] flex-shrink-0 relative overflow-hidden ring-1 ring-card-border">
                                             {note.owner.avatar_url || note.owner.image ? (
                                                 <Image src={note.owner.avatar_url || note.owner.image || ''} alt={note.owner.name || ''} fill className="object-cover" />
                                             ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-[11px] font-bold text-emerald-400 bg-emerald-500/10">
+                                                <div className="flex h-full w-full items-center justify-center text-[10px] font-black text-emerald-500 bg-emerald-500/10">
                                                     {(note.owner.full_name || note.owner.name || '?').charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
                                         <div className="min-w-0">
-                                            <p className="text-xs font-semibold text-white truncate">{note.owner.full_name || note.owner.name}</p>
-                                            <p className="text-[11px] text-zinc-500 truncate">Creator</p>
-                                            {note.owner.email && <p className="text-[11px] text-zinc-500 truncate">{note.owner.email}</p>}
+                                            <p className="text-[10px] font-black text-foreground truncate uppercase tracking-tight">{note.owner.full_name || note.owner.name}</p>
+                                            <p className="text-[9px] text-text-muted font-black uppercase tracking-widest">Command Lead</p>
                                         </div>
                                     </div>
                                 </div>
@@ -364,61 +364,81 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                     <FiUserPlus size={16} />
                                 </button>
                                 {showUserDropdown && availableUsers.length > 0 && (
-                                    <div className="absolute top-full right-0 mt-2 w-48 bg-zinc-900 rounded-2xl  p-2 border border-white/5 z-50">
-                                        <select
-                                            value={selectedUser}
-                                            onChange={(e) => setSelectedUser(e.target.value)}
-                                            className="w-full bg-zinc-950 border border-white/5 rounded-xl px-2 py-1.5 text-xs text-white mb-2 focus:outline-none focus:border-emerald-500/50"
-                                        >
-                                            <option value="">Select user...</option>
-                                            {availableUsers.map(u => (
-                                                <option key={u.id} value={u.id}>
-                                                    {u.name || u.email}
-                                                </option>
-                                            ))}
-                                        </select>
+                                    <div className="absolute top-full right-0 mt-2 w-64 bg-background rounded-2xl p-3 border border-card-border z-50 shadow-2xl space-y-3">
+                                        <div>
+                                            <p className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] mb-2 ml-1">Grant Access</p>
+                                            <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
+                                                {availableUsers.map(u => (
+                                                    <button
+                                                        key={u.id}
+                                                        type="button"
+                                                        onClick={() => setSelectedUser(u.id)}
+                                                        className={`w-full flex items-center gap-3 p-2 rounded-xl text-left border transition-all ${
+                                                            selectedUser === u.id 
+                                                            ? 'bg-foreground/[0.07] border-indigo-500/30 text-foreground font-bold' 
+                                                            : 'bg-transparent border-transparent hover:bg-foreground/[0.04] text-text-secondary hover:text-foreground'
+                                                        }`}
+                                                    >
+                                                        <div className="h-6 w-6 rounded-full bg-foreground/[0.03] flex-shrink-0 relative overflow-hidden ring-1 ring-card-border">
+                                                            {u.image ? (
+                                                                <Image src={u.image} alt={u.name || ''} fill className="object-cover" />
+                                                            ) : (
+                                                                <div className="flex h-full w-full items-center justify-center text-[8px] font-black text-emerald-500 bg-emerald-500/10">
+                                                                    {(u.name || u.email || '?').charAt(0).toUpperCase()}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-[10px] font-black truncate uppercase tracking-tight">{u.name || u.email?.split('@')[0]}</p>
+                                                            <p className="text-[8px] text-text-muted truncate uppercase tracking-widest">{u.email}</p>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
                                         <button
+                                            type="button"
                                             onClick={handleAddUser}
                                             disabled={!selectedUser}
-                                            className="w-full bg-emerald-600 text-white text-xs py-1.5 rounded-xl hover:bg-emerald-500 disabled:opacity-50 font-bold"
+                                            className="w-full bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-500 disabled:opacity-50 transition-all shadow-md shadow-emerald-500/10"
                                         >
-                                            Add
+                                            Authorize
                                         </button>
                                     </div>
                                 )}
                             </div>
-                            <button onClick={() => onEdit?.(note)} className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all"><FiEdit2 size={16} /></button>
+                            <button onClick={() => onEdit?.(note)} className="p-2 rounded-xl text-text-muted hover:text-foreground hover:bg-foreground/[0.06] transition-all"><FiEdit2 size={16} /></button>
                             <form onSubmit={async (e) => { e.preventDefault(); const fd = new FormData(); fd.append('id', note.id.toString()); await onNoteDelete(fd); }} style={{ display: 'inline' }}>
                                 <input type="hidden" name="id" value={note.id} />
-                                <button type="submit" className="p-2 rounded-xl text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-all"><FiTrash2 size={16} /></button>
+                                <button type="submit" className="p-2 rounded-xl text-text-muted hover:text-rose-500 hover:bg-rose-500/10 transition-all"><FiTrash2 size={16} /></button>
                             </form>
                         </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+                        </div>
+                        </div>
+                        </div>
+                        );
+                        }
 
-    const rowClasses = "border-b border-card-border";
+                        const rowClasses = "border-b border-card-border transition-colors hover:bg-foreground/[0.01]";
 
-    return (
-        <tr className={rowClasses}>
-            <td className="px-6 py-4 text-sm font-medium text-white">
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
+                        return (
+                        <tr className={rowClasses}>
+                        <td className="px-6 py-5 text-sm font-bold text-foreground">
+                        <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5 px-1.5 py-0.5 bg-foreground/[0.03] rounded-md border border-card-border">
                             {note.is_pinned === 1 && (
-                                <div className="text-blue-400" title="Pinned">
+                                <div className="text-blue-500" title="Pinned">
                                     <FiMapPin size={10} className="fill-current" />
                                 </div>
                             )}
                             {note.is_favorite === 1 && (
-                                <div className="text-yellow-400" title="Favorite">
+                                <div className="text-amber-500" title="Favorite">
                                     <FiStar size={10} className="fill-current" />
                                 </div>
                             )}
                             {note.is_archived === 1 && (
-                                <div className="text-zinc-500" title="Archived">
+                                <div className="text-text-muted" title="Archived">
                                     <FiArchive size={10} className="fill-current" />
                                 </div>
                             )}
@@ -430,123 +450,144 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                             className="relative flex-shrink-0 cursor-pointer"
                         >
                             {note.owner?.avatar_url || note.owner?.image ? (
-                                <Image src={(note.owner.avatar_url || note.owner.image)!} alt={note.owner.full_name || note.owner.name || 'Owner'} width={28} height={28} className="rounded-full border border-white/5 object-cover" />
+                                <Image src={(note.owner.avatar_url || note.owner.image)!} alt={note.owner.full_name || note.owner.name || 'Owner'} width={28} height={28} className="rounded-full border border-card-border object-cover ring-2 ring-foreground/[0.03]" />
                             ) : note.owner?.name || note.owner?.full_name ? (
-                                <div className="w-7 h-7 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center text-[11px] font-bold border border-white/5">
+                                <div className="w-7 h-7 rounded-full bg-foreground/[0.05] text-text-secondary flex items-center justify-center text-[10px] font-black border border-card-border">
                                     {(note.owner.full_name || note.owner.name)!.charAt(0).toUpperCase()}
                                 </div>
                             ) : null}
                         </div>
-                        <TextHighlight text={note.title} highlight={searchQuery} />
-                    </div>
-                    {( (note.shared_with && note.shared_with.length > 0) || isSharing ) && (
-                        <div className="flex items-center gap-1 ml-6 shrink-0">
+                        <span className="uppercase tracking-tight italic">
+                            <TextHighlight text={note.title} highlight={searchQuery} />
+                        </span>
+                        </div>
+                        {( (note.shared_with && note.shared_with.length > 0) || isSharing ) && (
+                        <div className="flex items-center gap-2 ml-10 shrink-0">
                             {note.shared_with && note.shared_with.length > 0 && (
                                 <>
-                                    <span className="text-[11px] text-zinc-500">+</span>
                                     <UserAvatarGroup 
                                         users={note.shared_with.map(u => typeof u === 'string' ? { name: u } : u)} 
-                                        size="sm" 
+                                        size="xs" 
                                         limit={2} 
                                     />
                                 </>
                             )}
                             {isSharing && (
-                                <div className="w-5 h-5 rounded-full bg-white/[0.06] animate-pulse" />
+                                <Skeleton className="w-5 h-5 rounded-full" />
                             )}
                         </div>
-                    )}
-                </div>
-            </td>
-            <td className="px-6 py-4 text-sm text-zinc-400">
-                <div className="ql-snow">
-                    <div className="ql-editor !p-0" dangerouslySetInnerHTML={{ __html: hasMounted ? renderContent(note.content || '') : '' }} />
-                </div>
-            </td>
-            <td className="px-6 py-4 text-sm text-zinc-400">
-                <span className={`px-2.5 py-1 inline-flex text-xs font-medium rounded-full ${priorityBgColorClass(note.priority)} ${priorityTextColorClass(note.priority)}`}>
-                    {formatPriority(note.priority)}
-                </span>
-            </td>
-            <td className="px-6 py-4 text-sm text-zinc-400">
-                <div className="flex flex-wrap gap-1">
-                    {noteTags.map((tag: string) => (
-                        <span key={tag} className="px-2 py-1 bg-white/[0.03] text-zinc-300 text-xs rounded-full">{tag}</span>
-                    ))}
-                </div>
-            </td>
-            <td className="px-6 py-4 text-sm font-medium text-right space-x-2">
-                <div className="relative inline-block" ref={dropdownRef}>
-                    <button 
+                        )}
+                        </div>
+                        </td>
+                        <td className="px-6 py-5 text-xs text-text-secondary font-medium">
+                        <div className="ql-snow">
+                        <div className="ql-editor !p-0 line-clamp-2" dangerouslySetInnerHTML={{ __html: hasMounted ? renderContent(note.content || '') : '' }} />
+                        </div>
+                        </td>
+                        <td className="px-6 py-5">
+                        <span className={`px-2.5 py-1 inline-flex text-[10px] font-black uppercase tracking-wider rounded-lg border ${priorityBgColorClass(note.priority)} ${priorityTextColorClass(note.priority)} border-current/20`}>
+                        {formatPriority(note.priority)}
+                        </span>
+                        </td>
+                        <td className="px-6 py-5">
+                        <div className="flex flex-wrap gap-1.5">
+                        {noteTags.map((tag: string) => (
+                        <span key={tag} className="px-2.5 py-0.5 bg-foreground/[0.03] text-text-muted text-[9px] font-black uppercase tracking-widest rounded-md border border-card-border">{tag}</span>
+                        ))}
+                        {noteTags.length === 0 && <span className="text-text-muted/30 italic text-[10px]">No Tags</span>}
+                        </div>
+                        </td>
+                        <td className="px-6 py-5 text-right space-x-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                        <div className="relative inline-block" ref={dropdownRef}>
+                        <button 
                         type="button" 
                         onClick={() => setShowUserDropdown(!showUserDropdown)} 
                         disabled={isSharing}
-                        className={`p-2 rounded-lg transition-colors ${isSharing ? 'text-zinc-600 cursor-not-allowed' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'}`}
+                        className={`p-2 rounded-xl transition-all ${isSharing ? 'text-text-muted cursor-not-allowed' : 'text-text-muted hover:text-foreground hover:bg-foreground/[0.06]'}`}
                         title="Add User"
-                    >
-                        <FiUserPlus size={16} />
-                    </button>
-                    {showUserDropdown && availableUsers.length > 0 && (
-                        <div className="absolute top-full right-0 mt-2 w-48 bg-slate-800 rounded-lg  p-2 border border-slate-700 z-50">
-                            <select
-                                value={selectedUser}
-                                onChange={(e) => setSelectedUser(e.target.value)}
-                                className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white mb-2 focus:outline-none focus:border-purple-500"
-                            >
-                                <option value="">Select user...</option>
-                                {availableUsers.map(u => (
-                                    <option key={u.id} value={u.id}>
-                                        {u.name || u.email}
-                                    </option>
-                                ))}
-                            </select>
+                        >
+                        <FiUserPlus size={15} />
+                        </button>
+                        {showUserDropdown && availableUsers.length > 0 && (
+                        <div className="absolute top-full right-0 mt-2 w-64 bg-background rounded-2xl p-3 border border-card-border z-50 shadow-2xl space-y-3 text-left">
+                            <div>
+                                <p className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] mb-2 ml-1">Grant Access</p>
+                                <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
+                                    {availableUsers.map(u => (
+                                        <button
+                                            key={u.id}
+                                            type="button"
+                                            onClick={() => setSelectedUser(u.id)}
+                                            className={`w-full flex items-center gap-3 p-2 rounded-xl text-left border transition-all ${
+                                                selectedUser === u.id 
+                                                ? 'bg-foreground/[0.07] border-indigo-500/30 text-foreground font-bold' 
+                                                : 'bg-transparent border-transparent hover:bg-foreground/[0.04] text-text-secondary hover:text-foreground'
+                                            }`}
+                                        >
+                                            <div className="h-6 w-6 rounded-full bg-foreground/[0.03] flex-shrink-0 relative overflow-hidden ring-1 ring-card-border">
+                                                {u.image ? (
+                                                    <Image src={u.image} alt={u.name || ''} fill className="object-cover" />
+                                                ) : (
+                                                    <div className="flex h-full w-full items-center justify-center text-[8px] font-black text-emerald-500 bg-emerald-500/10">
+                                                        {(u.name || u.email || '?').charAt(0).toUpperCase()}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-[10px] font-black truncate uppercase tracking-tight">{u.name || u.email?.split('@')[0]}</p>
+                                                <p className="text-[8px] text-text-muted truncate uppercase tracking-widest">{u.email}</p>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                             <button
+                                type="button"
                                 onClick={handleAddUser}
                                 disabled={!selectedUser}
-                                className="w-full bg-purple-600 text-white text-xs py-1 rounded hover:bg-purple-500 disabled:opacity-50"
+                                className="w-full bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest py-2 rounded-xl hover:bg-emerald-500 disabled:opacity-50 transition-all shadow-md shadow-emerald-500/10"
                             >
-                                Add
+                                Authorize
                             </button>
                         </div>
-                    )}
-                </div>
-                <button type="button" onClick={() => onEdit?.(note)} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06]"><FiEdit2 size={16} /></button>
-                <form onSubmit={async (e) => { e.preventDefault(); const fd = new FormData(); fd.append('id', note.id.toString()); await onNoteDelete(fd); }} style={{ display: 'inline' }}>
-                    <input type="hidden" name="id" value={note.id} />
-                    <button type="submit" className="p-2 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-white/[0.06]"><FiTrash2 size={16} /></button>
-                </form>
-            </td>
-            {/* Owner Tooltip */}
-            {hoveredOwner && note.owner && (
-                <Portal>
-                    <div 
+                        )}
+                        </div>
+                        <button type="button" onClick={() => onEdit?.(note)} className="p-2 rounded-xl text-text-muted hover:text-foreground hover:bg-foreground/[0.06] transition-all"><FiEdit2 size={15} /></button>
+                        <form onSubmit={async (e) => { e.preventDefault(); const fd = new FormData(); fd.append('id', note.id.toString()); await onNoteDelete(fd); }} style={{ display: 'inline' }}>
+                        <input type="hidden" name="id" value={note.id} />
+                        <button type="submit" className="p-2 rounded-xl text-text-muted hover:text-rose-500 hover:bg-rose-500/10 transition-all"><FiTrash2 size={15} /></button>
+                        </form>
+                        </td>
+                        {/* Owner Tooltip for Table */}
+                        {hoveredOwner && note.owner && (
+                        <Portal>
+                        <div 
                         style={{
                             position: 'fixed',
                             top: `${ownerCoords.top - 8}px`,
                             left: `${ownerCoords.left}px`,
                             transform: 'translate(-50%, -100%)',
                         }}
-                        className="mb-2 w-48 p-2 bg-zinc-900 border border-white/5 rounded-lg  animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
-                    >
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-zinc-800 flex-shrink-0 relative overflow-hidden ring-1 ring-white/10">
+                        className="mb-2 w-48 p-3 bg-background border border-card-border rounded-xl shadow-xl animate-in fade-in slide-in-from-bottom-1 duration-200 z-[9999]"
+                        >
+                        <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-full bg-foreground/[0.03] flex-shrink-0 relative overflow-hidden ring-1 ring-card-border">
                                 {note.owner.avatar_url || note.owner.image ? (
                                     <Image src={note.owner.avatar_url || note.owner.image || ''} alt={note.owner.name || ''} fill className="object-cover" />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-[11px] font-bold text-emerald-400 bg-emerald-500/10">
+                                    <div className="flex h-full w-full items-center justify-center text-[10px] font-black text-emerald-500 bg-emerald-500/10">
                                         {(note.owner.full_name || note.owner.name || '?').charAt(0).toUpperCase()}
                                     </div>
                                 )}
                             </div>
-                            <div className="min-w-0">
-                                <p className="text-xs font-semibold text-white truncate">{note.owner.full_name || note.owner.name}</p>
-                                <p className="text-[11px] text-zinc-500 truncate">Creator</p>
-                                {note.owner.email && <p className="text-[11px] text-zinc-500 truncate">{note.owner.email}</p>}
+                            <div className="min-w-0 text-left">
+                                <p className="text-[10px] font-black text-foreground truncate uppercase tracking-tight">{note.owner.full_name || note.owner.name}</p>
+                                <p className="text-[9px] text-text-muted font-black uppercase tracking-widest">Command Lead</p>
                             </div>
                         </div>
-                    </div>
-                </Portal>
-            )}
-        </tr>
-    );
-}
+                        </div>
+                        </Portal>
+                        )}
+                        </tr>
+                        );
+                        }

@@ -3,7 +3,7 @@ import Suggestion from '@tiptap/suggestion';
 import { ReactRenderer } from '@tiptap/react';
 import tippy, { Instance as TippyInstance } from 'tippy.js';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { FiType, FiList, FiCheckSquare, FiCode } from 'react-icons/fi';
+import { FiType, FiList, FiCheckSquare, FiCode, FiMinus, FiMessageSquare } from 'react-icons/fi';
 
 export interface CommandItemProps {
   title: string;
@@ -17,7 +17,7 @@ export const getSuggestionItems = ({ query }: { query: string }): CommandItemPro
     {
       title: 'Heading 1',
       description: 'Big section heading.',
-      icon: <FiType size={18} />,
+      icon: <FiType size={18} className="text-[var(--pastel-indigo)]" />,
       command: ({ editor, range }) => {
         editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run();
       },
@@ -25,7 +25,7 @@ export const getSuggestionItems = ({ query }: { query: string }): CommandItemPro
     {
       title: 'Heading 2',
       description: 'Medium section heading.',
-      icon: <FiType size={18} />,
+      icon: <FiType size={18} className="text-[var(--pastel-blue)]" />,
       command: ({ editor, range }) => {
         editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run();
       },
@@ -33,7 +33,7 @@ export const getSuggestionItems = ({ query }: { query: string }): CommandItemPro
     {
       title: 'Heading 3',
       description: 'Small section heading.',
-      icon: <FiType size={18} />,
+      icon: <FiType size={18} className="text-[var(--pastel-purple)]" />,
       command: ({ editor, range }) => {
         editor.chain().focus().deleteRange(range).setNode('heading', { level: 3 }).run();
       },
@@ -41,17 +41,41 @@ export const getSuggestionItems = ({ query }: { query: string }): CommandItemPro
     {
       title: 'Bullet List',
       description: 'Create a simple bulleted list.',
-      icon: <FiList size={18} />,
+      icon: <FiList size={18} className="text-[var(--pastel-emerald)]" />,
       command: ({ editor, range }) => {
         editor.chain().focus().deleteRange(range).toggleBulletList().run();
       },
     },
     {
+      title: 'Numbered List',
+      description: 'Create an ordered sequence.',
+      icon: <FiList size={18} className="text-[var(--pastel-amber)]" />,
+      command: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).toggleOrderedList().run();
+      },
+    },
+    {
+      title: 'Blockquote',
+      description: 'Insert an operational quotation.',
+      icon: <FiMessageSquare size={18} className="text-[var(--pastel-rose)]" />,
+      command: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).toggleBlockquote().run();
+      },
+    },
+    {
       title: 'Code Block',
-      description: 'Capture a code snippet.',
-      icon: <FiCode size={18} />,
+      description: 'Capture code or commands.',
+      icon: <FiCode size={18} className="text-[var(--pastel-teal)]" />,
       command: ({ editor, range }) => {
         editor.chain().focus().deleteRange(range).toggleCodeBlock().run();
+      },
+    },
+    {
+      title: 'Divider',
+      description: 'Insert a horizontal line.',
+      icon: <FiMinus size={18} className="text-text-muted" />,
+      command: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).setHorizontalRule().run();
       },
     },
   ];
@@ -108,21 +132,23 @@ export const CommandList = forwardRef((props: any, ref) => {
   }
 
   return (
-    <div className="z-50 w-72 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden p-1">
+    <div className="z-50 w-72 bg-background/95 backdrop-blur-md border border-card-border rounded-2xl shadow-2xl overflow-hidden p-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
       {props.items.map((item: CommandItemProps, index: number) => (
         <button
-          className={`flex items-center gap-3 w-full px-3 py-2 text-left rounded-lg transition-colors ${
-            index === selectedIndex ? 'bg-white/10 text-emerald-400' : 'text-zinc-300 hover:bg-white/5'
+          className={`flex items-center gap-3 w-full px-3 py-2 text-left rounded-xl transition-all ${
+            index === selectedIndex 
+              ? 'bg-foreground/[0.07] text-foreground font-bold border border-card-border' 
+              : 'text-text-secondary hover:bg-foreground/[0.04] hover:text-foreground border border-transparent'
           }`}
           key={index}
           onClick={() => selectItem(index)}
         >
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/5">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-foreground/[0.03] border border-card-border flex-shrink-0">
             {item.icon}
           </div>
           <div>
-            <p className="text-sm font-medium">{item.title}</p>
-            <p className="text-xs text-zinc-500">{item.description}</p>
+            <p className="text-xs font-black uppercase tracking-tight">{item.title}</p>
+            <p className="text-[10px] text-text-muted uppercase tracking-wider">{item.description}</p>
           </div>
         </button>
       ))}

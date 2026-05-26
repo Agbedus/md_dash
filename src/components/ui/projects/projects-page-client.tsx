@@ -440,32 +440,40 @@ export default function ProjectsPageClient({
       )}
 
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-white/5 rounded-2xl w-full max-w-5xl overflow-hidden ">
-            <div className="p-6 border-b border-white/5 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-white">Create New Project</h2>
-              <button onClick={() => setIsCreateModalOpen(false)} className="text-zinc-400 hover:text-white">×</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-md transition-opacity"
+            onClick={() => setIsCreateModalOpen(false)}
+          />
+          <div className="relative bg-background border border-card-border rounded-3xl w-full max-w-5xl overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)]">
+            <div className="p-6 border-b border-card-border flex justify-between items-center bg-foreground/[0.03]">
+              <h2 className="text-xl font-black text-foreground uppercase tracking-tight italic">Initialize Mission</h2>
+              <button 
+                onClick={() => setIsCreateModalOpen(false)} 
+                className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-foreground/[0.05] transition-all"
+              >
+                <FiX size={20} />
+              </button>
             </div>
-            <form action={handleCreate} className="p-6">
-              <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+            <form action={handleCreate} className="p-8">
+              <div className="max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
                 <ProjectFormFields users={users} clients={clients} />
               </div>
-              <div className="flex justify-end gap-3 mt-6">
+              <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-card-border">
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 transition-all  -black/20 backdrop-blur-md"
-                  title="Cancel"
+                  className="px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-text-secondary hover:text-foreground bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border transition-all"
                 >
-                  <FiX className="w-5 h-5" />
+                  Abort
                 </button>
                 <button
                   type="submit"
                   disabled={isCreating}
-                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all  -emerald-500/10 backdrop-blur-md disabled:opacity-50"
-                  title="Create Project"
+                  className="px-8 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2"
                 >
-                  {isCreating ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400"></div> : <FiCheck className="w-5 h-5" />}
+                  {isCreating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <FiCheck className="w-4 h-4" />}
+                  Confirm Project
                 </button>
               </div>
             </form>
@@ -474,32 +482,40 @@ export default function ProjectsPageClient({
       )}
 
       {editingProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-zinc-900 border border-white/5 rounded-2xl w-full max-w-5xl overflow-hidden ">
-            <div className="p-6 border-b border-white/5 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-white">Edit Project</h2>
-              <button onClick={() => setEditingProject(null)} className="text-zinc-400 hover:text-white">×</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-md transition-opacity"
+            onClick={() => setEditingProject(null)}
+          />
+          <div className="relative bg-background border border-card-border rounded-3xl w-full max-w-5xl overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)]">
+            <div className="p-6 border-b border-card-border flex justify-between items-center bg-foreground/[0.03]">
+              <h2 className="text-xl font-black text-foreground uppercase tracking-tight italic">Refine Objective</h2>
+              <button 
+                onClick={() => setEditingProject(null)} 
+                className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-foreground/[0.05] transition-all"
+              >
+                <FiX size={20} />
+              </button>
             </div>
-            <form action={handleUpdate} className="p-6">
-              <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+            <form action={handleUpdate} className="p-8">
+              <div className="max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
                 <ProjectFormFields defaultValues={editingProject} users={users} clients={clients} />
               </div>
-              <div className="flex justify-end gap-3 mt-6">
+              <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-card-border">
                 <button
                   type="button"
                   onClick={() => setEditingProject(null)}
-                  className="p-2.5 rounded-xl text-zinc-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 transition-all  -black/20 backdrop-blur-md"
-                  title="Cancel"
+                  className="px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-text-secondary hover:text-foreground bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border transition-all"
                 >
-                  <FiX className="w-5 h-5" />
+                  Discard
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all  -emerald-500/10 backdrop-blur-md disabled:opacity-50"
-                  title="Save Changes"
+                  className="px-8 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-white bg-indigo-600 hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50 flex items-center gap-2"
                 >
-                  {isUpdating ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400"></div> : <FiCheck className="w-5 h-5" />}
+                  {isUpdating ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : <FiCheck className="w-4 h-4" />}
+                  Execute Changes
                 </button>
               </div>
             </form>

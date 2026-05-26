@@ -15,6 +15,8 @@ interface DashboardContextType {
   setIsDesktopCollapsed: (v: boolean) => void;
   isCommandOpen: boolean;
   setIsCommandOpen: (v: boolean) => void;
+  hideContentScroll: boolean;
+  setHideContentScroll: (v: boolean) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -40,6 +42,7 @@ export default function DashboardLayout({
 }) {
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
+  const [hideContentScroll, setHideContentScroll] = useState(false);
   const { isCommandOpen, setIsCommandOpen } = useGlobalActions();
 
   return (
@@ -49,7 +52,9 @@ export default function DashboardLayout({
         isDesktopCollapsed, 
         setIsDesktopCollapsed,
         isCommandOpen,
-        setIsCommandOpen
+        setIsCommandOpen,
+        hideContentScroll,
+        setHideContentScroll
     }}>
       <NotificationProvider user={user}>
         <AnnouncementProvider user={user}>
@@ -67,7 +72,7 @@ export default function DashboardLayout({
                 `}
               >
                 {topnav}
-                <div className="flex-1 overflow-y-auto w-full pb-20 md:pb-0">
+                <div className={`flex-1 ${hideContentScroll ? 'overflow-hidden' : 'overflow-y-auto'} w-full pb-20 md:pb-0`}>
                   {children}
                 </div>
               </div>

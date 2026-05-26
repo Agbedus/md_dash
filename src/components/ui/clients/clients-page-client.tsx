@@ -213,35 +213,45 @@ export default function ClientsPageClient({ initialClients = [] }: ClientsPageCl
 
       {/* Create Modal */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-sm">
-          <div className="bg-card border border-card-border rounded-2xl w-full max-w-lg overflow-hidden shadow-none">
-            <div className="p-6 border-b border-card-border flex justify-between items-center">
-              <h2 className="text-xl font-bold text-foreground">Create New Client</h2>
-              <button onClick={() => setIsCreateModalOpen(false)} className="text-text-muted hover:text-foreground">×</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-md transition-opacity"
+            onClick={() => setIsCreateModalOpen(false)}
+          />
+          <div className="relative bg-background border border-card-border rounded-3xl w-full max-w-lg overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)]">
+            <div className="p-6 border-b border-card-border flex justify-between items-center bg-foreground/[0.03]">
+              <h2 className="text-xl font-black text-foreground uppercase tracking-tight italic">Initialize Client</h2>
+              <button 
+                onClick={() => setIsCreateModalOpen(false)} 
+                className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-foreground/[0.05] transition-all"
+              >
+                <FiX size={20} />
+              </button>
             </div>
-            <form action={handleCreate} className="p-6 space-y-4">
+            <form action={handleCreate} className="p-8 space-y-6">
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Company Name *</label>
-                <input type="text" name="companyName" required className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-2.5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="Acme Corp" />
+                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">Entity Designation *</label>
+                <input type="text" name="companyName" required className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold" placeholder="Acme Corp" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Contact Person</label>
-                <input type="text" name="contactPersonName" className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-2.5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="Jane Smith" />
+                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">Primary Liaison</label>
+                <input type="text" name="contactPersonName" className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold" placeholder="Jane Smith" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Contact Email</label>
-                <input type="email" name="contactEmail" className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-2.5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="contact@acme.com" />
+                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">Secure Email</label>
+                <input type="email" name="contactEmail" className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold" placeholder="contact@acme.com" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Website</label>
-                <input type="url" name="websiteUrl" className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-2.5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="https://acme.com" />
+                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">Digital Domain</label>
+                <input type="url" name="websiteUrl" className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold" placeholder="https://acme.com" />
               </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="p-2.5 rounded-xl text-text-muted hover:text-foreground bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border transition-all" title="Cancel">
-                  <FiX className="w-5 h-5" />
+              <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-card-border">
+                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-text-secondary hover:text-foreground bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border transition-all" title="Cancel">
+                  Abort
                 </button>
-                <button type="submit" className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all" title="Create Client">
-                  <FiCheck className="w-5 h-5" />
+                <button type="submit" className="px-8 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-white bg-emerald-600 hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2" title="Create Client">
+                  <FiCheck className="w-4 h-4" />
+                  Establish Entity
                 </button>
               </div>
             </form>
@@ -251,35 +261,45 @@ export default function ClientsPageClient({ initialClients = [] }: ClientsPageCl
 
       {/* Edit Modal */}
       {editingClient && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/60 backdrop-blur-sm">
-          <div className="bg-card border border-card-border rounded-2xl w-full max-w-lg overflow-hidden shadow-none">
-            <div className="p-6 border-b border-card-border flex justify-between items-center">
-              <h2 className="text-xl font-bold text-foreground">Edit Client</h2>
-              <button onClick={() => setEditingClient(null)} className="text-text-muted hover:text-foreground">×</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-white/60 dark:bg-black/60 backdrop-blur-md transition-opacity"
+            onClick={() => setEditingClient(null)}
+          />
+          <div className="relative bg-background border border-card-border rounded-3xl w-full max-w-lg overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)]">
+            <div className="p-6 border-b border-card-border flex justify-between items-center bg-foreground/[0.03]">
+              <h2 className="text-xl font-black text-foreground uppercase tracking-tight italic">Refine Client</h2>
+              <button 
+                onClick={() => setEditingClient(null)} 
+                className="p-2 rounded-xl text-text-secondary hover:text-foreground hover:bg-foreground/[0.05] transition-all"
+              >
+                <FiX size={20} />
+              </button>
             </div>
-            <form action={handleUpdate} className="p-6 space-y-4">
+            <form action={handleUpdate} className="p-8 space-y-6">
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Company Name *</label>
-                <input type="text" name="companyName" required defaultValue={editingClient.companyName} className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-2.5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" />
+                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">Entity Designation *</label>
+                <input type="text" name="companyName" required defaultValue={editingClient.companyName} className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Contact Person</label>
-                <input type="text" name="contactPersonName" defaultValue={editingClient.contactPersonName || ''} className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-2.5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" />
+                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">Primary Liaison</label>
+                <input type="text" name="contactPersonName" defaultValue={editingClient.contactPersonName || ''} className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Contact Email</label>
-                <input type="email" name="contactEmail" defaultValue={editingClient.contactEmail || ''} className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-2.5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" />
+                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">Secure Email</label>
+                <input type="email" name="contactEmail" defaultValue={editingClient.contactEmail || ''} className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Website</label>
-                <input type="url" name="websiteUrl" defaultValue={editingClient.websiteUrl || ''} className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-2.5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" />
+                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-1.5 ml-1">Digital Domain</label>
+                <input type="url" name="websiteUrl" defaultValue={editingClient.websiteUrl || ''} className="w-full bg-foreground/[0.03] border border-card-border rounded-xl px-4 py-3 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-indigo-500/30 transition-all font-bold" />
               </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button type="button" onClick={() => setEditingClient(null)} className="p-2.5 rounded-xl text-text-muted hover:text-foreground bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border transition-all" title="Cancel">
-                  <FiX className="w-5 h-5" />
+              <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-card-border">
+                <button type="button" onClick={() => setEditingClient(null)} className="px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-text-secondary hover:text-foreground bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border transition-all" title="Cancel">
+                  Discard
                 </button>
-                <button type="submit" className="p-2.5 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/30 transition-all" title="Save Changes">
-                  <FiCheck className="w-5 h-5" />
+                <button type="submit" className="px-8 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest text-white bg-indigo-600 hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2" title="Save Changes">
+                  <FiCheck className="w-4 h-4" />
+                  Execute Changes
                 </button>
               </div>
             </form>

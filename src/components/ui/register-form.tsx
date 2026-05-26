@@ -23,15 +23,15 @@ export default function RegisterForm() {
   return (
     <form action={dispatch} className="space-y-4">
       <div className="space-y-2">
-        <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider" htmlFor="fullName">
-          Full Name
+        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]" htmlFor="fullName">
+          Legal Identity
         </label>
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FiUser className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+            <FiUser className="h-4 w-4 text-text-muted group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/5 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
+            className="block w-full pl-10 pr-3 py-3 bg-foreground/[0.04] border border-card-border rounded-xl text-sm text-foreground placeholder-text-muted/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all font-bold"
             id="fullName"
             type="text"
             name="fullName"
@@ -42,15 +42,15 @@ export default function RegisterForm() {
         </div>
       </div>
       <div className="space-y-2">
-        <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider" htmlFor="email">
-          Email
+        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]" htmlFor="email">
+          Personnel Identifier
         </label>
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FiMail className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+            <FiMail className="h-4 w-4 text-text-muted group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/5 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
+            className="block w-full pl-10 pr-3 py-3 bg-foreground/[0.04] border border-card-border rounded-xl text-sm text-foreground placeholder-text-muted/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all font-bold"
             id="email"
             type="email"
             name="email"
@@ -60,15 +60,15 @@ export default function RegisterForm() {
         </div>
       </div>
       <div className="space-y-2">
-        <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider" htmlFor="password">
-          Password
+        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]" htmlFor="password">
+          Security Protocol
         </label>
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FiLock className="h-5 w-5 text-zinc-500 group-focus-within:text-emerald-500 transition-colors" />
+            <FiLock className="h-4 w-4 text-text-muted group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
-            className="block w-full pl-10 pr-10 py-2.5 bg-white/[0.03] border border-white/5 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all font-sans"
+            className="block w-full pl-10 pr-10 py-3 bg-foreground/[0.04] border border-card-border rounded-xl text-sm text-foreground placeholder-text-muted/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all font-bold"
             id="password"
             type={showPassword ? "text" : "password"}
             name="password"
@@ -79,7 +79,7 @@ export default function RegisterForm() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-500 hover:text-white transition-colors focus:outline-none"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-text-muted hover:text-foreground transition-colors focus:outline-none"
           >
             {showPassword ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4" />}
           </button>
@@ -87,23 +87,23 @@ export default function RegisterForm() {
       </div>
 
       <button
-        className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/5 text-sm font-bold text-zinc-400 hover:text-zinc-100 transition-all duration-200 group disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-14 flex items-center gap-4 px-4 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.05] border border-card-border hover:border-emerald-500/30 text-sm font-bold text-text-secondary hover:text-foreground transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed mt-4"
         aria-disabled={isPending}
         disabled={isPending}
       >
-        <div className="p-2.5 rounded-xl bg-white/[0.03] group-hover:bg-emerald-500/10 transition-colors flex items-center justify-center shrink-0">
+        <div className="p-2.5 rounded-xl bg-foreground/[0.03] group-hover:bg-emerald-500/10 transition-colors flex items-center justify-center shrink-0 border border-transparent group-hover:border-emerald-500/20">
           {isPending ? (
             <FiLoader className="animate-spin h-5 w-5 text-emerald-400" />
           ) : (
             <FiArrowRight className="h-5 w-5 text-emerald-400 group-hover:translate-x-1 transition-transform" />
           )}
         </div>
-        <span className="uppercase tracking-wider">{isPending ? 'Creating account...' : 'Create Account'}</span>
+        <span className="uppercase tracking-[0.2em] text-xs font-black">{isPending ? 'Establishing Record...' : 'Initiate Enrollment'}</span>
       </button>
-      <div className="text-center text-sm text-zinc-400 mt-4">
-        Already have an account?{' '}
-        <Link href="/login" className="font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
-            Sign in
+      <div className="text-center text-[10px] font-black text-text-muted uppercase tracking-widest mt-6">
+        Existing Personnel?{' '}
+        <Link href="/login" className="text-emerald-500 hover:text-emerald-400 transition-colors">
+            Authorized Entry
         </Link>
       </div>
     </form>

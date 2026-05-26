@@ -28,18 +28,18 @@ interface WeekGridProps {
 const HOURS = eachHourOfInterval({ start: startOfDay(new Date()), end: endOfDay(new Date()) }).slice(0, 24);
 
 const COLOR_PALETTE = [
-    { bg: 'bg-indigo-500', border: 'border-indigo-400', text: 'text-indigo-50' },
-    { bg: 'bg-emerald-500', border: 'border-emerald-400', text: 'text-emerald-50' },
-    { bg: 'bg-rose-500', border: 'border-rose-400', text: 'text-rose-50' },
-    { bg: 'bg-amber-500', border: 'border-amber-400', text: 'text-amber-50' },
-    { bg: 'bg-sky-500', border: 'border-sky-400', text: 'text-sky-50' },
-    { bg: 'bg-purple-500', border: 'border-purple-400', text: 'text-purple-50' },
-    { bg: 'bg-fuchsia-500', border: 'border-fuchsia-400', text: 'text-fuchsia-50' },
-    { bg: 'bg-teal-500', border: 'border-teal-400', text: 'text-teal-50' },
-    { bg: 'bg-orange-500', border: 'border-orange-400', text: 'text-orange-50' },
-    { bg: 'bg-blue-500', border: 'border-blue-400', text: 'text-blue-50' },
-    { bg: 'bg-lime-500', border: 'border-lime-400', text: 'text-lime-50' },
-    { bg: 'bg-pink-500', border: 'border-pink-400', text: 'text-pink-50' },
+    { bg: 'bg-indigo-500/10 dark:bg-indigo-500/20', border: 'border-indigo-500/30', text: 'text-indigo-700 dark:text-indigo-300' },
+    { bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-700 dark:text-emerald-300' },
+    { bg: 'bg-rose-500/10 dark:bg-rose-500/20', border: 'border-rose-500/30', text: 'text-rose-700 dark:text-rose-300' },
+    { bg: 'bg-amber-500/10 dark:bg-amber-500/20', border: 'border-amber-500/30', text: 'text-amber-700 dark:text-amber-300' },
+    { bg: 'bg-sky-500/10 dark:bg-sky-500/20', border: 'border-sky-500/30', text: 'text-sky-700 dark:text-sky-300' },
+    { bg: 'bg-purple-500/10 dark:bg-purple-500/20', border: 'border-purple-500/30', text: 'text-purple-700 dark:text-purple-300' },
+    { bg: 'bg-fuchsia-500/10 dark:bg-fuchsia-500/20', border: 'border-fuchsia-500/30', text: 'text-fuchsia-700 dark:text-fuchsia-300' },
+    { bg: 'bg-teal-500/10 dark:bg-teal-500/20', border: 'border-teal-500/30', text: 'text-teal-700 dark:text-teal-300' },
+    { bg: 'bg-orange-500/10 dark:bg-orange-500/20', border: 'border-orange-500/30', text: 'text-orange-700 dark:text-orange-300' },
+    { bg: 'bg-blue-500/10 dark:bg-blue-500/20', border: 'border-blue-500/30', text: 'text-blue-700 dark:text-blue-300' },
+    { bg: 'bg-lime-500/10 dark:bg-lime-500/20', border: 'border-lime-500/30', text: 'text-lime-700 dark:text-lime-300' },
+    { bg: 'bg-pink-500/10 dark:bg-pink-500/20', border: 'border-pink-500/30', text: 'text-pink-700 dark:text-pink-300' },
 ];
 
 function getColorForId(id: string) {
@@ -54,25 +54,24 @@ function getColorForId(id: string) {
 function privacyClasses(p?: CalendarEvent["privacy"]) {
   switch (p) {
     case "public":
-      return { dot: "bg-emerald-400", border: "border-emerald-500/50", text: "text-emerald-200" };
+      return { dot: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]", border: "border-emerald-500/30", text: "text-emerald-700 dark:text-emerald-400" };
     case "private":
-      return { dot: "bg-amber-400", border: "border-amber-500/50", text: "text-amber-200" };
+      return { dot: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]", border: "border-amber-500/30", text: "text-amber-700 dark:text-amber-400" };
     case "confidential":
-      return { dot: "bg-rose-400", border: "border-rose-500/50", text: "text-rose-200" };
+      return { dot: "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]", border: "border-rose-500/30", text: "text-rose-700 dark:text-rose-400" };
     default:
-      return { dot: "bg-slate-400", border: "border-slate-600", text: "text-slate-200" };
+      return { dot: "bg-slate-400", border: "border-slate-500/30", text: "text-text-secondary" };
   }
 }
 
-function taskClasses(status?: "task" | "in_progress" | "completed") {
+function taskClasses(status?: string) {
   switch (status) {
     case "completed":
-      return { dot: "", border: "border-emerald-500/50", text: "text-emerald-200", bg: "bg-emerald-500/10" };
+      return { dot: "", border: "border-emerald-500/30", text: "text-emerald-700 dark:text-emerald-400", bg: "bg-emerald-500/5" };
     case "in_progress":
-      return { dot: "", border: "border-amber-500/50", text: "text-amber-200", bg: "bg-amber-500/10" };
-    case "task":
+      return { dot: "", border: "border-amber-500/30", text: "text-amber-700 dark:text-amber-400", bg: "bg-amber-500/5" };
     default:
-      return { dot: "", border: "border-sky-500/50", text: "text-sky-200", bg: "bg-sky-500/10" };
+      return { dot: "", border: "border-sky-500/30", text: "text-sky-700 dark:text-sky-400", bg: "bg-sky-500/5" };
   }
 }
 
@@ -111,10 +110,10 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
 
       {/* Spanning Events (All Day / Projects Area) */}
       <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-card-border bg-background/50 relative flex-shrink-0">
-          <div className="border-r border-card-border bg-background/50 flex items-center justify-center">
-            <FiBriefcase className="text-(--text-muted) w-3 h-3" />
+          <div className="border-r border-card-border bg-foreground/[0.02] flex items-center justify-center">
+            <FiBriefcase className="text-text-muted w-3.5 h-3.5" />
           </div>
-          <div className="col-span-7 py-2 relative min-h-[40px] flex flex-col gap-1 px-1">
+          <div className="col-span-7 py-3 relative min-h-[48px] flex flex-col gap-1.5 px-1 bg-foreground/[0.01]">
               {spanningEvents.map(e => {
                 const eStart = startOfDay(new Date(e.start));
                 const eEnd = endOfDay(e.end ? new Date(e.end) : eStart);
@@ -137,8 +136,8 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
                         style={{ 
                             marginLeft: `${(startOffset / 7) * 100}%`,
                             width: `${(duration / 7) * 100}%`,
-                            paddingLeft: isStarting ? '2px' : '0px',
-                            paddingRight: isEnding ? '2px' : '0px'
+                            paddingLeft: isStarting ? '4px' : '0px',
+                            paddingRight: isEnding ? '4px' : '0px'
                         }}
                         className="h-7 relative z-10"
                     >
@@ -146,13 +145,13 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
                             <div 
                                 onClick={(ev) => { ev.stopPropagation(); onEventClick?.(e); }}
                                 className={`
-                                    h-full px-2 flex items-center gap-2 rounded-lg border cursor-pointer transition-all hover:brightness-110 active:scale-[0.98]
+                                    h-full px-2 flex items-center gap-2 rounded-lg border cursor-pointer transition-all hover:brightness-105 dark:hover:brightness-110 active:scale-[0.98] shadow-sm
                                     ${barColor.bg} ${barColor.border}
                                     ${!isStarting ? 'rounded-l-none border-l-0' : ''}
                                     ${!isEnding ? 'rounded-r-none border-r-0' : ''}
                                 `}
                             >
-                                {e.isProject && isStarting && <FiBriefcase className="w-2.5 h-2.5 flex-shrink-0 text-white" />}
+                                {e.isProject && isStarting && <FiBriefcase className={`w-2.5 h-2.5 flex-shrink-0 ${barColor.text}`} />}
                                 {e.isTimeOff && isStarting && <span className="text-[10px] flex-shrink-0">🌴</span>}
                                 <span className={`text-[9px] font-black uppercase tracking-wider truncate ${barColor.text}`}>
                                     {displayTitle}
@@ -163,7 +162,7 @@ export default function WeekGrid({ date, events = [], onSelectDateTime, onEventC
                 );
               })}
               {spanningEvents.length === 0 && (
-                  <div className="text-[9px] font-bold text-text-secondary uppercase tracking-widest text-center py-1">No multi-day projects this week</div>
+                  <div className="text-[9px] font-black text-text-muted/30 uppercase tracking-[0.2em] text-center py-1 italic">No active missions detected</div>
               )}
           </div>
       </div>

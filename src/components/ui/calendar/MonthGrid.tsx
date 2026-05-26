@@ -32,18 +32,18 @@ interface MonthGridProps {
 }
 
 const COLOR_PALETTE = [
-    { bg: 'bg-indigo-500', border: 'border-indigo-400', text: 'text-indigo-50' },
-    { bg: 'bg-emerald-500', border: 'border-emerald-400', text: 'text-emerald-50' },
-    { bg: 'bg-rose-500', border: 'border-rose-400', text: 'text-rose-50' },
-    { bg: 'bg-amber-500', border: 'border-amber-400', text: 'text-amber-50' },
-    { bg: 'bg-sky-500', border: 'border-sky-400', text: 'text-sky-50' },
-    { bg: 'bg-purple-500', border: 'border-purple-400', text: 'text-purple-50' },
-    { bg: 'bg-fuchsia-500', border: 'border-fuchsia-400', text: 'text-fuchsia-50' },
-    { bg: 'bg-teal-500', border: 'border-teal-400', text: 'text-teal-50' },
-    { bg: 'bg-orange-500', border: 'border-orange-400', text: 'text-orange-50' },
-    { bg: 'bg-blue-500', border: 'border-blue-400', text: 'text-blue-50' },
-    { bg: 'bg-lime-500', border: 'border-lime-400', text: 'text-lime-50' },
-    { bg: 'bg-pink-500', border: 'border-pink-400', text: 'text-pink-50' },
+    { bg: 'bg-indigo-500/10 dark:bg-indigo-500/20', border: 'border-indigo-500/30', text: 'text-indigo-700 dark:text-indigo-300' },
+    { bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-700 dark:text-emerald-300' },
+    { bg: 'bg-rose-500/10 dark:bg-rose-500/20', border: 'border-rose-500/30', text: 'text-rose-700 dark:text-rose-300' },
+    { bg: 'bg-amber-500/10 dark:bg-amber-500/20', border: 'border-amber-500/30', text: 'text-amber-700 dark:text-amber-300' },
+    { bg: 'bg-sky-500/10 dark:bg-sky-500/20', border: 'border-sky-500/30', text: 'text-sky-700 dark:text-sky-300' },
+    { bg: 'bg-purple-500/10 dark:bg-purple-500/20', border: 'border-purple-500/30', text: 'text-purple-700 dark:text-purple-300' },
+    { bg: 'bg-fuchsia-500/10 dark:bg-fuchsia-500/20', border: 'border-fuchsia-500/30', text: 'text-fuchsia-700 dark:text-fuchsia-300' },
+    { bg: 'bg-teal-500/10 dark:bg-teal-500/20', border: 'border-teal-500/30', text: 'text-teal-700 dark:text-teal-300' },
+    { bg: 'bg-orange-500/10 dark:bg-orange-500/20', border: 'border-orange-500/30', text: 'text-orange-700 dark:text-orange-300' },
+    { bg: 'bg-blue-500/10 dark:bg-blue-500/20', border: 'border-blue-500/30', text: 'text-blue-700 dark:text-blue-300' },
+    { bg: 'bg-lime-500/10 dark:bg-lime-500/20', border: 'border-lime-500/30', text: 'text-lime-700 dark:text-lime-300' },
+    { bg: 'bg-pink-500/10 dark:bg-pink-500/20', border: 'border-pink-500/30', text: 'text-pink-700 dark:text-pink-300' },
 ];
 
 function getColorForId(id: string) {
@@ -58,38 +58,36 @@ function getColorForId(id: string) {
 function privacyClasses(p?: CalendarEvent["privacy"]) {
   switch (p) {
     case "public":
-      return { dot: "bg-emerald-400", border: "border-emerald-500/50", text: "text-emerald-200", bg: "bg-emerald-500/10" };
+      return { dot: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]", border: "border-emerald-500/30", text: "text-emerald-700 dark:text-emerald-400", bg: "bg-emerald-500/5" };
     case "private":
-      return { dot: "bg-amber-400", border: "border-amber-500/50", text: "text-amber-200", bg: "bg-amber-500/10" };
+      return { dot: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]", border: "border-amber-500/30", text: "text-amber-700 dark:text-amber-400", bg: "bg-amber-500/5" };
     case "confidential":
-      return { dot: "bg-rose-400", border: "border-rose-500/50", text: "text-rose-200", bg: "bg-rose-500/10" };
+      return { dot: "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]", border: "border-rose-500/30", text: "text-rose-700 dark:text-rose-400", bg: "bg-rose-500/5" };
     default:
-      return { dot: "bg-slate-400", border: "border-slate-600", text: "text-slate-200", bg: "bg-slate-500/10" };
+      return { dot: "bg-slate-400", border: "border-slate-500/30", text: "text-text-secondary", bg: "bg-slate-500/5" };
   }
 }
 
-function taskClasses(status?: "task" | "in_progress" | "completed") {
+function taskClasses(status?: string) {
   switch (status) {
     case "completed":
-      return { dot: "bg-emerald-400", border: "border-emerald-500/50", text: "text-emerald-200", bg: "bg-emerald-500/10" };
+      return { dot: "", border: "border-emerald-500/30", text: "text-emerald-700 dark:text-emerald-400", bg: "bg-emerald-500/5" };
     case "in_progress":
-      return { dot: "bg-amber-400", border: "border-amber-500/50", text: "text-amber-200", bg: "bg-amber-500/10" };
-    case "task":
-      return { dot: "bg-sky-400", border: "border-sky-500/50", text: "text-sky-200", bg: "bg-sky-500/10" };
+      return { dot: "", border: "border-amber-500/30", text: "text-amber-700 dark:text-amber-400", bg: "bg-amber-500/5" };
     default:
-      return { dot: "bg-sky-400", border: "border-sky-500/50", text: "text-sky-200", bg: "bg-sky-500/10" };
+      return { dot: "", border: "border-sky-500/30", text: "text-sky-700 dark:text-sky-400", bg: "bg-sky-500/5" };
   }
 }
 
 function timeOffClasses(status?: string) {
   switch (status) {
     case "approved":
-      return { dot: "bg-emerald-400", border: "border-emerald-500/50", text: "text-emerald-200", bg: "bg-emerald-500/10" };
+      return { dot: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]", border: "border-emerald-500/30", text: "text-emerald-700 dark:text-emerald-400", bg: "bg-emerald-500/5" };
     case "rejected":
-      return { dot: "bg-rose-400", border: "border-rose-500/50", text: "text-rose-200", bg: "bg-rose-500/10" };
+      return { dot: "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]", border: "border-rose-500/30", text: "text-rose-700 dark:text-rose-400", bg: "bg-rose-500/5" };
     case "pending":
     default:
-      return { dot: "bg-amber-400", border: "border-amber-500/50", text: "text-amber-200", bg: "bg-amber-500/10" };
+      return { dot: "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]", border: "border-amber-500/30", text: "text-amber-700 dark:text-amber-400", bg: "bg-amber-500/5" };
   }
 }
 
@@ -132,9 +130,9 @@ export default function MonthGrid({ date, events = [], onSelectDate, onEventClic
     <div className="bg-card rounded-2xl overflow-hidden relative">
       <div className="overflow-hidden">
         {/* Weekday headers */}
-        <div className="grid grid-cols-7 border-b border-card-border bg-foreground/[0.05]">
+        <div className="grid grid-cols-7 border-b border-card-border bg-foreground/[0.03]">
           {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="px-4 py-3 text-center text-[10px] font-black text-(--text-muted) uppercase tracking-widest">
+            <div key={i} className="px-4 py-3 text-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">
               {format(addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), i), "EEE")}
             </div>
           ))}

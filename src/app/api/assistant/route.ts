@@ -413,32 +413,27 @@ export async function POST(req: Request) {
   try {
     const { message } = await req.json();
     
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: "GROQ_API_KEY is not set" }, { status: 500 });
-    }
-
-    const model = "openai/gpt-oss-20b";
-    const baseUrl = "https://api.groq.com/openai/v1/chat/completions";
+    const model = "gemma4:e4b";
+    const baseUrl = "http://localhost:11434/v1/chat/completions";
 
     const messages: any[] = [
       {
         role: "system",
-        content: `You are a helpful assistant for a markdown note-taking app. You have access to the user's database to search notes and tasks. Always check the database before saying you don't know.
+        content: `You are a helpful assistant for a markdown note-taking app. 
+        You have access to the user's dashboard data to summarize or chat about it.
         
-        Here is the current status of the user's dashboard (real data):
+        Here is the current status of the user's dashboard:
         ${JSON.stringify(await getAggregatedDashboardData(), null, 2)}
 
-        IMPORTANT INSTRUCTIONS:
-        1. When the user asks to "show", "list", or "display" specific items (tasks, notes, projects, events), ALWAYS call the corresponding 'displayX' tool (e.g., displayTasks).
-        2. When a 'displayX' tool returns a __WIDGET__ content marker, you MUST include that EXACT marker string in your response to the user.
-        3. Do NOT summarize the widget content in text unless asked; let the widget do the talking.
-        4. The marker triggers an interactive UI element for the user.
+        CRITICAL INSTRUCTIONS:
+        1. When the user asks to "show", "list", or "display" specific items (tasks, notes, projects, events), you MUST call the corresponding 'displayX' tool (e.g., displayTasks).
+        2. Do NOT manually list out tasks, notes, or projects. ALWAYS use the tool so the interactive UI widget is rendered for the user.
+        3. Be brief and conversational.
         `
       },
       {
         role: "assistant",
-        content: "Understood. I will use the database and interactive widgets to help you."
+        content: "Understood. I will use the tools to display widgets when you ask to see your tasks, notes, or projects."
       },
       {
         role: "user",
@@ -446,144 +441,123 @@ export async function POST(req: Request) {
       }
     ];
 
-    const MAX_TURNS = 5;
-    let currentTurn = 0;
+    console.log(`Sending request to local Ollama (${model})...`);
 
-    while (currentTurn < MAX_TURNS) {
-      console.log(`Turn ${currentTurn + 1}: Sending request to Groq...`);
+    const response = await fetch(baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        tools: tools,
+        stream: true
+      }),
+    });
 
-      const response = await fetch(baseUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: messages,
-          tools: tools,
-          tool_choice: "auto",
-          stream: true
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Groq API Error: ${response.status} - ${errorText}`);
-      }
-
-      const reader = response.body!.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let finalContent = "";
-      const toolCallsMap: Record<number, any> = {};
-      let currentToolCallIndex: number | null = null;
-
-      // Process the stream
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (data === "[DONE]") continue;
-
-            try {
-              const json = JSON.parse(data);
-              const delta = json.choices[0].delta;
-
-              if (delta.content) {
-                finalContent += delta.content;
-              }
-
-              if (delta.tool_calls) {
-                for (const tc of delta.tool_calls) {
-                  if (tc.index !== undefined && tc.index !== null) {
-                    const idx = tc.index;
-                    currentToolCallIndex = idx;
-                    if (!toolCallsMap[idx]) {
-                      toolCallsMap[idx] = {
-                        id: tc.id,
-                        type: tc.type,
-                        function: { name: "", arguments: "" }
-                      };
-                    }
-                  }
-                  
-                  if (currentToolCallIndex !== null) {
-                     if (tc.id) toolCallsMap[currentToolCallIndex].id = tc.id;
-                     if (tc.function?.name) toolCallsMap[currentToolCallIndex].function.name += tc.function.name;
-                     if (tc.function?.arguments) toolCallsMap[currentToolCallIndex].function.arguments += tc.function.arguments;
-                  }
-                }
-              }
-            } catch (e) {
-              console.error("Error parsing stream chunk:", e);
-            }
-          }
+    if (!response.ok) {
+      let errMessage = `API Error: ${response.status}`;
+      try {
+        const errData = await response.json();
+        if (errData?.error?.message) {
+          errMessage = errData.error.message;
+        } else {
+          errMessage = JSON.stringify(errData);
         }
+      } catch {
+        errMessage = await response.text();
       }
-
-      const toolCalls = Object.values(toolCallsMap);
-
-      // If no tool calls, we are done. Return the content.
-      if (toolCalls.length === 0) {
-         // Re-stream to client? Or just return JSON?
-         // The client expects a stream. Let's create a simple stream.
-         const stream = new ReadableStream({
-            start(controller) {
-              const encoder = new TextEncoder();
-              controller.enqueue(encoder.encode(finalContent));
-              controller.close();
-            }
-         });
-         return new NextResponse(stream);
-      }
-
-      // Handle tool calls
-      console.log(`Received ${toolCalls.length} tool calls`);
-      
-      // Add assistant message with tool calls to history
-      messages.push({
-        role: "assistant",
-        content: finalContent || null,
-        tool_calls: toolCalls
-      });
-
-      // Execute tools
-      for (const tc of toolCalls) {
-        const functionName = tc.function.name;
-        let functionArgs = {};
-        try {
-          functionArgs = JSON.parse(tc.function.arguments);
-        } catch (e) {
-          console.error("Failed to parse function arguments:", e);
-        }
-
-        const result = await executeTool(functionName, functionArgs);
-        
-        // If it's a widget result, we return the marker so the LLM can include it in its text
-        const content = (result.widget && result.data) 
-          ? `__WIDGET__${JSON.stringify(result)}__WIDGET__`
-          : JSON.stringify(result);
-
-        messages.push({
-          role: "tool",
-          tool_call_id: tc.id,
-          name: functionName,
-          content: content
-        });
-      }
-
-      currentTurn++;
+      throw new Error(errMessage);
     }
 
-    return NextResponse.json({ error: "Too many turns" }, { status: 500 });
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        const toolCallsMap: Record<number, any> = {};
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6);
+                if (data === "[DONE]") continue;
+
+                try {
+                  const json = JSON.parse(data);
+                  const delta = json.choices[0]?.delta || {};
+
+                  // Stream text directly to the client immediately
+                  if (delta.content) {
+                    controller.enqueue(new TextEncoder().encode(delta.content));
+                  }
+
+                  // Accumulate tool calls
+                  if (delta.tool_calls) {
+                    for (const tc of delta.tool_calls) {
+                      if (tc.index !== undefined && tc.index !== null) {
+                        const idx = tc.index;
+                        if (!toolCallsMap[idx]) {
+                          toolCallsMap[idx] = { id: tc.id, type: tc.type, function: { name: "", arguments: "" } };
+                        }
+                        if (tc.id) toolCallsMap[idx].id = tc.id;
+                        if (tc.function?.name) toolCallsMap[idx].function.name += tc.function.name;
+                        if (tc.function?.arguments) toolCallsMap[idx].function.arguments += tc.function.arguments;
+                      }
+                    }
+                  }
+                } catch (e) {
+                  console.error("Error parsing stream chunk:", e);
+                }
+              }
+            }
+          }
+
+          // Once the stream is done, check if the model invoked any tools
+          const toolCalls = Object.values(toolCallsMap);
+          if (toolCalls.length > 0) {
+            console.log(`Executing ${toolCalls.length} tool calls...`);
+            for (const tc of toolCalls) {
+              const functionName = tc.function.name;
+              let functionArgs = {};
+              try {
+                functionArgs = tc.function.arguments ? JSON.parse(tc.function.arguments) : {};
+              } catch (e) {
+                console.error("Failed to parse tool arguments:", e);
+              }
+
+              const result = await executeTool(functionName, functionArgs);
+              
+              if (result.widget && result.data) {
+                // Manually inject the widget string into the client stream
+                const widgetStr = `\n\n__WIDGET__${JSON.stringify(result)}__WIDGET__\n\n`;
+                controller.enqueue(new TextEncoder().encode(widgetStr));
+              } else if (result.error) {
+                controller.enqueue(new TextEncoder().encode(`\n\n*Error: ${result.error}*\n\n`));
+              } else if (result.message) {
+                controller.enqueue(new TextEncoder().encode(`\n\n*${result.message}*\n\n`));
+              }
+            }
+          }
+        } catch (streamErr) {
+          console.error("Stream reading error:", streamErr);
+          controller.enqueue(new TextEncoder().encode("\n\n*Error reading stream from assistant.*"));
+        } finally {
+          controller.close();
+        }
+      }
+    });
+
+    return new NextResponse(stream);
 
   } catch (error: unknown) {
     console.error("Error in assistant API:", error);

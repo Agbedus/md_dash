@@ -41,112 +41,112 @@ export function ProjectDetails({ project, users, clients, notes, projects, onClo
     const taskProgress = projectTasks.length > 0 ? (completedTasks / projectTasks.length) * 100 : 0;
 
     return (
-        <div className="fixed inset-y-0 right-0 w-full max-w-2xl z-[100] animate-in slide-in-from-right duration-500">
-            <div className="h-full bg-zinc-950/80 backdrop-blur-2xl border-l border-white/5  flex flex-col">
+        <div className="fixed inset-y-0 right-0 w-full max-w-2xl z-[100] animate-in slide-in-from-right duration-500 shadow-2xl">
+            <div className="h-full bg-background border-l border-card-border flex flex-col">
                 {/* Header */}
-                <div className="p-8 border-b border-white/5 relative overflow-hidden">
+                <div className="p-8 border-b border-card-border relative overflow-hidden bg-foreground/[0.02]">
                     <div className="absolute top-0 right-0 p-8 flex items-center gap-2">
                         <Link 
                             href={`/projects/${project.id}`}
-                            className="flex items-center gap-2 h-10 px-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 text-[11px] font-medium text-zinc-400 hover:text-white uppercase tracking-wider transition-all"
+                            className="flex items-center gap-2 h-10 px-4 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border text-[10px] font-black text-text-muted hover:text-foreground uppercase tracking-widest transition-all"
                         >
                             <FiMaximize2 className="w-3.5 h-3.5" />
-                            <span>Open Command Center</span>
+                            <span>Command Center</span>
                         </Link>
-                        <button onClick={onClose} className="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-all border border-white/5">
+                        <button onClick={onClose} className="p-2.5 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] text-text-muted hover:text-foreground transition-all border border-card-border">
                             <FiX className="w-5 h-5" />
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-3 mb-4">
-                        <span className={`px-2.5 py-1 rounded-lg text-[11px] font-medium uppercase tracking-wider border ${
-                            project.status === 'completed' ? 'bg-[var(--pastel-emerald)]/10 text-[var(--pastel-emerald)] border-[var(--pastel-emerald)]/20' :
-                            project.status === 'in_progress' ? 'bg-[var(--pastel-blue)]/10 text-[var(--pastel-blue)] border-[var(--pastel-blue)]/20' :
-                            'bg-white/[0.03] text-zinc-500 border-white/5'
+                    <div className="flex items-center gap-3 mb-6">
+                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+                            project.status === 'completed' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border-emerald-500/20' :
+                            project.status === 'in_progress' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20' :
+                            'bg-foreground/[0.03] text-text-muted border-card-border'
                         }`}>
                             {statusMapping[project.status]}
                         </span>
-                        <div className="px-2.5 py-1 rounded-lg text-[11px] font-medium font-mono text-zinc-500 bg-white/[0.03] border border-white/5 uppercase tracking-wider leading-none">
+                        <div className="px-2.5 py-1 rounded-lg text-[10px] font-black font-numbers text-text-muted bg-foreground/[0.03] border border-card-border uppercase tracking-widest leading-none">
                             {project.key}
                         </div>
                     </div>
 
-                    <h2 className="text-3xl font-medium text-white tracking-tight leading-none mb-6 group">
+                    <h2 className="text-4xl font-black text-foreground tracking-tightest leading-none mb-8 uppercase italic">
                         {project.name}
                     </h2>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Client</span>
-                            <span className="text-sm font-bold text-white uppercase tracking-tight truncate">
-                                {client ? client.companyName : 'Internal'}
+                        <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Client Partner</span>
+                            <span className="text-xs font-bold text-foreground uppercase tracking-tight truncate">
+                                {client ? client.companyName : 'Internal Asset'}
                             </span>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Owner</span>
+                        <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Mission Lead</span>
                             <div className="flex items-center gap-2">
                                 {owner ? (
                                     <>
                                         <UserAvatarGroup users={[owner]} size="sm" limit={1} />
-                                        <span className="text-sm font-bold text-white uppercase tracking-tight truncate">{owner.fullName}</span>
+                                        <span className="text-xs font-bold text-foreground uppercase tracking-tight truncate">{owner.fullName}</span>
                                     </>
-                                ) : <span className="text-sm font-bold text-zinc-600">Unassigned</span>}
+                                ) : <span className="text-xs font-bold text-text-muted italic">Unassigned</span>}
                             </div>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Budget</span>
+                        <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Capital Intel</span>
                             <div className="flex flex-col">
-                                <span className="text-sm font-medium text-white uppercase tracking-tight">${spent.toLocaleString()} / ${totalBudget.toLocaleString()}</span>
-                                <div className="w-full h-1 bg-white/[0.03] rounded-full mt-1 overflow-hidden">
+                                <span className="text-xs font-bold text-foreground uppercase tracking-tight">${spent.toLocaleString()} / ${totalBudget.toLocaleString()}</span>
+                                <div className="w-full h-1 bg-foreground/[0.05] rounded-full mt-2 overflow-hidden">
                                     <div 
-                                        className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+                                        className="h-full bg-gradient-to-r from-emerald-500 to-indigo-500"
                                         style={{ width: `${Math.min(budgetProgress, 100)}%` }}
                                     />
                                 </div>
                             </div>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Timeline</span>
-                            <div className="flex items-center gap-1.5 text-sm font-bold text-white uppercase tracking-tight">
-                                <FiCalendar className="w-3.5 h-3.5 text-zinc-500" />
-                                <span>{project.endDate ? format(new Date(project.endDate), 'MMM dd') : 'TBD'}</span>
+                        <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Timeline</span>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-foreground uppercase tracking-tight">
+                                <FiCalendar className="w-3.5 h-3.5 text-indigo-500" />
+                                <span>{project.endDate ? format(new Date(project.endDate), 'MMM dd, yyyy') : 'TBD'}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex px-8 border-b border-white/5">
+                <div className="flex px-8 border-b border-card-border bg-background">
                     <button 
                         onClick={() => setActiveTab('tasks')}
-                        className={`py-6 px-4 text-[11px] font-medium uppercase tracking-wider border-b-2 transition-all ${activeTab === 'tasks' ? 'border-[var(--pastel-indigo)] text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+                        className={`py-6 px-6 text-[10px] font-black uppercase tracking-[0.2em] border-b-2 transition-all ${activeTab === 'tasks' ? 'border-indigo-500 text-foreground' : 'border-transparent text-text-muted hover:text-foreground'}`}
                     >
-                        Tasks ({projectTasks.length})
+                        Roadmap ({projectTasks.length})
                     </button>
                     <button 
                         onClick={() => setActiveTab('notes')}
-                        className={`py-6 px-4 text-[11px] font-medium uppercase tracking-wider border-b-2 transition-all ${activeTab === 'notes' ? 'border-[var(--pastel-indigo)] text-white' : 'border-transparent text-zinc-500 hover:text-zinc-300'}`}
+                        className={`py-6 px-6 text-[10px] font-black uppercase tracking-[0.2em] border-b-2 transition-all ${activeTab === 'notes' ? 'border-indigo-500 text-foreground' : 'border-transparent text-text-muted hover:text-foreground'}`}
                     >
-                        Notes ({projectNotes.length})
+                        Intelligence ({projectNotes.length})
                     </button>
                 </div>
 
                 {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-background">
                     {activeTab === 'tasks' ? (
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Project Roadmaps</h3>
-                                <button className="flex items-center gap-2 h-9 px-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 text-[11px] font-medium uppercase tracking-wider text-zinc-400 hover:text-white transition-all">
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Deployment Pipeline</h3>
+                                <button className="flex items-center gap-2 h-9 px-4 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border text-[9px] font-black uppercase tracking-widest text-text-muted hover:text-foreground transition-all">
                                     <FiPlus className="w-3.5 h-3.5" />
-                                    <span>Add Task</span>
+                                    <span>New Objective</span>
                                 </button>
                             </div>
                             
                             {projectTasks.length > 0 ? (
-                                <div className="rounded-2xl overflow-x-auto border border-white/5 custom-scrollbar">
+                                <div className="rounded-2xl overflow-x-auto border border-card-border custom-scrollbar shadow-sm">
                                     <table className="w-full text-left text-sm min-w-[800px]">
-                                        <tbody className="divide-y divide-white/5">
+                                        <tbody className="divide-y divide-card-border">
                                             {projectTasks.map(task => (
                                                 <TaskCard 
                                                     key={task.id}
@@ -162,19 +162,19 @@ export function ProjectDetails({ project, users, clients, notes, projects, onClo
                                     </table>
                                 </div>
                             ) : (
-                                <div className="py-20 flex flex-col items-center gap-4 text-zinc-600">
-                                    <FiCheckSquare className="w-12 h-12 opacity-20" />
-                                    <span className="text-sm font-bold uppercase tracking-wider">No tasks active</span>
+                                <div className="py-20 flex flex-col items-center gap-4 text-text-muted/30">
+                                    <FiCheckSquare className="w-12 h-12" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">No Active Deployments</span>
                                 </div>
                             )}
                         </div>
                     ) : (
-                        <div className="space-y-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Context & Mentions</h3>
-                                <button className="flex items-center gap-2 h-9 px-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 text-[11px] font-medium uppercase tracking-wider text-zinc-400 hover:text-white transition-all">
+                        <div className="space-y-8">
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Strategic Context</h3>
+                                <button className="flex items-center gap-2 h-9 px-4 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] border border-card-border text-[9px] font-black uppercase tracking-widest text-text-muted hover:text-foreground transition-all">
                                     <FiPlus className="w-3.5 h-3.5" />
-                                    <span>New Note</span>
+                                    <span>New Intel</span>
                                 </button>
                             </div>
 
@@ -193,9 +193,9 @@ export function ProjectDetails({ project, users, clients, notes, projects, onClo
                                     ))}
                                 </div>
                             ) : (
-                                <div className="py-20 flex flex-col items-center gap-4 text-zinc-600">
-                                    <FiFileText className="w-12 h-12 opacity-20" />
-                                    <span className="text-sm font-bold uppercase tracking-wider">Zero documents found</span>
+                                <div className="py-20 flex flex-col items-center gap-4 text-text-muted/30">
+                                    <FiFileText className="w-12 h-12" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Zero Data Points</span>
                                 </div>
                             )}
                         </div>
@@ -203,28 +203,28 @@ export function ProjectDetails({ project, users, clients, notes, projects, onClo
                 </div>
                 
                 {/* Footer / Stats */}
-                <div className="p-8 border-t border-white/5 bg-white/[0.02]">
+                <div className="p-8 border-t border-card-border bg-foreground/[0.02]">
                     <div className="flex items-center justify-between">
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-wider">Mission Progress</span>
-                            <div className="flex items-center gap-3">
-                                <div className="w-48 h-2 bg-white/[0.03] rounded-full overflow-hidden">
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Operational Progress</span>
+                            <div className="flex items-center gap-4">
+                                <div className="w-48 h-1.5 bg-foreground/[0.05] rounded-full overflow-hidden">
                                     <div 
-                                        className="h-full bg-[var(--pastel-indigo)]"
+                                        className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
                                         style={{ width: `${taskProgress}%` }}
                                     />
                                 </div>
-                                <span className="text-xs font-medium text-white tracking-wider">{Math.round(taskProgress)}%</span>
+                                <span className="text-xs font-black text-foreground tracking-widest uppercase">{Math.round(taskProgress)}%</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-6">
-                            <div className="flex flex-col items-end gap-0.5">
-                                <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-wider">Created</span>
-                                <span className="text-[11px] font-medium text-zinc-400">{project.createdAt ? format(new Date(project.createdAt), 'MMM dd, yyyy') : '-'}</span>
+                        <div className="flex items-center gap-8">
+                            <div className="flex flex-col items-end gap-1">
+                                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Created</span>
+                                <span className="text-[10px] font-bold text-text-secondary uppercase tracking-tight">{project.createdAt ? format(new Date(project.createdAt), 'MMM dd, yyyy') : '-'}</span>
                             </div>
-                            <div className="flex flex-col items-end gap-0.5">
-                                <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-wider">Last Update</span>
-                                <span className="text-[11px] font-medium text-zinc-400">{project.updatedAt ? format(new Date(project.updatedAt), 'MMM dd, yyyy') : '-'}</span>
+                            <div className="flex flex-col items-end gap-1">
+                                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Last Intel</span>
+                                <span className="text-[10px] font-bold text-text-secondary uppercase tracking-tight">{project.updatedAt ? format(new Date(project.updatedAt), 'MMM dd, yyyy') : '-'}</span>
                             </div>
                         </div>
                     </div>

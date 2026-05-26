@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @keyframes pulse-ring {
   0% { transform: scale(0.5); opacity: 0.5; }
@@ -13,6 +14,8 @@
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-sora: var(--font-sora-sans);
+  --font-dm-sans: var(--font-dm-sans);
 
   /* Map CSS variables → Tailwind utilities */
   --color-background:   var(--background);
@@ -53,56 +56,56 @@
 }
 
 /* ── Light theme ───────────────────────────────────────────────── */
-/* Body: slate-50. Cards: white. Borders: slate-200. */
+/* Body: pure white. Cards: white. Borders: slate-200. */
 .light {
   color-scheme: light;
 
   /* Page */
-  --background:       #f8fafc;   /* slate-50  */
+  --background:       #ffffff;   /* clean white */
   --foreground:       #0f172a;   /* slate-900 — primary text */
-  --text-secondary:   #334155;   /* slate-700 — secondary text */
-  --text-muted:       #64748b;   /* slate-500 — captions / labels */
+  --text-secondary:   #1e293b;   /* slate-800 — higher contrast secondary text */
+  --text-muted:       #475569;   /* slate-600 — higher contrast muted text */
 
   /* Cards / elevated containers */
   --card-bg:          #ffffff;
-  --card-border:      #e2e8f0;   /* slate-200 */
+  --card-border:      #f1f5f9;   /* slate-100 — very subtle border for white-on-white */
 
   /* Sidebar */
   --sidebar-bg:       #ffffff;
-  --sidebar-border:   #e2e8f0;
+  --sidebar-border:   #f1f5f9;
 
   /* Generic borders & inputs */
-  --border-subtle:    #e2e8f0;
-  --input-bg:         #f1f5f9;   /* slate-100 */
+  --border-subtle:    #f1f5f9;
+  --input-bg:         #f1f5f9;   /* light silver-blue (slate-100) */
 
   /* Charts & Tooltips */
-  --chart-grid:       rgba(0, 0, 0, 0.05);
+  --chart-grid:       rgba(0, 0, 0, 0.03);
   --chart-axis:       #64748b;   /* slate-500 */
-  --tooltip-bg:       rgba(255, 255, 255, 0.9);
-  --tooltip-border:   rgba(0, 0, 0, 0.1);
-  --glass-bg:         rgba(255, 255, 255, 0.7);
+  --tooltip-bg:       rgba(255, 255, 255, 0.95);
+  --tooltip-border:   rgba(0, 0, 0, 0.05);
+  --glass-bg:         rgba(255, 255, 255, 0.85);
   --glass-border:     rgba(0, 0, 0, 0.05);
 
   /* Toast */
-  --toast-bg:         rgba(255, 255, 255, 0.95);
-  --toast-text:       #334155;   /* slate-700 */
-  --toast-border:     rgba(0, 0, 0, 0.08);
+  --toast-bg:         rgba(255, 255, 255, 0.98);
+  --toast-text:       #1e293b;   /* slate-800 */
+  --toast-border:     rgba(0, 0, 0, 0.05);
 
   /* Skeleton */
-  --skeleton-bg:      #f1f5f9;                 /* slate-100 */
-  --skeleton-shimmer: rgba(255, 255, 255, 0.6);
+  --skeleton-bg:      #f1f5f9;                 /* silver base (slate-100) */
+  --skeleton-shimmer: rgba(255, 255, 255, 0.7);
 
-  /* Shadow Overrides for Light Mode - Making them nearly invisible */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
-  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.02), 0 4px 6px -4px rgba(0, 0, 0, 0.02);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.02);
+  /* Shadow Overrides for Light Mode - Slightly more visible for contrast on white background */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
   
   /* Custom shadow token for components using arbitrary values */
-  --shadow-extra: 0 20px 50px rgba(0, 0, 0, 0.03);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.05);
+  --shadow-extra: 0 20px 50px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.06);
 }
 
 /* ── Dark theme ────────────────────────────────────────────────── */
@@ -161,7 +164,25 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans), Arial, Helvetica, sans-serif;
+}
+
+/* ── Light Mode Form Inputs Premium Styling ────────────────────── */
+.light input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]),
+.light select,
+.light textarea {
+  background-color: var(--input-bg) !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
+  color: var(--foreground) !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.light input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):focus,
+.light select:focus,
+.light textarea:focus {
+  background-color: #ffffff !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────────── */
