@@ -162,7 +162,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
             case 'high': return 'bg-[var(--pastel-rose)]/10';
             case 'medium': return 'bg-[var(--pastel-amber)]/10';
             case 'low': return 'bg-[var(--pastel-emerald)]/10';
-            default: return 'bg-zinc-400/10';
+            default: return 'bg-foreground/[0.05]';
         }
     };
     
@@ -234,22 +234,21 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        {onToggleExpand && (
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
-                                className="text-text-muted hover:text-foreground transition-colors"
-                                title={isExpanded ? "Collapse" : "Expand"}
-                            >
-                                {isExpanded ? <FiMinimize2 size={16} /> : <FiMaximize2 size={16} />}
-                            </button>
-                        )}
-                        {TypeIcon ? (
-                            <TypeIcon className={`${typeIconColorClass || 'text-zinc-400'} flex-shrink-0`} size={18} />
-                        ) : (
-                            <div className="w-4 h-4 rounded bg-zinc-800 flex-shrink-0" />
-                        )}
-                    </div>
-                </div>
+                    {onToggleExpand && (
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
+                            className="text-text-muted hover:text-foreground transition-colors"
+                            title={isExpanded ? "Collapse" : "Expand"}
+                        >
+                            {isExpanded ? <FiMinimize2 size={16} /> : <FiMaximize2 size={16} />}
+                        </button>
+                    )}
+                    {TypeIcon ? (
+                        <TypeIcon className={`${typeIconColorClass || 'text-text-muted'} flex-shrink-0`} size={18} />
+                    ) : (
+                        <div className="w-4 h-4 rounded bg-foreground/[0.05] flex-shrink-0" />
+                    )}
+                    </div>                </div>
 
                 {/* content area now flexes and scrolls internally */}
                 <div className="ql-snow text-sm text-text-secondary overflow-y-auto notes-scroll flex-1">
@@ -276,7 +275,7 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                     </div>
                                 )}
                                 {note.is_archived === 1 && (
-                                    <div className="text-zinc-500" title="Archived">
+                                    <div className="text-text-muted" title="Archived">
                                         <FiArchive size={12} className="fill-current" />
                                     </div>
                                 )}
@@ -295,17 +294,16 @@ export default function NoteCard({ note, onNoteUpdate, onNoteDelete, viewMode, s
                                             alt={note.owner.full_name || note.owner.name || 'Owner'} 
                                             width={32} 
                                             height={32} 
-                                            className="rounded-full border-2 border-zinc-900 ring-2 ring-purple-500/20 object-cover" 
+                                            className="rounded-full border-2 border-background ring-2 ring-purple-500/20 object-cover" 
                                         />
                                     ) : note.owner?.name || note.owner?.full_name ? (
                                         <div 
-                                            className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-300 flex items-center justify-center text-xs font-bold border-2 border-zinc-900 ring-2 ring-purple-500/20"
+                                            className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-300 flex items-center justify-center text-xs font-bold border-2 border-background ring-2 ring-purple-500/20"
                                         >
                                             {(note.owner.full_name || note.owner.name)!.charAt(0).toUpperCase()}
                                         </div>
                                     ) : null}
-                                </div>
-                                
+                                </div>                                
                                 {( (note.shared_with && note.shared_with.length > 0) || isSharing ) && (
                                     <div className="flex items-center gap-1 border-l border-card-border pl-3">
                                         {note.shared_with && note.shared_with.length > 0 && (
