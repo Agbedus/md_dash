@@ -74,6 +74,48 @@ const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 import { auth } from "@/auth";
 
+export const getUser = cache(async function (id: string) {
+  const session = await auth();
+
+  // @ts-expect-error accessToken is not in default session type
+  if (!session?.user?.accessToken) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // @ts-expect-error accessToken is not in default session type
+        Authorization: `Bearer ${session.user.accessToken}`,
+      },
+      next: { tags: [`user-${id}`], revalidate: 60 },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch user ${id}:`, await response.text());
+      return null;
+    }
+
+    const u = await response.json();
+    return {
+      id: u.id,
+      name: u.full_name,
+      email: u.email,
+      image: u.avatar_url,
+      fullName: u.full_name,
+      full_name: u.full_name,
+      roles: u.roles || [],
+      avatarUrl: u.avatar_url,
+      avatar_url: u.avatar_url,
+    };
+  } catch (error) {
+    console.error(`Error fetching user ${id}:`, error);
+    return null;
+  }
+});
+
 export const getUsers = cache(async function () {
   const session = await auth();
 

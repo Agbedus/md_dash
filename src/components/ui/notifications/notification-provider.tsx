@@ -3,8 +3,13 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { toast } from '@/lib/toast';
 import useSWR, { useSWRConfig } from 'swr';
-import { fetcher } from '@/lib/api';
 import { FiCheckCircle, FiInfo, FiAlertCircle } from 'react-icons/fi';
+import { 
+  getNotifications, 
+  markNotificationAsRead as apiMarkAsRead, 
+  markAllNotificationsAsRead as apiMarkAllAsRead 
+} from '@/app/lib/notification-actions';
+import { getUsers } from '@/app/(dashboard)/users/actions';
 
 export interface Notification {
   id: string;
@@ -50,22 +55,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
 
   // SWR for Users
   const { data: users = [] } = useSWR(
-    user?.accessToken ? [`${baseUrl}/api/v1/users`, user.accessToken] : null,
-    ([url, token]: [string, string]) => fetcher(url, token).then(data => data.map((u: any) => ({
-          id: u.id,
-          name: u.full_name,
-          email: u.email,
-          image: u.avatar_url,
-          fullName: u.full_name,
-          roles: u.roles || [],
-          avatarUrl: u.avatar_url,
-    })))
+    user?.accessToken ? 'users' : null,
+    () => getUsers()
   );
 
   // SWR for Notifications
   const { data: notifications = [], mutate: mutateNotifications } = useSWR<Notification[]>(
-    user?.accessToken ? [`${baseUrl}/api/v1/notifications`, user.accessToken] : null,
-    ([url, token]: [string, string]) => fetcher(url, token)
+    user?.accessToken ? 'notifications' : null,
+    () => getNotifications()
   );
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
@@ -79,37 +76,32 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode, user?: 
     );
 
     try {
-      const res = await fetch(`${baseUrl}/api/v1/notifications/${id}/read`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${user.accessToken}`,
-        },
-      });
-
-      if (!res.ok) throw new Error('Failed to mark read');
+      const res = await apiMarkAsRead(id);
+      if (!res.success) throw new Error('Failed to mark read');
       mutateNotifications();
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
       mutateNotifications();
     }
-  }, [user?.accessToken, baseUrl, mutateNotifications]);
+  }, [user?.accessToken, mutateNotifications]);
 
   const markAllAsRead = useCallback(async () => {
-    const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
-    
+    if (!user?.accessToken) return;
+
     mutateNotifications(
         (currentNotifications = []) => currentNotifications.map(n => ({ ...n, is_read: true })),
         false
     );
 
-    await Promise.all(unreadIds.map(id => 
-        fetch(`${baseUrl}/api/v1/notifications/${id}/read`, {
-             method: 'PUT',
-             headers: { 'Authorization': `Bearer ${user.accessToken}` }
-        })
-    ));
-    mutateNotifications();
-  }, [notifications, user?.accessToken, baseUrl, mutateNotifications]);
+    try {
+      const res = await apiMarkAllAsRead();
+      if (!res.success) throw new Error('Failed to mark all read');
+      mutateNotifications();
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+      mutateNotifications();
+    }
+  }, [user?.accessToken, mutateNotifications]);
 
   useEffect(() => {
     if (!user?.id || !user?.accessToken) {

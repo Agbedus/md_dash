@@ -3,9 +3,9 @@
 import React from 'react';
 import Image from 'next/image';
 import useSWR from 'swr';
-import { fetcher } from '@/lib/api';
 import { User } from '@/types/announcement';
 import { useAnnouncements } from './announcement-provider';
+import { getUser } from '@/app/(dashboard)/users/actions';
 
 interface CreatorAvatarProps {
   userId: string;
@@ -47,9 +47,9 @@ export const CreatorAvatar: React.FC<CreatorAvatarProps> = ({
   // Fetch full user profile if initialUser is missing or doesn't have an image
   const { data: fetchedUser, isLoading } = useSWR<User>(
     !initialUser?.image && !initialUser?.avatar_url && currentUser?.accessToken && userId
-      ? [`${baseUrl}/api/v1/users/${userId}`, currentUser.accessToken] 
+      ? `user-${userId}` 
       : null,
-    ([url, token]: [string, string]) => fetcher(url, token)
+    () => getUser(userId) as Promise<User>
   );
 
   const displayUser = fetchedUser || initialUser;

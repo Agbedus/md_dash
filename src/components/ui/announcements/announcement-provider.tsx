@@ -3,10 +3,14 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { toast } from '@/lib/toast';
 import useSWR from 'swr';
-import { fetcher } from '@/lib/api';
 import { Announcement, AnnouncementCreate, AnnouncementUpdate } from '@/types/announcement';
 import { HiSpeakerphone } from 'react-icons/hi';
-import { createAnnouncement as apiCreateAnnouncement, updateAnnouncement as apiUpdateAnnouncement, deleteAnnouncement as apiDeleteAnnouncement } from '@/app/(dashboard)/announcements/actions';
+import { 
+  getAnnouncements,
+  createAnnouncement as apiCreateAnnouncement, 
+  updateAnnouncement as apiUpdateAnnouncement, 
+  deleteAnnouncement as apiDeleteAnnouncement 
+} from '@/app/(dashboard)/announcements/actions';
 
 interface AnnouncementContextType {
   announcements: Announcement[];
@@ -71,8 +75,8 @@ export const AnnouncementProvider: React.FC<{ children: React.ReactNode, user?: 
 
   // SWR for Announcements
   const { data: announcements = [], mutate: mutateAnnouncements } = useSWR<Announcement[]>(
-    user?.accessToken ? [`${baseUrl}/api/v1/announcements`, user.accessToken] : null,
-    ([url, token]: [string, string]) => fetcher(url, token)
+    user?.accessToken ? 'announcements' : null,
+    () => getAnnouncements()
   );
 
   const unreadCount = announcements.filter(a => a.id && !readIds.includes(a.id)).length;
