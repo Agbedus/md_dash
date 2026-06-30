@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import ChatBubble from "@/components/ui/assistant/ChatBubble";
 import ChatInput from "@/components/ui/assistant/ChatInput";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiMessageSquare, FiList, FiTrendingUp, FiCpu } from "react-icons/fi";
+import { FiMessageSquare, FiList, FiTrendingUp, FiCpu, FiCalendar, FiClock } from "react-icons/fi";
 import { useDashboard } from "@/components/ui/dashboard-layout";
 
 interface Message {
@@ -15,6 +15,8 @@ interface Message {
 export default function AssistantPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showReportThinking, setShowReportThinking] = useState(false);
+  const [reportReady, setReportReady] = useState(false);
   const { setHideContentScroll } = useDashboard();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -27,12 +29,16 @@ export default function AssistantPage() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  }, [messages, isLoading, showReportThinking]);
 
   const handleSendMessage = async (text: string) => {
+    const isReport = /monthly report|monthly summary|end-of-month|generate.*report/i.test(text);
+    setReportReady(false);
+
     const newUserMessage: Message = { text, isUser: true, id: Date.now() };
     setMessages((prev) => [...prev, newUserMessage]);
     setIsLoading(true);
+    if (isReport) setShowReportThinking(true);
 
     const aiMessageId = Date.now() + 1;
     setMessages((prev) => [...prev, { text: "", isUser: false, id: aiMessageId }]);
@@ -45,12 +51,13 @@ export default function AssistantPage() {
       });
 
       if (!response.ok) {
+        const bodyText = await response.text();
         let errorMsg = "Failed to fetch response";
         try {
-          const errData = await response.json();
+          const errData = JSON.parse(bodyText);
           errorMsg = errData.error || errorMsg;
         } catch {
-          errorMsg = (await response.text()) || errorMsg;
+          errorMsg = bodyText || errorMsg;
         }
         throw new Error(errorMsg);
       }
@@ -61,11 +68,21 @@ export default function AssistantPage() {
       const decoder = new TextDecoder();
       let done = false;
       let accumulatedText = "";
+      let reportMarkerFound = false;
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
         accumulatedText += decoder.decode(value, { stream: !done });
+
+        if (isReport && !reportMarkerFound && accumulatedText.includes("__REPORT__")) {
+          reportMarkerFound = true;
+          setShowReportThinking(false);
+          setReportReady(true);
+          const markerIdx = accumulatedText.indexOf("__REPORT__");
+          accumulatedText = accumulatedText.slice(markerIdx + "__REPORT__".length);
+        }
+
         setMessages((prev) =>
           prev.map((msg) => (msg.id === aiMessageId ? { ...msg, text: accumulatedText } : msg))
         );
@@ -76,8 +93,10 @@ export default function AssistantPage() {
         ...prev,
         { text: `Sorry, I encountered an error: ${errString}`, isUser: false, id: Date.now() + 2 },
       ]);
+      setShowReportThinking(false);
     } finally {
       setIsLoading(false);
+      setShowReportThinking(false);
     }
   };
 
@@ -85,6 +104,7 @@ export default function AssistantPage() {
     { icon: FiList, title: "Show my tasks", desc: "View pending and active tasks", action: "Show me my pending tasks" },
     { icon: FiTrendingUp, title: "Productivity stats", desc: "Get an overview of your progress", action: "Show my productivity stats" },
     { icon: FiMessageSquare, title: "Summarize notes", desc: "Condense your recent thoughts", action: "Summarize my recent notes" },
+    { icon: FiCalendar, title: "Monthly report", desc: "Generate a full monthly summary", action: "Generate my monthly report" },
   ];
 
   return (
@@ -139,7 +159,7 @@ export default function AssistantPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-3xl mx-auto w-full mt-4"
+                className="grid grid-cols-1 md:grid-cols-4 gap-3 max-w-4xl mx-auto w-full mt-4"
                 >
                 {quickActions.map((item, idx) => (
                     <button
@@ -158,6 +178,34 @@ export default function AssistantPage() {
             </div>
             ) : (
             <div className="max-w-4xl mx-auto w-full space-y-4">
+                {showReportThinking && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-start gap-4 px-5 py-5 rounded-3xl bg-card/80 backdrop-blur-xl border border-card-border/60 max-w-2xl"
+                  >
+                    <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
+                      <motion.div
+                        animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.6, 0.3] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute inset-0 rounded-full bg-indigo-500 blur-lg"
+                      />
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                      >
+                        <FiClock className="w-5 h-5 text-indigo-400 relative z-10" />
+                      </motion.div>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-foreground">Generating your monthly report</p>
+                      <p className="text-xs text-text-muted font-medium">
+                        Analyzing tasks, projects, attendance, and more...
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
                 <AnimatePresence initial={false}>
                 {messages.map((msg) => (
                     <ChatBubble key={msg.id} message={{ text: msg.text, isUser: msg.isUser, id: msg.id }} />

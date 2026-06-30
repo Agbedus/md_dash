@@ -76,7 +76,7 @@ export default function WikiPage() {
             bg: 'bg-purple-500/10',
             subheadings: [
                 { id: 'ai-briefing', title: 'Intelligence partner', icon: FiZap },
-                { id: 'local-llm-architecture', title: 'Ollama Backend', icon: FiCpu },
+                { id: 'local-llm-architecture', title: 'NVIDIA Cloud AI', icon: FiCpu },
             ]
         },
         {
@@ -364,14 +364,14 @@ export default function WikiPage() {
                         </article>
 
                         <article id="local-llm-architecture" className="space-y-6">
-                            <h3 className="text-xl font-bold text-foreground tracking-wider">Local processor (Ollama)</h3>
+                            <h3 className="text-xl font-bold text-foreground tracking-wider">NVIDIA Cloud AI (Minimax-M3)</h3>
                             <div className="p-10 rounded-[3rem] bg-purple-500/[0.05] border border-purple-500/20 space-y-6">
                                 <p className="text-text-muted text-sm leading-relaxed font-medium">
-                                    The platform interfaces with <strong>Ollama</strong> running local-tier models (Llama 3 / Mistral). This direct-to-metal processing ensures that your intelligence deck remains offline and untouchable by third-party vectors.
+                                    The platform interfaces with <strong>NVIDIA NIM</strong> using the <strong>Minimax-M3</strong> model. This cloud-powered engine delivers intelligent task analysis, monthly report generation, and productivity insights — all secured via encrypted API calls.
                                 </p>
                                 <div className="flex gap-4">
-                                    <div className="px-4 py-2 rounded-xl bg-background border border-card-border text-[10px] font-bold text-purple-400 uppercase tracking-widest">In-VPC Reasoning</div>
-                                    <div className="px-4 py-2 rounded-xl bg-background border border-card-border text-[10px] font-bold text-purple-400 uppercase tracking-widest">Model Isolation</div>
+                                    <div className="px-4 py-2 rounded-xl bg-background border border-card-border text-[10px] font-bold text-purple-400 uppercase tracking-widest">NVIDIA NIM</div>
+                                    <div className="px-4 py-2 rounded-xl bg-background border border-card-border text-[10px] font-bold text-purple-400 uppercase tracking-widest">Minimax-M3</div>
                                 </div>
                             </div>
                         </article>

@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion } from 'framer-motion';
+import { FiDownload, FiCopy } from 'react-icons/fi';
 
 const NoteWidget = dynamic(() => import('./widgets/NoteWidget'));
 const TaskWidget = dynamic(() => import('./widgets/TaskWidget'));
 const ProjectWidget = dynamic(() => import('./widgets/ProjectWidget'));
 const EventWidget = dynamic(() => import('./widgets/EventWidget'));
 const StatsWidget = dynamic(() => import('./widgets/StatsWidget'));
+const ReportWidget = dynamic(() => import('./widgets/ReportWidget'));
 
 interface ChatBubbleProps {
   message: {
@@ -19,6 +21,45 @@ interface ChatBubbleProps {
 }
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
+  const [copied, setCopied] = useState(false);
+
+  const getCleanText = () => message.text.replace(/__WIDGET__[\s\S]*?__WIDGET__/g, '').trim();
+
+  const handleCopy = async () => {
+    const clean = getCleanText();
+    if (!clean) return;
+    try {
+      await navigator.clipboard.writeText(clean);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = clean;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleDownload = () => {
+    const clean = getCleanText();
+    if (!clean) return;
+    const blob = new Blob([clean], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `md-dash-report-${dateStr}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const isLong = message.text && message.text.length > 300;
+
   // Use a refined regex that won't miss the __WIDGET__ tags
   const parts = message.text ? message.text.split(/(__WIDGET__[\s\S]*?__WIDGET__)/g) : [];
 
@@ -56,6 +97,12 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
           return (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="my-3">
               <StatsWidget title={data.title} stats={data.stats} />
+            </motion.div>
+          );
+        case 'report':
+          return (
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="my-3">
+              <ReportWidget title={data.title} data={data} />
             </motion.div>
           );
         default:
@@ -153,6 +200,30 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
             </div>
           );
         })}
+
+        {!message.isUser && isLong && (
+          <div className="mt-3 space-y-2">
+            <p className="text-[10px] text-text-muted/60 italic font-medium">
+              This response is not saved — download or copy it to keep a record.
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-foreground/[0.05] border border-card-border text-[10px] font-bold text-text-muted uppercase tracking-widest hover:text-indigo-400 hover:border-indigo-500/30 transition-all"
+              >
+                <FiDownload className="w-3 h-3" />
+                Download .md
+              </button>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-foreground/[0.05] border border-card-border text-[10px] font-bold text-text-muted uppercase tracking-widest hover:text-indigo-400 hover:border-indigo-500/30 transition-all"
+              >
+                <FiCopy className="w-3 h-3" />
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
     </div>
   );

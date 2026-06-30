@@ -106,8 +106,8 @@ export default function LandingPage() {
 
     const faqs = [
         {
-            q: "How does Zero-Cloud sovereignty work?",
-            a: "MD-Dash executes all AI computational tasks on your local hardware using Ollama and custom models. Your calendar entries, notes, and task lists are indexed locally, meaning no private telemetry or data is sent to external servers."
+            q: "How does the AI assistant protect my data?",
+            a: "MD-Dash leverages NVIDIA cloud AI (Minimax-M3) for intelligent assistance while keeping your raw data secure. All dashboard data is processed through encrypted API calls, and your privacy remains protected."
         },
         {
             q: "Do I need a continuous internet connection?",
@@ -115,7 +115,7 @@ export default function LandingPage() {
         },
         {
             q: "What local models are supported?",
-            a: "Out of the box, we support Llama 3, Mistral, and Phi-3. The system automatically detects your local system's capabilities (Apple Silicon GPU or Nvidia CUDA cores) and configures model weights for optimal performance."
+            a: "The assistant uses NVIDIA cloud models (Minimax-M3) for intelligent task analysis, monthly report generation, and productivity insights. Policies ensure your data is handled with enterprise-grade security."
         },
         {
             q: "How is data sync secured across my devices?",
@@ -416,7 +416,7 @@ export default function LandingPage() {
                             {
                                 title: "Zero-Cloud Sovereignty",
                                 subtitle: "PRIVACY FIRST",
-                                desc: "Absolute data sovereignty with local LLM processing via Ollama. Your mission-critical data never leaves your infrastructure.",
+                                desc: "Enterprise-grade AI powered by NVIDIA cloud models (Minimax-M3). Smart analysis, monthly reports, and productivity insights on demand.",
                                 image: "/screenshots/team.png",
                                 reverse: false
                             }
