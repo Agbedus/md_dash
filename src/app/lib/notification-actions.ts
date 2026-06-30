@@ -54,7 +54,7 @@ export async function markNotificationAsRead(id: string) {
             return { success: false };
         }
 
-        revalidateTag('notifications');
+        revalidateTag('notifications', 'max');
         return { success: true };
     } catch (error) {
         console.error("Error marking notification as read:", error);
@@ -82,7 +82,7 @@ export async function markAllNotificationsAsRead() {
             })
         ));
 
-        revalidateTag('notifications');
+        revalidateTag('notifications', 'max');
         return { success: true };
     } catch (error) {
         console.error("Error marking all notifications as read:", error);
