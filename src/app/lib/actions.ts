@@ -12,7 +12,7 @@ export async function authenticate(
   formData: FormData,
 ) {
   try {
-    await signIn('credentials', formData);
+    await signIn('credentials', { ...Object.fromEntries(formData), redirectTo: '/dashboard' });
   } catch (error) {
     // Next.js redirects work by throwing a special error. 
     // We need to re-throw it so Next.js can handle the redirect.

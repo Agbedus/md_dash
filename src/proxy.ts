@@ -13,6 +13,11 @@ export default auth((req) => {
     const isWiki = nextUrl.pathname.startsWith('/wiki');
     const isPublicRoute = isLandingPage || isWiki || nextUrl.pathname.startsWith('/api') || nextUrl.pathname.startsWith('/_next') || nextUrl.pathname.startsWith('/static') || nextUrl.pathname.includes('.');
 
+    // Redirect logged-in users from landing page to dashboard (unless ?home=true)
+    if (isLandingPage && isLoggedIn && nextUrl.searchParams.get('home') !== 'true') {
+        return Response.redirect(new URL('/dashboard', nextUrl));
+    }
+
     if (isAuthRoute) {
         if (isLoggedIn) {
             return Response.redirect(new URL('/dashboard', nextUrl));
