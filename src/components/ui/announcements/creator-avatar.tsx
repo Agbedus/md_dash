@@ -42,7 +42,7 @@ export const CreatorAvatar: React.FC<CreatorAvatarProps> = ({
   className = "" 
 }) => {
   const { user: currentUser } = useAnnouncements();
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_PRODUCTION_URL || "http://127.0.0.1:8000";
 
   // Fetch full user profile if initialUser is missing or doesn't have an image
   const { data: fetchedUser, isLoading } = useSWR<User>(

@@ -3,7 +3,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 
 
-const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+const BASE_URL = process.env.BASE_URL_LOCAL || process.env.BASE_URL_PRODUCTION || "http://127.0.0.1:8000";
 const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 import { auth } from '@/auth';

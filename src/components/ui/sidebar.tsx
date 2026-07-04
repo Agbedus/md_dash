@@ -9,7 +9,6 @@ import {
   FiHome,
   FiFileText,
   FiCalendar,
-  FiCpu,
   FiSettings,
   FiLayers,
   FiCheckSquare,
@@ -127,7 +126,6 @@ const Sidebar = ({ user }: SidebarProps) => {
   const toolMenuItems = [
     { href: "/attendance", icon: FiMapPin, label: "Attendance", color: "text-sky-400" },
     { href: "/focus", icon: FiClock, label: "Focus Mode", color: "text-orange-400" },
-    { href: "/assistant", icon: FiCpu, label: "AI Assistant", color: "text-cyan-400" },
   ];
 
   const systemMenuItems = [

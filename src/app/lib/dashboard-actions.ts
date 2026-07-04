@@ -442,36 +442,44 @@ export async function getAggregatedDashboardData() {
     `;
 }
 
+let prioritiesCache: { data: any[]; timestamp: number } | null = null;
+const CACHE_TTL = 5 * 60 * 1000;
+
 export async function getAIPriorities() {
+    if (prioritiesCache && Date.now() - prioritiesCache.timestamp < CACHE_TTL) {
+        return prioritiesCache.data;
+    }
+
     const dashboardData = await getAggregatedDashboardData();
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.NVIDIA_BUILD_API_KEY;
     
     if (!apiKey) {
-        console.error("GROQ_API_KEY not set for priorities");
+        console.error("NVIDIA_BUILD_API_KEY not set for priorities");
         return [];
     }
 
     try {
-        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        const model = "minimaxai/minimax-m3";
+        const baseUrl = "https://integrate.api.nvidia.com/v1/chat/completions";
+
+        const response = await fetch(baseUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
+                model: model,
                 messages: [
                     {
                         role: "system",
-                        content: `You are a strategic productivity assistant. 
-                        Analyze the user's dashboard data (tasks, projects, events) and determine the top 5 most critical "Priorities" for today.
-                        
-                        RULES:
-                        1. Be specific. Mention project names or task titles.
-                        2. Provide a short "reason" (max 10 words) for each priority.
-                        3. Assign a priority level: 'high', 'medium', or 'low'.
-                        4. Return ONLY valid JSON in this format: {"priorities": [{"action": "string", "reason": "string", "priority": "high" | "medium" | "low"}]}
-                        `
+                        content: `You are a strategic productivity assistant. Analyze the user's dashboard data (tasks, projects, events) and determine the top 5 most critical "Priorities" for today.
+
+RULES:
+1. Be specific. Mention project names or task titles.
+2. Provide a short "reason" (max 10 words) for each priority.
+3. Assign a priority level: 'high', 'medium', or 'low'.
+4. Return ONLY valid JSON in this format: {"priorities": [{"action": "string", "reason": "string", "priority": "high" | "medium" | "low"}]}`
                     },
                     {
                         role: "user",
@@ -479,27 +487,35 @@ export async function getAIPriorities() {
                     }
                 ],
                 temperature: 0.1,
-                response_format: { type: "json_object" }
+                max_tokens: 1024
             }),
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("Failed to fetch priorities from Groq:", errorText);
+            console.error("Failed to fetch priorities from NVIDIA:", errorText);
+            if (prioritiesCache) return prioritiesCache.data;
             return [];
         }
 
         const result = await response.json();
-        const prioritiesStr = result.choices[0]?.message?.content;
+        const prioritiesStr = result.choices?.[0]?.message?.content;
         
-        if (!prioritiesStr) return [];
+        if (!prioritiesStr) {
+            if (prioritiesCache) return prioritiesCache.data;
+            return [];
+        }
 
-        const parsed = JSON.parse(prioritiesStr);
+        const cleaned = prioritiesStr.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+        const parsed = JSON.parse(cleaned);
         const priorities = parsed.priorities || parsed.items || (Array.isArray(parsed) ? parsed : []);
-        
-        return priorities.slice(0, 5);
+        const sliced = priorities.slice(0, 5);
+
+        prioritiesCache = { data: sliced, timestamp: Date.now() };
+        return sliced;
     } catch (error) {
         console.error("Error generating AI priorities:", error);
+        if (prioritiesCache) return prioritiesCache.data;
         return [];
     }
 }

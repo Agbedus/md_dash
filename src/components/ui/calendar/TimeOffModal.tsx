@@ -5,7 +5,7 @@ import { createTimeOffRequest } from "@/app/(dashboard)/time-off/actions";
 import type { TimeOffRequest, TimeOffType } from "@/types/time-off";
 import { CustomDatePicker } from "@/components/ui/inputs/custom-date-picker";
 import { format } from "date-fns";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 interface TimeOffModalProps {
     open: boolean;

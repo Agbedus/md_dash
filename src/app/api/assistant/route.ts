@@ -284,7 +284,7 @@ const tools = [
 // --- Helper Functions ---
 
 async function executeTool(name: string, args: any) {
-  console.log(`Executing tool: ${name}`, args);
+  console.debug(`Executing tool: ${name}`, args);
   try {
     if (name === "searchNotes") {
       const notes = await getNotes(50);
@@ -658,7 +658,7 @@ export async function POST(req: Request) {
       throw new Error("NVIDIA_BUILD_API_KEY environment variable is not set");
     }
 
-    console.log(`Sending request to NVIDIA NIM (${model})...`);
+    console.debug(`Sending request to NVIDIA NIM (${model})...`);
 
     const response = await fetch(baseUrl, {
       method: "POST",
@@ -741,7 +741,7 @@ export async function POST(req: Request) {
           // Once the stream is done, check if the model invoked any tools
           const toolCalls = Object.values(toolCallsMap);
           if (toolCalls.length > 0) {
-            console.log(`Executing ${toolCalls.length} tool calls...`);
+            console.debug(`Executing ${toolCalls.length} tool calls...`);
             for (const tc of toolCalls) {
               const functionName = tc.function.name;
               let functionArgs = {};

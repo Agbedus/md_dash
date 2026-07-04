@@ -4,7 +4,7 @@ import { Task } from "@/types/task";
 import { FiEdit, FiTrash2, FiCheck, FiX } from "react-icons/fi";
 import { useState } from "react";
 import TaskFormFields from "./task-form-fields";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 
 interface TaskTableProps {
     tasks: Task[];
@@ -24,7 +24,7 @@ export default function TaskTable({ tasks, updateTask, deleteTask }: TaskTablePr
             formData.set('id', editingTask!.id.toString());
             const result = await updateTask(formData);
             if (result?.success) {
-                toast.success('Task updated successfully');
+                toast.success(`Task updated — ${editingTask?.name || ''}`);
                 setEditingTask(null);
             } else {
                 toast.error(result?.error || 'Failed to update task');

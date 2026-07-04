@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiHome, FiCheckSquare, FiSearch, FiCalendar, FiMenu, FiBriefcase, FiFileText, FiClock, FiCpu, FiSettings, FiLogOut, FiMapPin } from 'react-icons/fi';
+import { FiHome, FiCheckSquare, FiSearch, FiCalendar, FiMenu, FiBriefcase, FiFileText, FiClock, FiSettings, FiLogOut, FiMapPin } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 export function MobileNav({ setIsCommandOpen }: { setIsCommandOpen: (open: boolean) => void }) {
@@ -37,7 +37,6 @@ export function MobileNav({ setIsCommandOpen }: { setIsCommandOpen: (open: boole
         { href: "/projects", icon: FiBriefcase, label: "Projects", color: "text-pink-400" },
         { href: "/notes", icon: FiFileText, label: "Notes", color: "text-yellow-400" },
         { href: "/focus", icon: FiClock, label: "Focus Mode", color: "text-orange-400" },
-        { href: "/assistant", icon: FiCpu, label: "AI Assistant", color: "text-cyan-400" },
         { href: "/settings", icon: FiSettings, label: "Settings", color: "text-indigo-400" },
     ];
 

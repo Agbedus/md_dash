@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FiAlertTriangle, FiTrash2, FiX } from 'react-icons/fi';
+import { playNotificationSound, getSoundEffectsEnabled } from '@/lib/notification-sounds';
 
 interface ConfirmationOptions {
     title: string;
@@ -36,6 +37,12 @@ export const ConfirmationProvider: React.FC<{ children: ReactNode }> = ({ childr
             setResolveRef(() => resolve);
         });
     }, []);
+
+    useEffect(() => {
+        if (options && getSoundEffectsEnabled()) {
+            playNotificationSound('error');
+        }
+    }, [options]);
 
     const handleConfirm = () => {
         if (resolveRef) resolveRef(true);

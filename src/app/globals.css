@@ -252,3 +252,23 @@ body {
 .tracking-tightest {
   letter-spacing: -0.05em;
 }
+
+/* ── New task glow (realtime creation) ──────────────────────────── */
+@keyframes new-task-fade {
+  0% {
+    box-shadow: inset 3px 0 0 0 var(--pastel-emerald);
+    background-color: rgba(52, 211, 153, 0.04);
+  }
+  70% {
+    box-shadow: inset 3px 0 0 0 var(--pastel-emerald);
+    background-color: rgba(52, 211, 153, 0.04);
+  }
+  100% {
+    box-shadow: inset 3px 0 0 0 transparent;
+    background-color: transparent;
+  }
+}
+
+.new-task-glow {
+  animation: new-task-fade 7s ease-out forwards;
+}

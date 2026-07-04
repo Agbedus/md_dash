@@ -8,7 +8,6 @@ import {
     FiHome, 
     FiCheckSquare, 
     FiCalendar, 
-    FiCpu, 
     FiSettings, 
     FiSun, 
     FiMoon, 
@@ -244,10 +243,6 @@ export function CommandMenu({ open, setOpen }: CommandMenuProps) {
                                 <Command.Item onSelect={() => runCommand(() => router.push("/projects"))} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm aria-selected:bg-foreground/[0.05] transition-colors cursor-pointer">
                                     <FiBriefcase className="text-emerald-400" />
                                     <span className="font-medium">Projects</span>
-                                </Command.Item>
-                                <Command.Item onSelect={() => runCommand(() => router.push("/assistant"))} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm aria-selected:bg-foreground/[0.05] transition-colors cursor-pointer">
-                                    <FiCpu className="text-cyan-400" />
-                                    <span className="font-medium">AI Assistant</span>
                                 </Command.Item>
                                 <Command.Item onSelect={() => runCommand(() => router.push("/settings"))} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm aria-selected:bg-foreground/[0.05] transition-colors cursor-pointer">
                                     <FiSettings className="text-indigo-400" />

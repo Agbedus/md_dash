@@ -28,6 +28,19 @@ export default function AssistantPage() {
   }, [setHideContentScroll]);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem('md_assistant_chat_messages');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+        }
+        localStorage.removeItem('md_assistant_chat_messages');
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading, showReportThinking]);
 

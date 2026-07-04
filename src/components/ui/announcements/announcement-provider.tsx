@@ -5,6 +5,7 @@ import { toast } from '@/lib/toast';
 import useSWR from 'swr';
 import { Announcement, AnnouncementCreate, AnnouncementUpdate } from '@/types/announcement';
 import { HiSpeakerphone } from 'react-icons/hi';
+import { playNotificationSound, getSoundEffectsEnabled } from '@/lib/notification-sounds';
 import { 
   getAnnouncements,
   createAnnouncement as apiCreateAnnouncement, 
@@ -49,8 +50,11 @@ export const AnnouncementProvider: React.FC<{ children: React.ReactNode, user?: 
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const socketRef = useRef<WebSocket | null>(null);
+  const shownToastIdsRef = useRef<Set<string>>(new Set());
+  const toastQueueRef = useRef<Array<() => void>>([]);
+  const processingToastRef = useRef(false);
   
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_PRODUCTION_URL || "http://127.0.0.1:8000";
 
   // Load read status from localStorage on mount
   useEffect(() => {
@@ -132,19 +136,92 @@ export const AnnouncementProvider: React.FC<{ children: React.ReactNode, user?: 
       socketRef.current = socket;
 
       socket.onopen = () => {
-        console.log('Announcement WebSocket connected');
+        console.debug('Announcement WebSocket connected');
         setIsConnected(true);
         reconnectAttemptsRef.current = 0;
+      };
+
+      const isToastShown = (key: string): boolean => {
+        if (shownToastIdsRef.current.has(key)) return true;
+        shownToastIdsRef.current.add(key);
+        setTimeout(() => shownToastIdsRef.current.delete(key), 5000);
+        return false;
+      };
+
+      const processToastQueue = () => {
+        if (processingToastRef.current || toastQueueRef.current.length === 0) return;
+        processingToastRef.current = true;
+        const next = toastQueueRef.current.shift();
+        if (next) {
+          next();
+          setTimeout(() => {
+            processingToastRef.current = false;
+            processToastQueue();
+          }, 600);
+        } else {
+          processingToastRef.current = false;
+        }
+      };
+
+      const enqueueToast = (fn: () => void) => {
+        toastQueueRef.current.push(fn);
+        if (!processingToastRef.current) {
+          processToastQueue();
+        }
       };
 
       socket.onmessage = (event: MessageEvent) => {
         try {
           const announcement: Announcement = JSON.parse(event.data);
           mutateAnnouncements((current = []) => [announcement, ...current], false);
-          
-          toast(announcement.title, {
-            icon: <HiSpeakerphone size={22} className="text-[var(--pastel-yellow)]" />,
-            duration: 6000,
+
+          const dedupKey = `announcement_${announcement.id}`;
+          if (isToastShown(dedupKey)) return;
+
+          if (getSoundEffectsEnabled(user)) {
+            const annType = announcement.type === 'critical' ? 'error' : announcement.type || 'info';
+            playNotificationSound(annType);
+          }
+
+          enqueueToast(() => {
+            const creatorImage = announcement.creator?.image || announcement.creator?.avatar_url;
+
+            if (creatorImage) {
+              toast.custom(
+                (t) => (
+                  <div
+                    className={`${t.visible ? 'animate-enter' : 'animate-leave'} flex items-start gap-3 p-3 min-w-[300px] max-w-md`}
+                    style={{
+                      background: 'var(--toast-bg)',
+                      color: 'var(--toast-text)',
+                      border: '1px solid var(--toast-border)',
+                      backdropFilter: 'blur(12px)',
+                      borderRadius: '16px',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                    }}
+                  >
+                    <img
+                      src={creatorImage}
+                      alt=""
+                      className="w-9 h-9 rounded-lg object-cover flex-shrink-0 border border-card-border"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground leading-tight">{announcement.title}</p>
+                      {announcement.content && (
+                        <p className="text-xs text-text-muted mt-1 line-clamp-2 leading-relaxed">{announcement.content}</p>
+                      )}
+                      <p className="text-[10px] text-[var(--pastel-yellow)] font-bold uppercase tracking-wider mt-1">Announcement</p>
+                    </div>
+                  </div>
+                ),
+                { duration: 6000 }
+              );
+            } else {
+              toast(announcement.title, {
+                icon: <HiSpeakerphone size={22} className="text-[var(--pastel-yellow)]" />,
+                duration: 6000,
+              });
+            }
           });
         } catch (err) {
           console.error('Failed to parse Announcement WebSocket message:', err);

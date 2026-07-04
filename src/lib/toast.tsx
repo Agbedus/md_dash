@@ -1,34 +1,51 @@
 import { toast as hotToast, ToastOptions } from 'react-hot-toast';
 import { FiCheckCircle, FiInfo, FiAlertCircle, FiXCircle } from 'react-icons/fi';
+import { playNotificationSound, getSoundEffectsEnabled } from '@/lib/notification-sounds';
 import React from 'react';
 
-const toastFunction = (message: string, options?: ToastOptions) => 
-    hotToast(message, {
+function tryPlaySound(type: string) {
+  if (typeof window !== 'undefined' && getSoundEffectsEnabled()) {
+    playNotificationSound(type);
+  }
+}
+
+const toastFunction = (message: string, options?: ToastOptions) => {
+    tryPlaySound('info');
+    return hotToast(message, {
         icon: <FiInfo size={22} className="text-blue-400" />,
         ...options,
     });
+};
 
 export const toast = Object.assign(toastFunction, {
-    success: (message: string, options?: ToastOptions) => 
-        hotToast.success(message, {
+    success: (message: string, options?: ToastOptions) => {
+        tryPlaySound('success');
+        return hotToast.success(message, {
             icon: <FiCheckCircle size={22} className="text-emerald-400" />,
             ...options,
-        }),
-    error: (message: string, options?: ToastOptions) => 
-        hotToast.error(message, {
+        });
+    },
+    error: (message: string, options?: ToastOptions) => {
+        tryPlaySound('error');
+        return hotToast.error(message, {
             icon: <FiXCircle size={22} className="text-rose-400" />,
             ...options,
-        }),
-    info: (message: string, options?: ToastOptions) => 
-        hotToast(message, {
+        });
+    },
+    info: (message: string, options?: ToastOptions) => {
+        tryPlaySound('info');
+        return hotToast(message, {
             icon: <FiInfo size={22} className="text-blue-400" />,
             ...options,
-        }),
-    warning: (message: string, options?: ToastOptions) => 
-        hotToast.error(message, {
+        });
+    },
+    warning: (message: string, options?: ToastOptions) => {
+        tryPlaySound('warning');
+        return hotToast.error(message, {
             icon: <FiAlertCircle size={22} className="text-amber-400" />,
             ...options,
-        }),
+        });
+    },
     custom: hotToast.custom,
     loading: hotToast.loading,
     dismiss: hotToast.dismiss,

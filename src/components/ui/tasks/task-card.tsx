@@ -13,12 +13,13 @@ import { CustomDatePicker } from "@/components/ui/inputs/custom-date-picker";
 import { User } from "@/types/user";
 import { Project } from "@/types/project";
 
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 import { startTaskTimer, pauseTaskTimer, stopTaskTimer } from "@/app/(dashboard)/tasks/actions";
 import { useTaskTimer } from "@/providers/task-timer-provider";
 import { canUserWorkOnTask } from "@/lib/task-auth";
 import { useConfirm } from "@/providers/confirmation-provider";
 import Image from "next/image";
+import { trackAction } from '@/lib/recent-actions';
 
 interface TaskCardProps {
     task: Task;
@@ -29,6 +30,7 @@ interface TaskCardProps {
     deleteTask?: (formData: FormData) => Promise<{ success: boolean; error?: string } | undefined>;
     hideProject?: boolean;
     isEditing?: boolean;
+    isNew?: boolean;
     onEdit?: () => void;
     onCancel?: () => void;
 }
@@ -42,6 +44,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
     deleteTask = async () => ({ success: true }),
     hideProject = false,
     isEditing = false,
+    isNew = false,
     onEdit = () => {},
     onCancel = () => {}
 }, ref) => {
@@ -120,9 +123,10 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
             formData.append('dueDate', '');
         }
         
+        trackAction('task', 'updated');
         const result = await updateTask(formData);
         if (result?.success) {
-            toast.success("Task updated successfully");
+            toast.success(`Task updated — ${task.name}`);
             onCancel();
         } else {
             toast.error(result?.error || "Failed to update task");
@@ -143,9 +147,10 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
       const formData = new FormData();
       formData.append("id", task.id.toString());
       formData.append("status", task.status === "DONE" ? "IN_PROGRESS" : "DONE");
+      trackAction('task', 'updated');
       const result = await updateTask(formData);
       if (result?.success) {
-        toast.success(`Task marked as ${task.status === "DONE" ? "in progress" : "completed"}`);
+        toast.success(`Task ${task.status === "DONE" ? "in progress" : "completed"} — ${task.name}`);
       } else {
         toast.error(result?.error || "Failed to update status");
       }
@@ -358,7 +363,7 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
         animate="animate"
         exit="exit"
         whileHover="hover"
-        className={`${rowClasses} transition-colors group items-center`} 
+        className={`${rowClasses} transition-colors group items-center ${isNew ? 'new-task-glow' : ''}`} 
         ref={ref}
       >
         <td className="px-6 py-4 text-xs font-bold text-foreground whitespace-nowrap flex items-center sticky left-0 z-10 bg-card/90 backdrop-blur-md border-r border-card-border">
@@ -517,9 +522,10 @@ const TaskCard = React.forwardRef<HTMLTableRowElement, TaskCardProps>(({
                     try {
                         const fd = new FormData();
                         fd.append('id', task.id.toString());
+                        trackAction('task', 'deleted');
                         const result = await deleteTask(fd);
                         if (result?.success) {
-                            toast.success("Task deleted successfully");
+                            toast.success(`Task deleted — ${task.name}`);
                         } else {
                             toast.error(result?.error || "Failed to delete task");
                         }

@@ -6,7 +6,7 @@ import type { AttendanceRecord, OfficeLocation, AttendancePolicy } from '@/types
 import { getDistanceInMeters } from '@/lib/distance-utils';
 import { isTimeInWindow, isAfterTime, isWithinRadius } from '@/lib/attendance-utils';
 
-const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+const BASE_URL = process.env.BASE_URL_LOCAL || process.env.BASE_URL_PRODUCTION || "http://127.0.0.1:8000";
 const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -187,8 +187,8 @@ export async function updateLocation(
         // Transform API response to match AttendanceRecord type if needed
         const record: AttendanceRecord = {
             id: data.id || 0,
-            user_id: '',
-            work_date: new Date().toISOString().split('T')[0],
+            user_id: data.user_id || '',
+            work_date: data.work_date || new Date().toISOString().split('T')[0],
             clock_in_at: data.clock_in_at || null,
             clock_out_at: data.clock_out_at || null,
             presence_state: data.presence_state,
@@ -211,12 +211,9 @@ export async function clockOutManual(force = false) {
     if (!headers) return { success: false, error: "Unauthorized" };
 
     try {
-        // ── Backend Enforcement (Policy Sync) ──
         const today = await getMyAttendanceToday();
-        if (today && today.attendance_state === 'CLOCKED_IN') {
-             // In a real scenario, we'd check policy here too if needed, 
-             // but we'll trust the API for clock-out unless specifically asked for more barriers.
-             // The user specifically asked to enforce checks on backend.
+        if (!today || today.attendance_state !== 'CLOCKED_IN') {
+            return { success: false, error: "Not currently clocked in." };
         }
 
         const res = await fetch(`${API_BASE_URL}/attendance/clock-out`, {
@@ -248,8 +245,8 @@ export async function clockOutManual(force = false) {
         
         const record: AttendanceRecord = {
             id: data.id || 0,
-            user_id: '',
-            work_date: new Date().toISOString().split('T')[0],
+            user_id: data.user_id || '',
+            work_date: data.work_date || new Date().toISOString().split('T')[0],
             clock_in_at: data.clock_in_at || null,
             clock_out_at: data.clock_out_at || null,
             presence_state: data.presence_state,

@@ -27,6 +27,8 @@ import { useUsers } from '@/hooks/use-users';
 import { useProjects } from '@/hooks/use-projects';
 import TasksLoading from '@/app/(dashboard)/tasks/loading';
 import { useConfirm } from '@/providers/confirmation-provider';
+import { on } from '@/lib/event-bus';
+import { trackAction } from '@/lib/recent-actions';
 
 export default function TasksPageClient({ 
     allTasks: initialTasks = [], 
@@ -85,7 +87,7 @@ export default function TasksPageClient({
     // Optimistic UI
     const [optimisticTasks, addOptimisticTask] = useOptimistic(
         serverTasks,
-        (state: Task[], action: { type: 'add' | 'update' | 'delete', task: Task }) => {
+        (state: Task[], action: { type: 'add' | 'update' | 'delete' | 'replace', task: Task, tempId?: number }) => {
             switch (action.type) {
                 case 'add':
                     return [...state, action.task];
@@ -93,15 +95,29 @@ export default function TasksPageClient({
                     return state.map(t => t.id === action.task.id ? action.task : t);
                 case 'delete':
                     return state.filter(t => t.id !== action.task.id);
+                case 'replace':
+                    return state.map(t => t.id === action.tempId ? action.task : t);
                 default:
                     return state;
             }
         }
     );
 
+    // Realtime-created tasks from WebSocket (live updates)
+    const [realtimeCreatedTasks, setRealtimeCreatedTasks] = useState<Task[]>([]);
+    const [newTaskIds, setNewTaskIds] = useState<Set<number>>(new Set());
+
+    // Merge realtime tasks into the display list
+    const mergedTasks = useMemo(() => {
+      const map = new Map<number, Task>();
+      realtimeCreatedTasks.forEach(t => map.set(t.id, t));
+      optimisticTasks.forEach(t => map.set(t.id, t));
+      return Array.from(map.values());
+    }, [realtimeCreatedTasks, optimisticTasks]);
+
     // Filtered tasks for visual grouping and search
     const filteredTasks = useMemo(() => {
-        const tasks = optimisticTasks.filter(task => {
+        const tasks = mergedTasks.filter(task => {
             const matchesSearch = !searchQuery || 
                 task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (task.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
@@ -162,7 +178,65 @@ export default function TasksPageClient({
         const uniqueTasksMap = new Map();
         sorted.forEach(t => uniqueTasksMap.set(t.id, t));
         return Array.from(uniqueTasksMap.values());
-    }, [optimisticTasks, searchQuery, filterPriority, filterStatus, filterMyTasks, currentUserId, viewMode, tableTab]);
+    }, [mergedTasks, searchQuery, filterPriority, filterStatus, filterMyTasks, currentUserId, viewMode, tableTab]);
+
+    useEffect(() => {
+      const unsub = on('task:created', (data: any) => {
+        const taskId = data.id;
+        if (!taskId) return;
+
+        const newTask: Task = {
+          id: taskId,
+          name: data.name || 'Untitled',
+          description: data.description || null,
+          status: data.status || 'TODO',
+          priority: data.priority || 'medium',
+          dueDate: data.due_date || null,
+          qa_required: data.qa_required || false,
+          review_required: data.review_required || false,
+          depends_on_id: data.depends_on_id || null,
+          createdAt: data.created_at || new Date().toISOString(),
+          updatedAt: data.updated_at || new Date().toISOString(),
+          projectId: data.project_id || null,
+          userId: data.user_id || null,
+          owner: data.owner ? {
+            id: data.owner.id,
+            email: data.owner.email,
+            fullName: data.owner.full_name || null,
+            avatarUrl: data.owner.avatar_url || null,
+            roles: [],
+          } : undefined,
+          assignees: (data.assignee_users || []).map((u: any) => ({
+            user: {
+              id: u.id,
+              email: u.email,
+              fullName: u.full_name || null,
+              avatarUrl: u.avatar_url || null,
+              roles: [],
+            }
+          })),
+          assigneeIds: data.assignee_ids || [],
+          timeLogs: [],
+          totalHours: 0,
+        };
+
+        setRealtimeCreatedTasks(prev => [newTask, ...prev]);
+        setNewTaskIds(prev => {
+          const next = new Set(prev);
+          next.add(taskId);
+          return next;
+        });
+        setTimeout(() => {
+          setNewTaskIds(prev => {
+            const next = new Set(prev);
+            next.delete(taskId);
+            return next;
+          });
+          setRealtimeCreatedTasks(prev => prev.filter(t => t.id !== taskId));
+        }, 7000);
+      });
+      return unsub;
+    }, []);
 
     // New task state
     const [newAssignees, setNewAssignees] = useState<(string | number)[]>([]);
@@ -200,37 +274,90 @@ export default function TasksPageClient({
     }, [isAddingTask]);
 
     const handleCreate = async (formData: FormData) => {
-        // Optimistic Update
-        // Optimistic Update
         const newTask = createOptimisticTask(formData, users);
         startTransition(() => {
             addOptimisticTask({ type: 'add', task: newTask });
         });
 
+        trackAction('task', 'created');
+
         setErrorMsg(null);
         setSavingCreate(true);
-        // Don't close form yet - wait for success
         try {
             const result = await createTask(formData);
             if (result && result.error) {
                 setErrorMsg(result.error);
-                 // We don't have an easy way to revert optimistic update here without reloading, 
-                 // but loadTasks() below will eventually fix it or user sees error.
-             } else {
-                 toast.success('Task created successfully');
-                 setIsAddingTask(false);
-                 setIsDirty(false);
-                 // Reset form state
-                 setNewAssignees([]);
-                 setNewProject(projectId || null);
-                 setNewQARequired(false);
-                 setNewReviewRequired(false);
-                 setNewDependsOn(null);
-                 if (newNameRef.current) newNameRef.current.value = '';
+                startTransition(() => {
+                    addOptimisticTask({ type: 'delete', task: newTask });
+                });
+            } else if (result?.task) {
+                const apiTask = result.task;
+                const owner = users.find((u: any) => u.id === apiTask.user_id);
+                const realTask: Task = {
+                    id: apiTask.id,
+                    name: apiTask.name,
+                    description: apiTask.description,
+                    status: apiTask.status as Task['status'],
+                    priority: apiTask.priority as Task['priority'],
+                    dueDate: apiTask.due_date,
+                    qa_required: apiTask.qa_required,
+                    review_required: apiTask.review_required,
+                    depends_on_id: apiTask.depends_on_id,
+                    createdAt: apiTask.created_at,
+                    updatedAt: apiTask.updated_at,
+                    projectId: apiTask.project_id,
+                    userId: apiTask.user_id,
+                    owner: owner || undefined,
+                    assignees: [],
+                    assigneeIds: (() => {
+                        if (apiTask.assignee_ids?.length) return apiTask.assignee_ids;
+                        if (apiTask.task_assignees?.length) return apiTask.task_assignees.map(a => String(a.user_id));
+                        if (apiTask.assignees?.length) return apiTask.assignees.map(a => String(a.id));
+                        return [];
+                    })(),
+                    timeLogs: apiTask.time_logs,
+                    totalHours: apiTask.total_hours,
+                };
+
+                startTransition(() => {
+                    addOptimisticTask({ type: 'replace', tempId: -1, task: realTask });
+                });
+
+                mutate((current: Task[][] | undefined) => {
+                    if (!current) return current;
+                    return current.map(page =>
+                        page.map(t => t.id === -1 ? realTask : t)
+                    );
+                }, { revalidate: false });
+
+                setNewTaskIds(prev => {
+                    const next = new Set(prev);
+                    next.add(apiTask.id);
+                    return next;
+                });
+                setTimeout(() => {
+                    setNewTaskIds(prev => {
+                        const next = new Set(prev);
+                        next.delete(apiTask.id);
+                        return next;
+                    });
+                }, 7000);
+
+                toast.success('Task created successfully');
+                setIsAddingTask(false);
+                setIsDirty(false);
+                setNewAssignees([]);
+                setNewProject(projectId || null);
+                setNewQARequired(false);
+                setNewReviewRequired(false);
+                setNewDependsOn(null);
+                if (newNameRef.current) newNameRef.current.value = '';
             }
-            mutate();
         } catch (err) {
             console.error(err);
+            startTransition(() => {
+                addOptimisticTask({ type: 'delete', task: newTask });
+            });
             setErrorMsg('Could not save the new task. Please try again.');
         } finally {
             setSavingCreate(false);
@@ -253,6 +380,7 @@ export default function TasksPageClient({
         }
 
         setErrorMsg(null);
+        trackAction('task', 'updated');
         try {
             const result = await updateTask(formData);
             if (result && result.error) {
@@ -281,6 +409,7 @@ export default function TasksPageClient({
         }
         
         setErrorMsg(null);
+        trackAction('task', 'deleted');
         try {
             const result = await deleteTask(formData);
             if (result && result.error) {
@@ -446,6 +575,7 @@ export default function TasksPageClient({
                                                 updateTask={handleUpdate}
                                                 deleteTask={handleDelete}
                                                 isEditing={editingTaskId === task.id}
+                                                isNew={newTaskIds.has(task.id)}
                                                 onEdit={() => setEditingTaskId(task.id)}
                                                 onCancel={() => setEditingTaskId(null)}
                                             />

@@ -151,7 +151,9 @@ export function LocationProvider({
     const watchIdRef = useRef<number | null>(null);
     const lastSyncTimeRef = useRef<number>(0);
     const presenceStateRef = useRef<PresenceState | null>(null);
-    const attendanceStateRef = useRef<AttendanceState | null>(null); // To avoid dependency loop in callbacks
+    const attendanceStateRef = useRef<AttendanceState | null>(null);
+    const suppressSyncToastRef = useRef(false);
+    const isTrackingRef = useRef(false);
 
     // Keep ref in sync for callbacks
     useEffect(() => {
@@ -172,7 +174,7 @@ export function LocationProvider({
                 setIsInitialized(true);
             }
 
-            console.log('[LocationProvider] Syncing configuration with server...');
+            console.debug('[LocationProvider] Syncing configuration with server...');
             const offices = await getOfficeLocations();
             officesRef.current = offices;
             if (offices.length > 0) {
@@ -223,14 +225,11 @@ export function LocationProvider({
 
 
     const handlePositionUpdate = useCallback(async (position: GeolocationPosition) => {
-        if (!isInitialized) return;
-        
         const { latitude, longitude, accuracy } = position.coords;
-        const now = new Date();
         
         // 1. Instant UI Update
         setLocation({ latitude, longitude, accuracy });
-        setLastPulse(now);
+        setLastPulse(new Date());
 
         const offices = officesRef.current;
         if (!offices || offices.length === 0) return;
@@ -260,21 +259,16 @@ export function LocationProvider({
         const stateChanged = prevPres !== localPresence;
         
         if (stateChanged) {
-            console.log(`[LocationProvider] Instant transition: ${prevPres} -> ${localPresence}`);
             presenceStateRef.current = localPresence;
-            // setPresenceState was here; the useMemo handles UI update via setLocation above
         }
 
-        // 3. Dynamic Sync: Location + Configuration
+        // 3. Dynamic Sync (throttled)
         const timeSinceLastSync = Date.now() - lastSyncTimeRef.current;
         const shouldSync = stateChanged || timeSinceLastSync >= SYNC_THROTTLE_MS;
 
-        if (shouldSync && accuracy <= 50) {
+        if (shouldSync && accuracy <= 50 && isInitialized) {
             setIsPolling(true);
             try {
-                // Ensure configuration is fresh
-                await syncConfiguration(true);
-                
                 const result = await updateLocation(latitude, longitude, accuracy, activeOffice.id);
                 if (result.success && result.record) {
                     const newAtt = result.record.attendance_state;
@@ -289,7 +283,6 @@ export function LocationProvider({
                     
                     // Sync presence state (confirming local guess)
                     if (backendPres && backendPres !== localPresence) {
-                        console.log(`[LocationProvider] Backend correction: ${localPresence} -> ${backendPres}`);
                         presenceStateRef.current = backendPres;
                         setConfirmedPresenceState(backendPres);
                     }
@@ -301,11 +294,12 @@ export function LocationProvider({
                     mutate('my-attendance-today');
                     if (prevAtt !== newAtt || (stateChanged && backendPres !== prevPres)) {
                         mutate('team-attendance-today');
-                        if (prevAtt && prevAtt !== newAtt) {
+                        if (prevAtt && prevAtt !== newAtt && !suppressSyncToastRef.current) {
                             if (newAtt === 'CLOCKED_IN') toast.success('Confirmed in office!');
                             else if (newAtt === 'CLOCKED_OUT') toast.info('Attendance finalized.');
                         }
                     }
+                    suppressSyncToastRef.current = false;
                 }
             } catch (err) {
                 console.error('Backend sync failed:', err);
@@ -313,7 +307,7 @@ export function LocationProvider({
                 setIsPolling(false);
             }
         }
-    }, [isInitialized, mutate, syncConfiguration]);
+    }, [mutate]);
 
     const startTracking = useCallback(() => {
         if (!navigator.geolocation) return;
@@ -330,6 +324,13 @@ export function LocationProvider({
                     toast.error('Location permission denied. Tracking disabled.');
                     setIsTracking(false);
                     localStorage.setItem(STORAGE_KEY, 'false');
+                } else {
+                    // Restart watch on transient errors (POSITION_UNAVAILABLE, TIMEOUT)
+                    navigator.geolocation.clearWatch(watchIdRef.current!);
+                    watchIdRef.current = null;
+                    setTimeout(() => {
+                        if (isTrackingRef.current) startTracking();
+                    }, 3000);
                 }
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
@@ -343,15 +344,20 @@ export function LocationProvider({
         }
     }, []);
 
-    // Start/stop watch when tracking changes
+    // Keep ref in sync for callbacks
     useEffect(() => {
-        if (isTracking) {
+        isTrackingRef.current = isTracking;
+    }, [isTracking]);
+
+    // Start/stop watch when tracking changes (wait for initialization)
+    useEffect(() => {
+        if (isTracking && isInitialized) {
             startTracking();
-        } else {
+        } else if (!isTracking) {
             stopTracking();
         }
         return () => stopTracking();
-    }, [isTracking, startTracking, stopTracking]);
+    }, [isTracking, isInitialized, startTracking, stopTracking]);
 
     const toggleTracking = useCallback(() => {
         const next = !isTracking;
@@ -366,6 +372,7 @@ export function LocationProvider({
 
     const manualClockIn = useCallback(async () => {
         setIsLoading(true);
+        suppressSyncToastRef.current = true;
         try {
             if (!navigator.geolocation) {
                 toast.error('Geolocation not supported');
@@ -488,6 +495,7 @@ export function LocationProvider({
 
     const manualClockOut = useCallback(async (force = false) => {
         setIsLoading(true);
+        suppressSyncToastRef.current = true;
         try {
             const now = new Date();
             // ── 2. Optimistic Update ──
@@ -569,9 +577,6 @@ export function LocationProvider({
             const { latitude, longitude, accuracy } = position.coords;
             setLocation({ latitude, longitude, accuracy });
             
-            // Sync both configuration and location
-            await syncConfiguration(true);
-            
             // Sync with backend
             const offices = officesRef.current;
             const resolvedId = offices.length > 0 ? offices[0].id : undefined;
@@ -587,7 +592,7 @@ export function LocationProvider({
         } finally {
             setIsLoading(false);
         }
-    }, [mutate, syncConfiguration]);
+    }, [mutate]);
 
     const contextValue = React.useMemo(() => ({
         isTracking,

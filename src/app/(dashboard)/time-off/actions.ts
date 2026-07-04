@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import type { TimeOffRequest } from '@/types/time-off';
 
-const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+const BASE_URL = process.env.BASE_URL_LOCAL || process.env.BASE_URL_PRODUCTION || "http://127.0.0.1:8000";
 const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 export async function getTimeOffRequests(): Promise<TimeOffRequest[]> {

@@ -7,6 +7,7 @@ import { AnnouncementDrawer } from './announcements/announcement-drawer';
 import { MobileNav } from './mobile-nav';
 import { ConfirmationProvider } from '@/providers/confirmation-provider';
 import { useGlobalActions } from '@/providers/global-action-provider';
+import AssistantOrb from './assistant/assistant-orb';
 
 interface DashboardContextType {
   isMobileExpanded: boolean;
@@ -78,6 +79,7 @@ export default function DashboardLayout({
               </div>
               <MobileNav setIsCommandOpen={setIsCommandOpen} />
               <AnnouncementDrawer />
+              <AssistantOrb />
             </div>
           </ConfirmationProvider>
         </AnnouncementProvider>

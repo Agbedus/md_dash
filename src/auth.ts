@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { z } from "zod";
 
-const BASE_URL = process.env.BASE_URL_LOCAL || "http://127.0.0.1:8000";
+const BASE_URL = process.env.BASE_URL_LOCAL || process.env.BASE_URL_PRODUCTION || "http://127.0.0.1:8000";
 const API_BASE_URL = `${BASE_URL}/api/v1`;
 
 export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
@@ -30,7 +30,6 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
             formData.append('username', email);
             formData.append('password', password);
 
-            console.log(`Attempting login for ${email} at ${API_BASE_URL}/auth/login`);
             const res = await fetch(`${API_BASE_URL}/auth/login`, {
               method: 'POST',
               body: formData,
@@ -47,7 +46,6 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
             const data = await res.json();
             
             // Fetch user profile
-            console.log(`Fetching profile for ${email}`);
             const userRes = await fetch(`${API_BASE_URL}/users/me`, {
                 headers: {
                     'Authorization': `Bearer ${data.access_token}`
@@ -67,7 +65,6 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
                     return null;
                 }
 
-                console.log(`Login successful for ${email} (ID: ${userProfile.id})`);
                 return {
                     id: userProfile.id,
                     name: userProfile.full_name,
@@ -87,7 +84,6 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
           }
         }
         
-        console.log("Invalid credentials format");
         return null;
       },
     }),
