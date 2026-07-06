@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSend, FiMaximize2, FiZap, FiCpu, FiTerminal } from 'react-icons/fi';
+import { FiSend, FiMaximize2, FiChevronDown } from 'react-icons/fi';
 import { useRouter, usePathname } from 'next/navigation';
 import ChatBubble from './ChatBubble';
+import PipMascot from './pip-mascot';
 
 interface Message {
   id?: number;
@@ -25,14 +26,19 @@ export default function AssistantOrb() {
   const [isFocused, setIsFocused] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [input, setInput] = useState('');
   const [greetingIdx, setGreetingIdx] = useState(0);
-  const [iconIdx, setIconIdx] = useState(0);
-  const ICONS = [FiZap, FiCpu, FiTerminal];
+  const [typedText, setTypedText] = useState('');
+  const [typingDone, setTypingDone] = useState(false);
+  const [pipVariantIdx, setPipVariantIdx] = useState(0);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const PIP_VARIANTS = ['classic', 'smart', 'sleepy', 'cool', 'shocked', 'spicy', 'lovely', 'cyber'] as const;
   const router = useRouter();
   const pathname = usePathname();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const typingRef = useRef<NodeJS.Timeout | null>(null);
 
   const isOnAssistantPage = pathname === '/assistant';
 
@@ -46,20 +52,50 @@ export default function AssistantOrb() {
   }, [isFocused]);
 
   useEffect(() => {
+    const greeting = GREETINGS[greetingIdx];
+    let charIdx = 0;
+    setTypedText('');
+    setTypingDone(false);
+
+    if (typingRef.current) clearInterval(typingRef.current);
+
+    typingRef.current = setInterval(() => {
+      charIdx++;
+      if (charIdx <= greeting.length) {
+        setTypedText(greeting.slice(0, charIdx));
+      } else {
+        setTypingDone(true);
+        if (typingRef.current) clearInterval(typingRef.current);
+      }
+    }, 35);
+
+    return () => {
+      if (typingRef.current) clearInterval(typingRef.current);
+    };
+  }, [greetingIdx]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
-      setIconIdx(prev => (prev + 1) % ICONS.length);
-    }, 400);
+      setPipVariantIdx(prev => (prev + 1) % PIP_VARIANTS.length);
+    }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [PIP_VARIANTS.length]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
+  useEffect(() => {
+    if (isMobileOpen) {
+      setTimeout(() => inputRef.current?.focus(), 350);
+    }
+  }, [isMobileOpen]);
+
   const handleSendMessage = useCallback(async (text: string) => {
     const userMsg: Message = { text, isUser: true, id: Date.now() };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
+    setHasError(false);
 
     const aiMsgId = Date.now() + 1;
     setMessages(prev => [...prev, { text: '', isUser: false, id: aiMsgId }]);
@@ -95,6 +131,8 @@ export default function AssistantOrb() {
       }
     } catch (error) {
       const errString = error instanceof Error ? error.message : 'Unknown error';
+      setHasError(true);
+      setTimeout(() => setHasError(false), 5000);
       setMessages(prev => [
         ...prev,
         { text: `Sorry, I encountered an error: ${errString}`, isUser: false, id: Date.now() + 2 },
@@ -128,7 +166,9 @@ export default function AssistantOrb() {
   if (isOnAssistantPage) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">
+    <>
+    {/* Desktop AI Assistant Bar */}
+    <div className="hidden md:flex fixed bottom-0 left-0 right-0 z-50 justify-center">
       {/* Backdrop blur when focused with messages */}
       <AnimatePresence>
         {isFocused && messages.length > 0 && (
@@ -171,25 +211,19 @@ export default function AssistantOrb() {
         </AnimatePresence>
 
         <div className="relative mx-4 mb-2">
-          <div className="relative rounded-3xl bg-zinc-950 overflow-hidden border border-white/[0.05]">
+          <div className="relative rounded-3xl bg-background border border-card-border overflow-hidden shadow-sm">
             <div className="absolute inset-0 pointer-events-none z-0 shimmer-sweep" />
 
             <div className="flex items-center gap-3 px-4 py-3 relative z-10">
-              <div className="shrink-0">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={iconIdx}
-                    initial={{ opacity: 0, scale: 0.6 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.6 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    {(() => {
-                      const Icon = ICONS[iconIdx];
-                      return <Icon className="w-4 h-4 text-indigo-400" />;
-                    })()}
-                  </motion.div>
-                </AnimatePresence>
+              <div className="shrink-0 flex items-center justify-center w-8 h-8">
+                <motion.div
+                  key={pipVariantIdx}
+                  initial={{ opacity: 0, scale: 0.6, rotate: -10 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <PipMascot variant={hasError ? 'sleepy' : PIP_VARIANTS[pipVariantIdx]} status={isLoading ? 'thinking' : hasError ? 'error' : 'idle'} size="sm" errorMessage={hasError ? 'Connection error' : undefined} />
+                </motion.div>
               </div>
 
               <div className="flex-1 min-w-0">
@@ -201,7 +235,7 @@ export default function AssistantOrb() {
                     onKeyDown={handleKeyDown}
                     placeholder="Ask me anything..."
                     rows={1}
-                    className="w-full bg-transparent text-base text-white placeholder-zinc-500 resize-none focus:outline-none scrollbar-hide font-medium"
+                    className="w-full !bg-white dark:!bg-transparent text-base text-foreground placeholder:text-text-muted resize-none focus:outline-none focus:!bg-white dark:focus:!bg-transparent focus:!shadow-none scrollbar-hide font-medium"
                     style={{ minHeight: '22px', maxHeight: '120px' }}
                   />
                 ) : (
@@ -213,18 +247,12 @@ export default function AssistantOrb() {
                     className="w-full text-left"
                   >
                     <div className="relative h-6 overflow-hidden">
-                      <AnimatePresence mode="wait">
-                        <motion.p
-                          key={greetingIdx}
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          exit={{ y: -20, opacity: 0 }}
-                          transition={{ duration: 0.35, ease: 'easeInOut' }}
-                          className="text-base text-zinc-400 font-medium"
-                        >
-                          {GREETINGS[greetingIdx]}
-                        </motion.p>
-                      </AnimatePresence>
+                      <p className="text-base text-text-muted font-medium">
+                        {typedText}
+                        {!typingDone && (
+                          <span className="animate-pulse">|</span>
+                        )}
+                      </p>
                     </div>
                   </button>
                 )}
@@ -233,7 +261,7 @@ export default function AssistantOrb() {
               <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   onClick={handleOpenFullPage}
-                  className="p-2 rounded-xl text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.06] transition-all"
+                  className="p-2 rounded-xl text-text-muted hover:text-foreground hover:bg-foreground/[0.06] transition-all"
                   title="Open full screen"
                 >
                   <FiMaximize2 className="w-4 h-4" />
@@ -241,7 +269,7 @@ export default function AssistantOrb() {
                 <button
                   onClick={handleSend}
                   disabled={!input.trim()}
-                  className="p-2.5 bg-zinc-700/60 text-white/80 rounded-2xl hover:bg-zinc-600/60 hover:text-white transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none"
+                  className="p-2.5 bg-foreground/[0.08] text-foreground/80 rounded-2xl hover:bg-foreground/[0.14] hover:text-foreground transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none"
                   aria-label="Send"
                 >
                   <FiSend className="w-4 h-4" />
@@ -261,10 +289,120 @@ export default function AssistantOrb() {
           100% { transform: translateX(100%); }
         }
         .shimmer-sweep {
-          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
+          background: linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0.08) 50%, transparent 100%);
           animation: shimmer-sweep 6s ease-in-out infinite;
         }
       `}</style>
     </div>
+
+    {/* Mobile AI Assistant */}
+    <div className="md:hidden">
+      {/* Floating trigger button */}
+      {!isMobileOpen && (
+        <div className="fixed right-5 z-50" style={{ bottom: 'calc(4rem + 12px)' }}>
+          <button
+            onClick={() => setIsMobileOpen(true)}
+            className="flex items-center justify-center w-12 h-12 rounded-full bg-background/90 border border-card-border shadow-lg backdrop-blur-md hover:bg-background active:scale-95 transition-all"
+            aria-label="Open AI Assistant"
+          >
+            <PipMascot variant={PIP_VARIANTS[pipVariantIdx]} status={hasError ? 'error' : 'idle'} size="sm" errorMessage={hasError ? 'Connection error' : undefined} />
+          </button>
+        </div>
+      )}
+
+      {/* Expanded bottom sheet */}
+      <AnimatePresence>
+        {isMobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+              onClick={() => setIsMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed left-0 right-0 z-50 flex flex-col bg-background/95 backdrop-blur-xl border-t border-card-border rounded-t-2xl shadow-xl"
+              style={{ bottom: '64px', maxHeight: '75vh' }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 shrink-0">
+                <div className="flex items-center gap-2">
+                  <motion.div
+                    key={pipVariantIdx}
+                    initial={{ opacity: 0, scale: 0.6, rotate: -10 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <PipMascot variant={hasError ? 'sleepy' : PIP_VARIANTS[pipVariantIdx]} status={isLoading ? 'thinking' : hasError ? 'error' : 'idle'} size="sm" errorMessage={hasError ? 'Connection error' : undefined} />
+                  </motion.div>
+                  <span className="text-sm font-medium text-foreground">AI Assistant</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={handleOpenFullPage}
+                    className="p-2 rounded-xl text-text-muted hover:text-foreground hover:bg-foreground/[0.06] transition-all"
+                    title="Open full screen"
+                  >
+                    <FiMaximize2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setIsMobileOpen(false)}
+                    className="p-2 rounded-xl text-text-muted hover:text-foreground hover:bg-foreground/[0.06] transition-all"
+                    title="Close"
+                  >
+                    <FiChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3 min-h-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                {messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-24">
+                    <p className="text-sm text-text-muted">Ask me anything...</p>
+                  </div>
+                ) : (
+                  messages.map(msg => (
+                    <ChatBubble key={msg.id} message={msg} />
+                  ))
+                )}
+                <div ref={bottomRef} />
+              </div>
+
+              {/* Input */}
+              <div className="px-4 py-3 shrink-0 border-t border-card-border">
+                <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-foreground/[0.05] border border-card-border">
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask me anything..."
+                    rows={1}
+                    className="flex-1 bg-transparent text-sm text-foreground placeholder:text-text-muted resize-none focus:outline-none"
+                    style={{ minHeight: '20px', maxHeight: '80px' }}
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={!input.trim()}
+                    className="p-2 bg-foreground/[0.08] text-foreground/80 rounded-xl hover:bg-foreground/[0.14] hover:text-foreground transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none shrink-0"
+                    aria-label="Send"
+                  >
+                    <FiSend className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+    </>
   );
 }

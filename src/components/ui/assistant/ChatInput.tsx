@@ -138,7 +138,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
 
   return (
     <div className="p-4 pt-2">
-      <div className="bg-card/90 backdrop-blur-xl p-2 relative flex flex-col w-full max-w-full rounded-[2rem] border border-card-border shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500/30">
+      <div className="bg-card p-2 relative flex flex-col w-full max-w-full rounded-[2rem] border border-card-border shadow-sm">
         <TextareaAutosize
           minRows={1}
           maxRows={8}
@@ -146,7 +146,7 @@ export default function ChatInput({ onSendMessage }: ChatInputProps) {
           onChange={(e) => { setBaseText(e.target.value); setInterimText(''); }}
           onKeyDown={handleKeyDown}
           placeholder="Type a message or use voice..."
-          className="flex-grow bg-transparent text-foreground placeholder:text-text-muted px-4 py-3 resize-none focus:outline-none scrollbar-hide"
+          className="flex-grow !bg-white dark:!bg-transparent text-foreground placeholder:text-text-muted px-4 py-3 resize-none focus:outline-none focus:!bg-white dark:focus:!bg-transparent focus:!shadow-none scrollbar-hide"
           aria-label="Message"
         />
 

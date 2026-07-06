@@ -160,7 +160,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
           max-w-2xl px-5 py-4 overflow-hidden relative
           ${message.isUser
             ? 'bg-indigo-600 text-white rounded-2xl rounded-br-md'
-            : 'bg-card/60 backdrop-blur-xl text-foreground rounded-2xl rounded-bl-md border border-card-border/50'
+            : 'bg-card/80 backdrop-blur-xl text-foreground rounded-2xl rounded-bl-md border border-card-border'
           }
         `}
       >

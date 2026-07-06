@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import ChatBubble from "@/components/ui/assistant/ChatBubble";
 import ChatInput from "@/components/ui/assistant/ChatInput";
+import PipMascot from "@/components/ui/assistant/pip-mascot";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMessageSquare, FiList, FiTrendingUp, FiCpu, FiCalendar, FiClock } from "react-icons/fi";
 import { useDashboard } from "@/components/ui/dashboard-layout";
@@ -15,8 +16,12 @@ interface Message {
 export default function AssistantPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [showReportThinking, setShowReportThinking] = useState(false);
   const [reportReady, setReportReady] = useState(false);
+  const [pipVariantIdx, setPipVariantIdx] = useState(0);
+  const PIP_VARIANTS = ['classic', 'smart', 'sleepy', 'cool', 'shocked', 'spicy', 'lovely', 'cyber'] as const;
   const { setHideContentScroll } = useDashboard();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -41,12 +46,21 @@ export default function AssistantPage() {
   }, []);
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      setPipVariantIdx(prev => (prev + 1) % PIP_VARIANTS.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [PIP_VARIANTS.length]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading, showReportThinking]);
 
   const handleSendMessage = async (text: string) => {
     const isReport = /monthly report|monthly summary|end-of-month|generate.*report/i.test(text);
     setReportReady(false);
+    setHasError(false);
+    setErrorMessage("");
 
     const newUserMessage: Message = { text, isUser: true, id: Date.now() };
     setMessages((prev) => [...prev, newUserMessage]);
@@ -102,6 +116,8 @@ export default function AssistantPage() {
       }
     } catch (error) {
       const errString = error instanceof Error ? error.message : "Unknown error";
+      setHasError(true);
+      setErrorMessage(errString);
       setMessages((prev) => [
         ...prev,
         { text: `Sorry, I encountered an error: ${errString}`, isUser: false, id: Date.now() + 2 },
@@ -125,19 +141,41 @@ export default function AssistantPage() {
       {/* ── Header — Fixed at the top ── */}
       <div className="z-20 flex-shrink-0 px-6 py-4 bg-background/80 backdrop-blur-md border-b border-card-border flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-500/10 text-indigo-500 rounded-lg">
-            <FiCpu className="w-5 h-5" />
-          </div>
+            <motion.div
+              key={hasError ? 'error' : pipVariantIdx}
+              initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <PipMascot
+                variant={hasError ? 'sleepy' : PIP_VARIANTS[pipVariantIdx]}
+                status={isLoading ? 'thinking' : hasError ? 'error' : 'idle'}
+                size="sm"
+                errorMessage={hasError ? errorMessage : undefined}
+              />
+            </motion.div>
           <div>
             <h1 className="text-lg font-bold text-foreground leading-none">AI Assistant</h1>
             <p className="text-[10px] text-text-muted uppercase tracking-widest font-bold mt-1">Intelligent Copilot</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-            <div className="px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Ready</span>
+          {hasError ? (
+            <div className="px-2 py-1 rounded-full bg-red-500/10 border border-red-500/20 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+              <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Error</span>
             </div>
+          ) : isLoading ? (
+            <div className="px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Thinking</span>
+            </div>
+          ) : (
+            <div className="px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Ready</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -153,11 +191,8 @@ export default function AssistantPage() {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", bounce: 0.5 }}
-                className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[2rem] flex items-center justify-center shadow-xl shadow-indigo-500/20"
                 >
-                <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+                  <PipMascot variant="smart" status="idle" size="lg" />
                 </motion.div>
 
                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
@@ -178,9 +213,9 @@ export default function AssistantPage() {
                     <button
                     key={idx}
                     onClick={() => handleSendMessage(item.action)}
-                    className="flex flex-col items-start p-5 bg-foreground/[0.03] border border-card-border rounded-2xl hover:bg-foreground/[0.06] hover:border-indigo-500/30 transition-all active:scale-[0.98] text-left group"
+                    className="flex flex-col items-start p-5 bg-card border border-card-border rounded-2xl shadow-sm hover:bg-foreground/[0.03] hover:border-indigo-500/30 transition-all active:scale-[0.98] text-left group"
                     >
-                    <div className="p-2.5 bg-foreground/[0.05] border border-card-border text-text-muted group-hover:text-indigo-400 group-hover:border-indigo-500/30 rounded-xl mb-3 transition-colors">
+                    <div className="p-2.5 bg-foreground/[0.04] border border-card-border text-text-muted group-hover:text-indigo-400 group-hover:border-indigo-500/30 rounded-xl mb-3 transition-colors">
                         <item.icon className="w-5 h-5" />
                     </div>
                     <h3 className="text-sm font-bold text-foreground mb-1 uppercase tracking-wider">{item.title}</h3>
