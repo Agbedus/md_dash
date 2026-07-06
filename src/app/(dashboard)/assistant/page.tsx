@@ -156,7 +156,7 @@ export default function AssistantPage() {
               />
             </motion.div>
           <div>
-            <h1 className="text-lg font-bold text-foreground leading-none">AI Assistant</h1>
+            <h1 className="text-lg font-bold text-foreground leading-none">Pip AI</h1>
             <p className="text-[10px] text-text-muted uppercase tracking-widest font-bold mt-1">Intelligent Copilot</p>
           </div>
         </div>
@@ -180,14 +180,10 @@ export default function AssistantPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col min-h-0 relative">
-        {/* ── Scrollable chat area ── */}
-        <div
-            ref={containerRef}
-            className="flex-1 overflow-y-auto overscroll-contain px-4 pt-6 pb-32 scrollbar-hide"
-        >
-            {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center min-h-full text-center space-y-6 py-10 max-w-5xl mx-auto">
+      <div className="flex-1 overflow-y-auto overscroll-contain scrollbar-hide relative" ref={containerRef}>
+        <div className="min-h-full px-4 pt-6 pb-4 flex flex-col justify-end">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center space-y-6 py-10 max-w-5xl mx-auto">
                 <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -197,9 +193,9 @@ export default function AssistantPage() {
                 </motion.div>
 
                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-                <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">How can Pip help you today?</h1>
-                <p className="text-text-muted text-lg max-w-lg mx-auto font-medium">
-                    I'm Pip, your AI copilot. I can help you manage tasks, summarize notes, and stay on top of your projects.
+                <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-2 tracking-tight">Hey, what can I help with?</h1>
+                <p className="text-text-muted text-sm md:text-lg max-w-lg mx-auto font-medium">
+                    Ask me anything — tasks, notes, reports, or just chat.
                 </p>
                 </motion.div>
 
@@ -225,7 +221,7 @@ export default function AssistantPage() {
                 ))}
                 </motion.div>
             </div>
-            ) : (
+          ) : (
             <div className="max-w-4xl mx-auto w-full space-y-4">
                 {showReportThinking && (
                   <motion.div
@@ -260,15 +256,14 @@ export default function AssistantPage() {
                     <ChatBubble key={msg.id} message={{ text: msg.text, isUser: msg.isUser, id: msg.id }} />
                 ))}
                 </AnimatePresence>
-                {/* Invisible anchor to scroll into view */}
                 <div ref={bottomRef} />
             </div>
-            )}
+          )}
         </div>
 
-        {/* ── Fixed input bar — Absolutely positioned at the bottom of the content area ── */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/90 to-transparent z-10 pb-4">
-            <div className="max-w-4xl mx-auto w-full">
+        {/* ── Input bar (sticky at bottom) ── */}
+        <div className="sticky bottom-0 z-10 pt-8 bg-gradient-to-t from-background via-background/95 to-transparent">
+            <div className="max-w-4xl mx-auto w-full px-4">
                 <ChatInput onSendMessage={handleSendMessage} />
             </div>
         </div>

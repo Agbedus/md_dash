@@ -163,7 +163,7 @@ const TopNav = ({ user }: TopNavProps) => {
             </button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-background/80 border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl shadow-2xl">
+              <div className="absolute right-0 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-background/95 border border-card-border rounded-xl py-2 animate-in fade-in zoom-in-95 duration-200 z-50 backdrop-blur-xl shadow-2xl">
                 <div className="px-4 py-3 border-b border-card-border flex justify-between items-center bg-background/50">
                   <p className="text-sm font-black text-foreground uppercase tracking-tight">Notifications</p>
                   {unreadCount > 0 && (
