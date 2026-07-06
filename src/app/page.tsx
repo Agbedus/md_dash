@@ -242,7 +242,7 @@ export default function LandingPage() {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                         </span>
-                        Intelligence v1.2.0-Alpha — Enterprise Ready
+                        Private Beta — Join the Waitlist
                     </motion.div>
 
                     <motion.h1 
@@ -262,7 +262,7 @@ export default function LandingPage() {
                         className="max-w-2xl mx-auto text-zinc-400 text-base md:text-lg leading-relaxed font-dm-sans"
                     >
                         A premium, AI-powered productivity platform designed for high-level management. 
-                        Transform raw data into mission-critical insights with absolute data sovereignty.
+                        Join the waitlist for early access and shape the future of strategic command.
                     </motion.p>
 
                     <motion.div 
@@ -275,7 +275,7 @@ export default function LandingPage() {
                                 href="#waitlist" 
                                 className="w-full md:w-auto px-10 py-5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 group transition-all border border-indigo-400/30 shadow-lg shadow-indigo-500/10"
                             >
-                                Explore Platform <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                Join the Waitlist <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </motion.div>
                         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full md:w-auto">
@@ -684,34 +684,33 @@ export default function LandingPage() {
                 
                 <div className="max-w-4xl mx-auto text-center space-y-12">
                     <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/5 text-indigo-400 text-[10px] font-bold uppercase tracking-widest font-sora">
-                        Deployment Wave 04
+                        Deployment Wave 04 — Limited Spots
                     </div>
                     <h2 className="text-4xl md:text-8xl font-bold tracking-tightest leading-[0.95] text-white font-sora">Ready for Operational <br /> Mastery?</h2>
                     <p className="text-zinc-500 text-lg max-w-2xl mx-auto leading-relaxed font-dm-sans">
-                        Join 200+ executive leaders orchestrating their missions with absolute precision and data sovereignty.
+                        Join 200+ executive leaders already on the waitlist. Early adopters get priority access, exclusive features, and a direct line to shape the platform.
                     </p>
                     
                     <form className="relative max-w-lg mx-auto group" onSubmit={(e) => e.preventDefault()}>
                         <div className="relative flex items-center focus-within:ring-2 focus-within:ring-indigo-500/20 rounded-full transition-all">
                             <input 
                                 type="email" 
-                                placeholder="Enter executive email address" 
+                                placeholder="Enter your email address" 
                                 className="w-full px-8 py-5.5 rounded-full bg-white/[0.02] border border-white/10 text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:bg-white/[0.04] text-xs transition-all pr-36"
                             />
                             <button 
                                 type="submit" 
                                 className="absolute right-2 top-2 bottom-2 px-6 py-2.5 rounded-full bg-white text-zinc-950 text-xs font-bold hover:bg-zinc-200 transition-all active:scale-[0.96] flex items-center gap-2 font-sora uppercase tracking-wider"
                             >
-                                Get Access <FiArrowRight />
+                                Get Early Access <FiArrowRight />
                             </button>
                         </div>
                     </form>
 
-                    <div className="flex flex-wrap items-center justify-center gap-12 pt-12 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-1000 font-sora text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                        <div className="tracking-tighter">ELITE</div>
-                        <div className="tracking-tighter">PRIME</div>
-                        <div className="tracking-tighter">STRATEGIC</div>
-                        <div className="tracking-tighter">GLOBAL</div>
+                    <div className="flex flex-wrap items-center justify-center gap-6 text-zinc-500 text-xs font-medium">
+                        <span className="flex items-center gap-2"><FiCheck className="text-emerald-500" /> No credit card required</span>
+                        <span className="flex items-center gap-2"><FiCheck className="text-emerald-500" /> Cancel anytime</span>
+                        <span className="flex items-center gap-2"><FiCheck className="text-emerald-500" /> Private beta access</span>
                     </div>
                 </div>
             </section>

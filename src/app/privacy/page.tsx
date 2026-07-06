@@ -36,14 +36,13 @@ export default function PrivacyPage() {
                     {/* Header Section */}
                     <motion.div {...fadeIn} className="space-y-8 border-b border-white/5 pb-16">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest">
-                            Enterprise Privacy Directive v2.1
+                            Privacy Policy v2.2
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.1]">Full Privacy <br /> & Transparency Directive</h1>
-                        <p className="text-zinc-500 text-xl max-w-2xl">This document outlines our exhaustive commitment to data sovereignty, AI integrity, and international regulatory compliance.</p>
+                        <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.1]">Privacy <br /> Policy</h1>
+                        <p className="text-zinc-500 text-xl max-w-2xl">How MD-Dash handles your data, protects your privacy, and ensures transparency in everything we build.</p>
                         <div className="flex items-center gap-6 pt-4 text-xs font-bold uppercase tracking-widest text-zinc-600">
-                            <span>Revision: 03.21.2026</span>
+                            <span>Revision: 07.06.2026</span>
                             <span>Status: Active</span>
-                            <span>Security: Public</span>
                         </div>
                     </motion.div>
 
@@ -55,8 +54,8 @@ export default function PrivacyPage() {
                     >
                         <div className="p-8 rounded-[2.5rem] bg-indigo-500/5 border border-indigo-500/10 space-y-4">
                             <FiCpu className="text-2xl text-indigo-400" />
-                            <h3 className="font-bold text-white">Edge Sovereignty</h3>
-                            <p className="text-xs text-zinc-500 leading-relaxed">98% of mission-critical AI inference occurs locally on your device hardware, never reaching our cloud infrastructure.</p>
+                            <h3 className="font-bold text-white">Data Privacy</h3>
+                            <p className="text-xs text-zinc-500 leading-relaxed">Your dashboard data — tasks, notes, projects — stays encrypted and private. AI queries are sent to NVIDIA NIM cloud models; we never use your data for training.</p>
                         </div>
                         <div className="p-8 rounded-[2.5rem] bg-emerald-500/5 border border-emerald-500/10 space-y-4">
                             <FiLock className="text-2xl text-emerald-400" />
@@ -109,17 +108,17 @@ export default function PrivacyPage() {
                             <div className="flex items-start gap-6">
                                 <span className="text-4xl font-black text-white/10 shrink-0">02</span>
                                 <div className="space-y-4">
-                                    <h2 className="text-3xl font-bold text-white">Local AI Aide & Data Sovereignty</h2>
-                                    <p className="text-zinc-400 leading-relaxed">The MD-Dash AI Aide is engineered for localized execution. This architectural choice is the cornerstone of our privacy directive.</p>
+                                    <h2 className="text-3xl font-bold text-white">AI Assistant & Data Privacy</h2>
+                                    <p className="text-zinc-400 leading-relaxed">Pip AI, the MD-Dash AI assistant, is powered by NVIDIA NIM (Minimax-M3) cloud models. Here's how your data is handled:</p>
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6">
                                         <div className="space-y-4">
-                                            <h4 className="font-bold text-white underline decoration-indigo-500/50 underline-offset-4">In-Environment Inference</h4>
-                                            <p className="text-sm text-zinc-500">When you interact with the AI, the query is parsed and executed on your device using the local CPU/GPU and system memory. No data is sent to external LLM providers (e.g., OpenAI, Anthropic) for these operations.</p>
+                                            <h4 className="font-bold text-white underline decoration-indigo-500/50 underline-offset-4">Query Handling</h4>
+                                            <p className="text-sm text-zinc-500">When you interact with Pip AI, your query is sent securely via encrypted API to NVIDIA NIM. We do not store prompts or responses beyond the current session. No training occurs on your data.</p>
                                         </div>
                                         <div className="space-y-4">
-                                            <h4 className="font-bold text-white underline decoration-emerald-500/50 underline-offset-4">Training Privacy</h4>
-                                            <p className="text-sm text-zinc-500">We do not use your localized mission data to train our global models. Your organizational taxonomy, strategic plans, and personnel data remain exclusive to your &quot;Privacy Sphere.&quot;</p>
+                                            <h4 className="font-bold text-white underline decoration-emerald-500/50 underline-offset-4">Data Isolation</h4>
+                                            <p className="text-sm text-zinc-500">Your organizational data — tasks, notes, projects — remains in our encrypted database. Pip AI only sees what you explicitly ask about in each query. We never bulk-export your data to AI providers.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -228,13 +227,13 @@ export default function PrivacyPage() {
                         {...fadeIn}
                         className="p-12 rounded-[3rem] bg-indigo-500/10 border border-indigo-500/20 text-center space-y-6"
                     >
-                        <h2 className="text-3xl font-bold text-white">Operational Privacy Inquiries</h2>
-                        <p className="text-zinc-400 max-w-xl mx-auto">Our Data Protection Officer (DPO) is available to handle deep-tier audits or complex privacy inquiries regarding your MD-Dash environment.</p>
+                        <h2 className="text-3xl font-bold text-white">Privacy Questions?</h2>
+                        <p className="text-zinc-400 max-w-xl mx-auto">If you have questions about your data or privacy, reach out to our team anytime.</p>
                         <div className="pt-4 space-y-2">
                             <Link href="mailto:privacy@md-dash.com" className="text-xl font-bold text-indigo-400 hover:text-indigo-300 block transition-colors">
                                 privacy@md-dash.com
                             </Link>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">MD-DASH INTELLIGENCE SYSTEM — PRIVACY DEPT.</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">MD-Dash — Privacy Team</span>
                         </div>
                     </motion.div>
                 </div>
@@ -243,11 +242,11 @@ export default function PrivacyPage() {
             <footer className="py-20 border-t border-white/5 bg-zinc-950/50">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8 text-[10px] font-bold uppercase tracking-widest text-zinc-600">
                     <div className="flex items-center gap-8">
-                        <span>© 2026 MD-DASH</span>
+                        <span>© 2026 MD-Dash</span>
                         <span>GDPR COMPLIANT</span>
                         <span>CCPA ALIGNED</span>
                     </div>
-                    <span>MD-DASH INTELLIGENCE DIRECTIVE PD-1002</span>
+                    <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
                 </div>
             </footer>
         </div>

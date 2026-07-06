@@ -8,6 +8,7 @@ import { MobileNav } from './mobile-nav';
 import { ConfirmationProvider } from '@/providers/confirmation-provider';
 import { useGlobalActions } from '@/providers/global-action-provider';
 import AssistantOrb from './assistant/assistant-orb';
+import InternetStatus from './internet-status';
 
 interface DashboardContextType {
   isMobileExpanded: boolean;
@@ -80,6 +81,7 @@ export default function DashboardLayout({
               <MobileNav setIsCommandOpen={setIsCommandOpen} />
               <AnnouncementDrawer />
               <AssistantOrb />
+              <InternetStatus />
             </div>
           </ConfirmationProvider>
         </AnnouncementProvider>
