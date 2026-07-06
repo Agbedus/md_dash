@@ -181,7 +181,7 @@ export default function AssistantPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto overscroll-contain scrollbar-hide relative" ref={containerRef}>
-        <div className="min-h-full px-4 pt-6 pb-4 flex flex-col justify-end">
+        <div className="min-h-full px-4 pt-6 pb-4 md:pb-36 flex flex-col justify-end">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center space-y-6 py-10 max-w-5xl mx-auto">
                 <motion.div
