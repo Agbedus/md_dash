@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiMessageSquare, FiList, FiTrendingUp, FiCpu, FiCalendar, FiClock } from "react-icons/fi";
 import { useDashboard } from "@/components/ui/dashboard-layout";
 
+const PIP_VARIANTS = ['classic', 'smart', 'sleepy', 'cool', 'shocked', 'spicy', 'lovely', 'cyber'] as const;
+
 interface Message {
   id?: number;
   text: string;
@@ -21,7 +23,6 @@ export default function AssistantPage() {
   const [showReportThinking, setShowReportThinking] = useState(false);
   const [reportReady, setReportReady] = useState(false);
   const [pipVariantIdx, setPipVariantIdx] = useState(0);
-  const PIP_VARIANTS = ['classic', 'smart', 'sleepy', 'cool', 'shocked', 'spicy', 'lovely', 'cyber'] as const;
   const { setHideContentScroll } = useDashboard();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -50,7 +51,7 @@ export default function AssistantPage() {
       setPipVariantIdx(prev => (prev + 1) % PIP_VARIANTS.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, [PIP_VARIANTS.length]);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -196,9 +197,9 @@ export default function AssistantPage() {
                 </motion.div>
 
                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-                <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">How can I help you today?</h1>
+                <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">How can Pip help you today?</h1>
                 <p className="text-text-muted text-lg max-w-lg mx-auto font-medium">
-                    I can help you manage your tasks, summarize your notes, and stay on top of your projects.
+                    I'm Pip, your AI copilot. I can help you manage tasks, summarize notes, and stay on top of your projects.
                 </p>
                 </motion.div>
 

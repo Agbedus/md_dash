@@ -14,9 +14,10 @@ interface Message {
 }
 
 const STORAGE_KEY = 'md_assistant_chat_messages';
+const PIP_VARIANTS = ['classic', 'smart', 'sleepy', 'cool', 'shocked', 'spicy', 'lovely', 'cyber'] as const;
 
 const GREETINGS = [
-  "Hey! I'm your AI assistant — ask me anything",
+  "Hey! I'm Pip — ask me anything",
   "Need help with tasks, notes, or projects?",
   "I can generate reports, summarize, and more",
   "What are you working on today?",
@@ -33,7 +34,6 @@ export default function AssistantOrb() {
   const [typingDone, setTypingDone] = useState(false);
   const [pipVariantIdx, setPipVariantIdx] = useState(0);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const PIP_VARIANTS = ['classic', 'smart', 'sleepy', 'cool', 'shocked', 'spicy', 'lovely', 'cyber'] as const;
   const router = useRouter();
   const pathname = usePathname();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -79,7 +79,7 @@ export default function AssistantOrb() {
       setPipVariantIdx(prev => (prev + 1) % PIP_VARIANTS.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, [PIP_VARIANTS.length]);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -365,7 +365,7 @@ export default function AssistantOrb() {
               <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3 min-h-0" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 {messages.length === 0 ? (
                   <div className="flex items-center justify-center h-24">
-                    <p className="text-sm text-text-muted">Ask me anything...</p>
+                    <p className="text-sm text-text-muted">Ask Pip anything...</p>
                   </div>
                 ) : (
                   messages.map(msg => (
